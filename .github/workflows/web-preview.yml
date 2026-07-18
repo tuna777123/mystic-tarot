@@ -58,4 +58,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-# Triggered after repository became public.
+# Pages enabled; deployment retriggered.
