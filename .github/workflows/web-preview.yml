@@ -57,3 +57,5 @@ jobs:
       - name: Publish preview
         id: deployment
         uses: actions/deploy-pages@v4
+
+# Triggered after repository became public.
