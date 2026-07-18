@@ -14,6 +14,18 @@ enum ReadingKind {
   final String symbol;
 }
 
+enum EmotionalState {
+  uncertain('Uncertain', '◌'),
+  hopeful('Hopeful', '✦'),
+  anxious('Anxious', '≈'),
+  grounded('Grounded', '●'),
+  curious('Curious', '?');
+
+  const EmotionalState(this.label, this.symbol);
+  final String label;
+  final String symbol;
+}
+
 class TarotCardData {
   const TarotCardData({
     required this.name,
@@ -44,10 +56,16 @@ class ReadingRecord {
     required this.question,
     required this.cards,
     required this.createdAt,
+    required this.emotion,
+    required this.alignedAction,
   });
 
   final ReadingKind kind;
   final String question;
   final List<DrawnCard> cards;
   final DateTime createdAt;
+  final EmotionalState emotion;
+  final String alignedAction;
+
+  DateTime get mirrorCheckInAt => createdAt.add(const Duration(hours: 24));
 }
