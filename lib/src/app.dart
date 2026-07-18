@@ -41,7 +41,7 @@ class _MysticAppState extends State<MysticApp> {
           selectedIndex: tab,
           onDestinationSelected: (value) => setState(() => tab = value),
           backgroundColor: const Color(0xFF100D1E),
-          indicatorColor: MysticColors.violet.withOpacity(.45),
+          indicatorColor: MysticColors.violet.withValues(alpha: .45),
           destinations: const [
             NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Read'),
             NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Journal'),
@@ -84,7 +84,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 350), child: _page(context))),
           GoldButton(label: page == 2 ? 'Enter Mystic' : 'Continue', onPressed: () => page < 2 ? setState(() => page++) : widget.onDone()),
         ]),
-      ))));
+      )));
 
   Widget _page(BuildContext context) {
     if (page == 0) return Column(key: const ValueKey(0), mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -124,7 +124,7 @@ class HomeScreen extends StatelessWidget {
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 10), sliver: SliverList(delegate: SliverChildListDelegate([
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Good evening', style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 4), Text('Your cards are waiting', style: Theme.of(context).textTheme.titleLarge)]),
-            InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(30), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(color: MysticColors.gold.withOpacity(.12), borderRadius: BorderRadius.circular(30), border: Border.all(color: MysticColors.gold.withOpacity(.4))), child: const Row(children: [Text('✦ ', style: TextStyle(color: MysticColors.gold)), Text('PLUS', style: TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, color: MysticColors.gold, fontSize: 12))]))),
+            InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(30), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(30), border: Border.all(color: MysticColors.gold.withValues(alpha: .4))), child: const Row(children: [Text('✦ ', style: TextStyle(color: MysticColors.gold)), Text('PLUS', style: TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, color: MysticColors.gold, fontSize: 12))]))),
           ]),
           const SizedBox(height: 24),
           _DailyCard(streak: streak, onTap: () => onReading(ReadingKind.daily)),
@@ -134,7 +134,7 @@ class HomeScreen extends StatelessWidget {
         ]))),
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 28), sliver: SliverGrid(delegate: SliverChildBuilderDelegate((context, index) {
           final kind = ReadingKind.values.skip(1).elementAt(index);
-          return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withOpacity(.055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(.08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(kind.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text('${kind.cardCount} cards', style: Theme.of(context).textTheme.bodyMedium)])]));
+          return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(kind.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text('${kind.cardCount} cards', style: Theme.of(context).textTheme.bodyMedium)])])));
         }, childCount: ReadingKind.values.length - 1), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.12, crossAxisSpacing: 12, mainAxisSpacing: 12))),
       ]));
 }
@@ -144,7 +144,7 @@ class _DailyCard extends StatelessWidget {
   final int streak;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => InkWell(onTap: onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 190, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF5D3DA2), Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withOpacity(.35))), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('TODAY’S ENERGY', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal your\ndaily card', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 $streak day reflection streak', style: Theme.of(context).textTheme.bodyMedium)])), const TarotCardFace(width: 90, height: 142)])));
+  Widget build(BuildContext context) => InkWell(onTap: onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 190, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF5D3DA2), Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .35))), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('TODAY’S ENERGY', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal your\ndaily card', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 $streak day reflection streak', style: Theme.of(context).textTheme.bodyMedium)])), const TarotCardFace(width: 90, height: 142)])));
 }
 
 class ReadingFlow extends StatefulWidget {
@@ -210,9 +210,9 @@ class _ReadingFlowState extends State<ReadingFlow> {
         SizedBox(height: 190, child: ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => TarotCardFace(drawn: drawn![i]), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
         const SizedBox(height: 26),
         ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
-        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withOpacity(.09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withOpacity(.3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('✦  YOUR GUIDANCE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
+        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('✦  YOUR GUIDANCE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
         const SizedBox(height: 14),
-        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withOpacity(.28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text('MYSTIC MIRROR • 24H LOOP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1.1)),
           const SizedBox(height: 10),
           Text('Your aligned action', style: Theme.of(context).textTheme.titleLarge),
@@ -264,7 +264,7 @@ class JournalScreen extends StatelessWidget {
         const SizedBox(height: 22),
         Expanded(child: records.isEmpty ? const _EmptyJournal() : ListView.separated(itemCount: records.length, separatorBuilder: (_, __) => const SizedBox(height: 10), itemBuilder: (_, i) {
           final item = records[i];
-          return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withOpacity(.055), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white.withOpacity(.08))), child: Row(children: [CircleAvatar(backgroundColor: MysticColors.violet.withOpacity(.35), child: Text(item.emotion.symbol, style: const TextStyle(color: MysticColors.gold))), const SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item.kind.title, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text('${item.emotion.label} • 24h Mirror pending', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium)])), const Icon(Icons.chevron_right, color: MysticColors.muted)]));
+          return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Row(children: [CircleAvatar(backgroundColor: MysticColors.violet.withValues(alpha: .35), child: Text(item.emotion.symbol, style: const TextStyle(color: MysticColors.gold))), const SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item.kind.title, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text('${item.emotion.label} • 24h Mirror pending', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium)])), const Icon(Icons.chevron_right, color: MysticColors.muted)]));
         }))
       ])));
 }
@@ -285,7 +285,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) => MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 28, 20, 28), children: [
         Text('Your space', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 22),
-        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white.withOpacity(.055), borderRadius: BorderRadius.circular(22), border: Border.all(color: Colors.white.withOpacity(.08))), child: Column(children: [const CircleAvatar(radius: 35, backgroundColor: MysticColors.violet, child: Text('☾', style: TextStyle(fontSize: 30, color: MysticColors.gold))), const SizedBox(height: 12), Text('Mystic Explorer', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 18), Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('$streak', 'day streak'), _stat('$readings', 'readings'), _stat('$xp', 'XP')])])),
+        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(22), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(children: [const CircleAvatar(radius: 35, backgroundColor: MysticColors.violet, child: Text('☾', style: TextStyle(fontSize: 30, color: MysticColors.gold))), const SizedBox(height: 12), Text('Mystic Explorer', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 18), Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('$streak', 'day streak'), _stat('$readings', 'readings'), _stat('$xp', 'XP')])])),
         const SizedBox(height: 14),
         InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: const Row(children: [Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Unlock Mystic Plus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), SizedBox(height: 4), Text('Go deeper with unlimited readings', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), Icon(Icons.arrow_forward)]))),
         const SizedBox(height: 18),
@@ -313,7 +313,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 24),
         ...['Unlimited personalized readings', 'Love compatibility & future timeline', 'Dream reflection and weekly energy', 'Premium card themes', 'No ads, ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [const CircleAvatar(radius: 12, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 15, color: MysticColors.ink)), const SizedBox(width: 12), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
         const SizedBox(height: 10),
-        Row(children: [Expanded(child: _plan(false, 'Monthly', r'$8.99', 'per month')), const SizedBox(width: 10), Expanded(child: _plan(true, 'Yearly', r'$39.99', 'only $3.33/month'))]),
+        Row(children: [Expanded(child: _plan(false, 'Monthly', r'$8.99', 'per month')), const SizedBox(width: 10), Expanded(child: _plan(true, 'Yearly', r'$39.99', r'only $3.33/month'))]),
         const SizedBox(height: 18),
         GoldButton(label: 'Start 7-day free trial', onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payments connect in the production milestone.')))),
         const SizedBox(height: 10),
@@ -321,6 +321,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
       ])));
   Widget _plan(bool isYearly, String title, String price, String subtitle) {
     final active = yearly == isYearly;
-    return InkWell(onTap: () => setState(() => yearly = isYearly), borderRadius: BorderRadius.circular(18), child: Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: active ? MysticColors.violet.withOpacity(.35) : Colors.white.withOpacity(.04), borderRadius: BorderRadius.circular(18), border: Border.all(color: active ? MysticColors.gold : Colors.white12, width: active ? 2 : 1)), child: Column(children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.bold)), const SizedBox(height: 7), Text(price, style: const TextStyle(fontFamily: 'Arial', fontSize: 22, fontWeight: FontWeight.bold, color: MysticColors.gold)), const SizedBox(height: 3), Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, color: MysticColors.muted))])));
+    return InkWell(onTap: () => setState(() => yearly = isYearly), borderRadius: BorderRadius.circular(18), child: Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: active ? MysticColors.violet.withValues(alpha: .35) : Colors.white.withValues(alpha: .04), borderRadius: BorderRadius.circular(18), border: Border.all(color: active ? MysticColors.gold : Colors.white12, width: active ? 2 : 1)), child: Column(children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.bold)), const SizedBox(height: 7), Text(price, style: const TextStyle(fontFamily: 'Arial', fontSize: 22, fontWeight: FontWeight.bold, color: MysticColors.gold)), const SizedBox(height: 3), Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, color: MysticColors.muted))])));
   }
 }
