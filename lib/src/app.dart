@@ -15,6 +15,7 @@ class MysticApp extends StatefulWidget {
 }
 
 class _MysticAppState extends State<MysticApp> {
+  final navigatorKey = GlobalKey<NavigatorState>();
   bool onboarded = false;
   int tab = 0;
   int streak = 3;
@@ -24,6 +25,7 @@ class _MysticAppState extends State<MysticApp> {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Mystic Tarot',
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: buildMysticTheme(),
         home: onboarded ? _shell() : OnboardingScreen(onDone: () => setState(() => onboarded = true)),
@@ -49,7 +51,7 @@ class _MysticAppState extends State<MysticApp> {
       );
 
   void _startReading(ReadingKind kind) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, onComplete: (record) {
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, onComplete: (record) {
       setState(() {
         journal.insert(0, record);
         xp += 25;
@@ -58,7 +60,7 @@ class _MysticAppState extends State<MysticApp> {
     })));
   }
 
-  void _showPremium() => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PremiumScreen()));
+  void _showPremium() => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const PremiumScreen()));
 }
 
 class OnboardingScreen extends StatefulWidget {
