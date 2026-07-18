@@ -130,7 +130,9 @@ class HomeScreen extends StatelessWidget {
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Good evening', style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 4), Text('Your cards are waiting', style: Theme.of(context).textTheme.titleLarge)]),
             InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(30), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(30), border: Border.all(color: MysticColors.gold.withValues(alpha: .4))), child: const Row(children: [Text('✦ ', style: TextStyle(color: MysticColors.gold)), Text('PLUS', style: TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, color: MysticColors.gold, fontSize: 12))]))),
           ]),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
+          const _MoonBriefing(),
+          const SizedBox(height: 14),
           _DailyCard(streak: streak, onTap: () => onReading(ReadingKind.daily)),
           const SizedBox(height: 26),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Choose a reading', style: Theme.of(context).textTheme.titleLarge), Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
@@ -143,12 +145,49 @@ class HomeScreen extends StatelessWidget {
       ]));
 }
 
-class _DailyCard extends StatelessWidget {
+class _MoonBriefing extends StatelessWidget {
+  const _MoonBriefing();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: .045),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: MysticColors.lavender.withValues(alpha: .14)),
+        ),
+        child: Row(children: [
+          Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFFF5DFA6), Color(0xFF8F6FD8)]), boxShadow: [BoxShadow(color: MysticColors.lavender.withValues(alpha: .25), blurRadius: 18)]), child: const Text('◐', style: TextStyle(color: MysticColors.ink, fontSize: 23))),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('TONIGHT’S MYSTIC PULSE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
+            const SizedBox(height: 4),
+            Text('Release urgency. Choose the honest next step.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
+          ])),
+          const Text('2 MIN', style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold)),
+        ]),
+      );
+
+class _DailyCard extends StatefulWidget {
   const _DailyCard({required this.streak, required this.onTap});
   final int streak;
   final VoidCallback onTap;
+
   @override
-  Widget build(BuildContext context) => InkWell(onTap: onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 190, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF5D3DA2), Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .35))), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('TODAY’S ENERGY', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal your\ndaily card', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 $streak day reflection streak', style: Theme.of(context).textTheme.bodyMedium)])), const TarotCardFace(width: 90, height: 142)])));
+  State<_DailyCard> createState() => _DailyCardState();
+}
+
+class _DailyCardState extends State<_DailyCard> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, child) => InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 196, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color.lerp(const Color(0xFF6C45B5), const Color(0xFF8356C5), controller.value)!, const Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .32 + controller.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + controller.value * .08), blurRadius: 28, spreadRadius: 1)]), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR DAILY PORTAL', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal what\nneeds you today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 ${widget.streak} day streak  •  +25 XP', style: Theme.of(context).textTheme.bodyMedium)])), const TarotCardFace(width: 90, height: 142)]))));
 }
 
 class ReadingFlow extends StatefulWidget {
