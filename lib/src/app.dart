@@ -103,7 +103,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       Text('Your name helps each reading feel personal.', style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 28),
       TextField(controller: name, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(hintText: 'Your first name', prefixIcon: Icon(Icons.person_outline))),
-    ]);
+      ]);
+    }
     const choices = ['Clarity', 'Love', 'Purpose', 'Healing'];
     return Column(key: const ValueKey(2), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Set your first\nintention.', style: Theme.of(context).textTheme.displaySmall),
