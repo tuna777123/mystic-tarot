@@ -158,6 +158,7 @@ class ReadingFlow extends StatefulWidget {
 class _ReadingFlowState extends State<ReadingFlow> {
   final question = TextEditingController();
   final selected = <int>[];
+  EmotionalState emotion = EmotionalState.uncertain;
   List<DrawnCard>? drawn;
   bool saved = false;
 
@@ -171,6 +172,13 @@ class _ReadingFlowState extends State<ReadingFlow> {
         Text('Breathe slowly. Hold your question in mind, then choose the cards that call to you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 16),
         TextField(controller: question, maxLines: 2, decoration: const InputDecoration(hintText: 'Write your question (optional)', prefixIcon: Icon(Icons.edit_outlined))),
+        const SizedBox(height: 14),
+        Align(alignment: Alignment.centerLeft, child: Text('HOW DO YOU FEEL RIGHT NOW?', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, letterSpacing: 1.1))),
+        const SizedBox(height: 8),
+        SizedBox(height: 38, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: EmotionalState.values.length, separatorBuilder: (_, __) => const SizedBox(width: 7), itemBuilder: (_, i) {
+          final item = EmotionalState.values[i];
+          return ChoiceChip(label: Text('${item.symbol} ${item.label}'), selected: emotion == item, onSelected: (_) => setState(() => emotion = item));
+        })),
         const SizedBox(height: 18),
         Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 18), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(selected: selected.contains(i), width: 65, height: 110)))),
         GoldButton(label: selected.length == widget.kind.cardCount ? 'Reveal my reading' : 'Choose ${widget.kind.cardCount - selected.length} more', onPressed: selected.length == widget.kind.cardCount ? _reveal : null, icon: Icons.auto_awesome),
@@ -191,7 +199,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   Widget _result(BuildContext context) {
-    final record = ReadingRecord(kind: widget.kind, question: question.text.trim(), cards: drawn!, createdAt: DateTime.now());
+    final record = ReadingRecord(kind: widget.kind, question: question.text.trim(), cards: drawn!, createdAt: DateTime.now(), emotion: emotion, alignedAction: _alignedAction());
     return CustomScrollView(slivers: [
       SliverAppBar(backgroundColor: Colors.transparent, title: const Text('Your reading'), actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.ios_share_outlined))]),
       SliverPadding(padding: const EdgeInsets.fromLTRB(20, 12, 20, 36), sliver: SliverList(delegate: SliverChildListDelegate([
@@ -203,6 +211,16 @@ class _ReadingFlowState extends State<ReadingFlow> {
         const SizedBox(height: 26),
         ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
         Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withOpacity(.09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withOpacity(.3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('✦  YOUR GUIDANCE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
+        const SizedBox(height: 14),
+        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withOpacity(.28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('MYSTIC MIRROR • 24H LOOP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1.1)),
+          const SizedBox(height: 10),
+          Text('Your aligned action', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(_alignedAction(), style: Theme.of(context).textTheme.bodyLarge),
+          const SizedBox(height: 10),
+          Text('Tomorrow, Mystic will ask what actually changed. Your answer becomes part of your personal pattern map.', style: Theme.of(context).textTheme.bodyMedium),
+        ])),
         const SizedBox(height: 20),
         GoldButton(label: saved ? 'Saved to your journal' : 'Save this reading', icon: saved ? Icons.check : Icons.bookmark_add_outlined, onPressed: saved ? null : () { widget.onComplete(record); setState(() => saved = true); }),
         const SizedBox(height: 10),
@@ -219,6 +237,20 @@ class _ReadingFlowState extends State<ReadingFlow> {
 
   String _headline() => drawn!.any((c) => c.card.name == 'The Star' || c.card.name == 'The Sun') ? 'A hopeful path is becoming visible.' : 'The truth arrives when you slow down.';
   String _guidance() => '${drawn!.last.card.advice} Let this be an invitation, not a command. Notice what changes when you carry this question through the next twenty-four hours.';
+  String _alignedAction() {
+    switch (emotion) {
+      case EmotionalState.anxious:
+        return 'Delay one fear-based decision. Write down what is known, what is assumed, and what can wait until tomorrow.';
+      case EmotionalState.hopeful:
+        return 'Turn hope into evidence: take one small action that your future self can continue tomorrow.';
+      case EmotionalState.grounded:
+        return 'Use today’s steadiness to complete one conversation or task you have been leaving open.';
+      case EmotionalState.curious:
+        return 'Ask one honest question without trying to control the answer.';
+      case EmotionalState.uncertain:
+        return 'Choose the smallest reversible step. Clarity often appears after movement, not before it.';
+    }
+  }
 }
 
 class JournalScreen extends StatelessWidget {
@@ -232,7 +264,7 @@ class JournalScreen extends StatelessWidget {
         const SizedBox(height: 22),
         Expanded(child: records.isEmpty ? const _EmptyJournal() : ListView.separated(itemCount: records.length, separatorBuilder: (_, __) => const SizedBox(height: 10), itemBuilder: (_, i) {
           final item = records[i];
-          return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withOpacity(.055), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white.withOpacity(.08))), child: Row(children: [CircleAvatar(backgroundColor: MysticColors.violet.withOpacity(.35), child: Text(item.kind.symbol, style: const TextStyle(color: MysticColors.gold))), const SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item.kind.title, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text(item.cards.map((c) => c.card.name).join(' • '), maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium)])), const Icon(Icons.chevron_right, color: MysticColors.muted)]));
+          return Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withOpacity(.055), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white.withOpacity(.08))), child: Row(children: [CircleAvatar(backgroundColor: MysticColors.violet.withOpacity(.35), child: Text(item.emotion.symbol, style: const TextStyle(color: MysticColors.gold))), const SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item.kind.title, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text('${item.emotion.label} • 24h Mirror pending', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium)])), const Icon(Icons.chevron_right, color: MysticColors.muted)]));
         }))
       ])));
 }
