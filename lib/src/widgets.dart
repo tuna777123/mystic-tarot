@@ -37,7 +37,7 @@ class GoldButton extends StatelessWidget {
           style: FilledButton.styleFrom(
             foregroundColor: MysticColors.ink,
             backgroundColor: MysticColors.gold,
-            disabledBackgroundColor: MysticColors.gold.withOpacity(.25),
+            disabledBackgroundColor: MysticColors.gold.withValues(alpha: .25),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           ),
         ),
@@ -62,11 +62,11 @@ class TarotCardFace extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(colors: faceUp ? [const Color(0xFF3B2868), const Color(0xFF151128)] : [const Color(0xFF251B44), const Color(0xFF0E0B1A)]),
-        border: Border.all(color: selected ? MysticColors.gold : MysticColors.lavender.withOpacity(.45), width: selected ? 2.5 : 1),
-        boxShadow: [BoxShadow(color: selected ? MysticColors.gold.withOpacity(.3) : Colors.black38, blurRadius: selected ? 24 : 10)],
+        border: Border.all(color: selected ? MysticColors.gold : MysticColors.lavender.withValues(alpha: .45), width: selected ? 2.5 : 1),
+        boxShadow: [BoxShadow(color: selected ? MysticColors.gold.withValues(alpha: .3) : Colors.black38, blurRadius: selected ? 24 : 10)],
       ),
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(11), border: Border.all(color: MysticColors.gold.withOpacity(.55))),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(11), border: Border.all(color: MysticColors.gold.withValues(alpha: .55))),
         child: faceUp ? _face() : const Center(child: Text('☾\n✦', textAlign: TextAlign.center, style: TextStyle(fontSize: 34, height: 1.15, color: MysticColors.gold))),
       ),
     );
