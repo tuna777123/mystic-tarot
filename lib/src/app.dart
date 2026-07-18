@@ -167,6 +167,7 @@ class _MoonBriefing extends StatelessWidget {
           const Text('2 MIN', style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold)),
         ]),
       );
+}
 
 class _DailyCard extends StatefulWidget {
   const _DailyCard({required this.streak, required this.onTap});
