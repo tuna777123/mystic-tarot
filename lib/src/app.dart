@@ -87,14 +87,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       )));
 
   Widget _page(BuildContext context) {
-    if (page == 0) return Column(key: const ValueKey(0), mainAxisAlignment: MainAxisAlignment.center, children: [
+    if (page == 0) {
+      return Column(key: const ValueKey(0), mainAxisAlignment: MainAxisAlignment.center, children: [
       const Text('☾', style: TextStyle(fontSize: 82, color: MysticColors.gold)),
       const SizedBox(height: 24),
       Text('Your inner world\nhas a language.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 18),
       Text('Mystic helps you hear it through reflective tarot, personal rituals, and a journal that grows with you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
-    ]);
-    if (page == 1) return Column(key: const ValueKey(1), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      ]);
+    }
+    if (page == 1) {
+      return Column(key: const ValueKey(1), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('What should we\ncall you?', style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 16),
       Text('Your name helps each reading feel personal.', style: Theme.of(context).textTheme.bodyLarge),
