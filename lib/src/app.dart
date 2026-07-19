@@ -24,6 +24,7 @@ class _MysticAppState extends State<MysticApp> {
   int streak = 0;
   int xp = 0;
   String? lastActiveDay;
+  String? dailyQuestClaimedDay;
   final List<ReadingRecord> journal = [];
   final Set<String> discoveredCards = {};
   final Set<String> completedRituals = {};
@@ -46,7 +47,16 @@ class _MysticAppState extends State<MysticApp> {
 
   Widget _shell() => Scaffold(
         body: IndexedStack(index: tab, children: [
-          HomeScreen(streak: streak, xp: xp, onReading: _startReading, onPremium: _showPremium),
+          HomeScreen(
+            streak: streak,
+            xp: xp,
+            dailyReadingDone: journal.any((record) => record.kind == ReadingKind.daily && _dayKey(record.createdAt) == _dayKey(DateTime.now())),
+            ritualDone: completedRituals.isNotEmpty,
+            dailyQuestClaimed: dailyQuestClaimedDay == _dayKey(DateTime.now()),
+            onReading: _startReading,
+            onClaimDailyQuest: _claimDailyQuest,
+            onPremium: _showPremium,
+          ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
           ProfileScreen(streak: streak, xp: xp, readings: journal.length, onPremium: _showPremium),
@@ -92,6 +102,17 @@ class _MysticAppState extends State<MysticApp> {
     _saveProgress();
   }
 
+  void _claimDailyQuest() {
+    final today = _dayKey(DateTime.now());
+    final readToday = journal.any((record) => record.kind == ReadingKind.daily && _dayKey(record.createdAt) == today);
+    if (!readToday || completedRituals.isEmpty || dailyQuestClaimedDay == today) return;
+    setState(() {
+      dailyQuestClaimedDay = today;
+      xp += 40;
+    });
+    _saveProgress();
+  }
+
   Future<void> _finishOnboarding() async {
     setState(() => onboarded = true);
     await _saveProgress();
@@ -108,6 +129,7 @@ class _MysticAppState extends State<MysticApp> {
         xp = prefs.getInt('xp') ?? 0;
         streak = prefs.getInt('streak') ?? 0;
         lastActiveDay = prefs.getString('last_active_day');
+        dailyQuestClaimedDay = prefs.getString('daily_quest_claimed_day');
         discoveredCards.addAll(prefs.getStringList('discovered_cards') ?? const []);
         claimedRewards.addAll((prefs.getStringList('claimed_rewards') ?? const []).map(int.parse));
         for (final encoded in prefs.getStringList('journal_records') ?? const []) {
@@ -134,6 +156,7 @@ class _MysticAppState extends State<MysticApp> {
         prefs.setStringList('claimed_rewards', claimedRewards.map((item) => '$item').toList()),
         prefs.setStringList('journal_records', journal.take(50).map(_encodeRecord).toList()),
         prefs.setString('ritual_day', _dayKey(DateTime.now())),
+        if (dailyQuestClaimedDay != null) prefs.setString('daily_quest_claimed_day', dailyQuestClaimedDay!),
         if (lastActiveDay != null) prefs.setString('last_active_day', lastActiveDay!),
       ]);
     } catch (_) {
@@ -250,10 +273,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.streak, required this.xp, required this.onReading, required this.onPremium, super.key});
+  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.onReading, required this.onClaimDailyQuest, required this.onPremium, super.key});
   final int streak;
   final int xp;
+  final bool dailyReadingDone;
+  final bool ritualDone;
+  final bool dailyQuestClaimed;
   final ValueChanged<ReadingKind> onReading;
+  final VoidCallback onClaimDailyQuest;
   final VoidCallback onPremium;
 
   @override
@@ -267,6 +294,13 @@ class HomeScreen extends StatelessWidget {
           const _MoonBriefing(),
           const SizedBox(height: 14),
           _DailyCard(streak: streak, onTap: () => onReading(ReadingKind.daily)),
+          const SizedBox(height: 14),
+          _DailyQuest(
+            readingDone: dailyReadingDone,
+            ritualDone: ritualDone,
+            claimed: dailyQuestClaimed,
+            onClaim: onClaimDailyQuest,
+          ),
           const SizedBox(height: 26),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Choose a reading', style: Theme.of(context).textTheme.titleLarge), Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
           const SizedBox(height: 12),
@@ -322,6 +356,112 @@ class _DailyCardState extends State<_DailyCard> with SingleTickerProviderStateMi
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, child) => InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 196, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color.lerp(const Color(0xFF6C45B5), const Color(0xFF8356C5), controller.value)!, const Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .32 + controller.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + controller.value * .08), blurRadius: 28, spreadRadius: 1)]), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR DAILY PORTAL', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal what\nneeds you today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 ${widget.streak} day streak  •  +25 XP', style: Theme.of(context).textTheme.bodyMedium)])), const TarotCardFace(width: 90, height: 142)]))));
+}
+
+class _DailyQuest extends StatelessWidget {
+  const _DailyQuest({required this.readingDone, required this.ritualDone, required this.claimed, required this.onClaim});
+  final bool readingDone;
+  final bool ritualDone;
+  final bool claimed;
+  final VoidCallback onClaim;
+
+  @override
+  Widget build(BuildContext context) {
+    final complete = readingDone && ritualDone;
+    final progress = (readingDone ? .5 : 0.0) + (ritualDone ? .5 : 0.0);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 420),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: complete ? const [Color(0xFF523771), Color(0xFF21182F)] : const [Color(0xFF211A31), Color(0xFF15111F)]),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: complete ? MysticColors.gold.withValues(alpha: .48) : Colors.white10),
+      ),
+      child: Column(children: [
+        Row(children: [
+          Container(width: 45, height: 45, alignment: Alignment.center, decoration: BoxDecoration(color: complete ? MysticColors.gold.withValues(alpha: .16) : Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(14)), child: Text(claimed ? '✦' : complete ? '◇' : '☾', style: const TextStyle(color: MysticColors.gold, fontSize: 25))),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('DAILY SOUL QUEST', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
+            const SizedBox(height: 4),
+            Text(claimed ? 'Today’s relic is yours.' : complete ? 'Your chest is ready to open.' : 'Complete both steps • +40 XP', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 14)),
+          ])),
+          if (complete && !claimed) IconButton(onPressed: () => _claim(context), style: IconButton.styleFrom(backgroundColor: MysticColors.gold, foregroundColor: MysticColors.ink), icon: const Icon(Icons.lock_open_rounded)),
+          if (claimed) const Icon(Icons.check_circle, color: MysticColors.gold),
+        ]),
+        const SizedBox(height: 13),
+        Row(children: [_step(context, '1', 'Daily card', readingDone), const SizedBox(width: 8), _step(context, '2', 'One ritual', ritualDone)]),
+        const SizedBox(height: 12),
+        ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: claimed ? 1.0 : progress, minHeight: 5, backgroundColor: Colors.white10, color: MysticColors.gold)),
+      ]),
+    );
+  }
+
+  Widget _step(BuildContext context, String number, String label, bool done) => Expanded(child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9), decoration: BoxDecoration(color: done ? MysticColors.gold.withValues(alpha: .1) : Colors.white.withValues(alpha: .035), borderRadius: BorderRadius.circular(12)), child: Row(children: [CircleAvatar(radius: 10, backgroundColor: done ? MysticColors.gold : Colors.white10, child: Text(done ? '✓' : number, style: TextStyle(fontFamily: 'Arial', color: done ? MysticColors.ink : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold))), const SizedBox(width: 7), Expanded(child: Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, fontWeight: FontWeight.w600)))])));
+
+  void _claim(BuildContext context) {
+    onClaim();
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Close reward',
+      barrierColor: Colors.black.withValues(alpha: .78),
+      transitionDuration: const Duration(milliseconds: 450),
+      transitionBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: ScaleTransition(scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack), child: child)),
+      pageBuilder: (_, __, ___) => const _QuestRewardDialog(),
+    );
+  }
+}
+
+class _QuestRewardDialog extends StatefulWidget {
+  const _QuestRewardDialog();
+
+  @override
+  State<_QuestRewardDialog> createState() => _QuestRewardDialogState();
+}
+
+class _QuestRewardDialogState extends State<_QuestRewardDialog> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1700))..forward();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Center(child: Material(color: Colors.transparent, child: Container(width: 310, padding: const EdgeInsets.fromLTRB(22, 26, 22, 22), decoration: BoxDecoration(gradient: const RadialGradient(colors: [Color(0xFF60458F), Color(0xFF191226)]), borderRadius: BorderRadius.circular(28), border: Border.all(color: MysticColors.gold.withValues(alpha: .55)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .35), blurRadius: 50)]), child: AnimatedBuilder(animation: controller, builder: (context, _) => Column(mainAxisSize: MainAxisSize.min, children: [
+    SizedBox(height: 150, child: Stack(alignment: Alignment.center, children: [
+      Positioned.fill(child: CustomPaint(painter: _RewardBurstPainter(controller.value))),
+      Transform.scale(scale: .7 + Curves.elasticOut.transform(controller.value) * .3, child: Transform.rotate(angle: sin(controller.value * pi * 4) * (1 - controller.value) * .08, child: Container(width: 88, height: 88, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFFF4DB8F), Color(0xFFB88231)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .5), blurRadius: 35)]), child: Text(controller.value > .55 ? '✦' : '◇', style: const TextStyle(fontSize: 43, color: MysticColors.ink))))),
+    ])),
+    const Text('SOUL CHEST OPENED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+    const SizedBox(height: 9),
+    Text('+40 XP', style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: 34)),
+    const SizedBox(height: 8),
+    Text('Moon Shard added to your constellation.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+    const SizedBox(height: 20),
+    GoldButton(label: 'Continue my path', onPressed: () => Navigator.pop(context), icon: Icons.auto_awesome),
+  ])))));
+}
+
+class _RewardBurstPainter extends CustomPainter {
+  const _RewardBurstPainter(this.progress);
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    for (var i = 0; i < 14; i++) {
+      final angle = i * pi * 2 / 14;
+      final distance = 22 + Curves.easeOut.transform(progress) * (42 + (i % 3) * 8);
+      final point = center + Offset(cos(angle), sin(angle)) * distance;
+      canvas.drawCircle(point, i.isEven ? 2.2 : 1.4, Paint()..color = MysticColors.gold.withValues(alpha: (1 - progress * .55).clamp(0.0, 1.0).toDouble()));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RewardBurstPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
 class ReadingFlow extends StatefulWidget {
