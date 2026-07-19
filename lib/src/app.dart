@@ -59,7 +59,7 @@ class _MysticAppState extends State<MysticApp> {
           ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
-          ProfileScreen(streak: streak, xp: xp, readings: journal.length, onPremium: _showPremium),
+          ProfileScreen(streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, onPremium: _showPremium),
         ]),
         bottomNavigationBar: NavigationBar(
           selectedIndex: tab,
@@ -77,6 +77,7 @@ class _MysticAppState extends State<MysticApp> {
 
   void _startReading(ReadingKind kind) {
     navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, onComplete: (record) {
+      final newlyDiscovered = record.cards.map((item) => item.card).where((card) => !discoveredCards.contains(card.name)).toList();
       setState(() {
         journal.insert(0, record);
         discoveredCards.addAll(record.cards.map((item) => item.card.name));
@@ -84,7 +85,24 @@ class _MysticAppState extends State<MysticApp> {
         _updateStreak();
       });
       _saveProgress();
+      if (newlyDiscovered.isNotEmpty) {
+        Future<void>.delayed(const Duration(milliseconds: 280), () => _showCardDiscovery(newlyDiscovered));
+      }
     })));
+  }
+
+  void _showCardDiscovery(List<TarotCardData> cards) {
+    final context = navigatorKey.currentContext;
+    if (context == null || !mounted) return;
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Close discovery',
+      barrierColor: Colors.black.withValues(alpha: .82),
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: ScaleTransition(scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack), child: child)),
+      pageBuilder: (_, __, ___) => _CardDiscoveryDialog(cards: cards),
+    );
   }
 
   void _completeRitual(String id) {
@@ -217,6 +235,75 @@ class _MysticLoadingScreen extends StatelessWidget {
         SizedBox(height: 18),
         SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)),
       ]))));
+}
+
+class _CardDiscoveryDialog extends StatefulWidget {
+  const _CardDiscoveryDialog({required this.cards});
+  final List<TarotCardData> cards;
+
+  @override
+  State<_CardDiscoveryDialog> createState() => _CardDiscoveryDialogState();
+}
+
+class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog> with SingleTickerProviderStateMixin {
+  int index = 0;
+  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..forward();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final card = widget.cards[index];
+    final color = _cardRarityColor(card);
+    final hasNext = index < widget.cards.length - 1;
+    return Center(child: Material(color: Colors.transparent, child: Container(width: 330, padding: const EdgeInsets.fromLTRB(20, 22, 20, 20), decoration: BoxDecoration(gradient: const RadialGradient(center: Alignment(0, -.3), radius: 1.2, colors: [Color(0xFF5B3D7D), Color(0xFF17101F)]), borderRadius: BorderRadius.circular(30), border: Border.all(color: color.withValues(alpha: .7)), boxShadow: [BoxShadow(color: color.withValues(alpha: .28), blurRadius: 55)]), child: AnimatedBuilder(animation: controller, builder: (context, _) => Column(mainAxisSize: MainAxisSize.min, children: [
+      Row(children: [const Spacer(), Text('${index + 1}/${widget.cards.length}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold)), const Spacer(), InkWell(onTap: () => Navigator.pop(context), child: const Icon(Icons.close, size: 20, color: MysticColors.muted))]),
+      const SizedBox(height: 5),
+      const Text('✦  NEW ARCANA AWAKENED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.25)),
+      const SizedBox(height: 18),
+      Transform.scale(scale: .72 + Curves.elasticOut.transform(controller.value) * .28, child: Transform.rotate(angle: sin(controller.value * pi * 3) * (1 - controller.value) * .06, child: Container(width: 132, height: 198, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color.withValues(alpha: .45), const Color(0xFF17101F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: color, width: 1.5), boxShadow: [BoxShadow(color: color.withValues(alpha: .32), blurRadius: 35)]), child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: .45))), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 23), Text(card.symbol, style: TextStyle(fontSize: 50, color: color)), const SizedBox(height: 23), Text(card.name, maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, fontWeight: FontWeight.bold))])))),
+      const SizedBox(height: 17),
+      Text(_cardRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+      const SizedBox(height: 6),
+      Text(card.name, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      const SizedBox(height: 8),
+      Text(card.light, maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
+      const SizedBox(height: 20),
+      GoldButton(label: hasNext ? 'Reveal next card' : 'Add to Arcana Vault', onPressed: () {
+        if (hasNext) {
+          setState(() => index++);
+          controller.forward(from: 0);
+        } else {
+          Navigator.pop(context);
+        }
+      }, icon: hasNext ? Icons.auto_awesome : Icons.check),
+    ])))));
+  }
+}
+
+String _cardRarity(TarotCardData card) {
+  final index = tarotDeck.indexOf(card);
+  if (index < 22) return 'Legendary';
+  if (card.name.startsWith('Page') || card.name.startsWith('Knight') || card.name.startsWith('Queen') || card.name.startsWith('King')) return 'Epic';
+  if (card.name.startsWith('Ace')) return 'Rare';
+  return 'Common';
+}
+
+Color _cardRarityColor(TarotCardData card) {
+  switch (_cardRarity(card)) {
+    case 'Legendary':
+      return MysticColors.gold;
+    case 'Epic':
+      return const Color(0xFFC48DFF);
+    case 'Rare':
+      return const Color(0xFF72D6E8);
+    default:
+      return const Color(0xFFB8B4C7);
+  }
 }
 
 class OnboardingScreen extends StatefulWidget {
@@ -770,7 +857,7 @@ class _ArcanaVault extends StatelessWidget {
   }
 
   Widget _previewCard(TarotCardData card, bool unlocked) {
-    final color = _rarityColor(card);
+    final color = _cardRarityColor(card);
     return Container(height: 112, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: unlocked ? LinearGradient(colors: [color.withValues(alpha: .25), const Color(0xFF191323)]) : const LinearGradient(colors: [Color(0xFF1C1824), Color(0xFF100E16)]), borderRadius: BorderRadius.circular(14), border: Border.all(color: unlocked ? color.withValues(alpha: .55) : Colors.white10)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Text(unlocked ? card.symbol : '◈', style: TextStyle(fontSize: 28, color: unlocked ? color : Colors.white24)),
       const SizedBox(height: 8),
@@ -808,7 +895,7 @@ class _ArcanaVault extends StatelessWidget {
   }
 
   Widget _vaultCard(BuildContext context, TarotCardData card, bool unlocked) {
-    final color = _rarityColor(card);
+    final color = _cardRarityColor(card);
     return InkWell(
       onTap: unlocked ? () => _showCardDetail(context, card) : null,
       borderRadius: BorderRadius.circular(15),
@@ -819,18 +906,18 @@ class _ArcanaVault extends StatelessWidget {
         const Spacer(),
         Text(unlocked ? card.name : 'Locked', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
-        Text(unlocked ? _rarity(card).toUpperCase() : 'UNDISCOVERED', style: TextStyle(fontFamily: 'Arial', color: unlocked ? color : Colors.white24, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: .7)),
+        Text(unlocked ? _cardRarity(card).toUpperCase() : 'UNDISCOVERED', style: TextStyle(fontFamily: 'Arial', color: unlocked ? color : Colors.white24, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: .7)),
       ])),
     );
   }
 
   void _showCardDetail(BuildContext context, TarotCardData card) {
-    final color = _rarityColor(card);
+    final color = _cardRarityColor(card);
     showDialog<void>(context: context, builder: (dialogContext) => Dialog(backgroundColor: Colors.transparent, insetPadding: const EdgeInsets.all(20), child: Container(padding: const EdgeInsets.fromLTRB(20, 22, 20, 20), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF372451), Color(0xFF17111F)]), borderRadius: BorderRadius.circular(26), border: Border.all(color: color.withValues(alpha: .6))), child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
       Align(alignment: Alignment.centerRight, child: IconButton(onPressed: () => Navigator.pop(dialogContext), icon: const Icon(Icons.close))),
       Container(width: 118, height: 176, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [color.withValues(alpha: .35), const Color(0xFF17111F)]), borderRadius: BorderRadius.circular(18), border: Border.all(color: color.withValues(alpha: .75)), boxShadow: [BoxShadow(color: color.withValues(alpha: .2), blurRadius: 28)]), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 18), Text(card.symbol, style: TextStyle(fontSize: 48, color: color))])),
       const SizedBox(height: 18),
-      Text(_rarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
+      Text(_cardRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
       const SizedBox(height: 6),
       Text(card.name, textAlign: TextAlign.center, style: Theme.of(dialogContext).textTheme.headlineMedium),
       const SizedBox(height: 20),
@@ -844,26 +931,6 @@ class _ArcanaVault extends StatelessWidget {
 
   Widget _meaningBlock(BuildContext context, String label, String text, Color color) => Container(width: double.infinity, padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(15), border: Border.all(color: color.withValues(alpha: .16))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.1)), const SizedBox(height: 6), Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))]));
 
-  String _rarity(TarotCardData card) {
-    final index = tarotDeck.indexOf(card);
-    if (index < 22) return 'Legendary';
-    if (card.name.startsWith('Page') || card.name.startsWith('Knight') || card.name.startsWith('Queen') || card.name.startsWith('King')) return 'Epic';
-    if (card.name.startsWith('Ace')) return 'Rare';
-    return 'Common';
-  }
-
-  Color _rarityColor(TarotCardData card) {
-    switch (_rarity(card)) {
-      case 'Legendary':
-        return MysticColors.gold;
-      case 'Epic':
-        return const Color(0xFFC48DFF);
-      case 'Rare':
-        return const Color(0xFF72D6E8);
-      default:
-        return const Color(0xFFB8B4C7);
-    }
-  }
 }
 
 class _WeeklyMirror extends StatelessWidget {
@@ -977,21 +1044,66 @@ class _EmptyJournal extends StatelessWidget {
 }
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({required this.streak, required this.xp, required this.readings, required this.onPremium, super.key});
+  const ProfileScreen({required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.onPremium, super.key});
   final int streak;
   final int xp;
   final int readings;
+  final int discovered;
+  final int relics;
   final VoidCallback onPremium;
+
   @override
-  Widget build(BuildContext context) => MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 28, 20, 28), children: [
+  Widget build(BuildContext context) {
+    final level = xp ~/ 100 + 1;
+    final progress = (xp % 100) / 100;
+    final badges = <(String, String, bool, String)>[
+      ('First Signal', '✦', readings >= 1, 'Save 1 reading'),
+      ('Flame Keeper', '🔥', streak >= 3, 'Reach a 3-day streak'),
+      ('Arcana Seeker', '◈', discovered >= 10, 'Awaken 10 cards'),
+      ('Relic Keeper', '♛', relics >= 1, 'Claim an XP relic'),
+    ];
+    return MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 28, 20, 28), children: [
         Text('Your space', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 22),
-        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(22), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(children: [const CircleAvatar(radius: 35, backgroundColor: MysticColors.violet, child: Text('☾', style: TextStyle(fontSize: 30, color: MysticColors.gold))), const SizedBox(height: 12), Text('Mystic Explorer', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 18), Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('$streak', 'day streak'), _stat('$readings', 'readings'), _stat('$xp', 'XP')])])),
+        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const RadialGradient(center: Alignment(0, -.9), radius: 1.35, colors: [Color(0xFF4B3471), Color(0xFF191326)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .24))), child: Column(children: [
+          Container(width: 78, height: 78, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFF8B63D6), Color(0xFF3B285F)]), border: Border.all(color: MysticColors.gold.withValues(alpha: .55), width: 2), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .3), blurRadius: 28)]), child: const Text('☾', style: TextStyle(fontSize: 34, color: MysticColors.gold))),
+          const SizedBox(height: 12),
+          Text(_titleForLevel(level), style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 4),
+          Text('LEVEL $level', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.3)),
+          const SizedBox(height: 16),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('$streak', 'day streak'), _stat('$readings', 'readings'), _stat('$discovered', 'arcana')]),
+          const SizedBox(height: 18),
+          Row(children: [Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('${100 - (xp % 100)} XP to level ${level + 1}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10))]),
+          const SizedBox(height: 8),
+          ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: progress, minHeight: 7, backgroundColor: Colors.white10, color: MysticColors.gold)),
+        ])),
+        const SizedBox(height: 22),
+        Row(children: [Text('Mystic achievements', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${badges.where((badge) => badge.$3).length}/${badges.length}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
+        const SizedBox(height: 6),
+        Text('Your practice leaves permanent marks on your path.', style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 12),
+        GridView.count(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, childAspectRatio: 1.48, crossAxisSpacing: 10, mainAxisSpacing: 10, children: badges.map((badge) => _badge(context, badge.$1, badge.$2, badge.$3, badge.$4)).toList()),
         const SizedBox(height: 14),
         InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: const Row(children: [Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Unlock Mystic Plus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), SizedBox(height: 4), Text('Go deeper with unlimited readings', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), Icon(Icons.arrow_forward)]))),
         const SizedBox(height: 18),
         ...['Reading preferences', 'Daily reminder', 'Privacy & data', 'Help and support'].map((label) => ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(label, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
       ]));
+  }
+
+  String _titleForLevel(int level) {
+    if (level >= 10) return 'Astral Sage';
+    if (level >= 6) return 'Mystic Oracle';
+    if (level >= 3) return 'Arcana Seeker';
+    return 'Mystic Initiate';
+  }
+
+  Widget _badge(BuildContext context, String title, String symbol, bool unlocked, String goal) => AnimatedContainer(duration: const Duration(milliseconds: 350), padding: const EdgeInsets.all(13), decoration: BoxDecoration(gradient: unlocked ? const LinearGradient(colors: [Color(0xFF4A326D), Color(0xFF21172F)]) : const LinearGradient(colors: [Color(0xFF1D1924), Color(0xFF121017)]), borderRadius: BorderRadius.circular(17), border: Border.all(color: unlocked ? MysticColors.gold.withValues(alpha: .45) : Colors.white10)), child: Row(children: [
+    Container(width: 38, height: 38, alignment: Alignment.center, decoration: BoxDecoration(color: unlocked ? MysticColors.gold.withValues(alpha: .14) : Colors.white.withValues(alpha: .035), shape: BoxShape.circle), child: Text(unlocked ? symbol : '🔒', style: TextStyle(fontSize: unlocked ? 21 : 15, color: MysticColors.gold))),
+    const SizedBox(width: 9),
+    Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)), const SizedBox(height: 4), Text(unlocked ? 'UNLOCKED' : goal, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.gold : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: unlocked ? .7 : 0))]))
+  ]));
+
   Widget _stat(String value, String label) => Column(children: [Text(value, style: const TextStyle(fontFamily: 'Arial', fontSize: 20, color: MysticColors.gold, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 12))]);
 }
 
