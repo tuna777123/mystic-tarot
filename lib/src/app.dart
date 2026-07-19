@@ -205,6 +205,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   EmotionalState emotion = EmotionalState.uncertain;
   List<DrawnCard>? drawn;
   bool saved = false;
+  bool revealComplete = false;
 
   @override
   Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: drawn == null ? _selection(context) : _result(context)));
@@ -236,10 +237,15 @@ class _ReadingFlowState extends State<ReadingFlow> {
         }
       });
 
-  void _reveal() {
+  Future<void> _reveal() async {
     final random = Random();
     final pool = [...tarotDeck]..shuffle(random);
-    setState(() => drawn = List.generate(widget.kind.cardCount, (i) => DrawnCard(pool[i], random.nextInt(4) == 0)));
+    setState(() {
+      drawn = List.generate(widget.kind.cardCount, (i) => DrawnCard(pool[i], random.nextInt(4) == 0));
+      revealComplete = false;
+    });
+    await Future<void>.delayed(Duration(milliseconds: 850 + widget.kind.cardCount * 520));
+    if (mounted) setState(() => revealComplete = true);
   }
 
   Widget _result(BuildContext context) {
@@ -251,12 +257,13 @@ class _ReadingFlowState extends State<ReadingFlow> {
         const SizedBox(height: 10),
         Text('Take what resonates. Tarot is a mirror for reflection—not a fixed prediction.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
-        SizedBox(height: 190, child: ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => TarotCardFace(drawn: drawn![i]), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
+        SizedBox(height: 190, child: ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
         const SizedBox(height: 26),
-        ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
-        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('✦  YOUR GUIDANCE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
-        const SizedBox(height: 14),
-        Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (!revealComplete) _ReadingInProgress(cardCount: drawn!.length),
+        if (revealComplete) ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
+        if (revealComplete) Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('✦  YOUR GUIDANCE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
+        if (revealComplete) const SizedBox(height: 14),
+        if (revealComplete) Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text('MYSTIC MIRROR • 24H LOOP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1.1)),
           const SizedBox(height: 10),
           Text('Your aligned action', style: Theme.of(context).textTheme.titleLarge),
@@ -265,10 +272,10 @@ class _ReadingFlowState extends State<ReadingFlow> {
           const SizedBox(height: 10),
           Text('Tomorrow, Mystic will ask what actually changed. Your answer becomes part of your personal pattern map.', style: Theme.of(context).textTheme.bodyMedium),
         ])),
-        const SizedBox(height: 20),
-        GoldButton(label: saved ? 'Saved to your journal' : 'Save this reading', icon: saved ? Icons.check : Icons.bookmark_add_outlined, onPressed: saved ? null : () { widget.onComplete(record); setState(() => saved = true); }),
-        const SizedBox(height: 10),
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Return home')),
+        if (revealComplete) const SizedBox(height: 20),
+        if (revealComplete) GoldButton(label: saved ? 'Saved to your journal' : 'Save this reading', icon: saved ? Icons.check : Icons.bookmark_add_outlined, onPressed: saved ? null : () { widget.onComplete(record); setState(() => saved = true); }),
+        if (revealComplete) const SizedBox(height: 10),
+        if (revealComplete) TextButton(onPressed: () => Navigator.pop(context), child: const Text('Return home')),
       ]))),
     ]);
   }
@@ -295,6 +302,62 @@ class _ReadingFlowState extends State<ReadingFlow> {
         return 'Choose the smallest reversible step. Clarity often appears after movement, not before it.';
     }
   }
+}
+
+class _RitualRevealCard extends StatefulWidget {
+  const _RitualRevealCard({required this.card, required this.delay});
+  final DrawnCard card;
+  final Duration delay;
+
+  @override
+  State<_RitualRevealCard> createState() => _RitualRevealCardState();
+}
+
+class _RitualRevealCardState extends State<_RitualRevealCard> {
+  bool faceUp = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(widget.delay, () {
+      if (mounted) setState(() => faceUp = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+        tween: Tween(end: faceUp ? 1 : 0),
+        duration: const Duration(milliseconds: 720),
+        curve: Curves.easeInOutCubic,
+        builder: (context, value, _) {
+          final showFace = value > .5;
+          final angle = value * pi;
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()..setEntry(3, 2, .0014)..rotateY(angle),
+            child: Transform.flip(
+              flipX: showFace,
+              child: TarotCardFace(drawn: showFace ? widget.card : null),
+            ),
+          );
+        },
+      );
+}
+
+class _ReadingInProgress extends StatelessWidget {
+  const _ReadingInProgress({required this.cardCount});
+  final int cardCount;
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        const SizedBox(height: 10),
+        const SizedBox(width: 30, height: 30, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)),
+        const SizedBox(height: 15),
+        Text(cardCount == 1 ? 'Your card is finding its voice…' : 'The cards are forming a pattern…', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 7),
+        Text('Stay with your first feeling. The full interpretation appears after the final card turns.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 24),
+      ]);
 }
 
 class JournalScreen extends StatelessWidget {
