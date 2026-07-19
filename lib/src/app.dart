@@ -17,15 +17,18 @@ class MysticApp extends StatefulWidget {
 }
 
 class _MysticAppState extends State<MysticApp> {
+  static const freeDeepReadingLimit = 3;
   final navigatorKey = GlobalKey<NavigatorState>();
   bool ready = false;
   bool onboarded = false;
   int tab = 0;
   int streak = 0;
   int xp = 0;
+  int deepReadingsToday = 0;
   DeckStyle deckStyle = DeckStyle.midnight;
   String? lastActiveDay;
   String? dailyQuestClaimedDay;
+  String? deepReadingsDay;
   final List<ReadingRecord> journal = [];
   final Set<String> discoveredCards = {};
   final Set<String> completedRituals = {};
@@ -55,6 +58,7 @@ class _MysticAppState extends State<MysticApp> {
             ritualDone: completedRituals.isNotEmpty,
             dailyQuestClaimed: dailyQuestClaimedDay == _dayKey(DateTime.now()),
             deckStyle: deckStyle,
+            freeReadingsLeft: max(0, freeDeepReadingLimit - deepReadingsToday),
             onReading: _startReading,
             onClaimDailyQuest: _claimDailyQuest,
             onPremium: _showPremium,
@@ -78,12 +82,20 @@ class _MysticAppState extends State<MysticApp> {
       );
 
   void _startReading(ReadingKind kind) {
+    if (kind != ReadingKind.daily && deepReadingsToday >= freeDeepReadingLimit) {
+      _showPremium(source: 'daily_limit');
+      return;
+    }
     navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, deckStyle: deckStyle, onComplete: (record) {
       final newlyDiscovered = record.cards.map((item) => item.card).where((card) => !discoveredCards.contains(card.name)).toList();
       setState(() {
         journal.insert(0, record);
         discoveredCards.addAll(record.cards.map((item) => item.card.name));
         xp += 25;
+        if (record.kind != ReadingKind.daily) {
+          deepReadingsToday++;
+          deepReadingsDay = _dayKey(DateTime.now());
+        }
         _updateStreak();
       });
       _saveProgress();
@@ -148,6 +160,7 @@ class _MysticAppState extends State<MysticApp> {
       final prefs = await SharedPreferences.getInstance();
       final today = _dayKey(DateTime.now());
       final ritualDay = prefs.getString('ritual_day');
+      final savedReadingDay = prefs.getString('deep_readings_day');
       if (!mounted) return;
       setState(() {
         onboarded = prefs.getBool('onboarded') ?? false;
@@ -155,6 +168,8 @@ class _MysticAppState extends State<MysticApp> {
         streak = prefs.getInt('streak') ?? 0;
         lastActiveDay = prefs.getString('last_active_day');
         dailyQuestClaimedDay = prefs.getString('daily_quest_claimed_day');
+        deepReadingsDay = savedReadingDay;
+        deepReadingsToday = savedReadingDay == today ? prefs.getInt('deep_readings_today') ?? 0 : 0;
         deckStyle = _deckStyleFromName(prefs.getString('deck_style'));
         discoveredCards.addAll(prefs.getStringList('discovered_cards') ?? const []);
         claimedRewards.addAll((prefs.getStringList('claimed_rewards') ?? const []).map(int.parse));
@@ -177,11 +192,13 @@ class _MysticAppState extends State<MysticApp> {
         prefs.setBool('onboarded', onboarded),
         prefs.setInt('xp', xp),
         prefs.setInt('streak', streak),
+        prefs.setInt('deep_readings_today', deepReadingsToday),
         prefs.setStringList('discovered_cards', discoveredCards.toList()),
         prefs.setStringList('completed_rituals', completedRituals.toList()),
         prefs.setStringList('claimed_rewards', claimedRewards.map((item) => '$item').toList()),
         prefs.setStringList('journal_records', journal.take(50).map(_encodeRecord).toList()),
         prefs.setString('ritual_day', _dayKey(DateTime.now())),
+        prefs.setString('deep_readings_day', deepReadingsDay ?? _dayKey(DateTime.now())),
         prefs.setString('deck_style', deckStyle.name),
         if (dailyQuestClaimedDay != null) prefs.setString('daily_quest_claimed_day', dailyQuestClaimedDay!),
         if (lastActiveDay != null) prefs.setString('last_active_day', lastActiveDay!),
@@ -239,7 +256,7 @@ class _MysticAppState extends State<MysticApp> {
     }
   }
 
-  void _showPremium() => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const PremiumScreen()));
+  void _showPremium({String source = 'organic'}) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumScreen(source: source)));
 }
 
 class _MysticLoadingScreen extends StatelessWidget {
@@ -376,13 +393,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.onReading, required this.onClaimDailyQuest, required this.onPremium, super.key});
+  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.freeReadingsLeft, required this.onReading, required this.onClaimDailyQuest, required this.onPremium, super.key});
   final int streak;
   final int xp;
   final bool dailyReadingDone;
   final bool ritualDone;
   final bool dailyQuestClaimed;
   final DeckStyle deckStyle;
+  final int freeReadingsLeft;
   final ValueChanged<ReadingKind> onReading;
   final VoidCallback onClaimDailyQuest;
   final VoidCallback onPremium;
@@ -405,6 +423,8 @@ class HomeScreen extends StatelessWidget {
             claimed: dailyQuestClaimed,
             onClaim: onClaimDailyQuest,
           ),
+          const SizedBox(height: 12),
+          _ReadingAllowance(readingsLeft: freeReadingsLeft, onUpgrade: onPremium),
           const SizedBox(height: 26),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Choose a reading', style: Theme.of(context).textTheme.titleLarge), Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
           const SizedBox(height: 12),
@@ -414,6 +434,27 @@ class HomeScreen extends StatelessWidget {
           return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(kind.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text('${kind.cardCount} cards', style: Theme.of(context).textTheme.bodyMedium)])])));
         }, childCount: ReadingKind.values.length - 1), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.12, crossAxisSpacing: 12, mainAxisSpacing: 12))),
       ]));
+}
+
+class _ReadingAllowance extends StatelessWidget {
+  const _ReadingAllowance({required this.readingsLeft, required this.onUpgrade});
+  final int readingsLeft;
+  final VoidCallback onUpgrade;
+
+  @override
+  Widget build(BuildContext context) {
+    final empty = readingsLeft == 0;
+    return InkWell(
+      onTap: empty ? onUpgrade : null,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), decoration: BoxDecoration(color: empty ? MysticColors.gold.withValues(alpha: .1) : Colors.white.withValues(alpha: .04), borderRadius: BorderRadius.circular(16), border: Border.all(color: empty ? MysticColors.gold.withValues(alpha: .38) : Colors.white10)), child: Row(children: [
+        Container(width: 35, height: 35, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: empty ? MysticColors.gold : MysticColors.violet.withValues(alpha: .28)), child: Icon(empty ? Icons.lock_outline : Icons.bolt, color: empty ? MysticColors.ink : MysticColors.gold, size: 18)),
+        const SizedBox(width: 11),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(empty ? 'Free deep readings used' : '$readingsLeft free deep readings left today', style: const TextStyle(fontFamily: 'Arial', fontSize: 12, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text(empty ? 'Unlock unlimited readings with Mystic Plus.' : 'Your Daily Guidance remains free every day.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11))])),
+        Text(empty ? 'VIEW PLUS' : '${3 - readingsLeft}/3', style: TextStyle(fontFamily: 'Arial', color: empty ? MysticColors.gold : MysticColors.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .6)),
+      ])),
+    );
+  }
 }
 
 class _MoonBriefing extends StatelessWidget {
@@ -1176,32 +1217,52 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class PremiumScreen extends StatefulWidget {
-  const PremiumScreen({super.key});
+  const PremiumScreen({required this.source, super.key});
+  final String source;
+
   @override
   State<PremiumScreen> createState() => _PremiumScreenState();
 }
 
 class _PremiumScreenState extends State<PremiumScreen> {
-  bool yearly = true;
+  int plan = 2;
+
   @override
   Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 30), children: [
-        Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close))),
-        const Text('✦', textAlign: TextAlign.center, style: TextStyle(fontSize: 48, color: MysticColors.gold)),
+        Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)), const Spacer(), TextButton(onPressed: _restore, child: const Text('Restore'))]),
+        Container(width: 74, height: 74, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE5A3), Color(0xFF9D6D26)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .32), blurRadius: 32)]), child: const Text('✦', style: TextStyle(fontSize: 39, color: MysticColors.ink))),
         const SizedBox(height: 8),
-        Text('Make space for\ndeeper insight.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
+        Text(widget.source == 'daily_limit' ? 'Your insight does not\nhave to stop here.' : 'Make space for\ndeeper insight.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
         const SizedBox(height: 12),
-        Text('Unlimited reflective readings, richer patterns, and a private spiritual practice built around you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        Text(widget.source == 'daily_limit' ? 'You used today’s three free deep readings. Daily Guidance stays free—or unlock every spread without limits.' : 'Turn occasional readings into a private practice that grows more useful every day.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
-        ...['Unlimited personalized readings', 'Love compatibility & future timeline', 'Dream reflection and weekly energy', 'Premium card themes', 'No ads, ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [const CircleAvatar(radius: 12, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 15, color: MysticColors.ink)), const SizedBox(width: 12), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
-        const SizedBox(height: 10),
-        Row(children: [Expanded(child: _plan(false, 'Monthly', r'$8.99', 'per month')), const SizedBox(width: 10), Expanded(child: _plan(true, 'Yearly', r'$39.99', r'only $3.33/month'))]),
+        ...['Unlimited readings and every spread', 'Complete journal and weekly pattern history', 'All premium tarot deck themes', 'Future Plus features included', 'No ads—ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 11), child: Row(children: [const CircleAvatar(radius: 11, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 14, color: MysticColors.ink)), const SizedBox(width: 11), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
+        const SizedBox(height: 12),
+        SizedBox(height: 128, child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Expanded(child: _plan(0, 'Weekly', r'$4.99', 'per week')),
+          const SizedBox(width: 8),
+          Expanded(child: _plan(1, 'Monthly', r'$9.99', 'per month')),
+          const SizedBox(width: 8),
+          Expanded(child: _plan(2, 'Yearly', r'$39.99', r'$3.33/month', badge: 'SAVE 67%')),
+        ])),
         const SizedBox(height: 18),
-        GoldButton(label: 'Start 7-day free trial', onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payments connect in the production milestone.')))),
+        GoldButton(label: plan == 2 ? 'Start my 7-day free trial' : 'Continue with ${plan == 0 ? 'weekly' : 'monthly'}', onPressed: _beginPurchase, icon: Icons.lock_open_rounded),
         const SizedBox(height: 10),
-        Text('Cancel anytime. No charge today.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(plan == 2 ? r'No charge today. Then $39.99/year unless cancelled.' : 'Cancel anytime in your App Store or Google Play settings.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 10),
+        const Text('Subscription purchases use the official Apple or Google checkout. Terms • Privacy', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
       ])));
-  Widget _plan(bool isYearly, String title, String price, String subtitle) {
-    final active = yearly == isYearly;
-    return InkWell(onTap: () => setState(() => yearly = isYearly), borderRadius: BorderRadius.circular(18), child: Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: active ? MysticColors.violet.withValues(alpha: .35) : Colors.white.withValues(alpha: .04), borderRadius: BorderRadius.circular(18), border: Border.all(color: active ? MysticColors.gold : Colors.white12, width: active ? 2 : 1)), child: Column(children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.bold)), const SizedBox(height: 7), Text(price, style: const TextStyle(fontFamily: 'Arial', fontSize: 22, fontWeight: FontWeight.bold, color: MysticColors.gold)), const SizedBox(height: 3), Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, color: MysticColors.muted))])));
+
+  Widget _plan(int index, String title, String price, String subtitle, {String? badge}) {
+    final active = plan == index;
+    return InkWell(onTap: () => setState(() => plan = index), borderRadius: BorderRadius.circular(18), child: Stack(clipBehavior: Clip.none, children: [Container(padding: const EdgeInsets.fromLTRB(8, 17, 8, 12), decoration: BoxDecoration(color: active ? MysticColors.violet.withValues(alpha: .35) : Colors.white.withValues(alpha: .04), borderRadius: BorderRadius.circular(18), border: Border.all(color: active ? MysticColors.gold : Colors.white12, width: active ? 2 : 1)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.bold, fontSize: 11)), const SizedBox(height: 7), Text(price, style: TextStyle(fontFamily: 'Arial', fontSize: index == 2 ? 18 : 16, fontWeight: FontWeight.bold, color: MysticColors.gold)), const SizedBox(height: 3), Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 9, color: MysticColors.muted))])), if (badge != null) Positioned(top: -7, left: 7, right: 7, child: Container(padding: const EdgeInsets.symmetric(vertical: 4), decoration: BoxDecoration(color: MysticColors.gold, borderRadius: BorderRadius.circular(12)), child: Text(badge, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: .6))))]));
+  }
+
+  void _beginPurchase() {
+    showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))), builder: (context) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(22, 16, 22, 28), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))), const SizedBox(height: 22), const Icon(Icons.verified_user_outlined, color: MysticColors.gold, size: 40), const SizedBox(height: 12), Text('Store checkout is the final launch connection.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 9), Text('This web preview cannot charge you. Apple/Google billing will activate after the store products and merchant accounts are connected.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 18), GoldButton(label: 'Understood', onPressed: () => Navigator.pop(context))]))));
+  }
+
+  void _restore() {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Restore Purchases activates with the native store billing connection.')));
   }
 }
