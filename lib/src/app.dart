@@ -61,6 +61,7 @@ class _MysticAppState extends State<MysticApp> {
             freeReadingsLeft: max(0, freeDeepReadingLimit - deepReadingsToday),
             onReading: _startReading,
             onClaimDailyQuest: _claimDailyQuest,
+            onPremiumSpread: () => _showPremium(source: 'premium_spread'),
             onPremium: _showPremium,
           ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
@@ -82,6 +83,10 @@ class _MysticAppState extends State<MysticApp> {
       );
 
   void _startReading(ReadingKind kind) {
+    if (_premiumReadingKinds.contains(kind)) {
+      _showPremium(source: 'premium_spread');
+      return;
+    }
     if (kind != ReadingKind.daily && deepReadingsToday >= freeDeepReadingLimit) {
       _showPremium(source: 'daily_limit');
       return;
@@ -392,8 +397,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
+const _standardReadingKinds = <ReadingKind>[
+  ReadingKind.love,
+  ReadingKind.career,
+  ReadingKind.money,
+  ReadingKind.decision,
+  ReadingKind.spiritual,
+  ReadingKind.shadow,
+];
+
+const _premiumReadingKinds = <ReadingKind>[
+  ReadingKind.compatibility,
+  ReadingKind.timeline,
+  ReadingKind.celticCross,
+];
+
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.freeReadingsLeft, required this.onReading, required this.onClaimDailyQuest, required this.onPremium, super.key});
+  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.freeReadingsLeft, required this.onReading, required this.onClaimDailyQuest, required this.onPremiumSpread, required this.onPremium, super.key});
   final int streak;
   final int xp;
   final bool dailyReadingDone;
@@ -403,6 +423,7 @@ class HomeScreen extends StatelessWidget {
   final int freeReadingsLeft;
   final ValueChanged<ReadingKind> onReading;
   final VoidCallback onClaimDailyQuest;
+  final VoidCallback onPremiumSpread;
   final VoidCallback onPremium;
 
   @override
@@ -430,10 +451,25 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 12),
         ]))),
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 28), sliver: SliverGrid(delegate: SliverChildBuilderDelegate((context, index) {
-          final kind = ReadingKind.values.skip(1).elementAt(index);
+          final kind = _standardReadingKinds[index];
           return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(kind.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text('${kind.cardCount} cards', style: Theme.of(context).textTheme.bodyMedium)])])));
-        }, childCount: ReadingKind.values.length - 1), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.12, crossAxisSpacing: 12, mainAxisSpacing: 12))),
+        }, childCount: _standardReadingKinds.length), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.12, crossAxisSpacing: 12, mainAxisSpacing: 12))),
+        SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 32), sliver: SliverToBoxAdapter(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [Text('Mystic Plus readings', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: MysticColors.gold, borderRadius: BorderRadius.circular(12)), child: const Text('PLUS', style: TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .7)))]),
+          const SizedBox(height: 6),
+          Text('High-depth spreads built for the questions people return to most.', style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 12),
+          SizedBox(height: 166, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: _premiumReadingKinds.length, separatorBuilder: (_, __) => const SizedBox(width: 10), itemBuilder: (_, index) => _premiumReadingCard(context, _premiumReadingKinds[index]))),
+        ]))),
       ]));
+
+  Widget _premiumReadingCard(BuildContext context, ReadingKind kind) => InkWell(onTap: onPremiumSpread, borderRadius: BorderRadius.circular(20), child: Container(width: 158, padding: const EdgeInsets.all(15), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF5A3B82), Color(0xFF20152F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+    Row(children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), const Spacer(), const Icon(Icons.lock_outline, color: MysticColors.gold, size: 17)]),
+    const Spacer(),
+    Text(kind.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+    const SizedBox(height: 5),
+    Text('${kind.cardCount}-card premium spread', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10)),
+  ])));
 }
 
 class _ReadingAllowance extends StatelessWidget {
@@ -1232,9 +1268,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
         Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)), const Spacer(), TextButton(onPressed: _restore, child: const Text('Restore'))]),
         Container(width: 74, height: 74, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE5A3), Color(0xFF9D6D26)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .32), blurRadius: 32)]), child: const Text('✦', style: TextStyle(fontSize: 39, color: MysticColors.ink))),
         const SizedBox(height: 8),
-        Text(widget.source == 'daily_limit' ? 'Your insight does not\nhave to stop here.' : 'Make space for\ndeeper insight.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
+        if (widget.source == 'premium_spread') const Text('PREMIUM SPREAD COLLECTION', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.3)),
+        if (widget.source == 'premium_spread') const SizedBox(height: 7),
+        Text(widget.source == 'daily_limit' ? 'Your insight does not\nhave to stop here.' : widget.source == 'premium_spread' ? 'Some questions need\na deeper spread.' : 'Make space for\ndeeper insight.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
         const SizedBox(height: 12),
-        Text(widget.source == 'daily_limit' ? 'You used today’s three free deep readings. Daily Guidance stays free—or unlock every spread without limits.' : 'Turn occasional readings into a private practice that grows more useful every day.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        Text(widget.source == 'daily_limit' ? 'You used today’s three free deep readings. Daily Guidance stays free—or unlock every spread without limits.' : widget.source == 'premium_spread' ? 'Unlock Love Compatibility, Future Timeline, Celtic Cross, and every premium reading in one membership.' : 'Turn occasional readings into a private practice that grows more useful every day.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
         ...['Unlimited readings and every spread', 'Complete journal and weekly pattern history', 'All premium tarot deck themes', 'Future Plus features included', 'No ads—ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 11), child: Row(children: [const CircleAvatar(radius: 11, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 14, color: MysticColors.ink)), const SizedBox(width: 11), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
         const SizedBox(height: 12),
