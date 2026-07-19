@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
 import 'tarot_data.dart';
@@ -16,13 +17,21 @@ class MysticApp extends StatefulWidget {
 
 class _MysticAppState extends State<MysticApp> {
   final navigatorKey = GlobalKey<NavigatorState>();
+  bool ready = false;
   bool onboarded = false;
   int tab = 0;
-  int streak = 3;
-  int xp = 140;
+  int streak = 0;
+  int xp = 0;
+  String? lastActiveDay;
   final List<ReadingRecord> journal = [];
   final Set<String> discoveredCards = {};
   final Set<String> completedRituals = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -30,7 +39,7 @@ class _MysticAppState extends State<MysticApp> {
         navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: buildMysticTheme(),
-        home: onboarded ? _shell() : OnboardingScreen(onDone: () => setState(() => onboarded = true)),
+        home: !ready ? const _MysticLoadingScreen() : onboarded ? _shell() : OnboardingScreen(onDone: _finishOnboarding),
       );
 
   Widget _shell() => Scaffold(
@@ -60,8 +69,9 @@ class _MysticAppState extends State<MysticApp> {
         journal.insert(0, record);
         discoveredCards.addAll(record.cards.map((item) => item.card.name));
         xp += 25;
-        streak = max(streak, 4);
+        _updateStreak();
       });
+      _saveProgress();
     })));
   }
 
@@ -71,9 +81,74 @@ class _MysticAppState extends State<MysticApp> {
       completedRituals.add(id);
       xp += 15;
     });
+    _saveProgress();
   }
 
+  Future<void> _finishOnboarding() async {
+    setState(() => onboarded = true);
+    await _saveProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final today = _dayKey(DateTime.now());
+      final ritualDay = prefs.getString('ritual_day');
+      if (!mounted) return;
+      setState(() {
+        onboarded = prefs.getBool('onboarded') ?? false;
+        xp = prefs.getInt('xp') ?? 0;
+        streak = prefs.getInt('streak') ?? 0;
+        lastActiveDay = prefs.getString('last_active_day');
+        discoveredCards.addAll(prefs.getStringList('discovered_cards') ?? const []);
+        if (ritualDay == today) completedRituals.addAll(prefs.getStringList('completed_rituals') ?? const []);
+        ready = true;
+      });
+    } catch (_) {
+      if (mounted) setState(() => ready = true);
+    }
+  }
+
+  Future<void> _saveProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await Future.wait([
+        prefs.setBool('onboarded', onboarded),
+        prefs.setInt('xp', xp),
+        prefs.setInt('streak', streak),
+        prefs.setStringList('discovered_cards', discoveredCards.toList()),
+        prefs.setStringList('completed_rituals', completedRituals.toList()),
+        prefs.setString('ritual_day', _dayKey(DateTime.now())),
+        if (lastActiveDay != null) prefs.setString('last_active_day', lastActiveDay!),
+      ]);
+    } catch (_) {
+      // The experience remains usable if local storage is temporarily unavailable.
+    }
+  }
+
+  void _updateStreak() {
+    final now = DateTime.now();
+    final today = _dayKey(now);
+    if (lastActiveDay == today) return;
+    final yesterday = _dayKey(now.subtract(const Duration(days: 1)));
+    streak = lastActiveDay == yesterday ? streak + 1 : 1;
+    lastActiveDay = today;
+  }
+
+  String _dayKey(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
   void _showPremium() => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const PremiumScreen()));
+}
+
+class _MysticLoadingScreen extends StatelessWidget {
+  const _MysticLoadingScreen();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: MysticBackground(child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text('☾', style: TextStyle(fontSize: 68, color: MysticColors.gold)),
+        SizedBox(height: 18),
+        SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)),
+      ]))));
 }
 
 class OnboardingScreen extends StatefulWidget {
