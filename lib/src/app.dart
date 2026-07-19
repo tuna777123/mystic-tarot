@@ -457,11 +457,15 @@ class _ConstellationPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final active = unlocked.clamp(0, points.length);
     final line = Paint()..color = MysticColors.lavender.withValues(alpha: .18 + pulse * .1)..strokeWidth = 1.2;
-    for (var i = 1; i < active; i++) canvas.drawLine(_at(points[i - 1], size), _at(points[i], size), line);
+    for (var i = 1; i < active; i++) {
+      canvas.drawLine(_at(points[i - 1], size), _at(points[i], size), line);
+    }
     for (var i = 0; i < points.length; i++) {
       final on = i < active;
       final point = _at(points[i], size);
-      if (on) canvas.drawCircle(point, 7 + pulse * 3, Paint()..color = MysticColors.gold.withValues(alpha: .08));
+      if (on) {
+        canvas.drawCircle(point, 7 + pulse * 3, Paint()..color = MysticColors.gold.withValues(alpha: .08));
+      }
       canvas.drawCircle(point, on ? 2.8 : 1.5, Paint()..color = on ? MysticColors.gold : Colors.white.withValues(alpha: .15));
     }
   }
