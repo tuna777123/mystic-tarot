@@ -21,6 +21,8 @@ class _MysticAppState extends State<MysticApp> {
   int streak = 3;
   int xp = 140;
   final List<ReadingRecord> journal = [];
+  final Set<String> discoveredCards = {};
+  final Set<String> completedRituals = {};
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -34,6 +36,7 @@ class _MysticAppState extends State<MysticApp> {
   Widget _shell() => Scaffold(
         body: IndexedStack(index: tab, children: [
           HomeScreen(streak: streak, xp: xp, onReading: _startReading, onPremium: _showPremium),
+          JourneyScreen(streak: streak, xp: xp, discoveredCards: discoveredCards, completedRituals: completedRituals, onCompleteRitual: _completeRitual),
           JournalScreen(records: journal),
           ProfileScreen(streak: streak, xp: xp, readings: journal.length, onPremium: _showPremium),
         ]),
@@ -44,6 +47,7 @@ class _MysticAppState extends State<MysticApp> {
           indicatorColor: MysticColors.violet.withValues(alpha: .45),
           destinations: const [
             NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Read'),
+            NavigationDestination(icon: Icon(Icons.hub_outlined), selectedIcon: Icon(Icons.hub), label: 'Path'),
             NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Journal'),
             NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'You'),
           ],
@@ -54,10 +58,19 @@ class _MysticAppState extends State<MysticApp> {
     navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, onComplete: (record) {
       setState(() {
         journal.insert(0, record);
+        discoveredCards.addAll(record.cards.map((item) => item.card.name));
         xp += 25;
         streak = max(streak, 4);
       });
     })));
+  }
+
+  void _completeRitual(String id) {
+    if (completedRituals.contains(id)) return;
+    setState(() {
+      completedRituals.add(id);
+      xp += 15;
+    });
   }
 
   void _showPremium() => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const PremiumScreen()));
@@ -358,6 +371,104 @@ class _ReadingInProgress extends StatelessWidget {
         Text('Stay with your first feeling. The full interpretation appears after the final card turns.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
       ]);
+}
+
+class JourneyScreen extends StatefulWidget {
+  const JourneyScreen({required this.streak, required this.xp, required this.discoveredCards, required this.completedRituals, required this.onCompleteRitual, super.key});
+  final int streak;
+  final int xp;
+  final Set<String> discoveredCards;
+  final Set<String> completedRituals;
+  final ValueChanged<String> onCompleteRitual;
+
+  @override
+  State<JourneyScreen> createState() => _JourneyScreenState();
+}
+
+class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProviderStateMixin {
+  late final AnimationController glow = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    glow.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final level = widget.xp ~/ 100 + 1;
+    final levelProgress = (widget.xp % 100) / 100;
+    return MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 34), children: [
+      Row(children: [
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Your Mystic Path', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 5), Text('Your inner world becomes visible as you practice.', style: Theme.of(context).textTheme.bodyMedium)])),
+        Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(18), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Text('LEVEL $level', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1))),
+      ]),
+      const SizedBox(height: 20),
+      AnimatedBuilder(animation: glow, builder: (context, _) => Container(
+        height: 245,
+        decoration: BoxDecoration(gradient: const RadialGradient(colors: [Color(0xFF49347D), Color(0xFF171128)]), borderRadius: BorderRadius.circular(26), border: Border.all(color: MysticColors.lavender.withValues(alpha: .18 + glow.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + glow.value * .08), blurRadius: 32)]),
+        child: Stack(children: [
+          Positioned.fill(child: CustomPaint(painter: _ConstellationPainter(unlocked: widget.discoveredCards.length, pulse: glow.value))),
+          Positioned(left: 18, top: 17, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('INNER CONSTELLATION', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 10, letterSpacing: 1.3)), const SizedBox(height: 4), Text('${widget.discoveredCards.length} of 78 cards awakened', style: Theme.of(context).textTheme.bodyMedium)])),
+          Positioned(left: 18, right: 18, bottom: 17, child: ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: widget.discoveredCards.length / 78, minHeight: 5, backgroundColor: Colors.white10, color: MysticColors.gold))),
+        ]),
+      )),
+      const SizedBox(height: 18),
+      Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(children: [
+        Row(children: [Text('${widget.xp} XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const Spacer(), Text('${(levelProgress * 100).round()}% to Level ${level + 1}', style: Theme.of(context).textTheme.bodyMedium)]),
+        const SizedBox(height: 10),
+        ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: levelProgress, minHeight: 7, backgroundColor: Colors.white10, color: MysticColors.violet)),
+      ])),
+      const SizedBox(height: 25),
+      Row(children: [Text('Today’s rituals', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
+      const SizedBox(height: 6),
+      Text('Small actions turn insight into change. Each ritual grants +15 XP.', style: Theme.of(context).textTheme.bodyMedium),
+      const SizedBox(height: 12),
+      _ritual(context, 'breathe', '60-second reset', 'Breathe in for four, out for six.', Icons.air),
+      _ritual(context, 'truth', 'Name the truth', 'Write one sentence you have been avoiding.', Icons.edit_note),
+      _ritual(context, 'action', 'Aligned action', 'Take the smallest reversible next step.', Icons.bolt),
+      const SizedBox(height: 18),
+      Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF33245C), Color(0xFF1A142D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .2))), child: Row(children: [const Text('🔥', style: TextStyle(fontSize: 30)), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${widget.streak}-day flame', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text('Return tomorrow to keep your constellation alive.', style: Theme.of(context).textTheme.bodyMedium)]))])),
+    ]));
+  }
+
+  Widget _ritual(BuildContext context, String id, String title, String subtitle, IconData icon) {
+    final done = widget.completedRituals.contains(id);
+    return Padding(padding: const EdgeInsets.only(bottom: 10), child: InkWell(
+      onTap: done ? null : () { widget.onCompleteRitual(id); setState(() {}); },
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(duration: const Duration(milliseconds: 320), padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: done ? MysticColors.gold.withValues(alpha: .1) : Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(18), border: Border.all(color: done ? MysticColors.gold.withValues(alpha: .42) : Colors.white.withValues(alpha: .08))), child: Row(children: [
+        CircleAvatar(backgroundColor: done ? MysticColors.gold : MysticColors.violet.withValues(alpha: .35), child: Icon(done ? Icons.check : icon, color: done ? MysticColors.ink : MysticColors.lavender, size: 20)),
+        const SizedBox(width: 13),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w700)), const SizedBox(height: 3), Text(done ? 'Ritual complete • +15 XP' : subtitle, style: Theme.of(context).textTheme.bodyMedium)])),
+        if (!done) const Icon(Icons.arrow_forward_ios, size: 14, color: MysticColors.muted),
+      ])),
+    ));
+  }
+}
+
+class _ConstellationPainter extends CustomPainter {
+  const _ConstellationPainter({required this.unlocked, required this.pulse});
+  final int unlocked;
+  final double pulse;
+  static const points = <Offset>[Offset(.12, .65), Offset(.24, .38), Offset(.39, .58), Offset(.53, .29), Offset(.67, .52), Offset(.82, .25), Offset(.9, .62), Offset(.58, .76), Offset(.31, .79)];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final active = unlocked.clamp(0, points.length);
+    final line = Paint()..color = MysticColors.lavender.withValues(alpha: .18 + pulse * .1)..strokeWidth = 1.2;
+    for (var i = 1; i < active; i++) canvas.drawLine(_at(points[i - 1], size), _at(points[i], size), line);
+    for (var i = 0; i < points.length; i++) {
+      final on = i < active;
+      final point = _at(points[i], size);
+      if (on) canvas.drawCircle(point, 7 + pulse * 3, Paint()..color = MysticColors.gold.withValues(alpha: .08));
+      canvas.drawCircle(point, on ? 2.8 : 1.5, Paint()..color = on ? MysticColors.gold : Colors.white.withValues(alpha: .15));
+    }
+  }
+
+  Offset _at(Offset value, Size size) => Offset(value.dx * size.width, value.dy * size.height);
+  @override
+  bool shouldRepaint(covariant _ConstellationPainter oldDelegate) => oldDelegate.unlocked != unlocked || oldDelegate.pulse != pulse;
 }
 
 class JournalScreen extends StatelessWidget {
