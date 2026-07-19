@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
@@ -66,7 +67,7 @@ class _MysticAppState extends State<MysticApp> {
           ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
-          ProfileScreen(streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, deckStyle: deckStyle, onSelectDeckStyle: _selectDeckStyle, onPremium: _showPremium),
+          ProfileScreen(streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, deckStyle: deckStyle, onSelectDeckStyle: _selectDeckStyle, onDeleteData: _deleteAllData, onPremium: _showPremium),
         ]),
         bottomNavigationBar: NavigationBar(
           selectedIndex: tab,
@@ -153,6 +154,27 @@ class _MysticAppState extends State<MysticApp> {
   void _selectDeckStyle(DeckStyle style) {
     setState(() => deckStyle = style);
     _saveProgress();
+  }
+
+  Future<void> _deleteAllData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (!mounted) return;
+    setState(() {
+      onboarded = false;
+      tab = 0;
+      streak = 0;
+      xp = 0;
+      deepReadingsToday = 0;
+      deckStyle = DeckStyle.midnight;
+      lastActiveDay = null;
+      dailyQuestClaimedDay = null;
+      deepReadingsDay = null;
+      journal.clear();
+      discoveredCards.clear();
+      completedRituals.clear();
+      claimedRewards.clear();
+    });
   }
 
   Future<void> _finishOnboarding() async {
@@ -668,6 +690,15 @@ class _ReadingFlowState extends State<ReadingFlow> {
   List<DrawnCard>? drawn;
   bool saved = false;
   bool revealComplete = false;
+  bool allowReversals = true;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      if (mounted) setState(() => allowReversals = prefs.getBool('allow_reversals') ?? true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: drawn == null ? _selection(context) : _result(context)));
@@ -703,7 +734,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
     final random = Random();
     final pool = [...tarotDeck]..shuffle(random);
     setState(() {
-      drawn = List.generate(widget.kind.cardCount, (i) => DrawnCard(pool[i], random.nextInt(4) == 0));
+      drawn = List.generate(widget.kind.cardCount, (i) => DrawnCard(pool[i], allowReversals && random.nextInt(4) == 0));
       revealComplete = false;
     });
     await Future<void>.delayed(Duration(milliseconds: 850 + widget.kind.cardCount * 520));
@@ -713,7 +744,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   Widget _result(BuildContext context) {
     final record = ReadingRecord(kind: widget.kind, question: question.text.trim(), cards: drawn!, createdAt: DateTime.now(), emotion: emotion, alignedAction: _alignedAction());
     return CustomScrollView(slivers: [
-      SliverAppBar(backgroundColor: Colors.transparent, title: const Text('Your reading'), actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.ios_share_outlined))]),
+      SliverAppBar(backgroundColor: Colors.transparent, title: const Text('Your reading'), actions: [IconButton(onPressed: revealComplete ? () => _shareReading(record) : null, tooltip: 'Share reading', icon: const Icon(Icons.ios_share_outlined))]),
       SliverPadding(padding: const EdgeInsets.fromLTRB(20, 12, 20, 36), sliver: SliverList(delegate: SliverChildListDelegate([
         Text(_headline(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 10),
@@ -749,6 +780,14 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   String _headline() => drawn!.any((c) => c.card.name == 'The Star' || c.card.name == 'The Sun') ? 'A hopeful path is becoming visible.' : 'The truth arrives when you slow down.';
+
+  Future<void> _shareReading(ReadingRecord record) async {
+    final cards = record.cards.map((item) => '${item.card.name}${item.reversed ? ' (Reversed)' : ''}').join(' • ');
+    final text = '✦ My ${record.kind.title} — Mystic Tarot\n\n$cards\n\n${_guidance()}\n\nA reflection, not a fixed prediction.\nTry your own reading: https://tuna777123.github.io/mystic-tarot/';
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))), builder: (context) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(22, 16, 22, 28), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))), const SizedBox(height: 22), const Icon(Icons.auto_awesome, color: MysticColors.gold, size: 38), const SizedBox(height: 12), Text('Your shareable reading is ready', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8), Text('The cards, guidance, and Mystic link were copied. Paste them into Instagram, TikTok, WhatsApp, or anywhere your story continues.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 18), GoldButton(label: 'Done', onPressed: () => Navigator.pop(context), icon: Icons.check)]))));
+  }
   String _guidance() => '${drawn!.last.card.advice} Let this be an invitation, not a command. Notice what changes when you carry this question through the next twenty-four hours.';
   String _alignedAction() {
     switch (emotion) {
@@ -1147,14 +1186,16 @@ class _EmptyJournal extends StatelessWidget {
 }
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.deckStyle, required this.onSelectDeckStyle, required this.onPremium, super.key});
+  const ProfileScreen({required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.deckStyle, required this.onSelectDeckStyle, required this.onDeleteData, required this.onPremium, super.key});
   final int streak;
   final int xp;
   final int readings;
   final int discovered;
   final int relics;
+  final List<ReadingRecord> records;
   final DeckStyle deckStyle;
   final ValueChanged<DeckStyle> onSelectDeckStyle;
+  final VoidCallback onDeleteData;
   final VoidCallback onPremium;
 
   @override
@@ -1198,7 +1239,7 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 14),
         InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: const Row(children: [Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Unlock Mystic Plus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), SizedBox(height: 4), Text('Go deeper with unlimited readings', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), Icon(Icons.arrow_forward)]))),
         const SizedBox(height: 18),
-        ...['Reading preferences', 'Daily reminder', 'Privacy & data', 'Help and support'].map((label) => ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(label, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
+        ...['Reading preferences', 'Daily reminder', 'Privacy & data', 'Help and support'].map((label) => ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticSettingsScreen(section: label, records: records, onDeleteData: onDeleteData))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(label, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
       ]));
   }
 
@@ -1256,6 +1297,91 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _stat(String value, String label) => Column(children: [Text(value, style: const TextStyle(fontFamily: 'Arial', fontSize: 20, color: MysticColors.gold, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 12))]);
+}
+
+class MysticSettingsScreen extends StatefulWidget {
+  const MysticSettingsScreen({required this.section, required this.records, required this.onDeleteData, super.key});
+  final String section;
+  final List<ReadingRecord> records;
+  final VoidCallback onDeleteData;
+
+  @override
+  State<MysticSettingsScreen> createState() => _MysticSettingsScreenState();
+}
+
+class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
+  bool allowReversals = true;
+  bool reminderEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      if (!mounted) return;
+      setState(() {
+        allowReversals = prefs.getBool('allow_reversals') ?? true;
+        reminderEnabled = prefs.getBool('daily_reminder') ?? false;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(widget.section)), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 30), children: _content(context))));
+
+  List<Widget> _content(BuildContext context) {
+    if (widget.section == 'Reading preferences') {
+      return [
+        _intro(context, 'Shape every reading', 'Mystic should adapt to your practice—not ask you to adapt to it.'),
+        SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Allow reversed cards'), subtitle: const Text('Adds shadow meanings to approximately one in four cards.'), value: allowReversals, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => allowReversals = value); final prefs = await SharedPreferences.getInstance(); await prefs.setBool('allow_reversals', value); }),
+        const Divider(),
+        const ListTile(contentPadding: EdgeInsets.zero, leading: Icon(Icons.psychology_alt_outlined, color: MysticColors.lavender), title: Text('Reflection-first guidance'), subtitle: Text('Readings remain grounded invitations—not certainty, diagnosis, or professional advice.')),
+      ];
+    }
+    if (widget.section == 'Daily reminder') {
+      return [
+        _intro(context, 'Protect your daily ritual', 'A gentle return works better than endless notifications.'),
+        SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Daily Guidance reminder'), subtitle: Text(reminderEnabled ? 'Scheduled for 9:00 AM on supported mobile devices.' : 'Off'), value: reminderEnabled, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => reminderEnabled = value); final prefs = await SharedPreferences.getInstance(); await prefs.setBool('daily_reminder', value); }),
+        const SizedBox(height: 12),
+        _notice('Web preview note', 'Notification permission and system scheduling activate in the native iOS/Android release.'),
+      ];
+    }
+    if (widget.section == 'Privacy & data') {
+      return [
+        _intro(context, 'Your inner world stays yours', 'This preview keeps your journal and progress locally on this device. No questions are sold to advertisers.'),
+        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.download_outlined, color: MysticColors.gold), title: const Text('Export my journal'), subtitle: Text('${widget.records.length} saved readings'), trailing: const Icon(Icons.chevron_right), onTap: _exportJournal),
+        const Divider(),
+        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.delete_outline, color: Color(0xFFFF8090)), title: const Text('Delete all Mystic data'), subtitle: const Text('Permanently removes local journal, XP, streak, and settings.'), onTap: _confirmDelete),
+        const SizedBox(height: 14),
+        _notice('Entertainment & reflection', 'Mystic Tarot is designed for personal reflection and entertainment. It does not provide medical, legal, financial, or mental-health advice.'),
+      ];
+    }
+    return [
+      _intro(context, 'We are here to help', 'Clear answers before you begin your next ritual.'),
+      _faq('Does Mystic predict the future?', 'No. It uses tarot symbolism as a structured mirror for reflection and possible perspectives.'),
+      _faq('Can I cancel Mystic Plus?', 'Yes. Subscriptions can be managed and cancelled through Apple or Google account settings.'),
+      _faq('How do I restore a purchase?', 'Open Mystic Plus and choose Restore. It will reconnect purchases made with the same store account.'),
+      _faq('Is my journal private?', 'In this preview it is stored locally on your device. Before cloud accounts launch, the privacy policy will identify every processor and retention period.'),
+      const SizedBox(height: 10),
+      GoldButton(label: 'Copy support link', icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://github.com/tuna777123/mystic-tarot/issues')); if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support link copied.'))); }),
+    ];
+  }
+
+  Widget _intro(BuildContext context, String title, String body) => Padding(padding: const EdgeInsets.only(bottom: 18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text(body, style: Theme.of(context).textTheme.bodyLarge)]));
+  Widget _notice(String title, String body) => Container(padding: const EdgeInsets.all(17), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white10)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const SizedBox(height: 7), Text(body, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, height: 1.45))]));
+  Widget _faq(String question, String answer) => ExpansionTile(tilePadding: EdgeInsets.zero, childrenPadding: const EdgeInsets.only(bottom: 14), title: Text(question, style: const TextStyle(fontFamily: 'Arial', fontSize: 14, fontWeight: FontWeight.bold)), children: [Align(alignment: Alignment.centerLeft, child: Text(answer, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, height: 1.45)))]);
+
+  Future<void> _exportJournal() async {
+    final text = widget.records.isEmpty ? 'Mystic Tarot Journal\n\nNo saved readings yet.' : widget.records.map((record) => '${record.createdAt.toLocal()} — ${record.kind.title}\n${record.cards.map((item) => '${item.card.name}${item.reversed ? ' (Reversed)' : ''}').join(', ')}\nAligned action: ${record.alignedAction}').join('\n\n');
+    await Clipboard.setData(ClipboardData(text: text));
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your journal was copied for export.')));
+  }
+
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text('Delete all Mystic data?'), content: const Text('This cannot be undone. Your journal, card collection, streak, XP, and preferences will be removed from this device.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep my data')), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete everything', style: TextStyle(color: Color(0xFFFF8090))))])) ?? false;
+    if (!confirmed || !mounted) return;
+    Navigator.pop(context);
+    widget.onDeleteData();
+  }
 }
 
 class PremiumReadingPreview extends StatefulWidget {
@@ -1347,7 +1473,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 10),
         Text(plan == 2 ? r'No charge today. Then $39.99/year unless cancelled.' : 'Cancel anytime in your App Store or Google Play settings.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 10),
-        const Text('Subscription purchases use the official Apple or Google checkout. Terms • Privacy', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
+        const Text('Subscription purchases use the official Apple or Google checkout.', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [TextButton(onPressed: () => _openLegal('Terms of Use'), child: const Text('Terms')), const Text('•', style: TextStyle(color: MysticColors.muted)), TextButton(onPressed: () => _openLegal('Privacy Policy'), child: const Text('Privacy'))]),
       ])));
 
   Widget _plan(int index, String title, String price, String subtitle, {String? badge}) {
@@ -1362,4 +1489,28 @@ class _PremiumScreenState extends State<PremiumScreen> {
   void _restore() {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Restore Purchases activates with the native store billing connection.')));
   }
+
+  void _openLegal(String title) => Navigator.push(context, MaterialPageRoute(builder: (_) => LegalDocumentScreen(title: title)));
+}
+
+class LegalDocumentScreen extends StatelessWidget {
+  const LegalDocumentScreen({required this.title, super.key});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final privacy = title == 'Privacy Policy';
+    return Scaffold(appBar: AppBar(title: Text(title)), body: MysticBackground(child: ListView(padding: const EdgeInsets.all(22), children: [
+      Text(privacy ? 'Privacy, in plain language' : 'A fair mystical space', style: Theme.of(context).textTheme.headlineMedium),
+      const SizedBox(height: 12),
+      Text(privacy ? 'Mystic Tarot currently stores onboarding choices, journal entries, progress, and preferences locally on your device. The web preview does not create an account, sell personal data, or process real payments. You can export or delete your local data from Privacy & data.' : 'Mystic Tarot is a self-reflection and entertainment product. Readings are symbolic prompts, not factual predictions or substitutes for medical, mental-health, legal, or financial advice. Premium access will renew according to the plan shown at checkout and can be cancelled through the store account used to subscribe.', style: Theme.of(context).textTheme.bodyLarge),
+      const SizedBox(height: 20),
+      _legalSection(context, privacy ? 'When services are connected' : 'Subscriptions', privacy ? 'Before accounts, analytics, notifications, AI services, or cloud sync are activated, this policy will identify each provider, purpose, retention period, and deletion method. Store checkout data is handled by Apple, Google, and the configured subscription processor under their own policies.' : 'The exact localized price, renewal period, trial eligibility, and billing date shown by Apple or Google at confirmation control the purchase. Restore Purchases reconnects eligible access on the same store account.'),
+      _legalSection(context, privacy ? 'Your control' : 'Acceptable use', privacy ? 'You may export your journal and permanently delete all local Mystic data at any time from the profile. Deleting browser storage or uninstalling the preview may also remove local records.' : 'Do not rely on a reading for emergencies or high-stakes decisions. You remain responsible for your choices and should consult a qualified professional where appropriate.'),
+      const SizedBox(height: 12),
+      const Text('Preview policy • Last updated July 19, 2026', style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10)),
+    ])));
+  }
+
+  static Widget _legalSection(BuildContext context, String title, String body) => Padding(padding: const EdgeInsets.only(bottom: 18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 7), Text(body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.55))]));
 }
