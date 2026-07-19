@@ -26,6 +26,17 @@ enum EmotionalState {
   final String symbol;
 }
 
+enum DeckStyle {
+  midnight('Midnight Veil', 'The original violet deck', '☾'),
+  solarGold('Solar Gold', 'Awaken 10 Arcana', '☀'),
+  bloodMoon('Blood Moon', 'Reach Mystic Level 5', '◉');
+
+  const DeckStyle(this.label, this.subtitle, this.symbol);
+  final String label;
+  final String subtitle;
+  final String symbol;
+}
+
 class TarotCardData {
   const TarotCardData({
     required this.name,
