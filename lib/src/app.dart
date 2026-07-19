@@ -61,7 +61,7 @@ class _MysticAppState extends State<MysticApp> {
             freeReadingsLeft: max(0, freeDeepReadingLimit - deepReadingsToday),
             onReading: _startReading,
             onClaimDailyQuest: _claimDailyQuest,
-            onPremiumSpread: () => _showPremium(source: 'premium_spread'),
+            onPremiumSpread: _previewPremiumReading,
             onPremium: _showPremium,
           ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
@@ -262,6 +262,12 @@ class _MysticAppState extends State<MysticApp> {
   }
 
   void _showPremium({String source = 'organic'}) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumScreen(source: source)));
+
+  void _previewPremiumReading(ReadingKind kind) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumReadingPreview(
+        kind: kind,
+        deckStyle: deckStyle,
+        onUnlock: () => _showPremium(source: 'premium_spread'),
+      )));
 }
 
 class _MysticLoadingScreen extends StatelessWidget {
@@ -423,7 +429,7 @@ class HomeScreen extends StatelessWidget {
   final int freeReadingsLeft;
   final ValueChanged<ReadingKind> onReading;
   final VoidCallback onClaimDailyQuest;
-  final VoidCallback onPremiumSpread;
+  final ValueChanged<ReadingKind> onPremiumSpread;
   final VoidCallback onPremium;
 
   @override
@@ -463,7 +469,7 @@ class HomeScreen extends StatelessWidget {
         ]))),
       ]));
 
-  Widget _premiumReadingCard(BuildContext context, ReadingKind kind) => InkWell(onTap: onPremiumSpread, borderRadius: BorderRadius.circular(20), child: Container(width: 158, padding: const EdgeInsets.all(15), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF5A3B82), Color(0xFF20152F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  Widget _premiumReadingCard(BuildContext context, ReadingKind kind) => InkWell(onTap: () => onPremiumSpread(kind), borderRadius: BorderRadius.circular(20), child: Container(width: 158, padding: const EdgeInsets.all(15), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF5A3B82), Color(0xFF20152F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Row(children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), const Spacer(), const Icon(Icons.lock_outline, color: MysticColors.gold, size: 17)]),
     const Spacer(),
     Text(kind.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
@@ -1250,6 +1256,59 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _stat(String value, String label) => Column(children: [Text(value, style: const TextStyle(fontFamily: 'Arial', fontSize: 20, color: MysticColors.gold, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 12))]);
+}
+
+class PremiumReadingPreview extends StatefulWidget {
+  const PremiumReadingPreview({required this.kind, required this.deckStyle, required this.onUnlock, super.key});
+  final ReadingKind kind;
+  final DeckStyle deckStyle;
+  final VoidCallback onUnlock;
+
+  @override
+  State<PremiumReadingPreview> createState() => _PremiumReadingPreviewState();
+}
+
+class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
+  bool revealed = false;
+  late final DrawnCard previewCard;
+
+  @override
+  void initState() {
+    super.initState();
+    final seed = DateTime.now().day + widget.kind.index * 13;
+    previewCard = DrawnCard(tarotDeck[seed % tarotDeck.length], seed.isOdd);
+    Future<void>.delayed(const Duration(milliseconds: 850), () {
+      if (mounted) setState(() => revealed = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: SafeArea(child: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 30), children: [
+        Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .13), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: const Text('PLUS PREVIEW', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)))]),
+        const SizedBox(height: 12),
+        Text(widget.kind.symbol, textAlign: TextAlign.center, style: const TextStyle(fontSize: 38, color: MysticColors.gold)),
+        const SizedBox(height: 7),
+        Text(widget.kind.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 8),
+        Text('One card is yours. The complete ${widget.kind.cardCount}-card story waits behind it.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 24),
+        Center(child: AnimatedSwitcher(duration: const Duration(milliseconds: 650), transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: ScaleTransition(scale: Tween(begin: .82, end: 1.0).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutBack)), child: child)), child: TarotCardFace(key: ValueKey(revealed), drawn: revealed ? previewCard : null, selected: revealed, style: widget.deckStyle, width: 142, height: 222))),
+        const SizedBox(height: 20),
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 500),
+          crossFadeState: revealed ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          firstChild: const Center(child: Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), SizedBox(width: 10), Text('The first signal is forming…', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
+          secondChild: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF3B285A), Color(0xFF1B1428)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .25))), child: Column(children: [const Text('YOUR FIRST SIGNAL', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.25)), const SizedBox(height: 8), Text(previewCard.card.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)), const SizedBox(height: 7), Text(previewCard.reversed ? previewCard.card.shadow : previewCard.card.light, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge), const SizedBox(height: 8), Text(previewCard.reversed ? 'Reversed energy' : 'Upright energy', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.bold))])),
+        ),
+        const SizedBox(height: 22),
+        Row(children: [Text('The rest of your spread', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.kind.cardCount - 1} LOCKED', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .8))]),
+        const SizedBox(height: 12),
+        SizedBox(height: 104, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.kind.cardCount - 1, separatorBuilder: (_, __) => const SizedBox(width: 8), itemBuilder: (_, index) => Stack(alignment: Alignment.center, children: [Opacity(opacity: .48, child: TarotCardFace(style: widget.deckStyle, width: 64, height: 100)), Container(width: 29, height: 29, decoration: BoxDecoration(color: const Color(0xFF171122).withValues(alpha: .92), shape: BoxShape.circle, border: Border.all(color: MysticColors.gold.withValues(alpha: .45))), child: const Icon(Icons.lock, size: 14, color: MysticColors.gold))]))),
+        const SizedBox(height: 22),
+        GoldButton(label: 'Unlock the full ${widget.kind.title}', onPressed: widget.onUnlock, icon: Icons.auto_awesome),
+        const SizedBox(height: 9),
+        const Text('Included with Mystic Plus • Cancel anytime', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9)),
+      ]))));
 }
 
 class PremiumScreen extends StatefulWidget {
