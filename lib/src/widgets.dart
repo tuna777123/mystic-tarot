@@ -88,15 +88,17 @@ class GoldButton extends StatelessWidget {
 }
 
 class TarotCardFace extends StatelessWidget {
-  const TarotCardFace({this.drawn, this.selected = false, this.width = 116, this.height = 184, super.key});
+  const TarotCardFace({this.drawn, this.selected = false, this.style = DeckStyle.midnight, this.width = 116, this.height = 184, super.key});
   final DrawnCard? drawn;
   final bool selected;
+  final DeckStyle style;
   final double width;
   final double height;
 
   @override
   Widget build(BuildContext context) {
     final faceUp = drawn != null;
+    final accent = _accent;
     return TweenAnimationBuilder<double>(
       tween: Tween(end: selected ? 1.055 : 1),
       duration: const Duration(milliseconds: 320),
@@ -109,22 +111,55 @@ class TarotCardFace extends StatelessWidget {
       padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(colors: faceUp ? [const Color(0xFF3B2868), const Color(0xFF151128)] : [const Color(0xFF251B44), const Color(0xFF0E0B1A)]),
-        border: Border.all(color: selected ? MysticColors.gold : MysticColors.lavender.withValues(alpha: .45), width: selected ? 2.5 : 1),
-        boxShadow: [BoxShadow(color: selected ? MysticColors.gold.withValues(alpha: .3) : Colors.black38, blurRadius: selected ? 24 : 10)],
+        gradient: LinearGradient(colors: faceUp ? _faceColors : _backColors),
+        border: Border.all(color: selected ? accent : accent.withValues(alpha: .48), width: selected ? 2.5 : 1),
+        boxShadow: [BoxShadow(color: selected ? accent.withValues(alpha: .34) : Colors.black38, blurRadius: selected ? 24 : 10)],
       ),
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(11), border: Border.all(color: MysticColors.gold.withValues(alpha: .55))),
-        child: faceUp ? _face() : const Center(child: Text('☾\n✦', textAlign: TextAlign.center, style: TextStyle(fontSize: 34, height: 1.15, color: MysticColors.gold))),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(11), border: Border.all(color: accent.withValues(alpha: .58))),
+        child: faceUp ? _face(accent) : Center(child: Text('${style.symbol}\n✦', textAlign: TextAlign.center, style: TextStyle(fontSize: 34, height: 1.15, color: accent))),
       ),
       ),
     );
   }
 
-  Widget _face() => Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        Text(drawn!.card.number, style: const TextStyle(color: MysticColors.gold, fontSize: 12)),
-        Transform.rotate(angle: drawn!.reversed ? 3.14159 : 0, child: Text(drawn!.card.symbol, style: const TextStyle(color: MysticColors.gold, fontSize: 42))),
+  Color get _accent {
+    switch (style) {
+      case DeckStyle.solarGold:
+        return const Color(0xFFFFD76A);
+      case DeckStyle.bloodMoon:
+        return const Color(0xFFFF8090);
+      case DeckStyle.midnight:
+        return MysticColors.gold;
+    }
+  }
+
+  List<Color> get _backColors {
+    switch (style) {
+      case DeckStyle.solarGold:
+        return const [Color(0xFF4A3512), Color(0xFF171006)];
+      case DeckStyle.bloodMoon:
+        return const [Color(0xFF48151F), Color(0xFF160A0D)];
+      case DeckStyle.midnight:
+        return const [Color(0xFF251B44), Color(0xFF0E0B1A)];
+    }
+  }
+
+  List<Color> get _faceColors {
+    switch (style) {
+      case DeckStyle.solarGold:
+        return const [Color(0xFF6C4D16), Color(0xFF1A1208)];
+      case DeckStyle.bloodMoon:
+        return const [Color(0xFF67202C), Color(0xFF1B0A0F)];
+      case DeckStyle.midnight:
+        return const [Color(0xFF3B2868), Color(0xFF151128)];
+    }
+  }
+
+  Widget _face(Color accent) => Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Text(drawn!.card.number, style: TextStyle(color: accent, fontSize: 12)),
+        Transform.rotate(angle: drawn!.reversed ? 3.14159 : 0, child: Text(drawn!.card.symbol, style: TextStyle(color: accent, fontSize: 42))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Text(drawn!.card.name.toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: .8))),
-        if (drawn!.reversed) const Text('REVERSED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 8, letterSpacing: 1)),
+        if (drawn!.reversed) Text('REVERSED', style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .8), fontSize: 8, letterSpacing: 1)),
       ]);
 }
