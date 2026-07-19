@@ -5,7 +5,10 @@ enum ReadingKind {
   money('Money Energy', 'Understand your financial direction', 3, '◆'),
   decision('Decision', 'Reveal what each path may hold', 2, '⇄'),
   spiritual('Spiritual Growth', 'Hear what your inner self needs', 3, '☾'),
-  shadow('Shadow Work', 'Meet what is asking to be healed', 3, '◐');
+  shadow('Shadow Work', 'Meet what is asking to be healed', 3, '◐'),
+  compatibility('Love Compatibility', 'Read the dynamic between two hearts', 5, '∞'),
+  timeline('Future Timeline', 'Past, present, and three possible chapters', 6, '⌛'),
+  celticCross('Celtic Cross', 'A complete ten-card deep dive', 10, '✣');
 
   const ReadingKind(this.title, this.subtitle, this.cardCount, this.symbol);
   final String title;
