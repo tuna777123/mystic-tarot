@@ -23,6 +23,7 @@ class _MysticAppState extends State<MysticApp> {
   int tab = 0;
   int streak = 0;
   int xp = 0;
+  DeckStyle deckStyle = DeckStyle.midnight;
   String? lastActiveDay;
   String? dailyQuestClaimedDay;
   final List<ReadingRecord> journal = [];
@@ -53,13 +54,14 @@ class _MysticAppState extends State<MysticApp> {
             dailyReadingDone: journal.any((record) => record.kind == ReadingKind.daily && _dayKey(record.createdAt) == _dayKey(DateTime.now())),
             ritualDone: completedRituals.isNotEmpty,
             dailyQuestClaimed: dailyQuestClaimedDay == _dayKey(DateTime.now()),
+            deckStyle: deckStyle,
             onReading: _startReading,
             onClaimDailyQuest: _claimDailyQuest,
             onPremium: _showPremium,
           ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
-          ProfileScreen(streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, onPremium: _showPremium),
+          ProfileScreen(streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, deckStyle: deckStyle, onSelectDeckStyle: _selectDeckStyle, onPremium: _showPremium),
         ]),
         bottomNavigationBar: NavigationBar(
           selectedIndex: tab,
@@ -76,7 +78,7 @@ class _MysticAppState extends State<MysticApp> {
       );
 
   void _startReading(ReadingKind kind) {
-    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, onComplete: (record) {
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, deckStyle: deckStyle, onComplete: (record) {
       final newlyDiscovered = record.cards.map((item) => item.card).where((card) => !discoveredCards.contains(card.name)).toList();
       setState(() {
         journal.insert(0, record);
@@ -131,6 +133,11 @@ class _MysticAppState extends State<MysticApp> {
     _saveProgress();
   }
 
+  void _selectDeckStyle(DeckStyle style) {
+    setState(() => deckStyle = style);
+    _saveProgress();
+  }
+
   Future<void> _finishOnboarding() async {
     setState(() => onboarded = true);
     await _saveProgress();
@@ -148,6 +155,7 @@ class _MysticAppState extends State<MysticApp> {
         streak = prefs.getInt('streak') ?? 0;
         lastActiveDay = prefs.getString('last_active_day');
         dailyQuestClaimedDay = prefs.getString('daily_quest_claimed_day');
+        deckStyle = _deckStyleFromName(prefs.getString('deck_style'));
         discoveredCards.addAll(prefs.getStringList('discovered_cards') ?? const []);
         claimedRewards.addAll((prefs.getStringList('claimed_rewards') ?? const []).map(int.parse));
         for (final encoded in prefs.getStringList('journal_records') ?? const []) {
@@ -174,6 +182,7 @@ class _MysticAppState extends State<MysticApp> {
         prefs.setStringList('claimed_rewards', claimedRewards.map((item) => '$item').toList()),
         prefs.setStringList('journal_records', journal.take(50).map(_encodeRecord).toList()),
         prefs.setString('ritual_day', _dayKey(DateTime.now())),
+        prefs.setString('deck_style', deckStyle.name),
         if (dailyQuestClaimedDay != null) prefs.setString('daily_quest_claimed_day', dailyQuestClaimedDay!),
         if (lastActiveDay != null) prefs.setString('last_active_day', lastActiveDay!),
       ]);
@@ -192,6 +201,13 @@ class _MysticAppState extends State<MysticApp> {
   }
 
   String _dayKey(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  DeckStyle _deckStyleFromName(String? name) {
+    for (final style in DeckStyle.values) {
+      if (style.name == name) return style;
+    }
+    return DeckStyle.midnight;
+  }
 
   String _encodeRecord(ReadingRecord record) => jsonEncode({
         'kind': record.kind.name,
@@ -360,12 +376,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.onReading, required this.onClaimDailyQuest, required this.onPremium, super.key});
+  const HomeScreen({required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.onReading, required this.onClaimDailyQuest, required this.onPremium, super.key});
   final int streak;
   final int xp;
   final bool dailyReadingDone;
   final bool ritualDone;
   final bool dailyQuestClaimed;
+  final DeckStyle deckStyle;
   final ValueChanged<ReadingKind> onReading;
   final VoidCallback onClaimDailyQuest;
   final VoidCallback onPremium;
@@ -380,7 +397,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 18),
           const _MoonBriefing(),
           const SizedBox(height: 14),
-          _DailyCard(streak: streak, onTap: () => onReading(ReadingKind.daily)),
+          _DailyCard(streak: streak, deckStyle: deckStyle, onTap: () => onReading(ReadingKind.daily)),
           const SizedBox(height: 14),
           _DailyQuest(
             readingDone: dailyReadingDone,
@@ -424,8 +441,9 @@ class _MoonBriefing extends StatelessWidget {
 }
 
 class _DailyCard extends StatefulWidget {
-  const _DailyCard({required this.streak, required this.onTap});
+  const _DailyCard({required this.streak, required this.deckStyle, required this.onTap});
   final int streak;
+  final DeckStyle deckStyle;
   final VoidCallback onTap;
 
   @override
@@ -442,7 +460,7 @@ class _DailyCardState extends State<_DailyCard> with SingleTickerProviderStateMi
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, child) => InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 196, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color.lerp(const Color(0xFF6C45B5), const Color(0xFF8356C5), controller.value)!, const Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .32 + controller.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + controller.value * .08), blurRadius: 28, spreadRadius: 1)]), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR DAILY PORTAL', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal what\nneeds you today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 ${widget.streak} day streak  •  +25 XP', style: Theme.of(context).textTheme.bodyMedium)])), const TarotCardFace(width: 90, height: 142)]))));
+  Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, child) => InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 196, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color.lerp(const Color(0xFF6C45B5), const Color(0xFF8356C5), controller.value)!, const Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .32 + controller.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + controller.value * .08), blurRadius: 28, spreadRadius: 1)]), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR DAILY PORTAL', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal what\nneeds you today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 ${widget.streak} day streak  •  +25 XP', style: Theme.of(context).textTheme.bodyMedium)])), TarotCardFace(style: widget.deckStyle, width: 90, height: 142)]))));
 }
 
 class _DailyQuest extends StatelessWidget {
@@ -552,8 +570,9 @@ class _RewardBurstPainter extends CustomPainter {
 }
 
 class ReadingFlow extends StatefulWidget {
-  const ReadingFlow({required this.kind, required this.onComplete, super.key});
+  const ReadingFlow({required this.kind, required this.deckStyle, required this.onComplete, super.key});
   final ReadingKind kind;
+  final DeckStyle deckStyle;
   final ValueChanged<ReadingRecord> onComplete;
   @override
   State<ReadingFlow> createState() => _ReadingFlowState();
@@ -585,7 +604,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
           return ChoiceChip(label: Text('${item.symbol} ${item.label}'), selected: emotion == item, onSelected: (_) => setState(() => emotion = item));
         })),
         const SizedBox(height: 18),
-        Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 18), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(selected: selected.contains(i), width: 65, height: 110)))),
+        Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 18), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(style: widget.deckStyle, selected: selected.contains(i), width: 65, height: 110)))),
         GoldButton(label: selected.length == widget.kind.cardCount ? 'Reveal my reading' : 'Choose ${widget.kind.cardCount - selected.length} more', onPressed: selected.length == widget.kind.cardCount ? _reveal : null, icon: Icons.auto_awesome),
       ]));
 
@@ -617,7 +636,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
         const SizedBox(height: 10),
         Text('Take what resonates. Tarot is a mirror for reflection—not a fixed prediction.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
-        SizedBox(height: 190, child: ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
+        SizedBox(height: 190, child: ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
         const SizedBox(height: 26),
         if (!revealComplete) _ReadingInProgress(cardCount: drawn!.length),
         if (revealComplete) ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
@@ -665,8 +684,9 @@ class _ReadingFlowState extends State<ReadingFlow> {
 }
 
 class _RitualRevealCard extends StatefulWidget {
-  const _RitualRevealCard({required this.card, required this.delay});
+  const _RitualRevealCard({required this.card, required this.deckStyle, required this.delay});
   final DrawnCard card;
+  final DeckStyle deckStyle;
   final Duration delay;
 
   @override
@@ -697,7 +717,7 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
             transform: Matrix4.identity()..setEntry(3, 2, .0014)..rotateY(angle),
             child: Transform.flip(
               flipX: showFace,
-              child: TarotCardFace(drawn: showFace ? widget.card : null),
+              child: TarotCardFace(drawn: showFace ? widget.card : null, style: widget.deckStyle),
             ),
           );
         },
@@ -1044,12 +1064,14 @@ class _EmptyJournal extends StatelessWidget {
 }
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.onPremium, super.key});
+  const ProfileScreen({required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.deckStyle, required this.onSelectDeckStyle, required this.onPremium, super.key});
   final int streak;
   final int xp;
   final int readings;
   final int discovered;
   final int relics;
+  final DeckStyle deckStyle;
+  final ValueChanged<DeckStyle> onSelectDeckStyle;
   final VoidCallback onPremium;
 
   @override
@@ -1084,6 +1106,12 @@ class ProfileScreen extends StatelessWidget {
         Text('Your practice leaves permanent marks on your path.', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 12),
         GridView.count(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, childAspectRatio: 1.48, crossAxisSpacing: 10, mainAxisSpacing: 10, children: badges.map((badge) => _badge(context, badge.$1, badge.$2, badge.$3, badge.$4)).toList()),
+        const SizedBox(height: 24),
+        Text('Your tarot deck', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 6),
+        Text('Choose the visual energy that follows every reading.', style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 12),
+        SizedBox(height: 178, child: ListView(scrollDirection: Axis.horizontal, children: DeckStyle.values.map((style) => _deckOption(context, style)).toList())),
         const SizedBox(height: 14),
         InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: const Row(children: [Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Unlock Mystic Plus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), SizedBox(height: 4), Text('Go deeper with unlimited readings', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), Icon(Icons.arrow_forward)]))),
         const SizedBox(height: 18),
@@ -1103,6 +1131,46 @@ class ProfileScreen extends StatelessWidget {
     const SizedBox(width: 9),
     Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)), const SizedBox(height: 4), Text(unlocked ? 'UNLOCKED' : goal, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.gold : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: unlocked ? .7 : 0))]))
   ]));
+
+  Widget _deckOption(BuildContext context, DeckStyle style) {
+    final unlocked = style == DeckStyle.midnight || (style == DeckStyle.solarGold && discovered >= 10) || (style == DeckStyle.bloodMoon && xp >= 400);
+    final active = deckStyle == style;
+    final accent = _deckAccent(style);
+    return InkWell(
+      onTap: unlocked ? () => onSelectDeckStyle(style) : null,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(duration: const Duration(milliseconds: 350), width: 132, margin: const EdgeInsets.only(right: 10), padding: const EdgeInsets.all(12), decoration: BoxDecoration(gradient: LinearGradient(colors: unlocked ? _deckColors(style) : const [Color(0xFF1C1822), Color(0xFF100E14)]), borderRadius: BorderRadius.circular(18), border: Border.all(color: active ? accent : unlocked ? accent.withValues(alpha: .35) : Colors.white10, width: active ? 2 : 1)), child: Column(children: [
+        Align(alignment: Alignment.topRight, child: Icon(active ? Icons.check_circle : unlocked ? Icons.radio_button_unchecked : Icons.lock, color: active ? accent : MysticColors.muted, size: 16)),
+        Text(unlocked ? style.symbol : '◈', style: TextStyle(fontSize: 34, color: unlocked ? accent : Colors.white24)),
+        const Spacer(),
+        Text(style.label, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 5),
+        Text(active ? 'ACTIVE DECK' : style.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: active ? accent : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: active ? .6 : 0)),
+      ])),
+    );
+  }
+
+  Color _deckAccent(DeckStyle style) {
+    switch (style) {
+      case DeckStyle.solarGold:
+        return const Color(0xFFFFD76A);
+      case DeckStyle.bloodMoon:
+        return const Color(0xFFFF8090);
+      case DeckStyle.midnight:
+        return MysticColors.lavender;
+    }
+  }
+
+  List<Color> _deckColors(DeckStyle style) {
+    switch (style) {
+      case DeckStyle.solarGold:
+        return const [Color(0xFF5D4215), Color(0xFF191106)];
+      case DeckStyle.bloodMoon:
+        return const [Color(0xFF581824), Color(0xFF19090D)];
+      case DeckStyle.midnight:
+        return const [Color(0xFF4A326D), Color(0xFF21172F)];
+    }
+  }
 
   Widget _stat(String value, String label) => Column(children: [Text(value, style: const TextStyle(fontFamily: 'Arial', fontSize: 20, color: MysticColors.gold, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 12))]);
 }
