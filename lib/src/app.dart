@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _MysticAppState extends State<MysticApp> {
   final List<ReadingRecord> journal = [];
   final Set<String> discoveredCards = {};
   final Set<String> completedRituals = {};
+  final Set<int> claimedRewards = {};
 
   @override
   void initState() {
@@ -45,7 +47,7 @@ class _MysticAppState extends State<MysticApp> {
   Widget _shell() => Scaffold(
         body: IndexedStack(index: tab, children: [
           HomeScreen(streak: streak, xp: xp, onReading: _startReading, onPremium: _showPremium),
-          JourneyScreen(streak: streak, xp: xp, discoveredCards: discoveredCards, completedRituals: completedRituals, onCompleteRitual: _completeRitual),
+          JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
           ProfileScreen(streak: streak, xp: xp, readings: journal.length, onPremium: _showPremium),
         ]),
@@ -84,6 +86,12 @@ class _MysticAppState extends State<MysticApp> {
     _saveProgress();
   }
 
+  void _claimReward(int milestone) {
+    if (xp < milestone || claimedRewards.contains(milestone)) return;
+    setState(() => claimedRewards.add(milestone));
+    _saveProgress();
+  }
+
   Future<void> _finishOnboarding() async {
     setState(() => onboarded = true);
     await _saveProgress();
@@ -101,6 +109,11 @@ class _MysticAppState extends State<MysticApp> {
         streak = prefs.getInt('streak') ?? 0;
         lastActiveDay = prefs.getString('last_active_day');
         discoveredCards.addAll(prefs.getStringList('discovered_cards') ?? const []);
+        claimedRewards.addAll((prefs.getStringList('claimed_rewards') ?? const []).map(int.parse));
+        for (final encoded in prefs.getStringList('journal_records') ?? const []) {
+          final record = _decodeRecord(encoded);
+          if (record != null) journal.add(record);
+        }
         if (ritualDay == today) completedRituals.addAll(prefs.getStringList('completed_rituals') ?? const []);
         ready = true;
       });
@@ -118,6 +131,8 @@ class _MysticAppState extends State<MysticApp> {
         prefs.setInt('streak', streak),
         prefs.setStringList('discovered_cards', discoveredCards.toList()),
         prefs.setStringList('completed_rituals', completedRituals.toList()),
+        prefs.setStringList('claimed_rewards', claimedRewards.map((item) => '$item').toList()),
+        prefs.setStringList('journal_records', journal.take(50).map(_encodeRecord).toList()),
         prefs.setString('ritual_day', _dayKey(DateTime.now())),
         if (lastActiveDay != null) prefs.setString('last_active_day', lastActiveDay!),
       ]);
@@ -136,6 +151,36 @@ class _MysticAppState extends State<MysticApp> {
   }
 
   String _dayKey(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  String _encodeRecord(ReadingRecord record) => jsonEncode({
+        'kind': record.kind.name,
+        'question': record.question,
+        'cards': record.cards.map((item) => {'name': item.card.name, 'reversed': item.reversed}).toList(),
+        'createdAt': record.createdAt.toIso8601String(),
+        'emotion': record.emotion.name,
+        'action': record.alignedAction,
+      });
+
+  ReadingRecord? _decodeRecord(String encoded) {
+    try {
+      final data = jsonDecode(encoded) as Map<String, dynamic>;
+      final cards = (data['cards'] as List<dynamic>).map((item) {
+        final map = item as Map<String, dynamic>;
+        final card = tarotDeck.firstWhere((candidate) => candidate.name == map['name']);
+        return DrawnCard(card, map['reversed'] as bool);
+      }).toList();
+      return ReadingRecord(
+        kind: ReadingKind.values.byName(data['kind'] as String),
+        question: data['question'] as String,
+        cards: cards,
+        createdAt: DateTime.parse(data['createdAt'] as String),
+        emotion: EmotionalState.values.byName(data['emotion'] as String),
+        alignedAction: data['action'] as String,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
 
   void _showPremium() => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const PremiumScreen()));
 }
@@ -449,12 +494,15 @@ class _ReadingInProgress extends StatelessWidget {
 }
 
 class JourneyScreen extends StatefulWidget {
-  const JourneyScreen({required this.streak, required this.xp, required this.discoveredCards, required this.completedRituals, required this.onCompleteRitual, super.key});
+  const JourneyScreen({required this.streak, required this.xp, required this.records, required this.discoveredCards, required this.completedRituals, required this.claimedRewards, required this.onCompleteRitual, required this.onClaimReward, super.key});
   final int streak;
   final int xp;
+  final List<ReadingRecord> records;
   final Set<String> discoveredCards;
   final Set<String> completedRituals;
+  final Set<int> claimedRewards;
   final ValueChanged<String> onCompleteRitual;
+  final ValueChanged<int> onClaimReward;
 
   @override
   State<JourneyScreen> createState() => _JourneyScreenState();
@@ -489,6 +537,8 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
         ]),
       )),
       const SizedBox(height: 18),
+      _WeeklyMirror(records: widget.records),
+      const SizedBox(height: 18),
       Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(children: [
         Row(children: [Text('${widget.xp} XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const Spacer(), Text('${(levelProgress * 100).round()}% to Level ${level + 1}', style: Theme.of(context).textTheme.bodyMedium)]),
         const SizedBox(height: 10),
@@ -502,8 +552,30 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
       _ritual(context, 'breathe', '60-second reset', 'Breathe in for four, out for six.', Icons.air),
       _ritual(context, 'truth', 'Name the truth', 'Write one sentence you have been avoiding.', Icons.edit_note),
       _ritual(context, 'action', 'Aligned action', 'Take the smallest reversible next step.', Icons.bolt),
+      const SizedBox(height: 15),
+      Text('Mystic rewards', style: Theme.of(context).textTheme.titleLarge),
+      const SizedBox(height: 6),
+      Text('Your practice unlocks cosmetic relics—never better answers.', style: Theme.of(context).textTheme.bodyMedium),
+      const SizedBox(height: 12),
+      SizedBox(height: 145, child: ListView(scrollDirection: Axis.horizontal, children: [
+        _reward(context, 100, 'Moon Dust', '✦'),
+        _reward(context, 300, 'Oracle Flame', '◉'),
+        _reward(context, 600, 'Astral Crown', '♛'),
+      ])),
       const SizedBox(height: 18),
       Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF33245C), Color(0xFF1A142D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .2))), child: Row(children: [const Text('🔥', style: TextStyle(fontSize: 30)), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${widget.streak}-day flame', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text('Return tomorrow to keep your constellation alive.', style: Theme.of(context).textTheme.bodyMedium)]))])),
+    ]));
+  }
+
+  Widget _reward(BuildContext context, int milestone, String title, String symbol) {
+    final unlocked = widget.xp >= milestone;
+    final claimed = widget.claimedRewards.contains(milestone);
+    return Container(width: 132, margin: const EdgeInsets.only(right: 10), padding: const EdgeInsets.all(13), decoration: BoxDecoration(gradient: LinearGradient(colors: unlocked ? const [Color(0xFF4B347E), Color(0xFF211735)] : const [Color(0xFF201A2C), Color(0xFF12101A)]), borderRadius: BorderRadius.circular(18), border: Border.all(color: claimed ? MysticColors.gold : Colors.white12)), child: Column(children: [
+      Text(claimed ? symbol : unlocked ? '◇' : '🔒', style: TextStyle(fontSize: 31, color: unlocked ? MysticColors.gold : MysticColors.muted)),
+      const Spacer(),
+      Text(title, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.bold, fontSize: 12)),
+      const SizedBox(height: 5),
+      SizedBox(height: 28, child: TextButton(onPressed: unlocked && !claimed ? () { widget.onClaimReward(milestone); setState(() {}); } : null, style: TextButton.styleFrom(padding: EdgeInsets.zero), child: Text(claimed ? 'CLAIMED' : unlocked ? 'CLAIM' : '$milestone XP', style: const TextStyle(fontFamily: 'Arial', fontSize: 10, fontWeight: FontWeight.w800)))),
     ]));
   }
 
@@ -520,6 +592,66 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
       ])),
     ));
   }
+}
+
+class _WeeklyMirror extends StatelessWidget {
+  const _WeeklyMirror({required this.records});
+  final List<ReadingRecord> records;
+
+  @override
+  Widget build(BuildContext context) {
+    final weekAgo = DateTime.now().subtract(const Duration(days: 7));
+    final recent = records.where((record) => record.createdAt.isAfter(weekAgo)).toList();
+    final emotion = _dominantEmotion(recent);
+    final card = _mostFrequentCard(recent);
+    return InkWell(
+      onTap: () => _showWrapped(context, recent, emotion, card),
+      borderRadius: BorderRadius.circular(22),
+      child: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF7550BA), Color(0xFF2A1D48)]), borderRadius: BorderRadius.circular(22), border: Border.all(color: MysticColors.lavender.withValues(alpha: .3))), child: Row(children: [
+        Container(width: 52, height: 52, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.white.withValues(alpha: .1), shape: BoxShape.circle), child: Text(recent.isEmpty ? '☾' : emotion.symbol, style: const TextStyle(fontSize: 26, color: MysticColors.gold))),
+        const SizedBox(width: 14),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR WEEKLY MYSTIC WRAPPED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.1)), const SizedBox(height: 6), Text(recent.isEmpty ? 'Your story is waiting for its first signal.' : '${emotion.label} led your week • ${recent.length} reflections', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 14))])),
+        const Icon(Icons.arrow_forward, color: MysticColors.mist),
+      ])),
+    );
+  }
+
+  EmotionalState _dominantEmotion(List<ReadingRecord> recent) {
+    if (recent.isEmpty) return EmotionalState.uncertain;
+    final counts = <EmotionalState, int>{};
+    for (final record in recent) {
+      counts.update(record.emotion, (value) => value + 1, ifAbsent: () => 1);
+    }
+    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+  }
+
+  String _mostFrequentCard(List<ReadingRecord> recent) {
+    final counts = <String, int>{};
+    for (final record in recent) {
+      for (final card in record.cards) {
+        counts.update(card.card.name, (value) => value + 1, ifAbsent: () => 1);
+      }
+    }
+    return counts.isEmpty ? 'No card yet' : counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+  }
+
+  void _showWrapped(BuildContext context, List<ReadingRecord> recent, EmotionalState emotion, String card) {
+    showModalBottomSheet<void>(context: context, isScrollControlled: true, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))), builder: (context) => Padding(padding: const EdgeInsets.fromLTRB(22, 14, 22, 32), child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))),
+      const SizedBox(height: 25),
+      const Text('✦  MYSTIC WRAPPED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, letterSpacing: 1.4)),
+      const SizedBox(height: 18),
+      Text(recent.isEmpty ? 'Your first pattern begins with one honest reading.' : '${emotion.symbol} ${emotion.label} was your dominant inner weather.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      const SizedBox(height: 22),
+      Row(children: [_wrappedStat(context, '${recent.length}', 'REFLECTIONS'), const SizedBox(width: 10), _wrappedStat(context, card, 'REPEATING CARD')]),
+      const SizedBox(height: 16),
+      Text(recent.isEmpty ? 'Complete a reading and return here to watch your emotional patterns become visible.' : 'Your invitation: notice where ${emotion.label.toLowerCase()} energy protected you—and where it quietly chose for you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      const SizedBox(height: 24),
+      GoldButton(label: recent.isEmpty ? 'Begin my first reading' : 'Keep building my pattern', onPressed: () => Navigator.pop(context), icon: Icons.auto_awesome),
+    ]))));
+  }
+
+  Widget _wrappedStat(BuildContext context, String value, String label) => Expanded(child: Container(height: 104, padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(17), border: Border.all(color: Colors.white10)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 17, fontWeight: FontWeight.bold)), const SizedBox(height: 7), Text(label, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: .8))])));
 }
 
 class _ConstellationPainter extends CustomPainter {
