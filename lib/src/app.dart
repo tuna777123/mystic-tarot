@@ -679,6 +679,8 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
       const SizedBox(height: 18),
       _WeeklyMirror(records: widget.records),
       const SizedBox(height: 18),
+      _ArcanaVault(discoveredCards: widget.discoveredCards),
+      const SizedBox(height: 18),
       Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(children: [
         Row(children: [Text('${widget.xp} XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const Spacer(), Text('${(levelProgress * 100).round()}% to Level ${level + 1}', style: Theme.of(context).textTheme.bodyMedium)]),
         const SizedBox(height: 10),
@@ -731,6 +733,136 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
         if (!done) const Icon(Icons.arrow_forward_ios, size: 14, color: MysticColors.muted),
       ])),
     ));
+  }
+}
+
+class _ArcanaVault extends StatelessWidget {
+  const _ArcanaVault({required this.discoveredCards});
+  final Set<String> discoveredCards;
+
+  @override
+  Widget build(BuildContext context) {
+    final unlocked = tarotDeck.where((card) => discoveredCards.contains(card.name)).toList();
+    final locked = tarotDeck.where((card) => !discoveredCards.contains(card.name)).toList();
+    final preview = [...unlocked, ...locked].take(3).toList();
+    final nextMilestone = discoveredCards.length >= 78 ? 78 : min(78, ((discoveredCards.length ~/ 10) + 1) * 10);
+    return InkWell(
+      onTap: () => _openVault(context),
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF251A3C), Color(0xFF12101C)]), borderRadius: BorderRadius.circular(22), border: Border.all(color: MysticColors.gold.withValues(alpha: .24))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            const Text('ARCANA VAULT', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.35)),
+            const Spacer(),
+            Text('${discoveredCards.length}/78', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 5),
+            const Icon(Icons.arrow_forward_ios, size: 12, color: MysticColors.muted),
+          ]),
+          const SizedBox(height: 6),
+          Text(discoveredCards.isEmpty ? 'Every reading can awaken a card.' : discoveredCards.length == 78 ? 'The entire deck has answered you.' : '${nextMilestone - discoveredCards.length} more cards until your next collection milestone.', style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 15),
+          Row(children: [for (var i = 0; i < preview.length; i++) ...[if (i > 0) const SizedBox(width: 9), Expanded(child: _previewCard(preview[i], discoveredCards.contains(preview[i].name)))]]),
+        ]),
+      ),
+    );
+  }
+
+  Widget _previewCard(TarotCardData card, bool unlocked) {
+    final color = _rarityColor(card);
+    return Container(height: 112, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: unlocked ? LinearGradient(colors: [color.withValues(alpha: .25), const Color(0xFF191323)]) : const LinearGradient(colors: [Color(0xFF1C1824), Color(0xFF100E16)]), borderRadius: BorderRadius.circular(14), border: Border.all(color: unlocked ? color.withValues(alpha: .55) : Colors.white10)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Text(unlocked ? card.symbol : '◈', style: TextStyle(fontSize: 28, color: unlocked ? color : Colors.white24)),
+      const SizedBox(height: 8),
+      Text(unlocked ? card.name : 'Undiscovered', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
+    ]));
+  }
+
+  void _openVault(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: .92,
+        child: Container(
+          decoration: const BoxDecoration(color: Color(0xFF14101F), borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+          child: SafeArea(top: false, child: Column(children: [
+            const SizedBox(height: 12),
+            Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))),
+            Padding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 12), child: Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Your Arcana Vault', style: Theme.of(sheetContext).textTheme.headlineMedium), const SizedBox(height: 4), Text('${discoveredCards.length} awakened • ${78 - discoveredCards.length} still hidden', style: Theme.of(sheetContext).textTheme.bodyMedium)])),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .1), borderRadius: BorderRadius.circular(16)), child: Text('${((discoveredCards.length / 78) * 100).round()}%', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))),
+            ])),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: discoveredCards.length / 78, minHeight: 6, backgroundColor: Colors.white10, color: MysticColors.gold))),
+            const SizedBox(height: 14),
+            Expanded(child: GridView.builder(padding: const EdgeInsets.fromLTRB(16, 4, 16, 28), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: .69, crossAxisSpacing: 9, mainAxisSpacing: 9), itemCount: tarotDeck.length, itemBuilder: (_, index) {
+              final card = tarotDeck[index];
+              final unlocked = discoveredCards.contains(card.name);
+              return _vaultCard(sheetContext, card, unlocked);
+            })),
+          ])),
+        ),
+      ),
+    );
+  }
+
+  Widget _vaultCard(BuildContext context, TarotCardData card, bool unlocked) {
+    final color = _rarityColor(card);
+    return InkWell(
+      onTap: unlocked ? () => _showCardDetail(context, card) : null,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: unlocked ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color.withValues(alpha: .24), const Color(0xFF181222)]) : const LinearGradient(colors: [Color(0xFF1B1722), Color(0xFF0F0D14)]), borderRadius: BorderRadius.circular(15), border: Border.all(color: unlocked ? color.withValues(alpha: .55) : Colors.white10)), child: Column(children: [
+        Align(alignment: Alignment.topRight, child: Text(unlocked ? card.number : '—', style: TextStyle(fontFamily: 'Arial', color: unlocked ? color : Colors.white24, fontSize: 9, fontWeight: FontWeight.bold))),
+        const Spacer(),
+        Text(unlocked ? card.symbol : '?', style: TextStyle(fontSize: 30, color: unlocked ? color : Colors.white24)),
+        const Spacer(),
+        Text(unlocked ? card.name : 'Locked', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 6),
+        Text(unlocked ? _rarity(card).toUpperCase() : 'UNDISCOVERED', style: TextStyle(fontFamily: 'Arial', color: unlocked ? color : Colors.white24, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: .7)),
+      ])),
+    );
+  }
+
+  void _showCardDetail(BuildContext context, TarotCardData card) {
+    final color = _rarityColor(card);
+    showDialog<void>(context: context, builder: (dialogContext) => Dialog(backgroundColor: Colors.transparent, insetPadding: const EdgeInsets.all(20), child: Container(padding: const EdgeInsets.fromLTRB(20, 22, 20, 20), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF372451), Color(0xFF17111F)]), borderRadius: BorderRadius.circular(26), border: Border.all(color: color.withValues(alpha: .6))), child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      Align(alignment: Alignment.centerRight, child: IconButton(onPressed: () => Navigator.pop(dialogContext), icon: const Icon(Icons.close))),
+      Container(width: 118, height: 176, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [color.withValues(alpha: .35), const Color(0xFF17111F)]), borderRadius: BorderRadius.circular(18), border: Border.all(color: color.withValues(alpha: .75)), boxShadow: [BoxShadow(color: color.withValues(alpha: .2), blurRadius: 28)]), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 18), Text(card.symbol, style: TextStyle(fontSize: 48, color: color))])),
+      const SizedBox(height: 18),
+      Text(_rarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
+      const SizedBox(height: 6),
+      Text(card.name, textAlign: TextAlign.center, style: Theme.of(dialogContext).textTheme.headlineMedium),
+      const SizedBox(height: 20),
+      _meaningBlock(dialogContext, 'LIGHT', card.light, MysticColors.gold),
+      const SizedBox(height: 10),
+      _meaningBlock(dialogContext, 'SHADOW', card.shadow, MysticColors.lavender),
+      const SizedBox(height: 10),
+      _meaningBlock(dialogContext, 'ALIGNED ACTION', card.advice, color),
+    ])))));
+  }
+
+  Widget _meaningBlock(BuildContext context, String label, String text, Color color) => Container(width: double.infinity, padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(15), border: Border.all(color: color.withValues(alpha: .16))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.1)), const SizedBox(height: 6), Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))]));
+
+  String _rarity(TarotCardData card) {
+    final index = tarotDeck.indexOf(card);
+    if (index < 22) return 'Legendary';
+    if (card.name.startsWith('Page') || card.name.startsWith('Knight') || card.name.startsWith('Queen') || card.name.startsWith('King')) return 'Epic';
+    if (card.name.startsWith('Ace')) return 'Rare';
+    return 'Common';
+  }
+
+  Color _rarityColor(TarotCardData card) {
+    switch (_rarity(card)) {
+      case 'Legendary':
+        return MysticColors.gold;
+      case 'Epic':
+        return const Color(0xFFC48DFF);
+      case 'Rare':
+        return const Color(0xFF72D6E8);
+      default:
+        return const Color(0xFFB8B4C7);
+    }
   }
 }
 
