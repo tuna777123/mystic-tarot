@@ -1501,7 +1501,7 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
       _faq('How do I restore a purchase?', 'Open Mystic Plus and choose Restore. It will reconnect purchases made with the same store account.'),
       _faq('Is my journal private?', 'In this preview it is stored locally on your device. Before cloud accounts launch, the privacy policy will identify every processor and retention period.'),
       const SizedBox(height: 10),
-      GoldButton(label: 'Copy support link', icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://github.com/tuna777123/mystic-tarot/issues')); if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support link copied.'))); }),
+      GoldButton(label: 'Copy support link', icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://github.com/tuna777123/mystic-tarot/issues')); if (!context.mounted) return; ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support link copied.'))); }),
     ];
   }
 
