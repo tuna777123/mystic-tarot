@@ -436,7 +436,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: 14),
       Text('Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 22),
-      Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: const [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),
+      const Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),
       ]);
     }
     if (page == 1) {
@@ -481,7 +481,7 @@ class _OnboardingPortalState extends State<_OnboardingPortal> with SingleTickerP
         return SizedBox(width: 150, height: 150, child: Stack(alignment: Alignment.center, children: [
           Container(width: 142, height: 142, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RadialGradient(colors: [MysticColors.violet.withValues(alpha: .34 + pulse * .08), const Color(0xFF171027).withValues(alpha: .25), Colors.transparent], stops: const [0, .58, 1]), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .18 + pulse * .08), blurRadius: 40, spreadRadius: 4)])),
           Transform.rotate(angle: controller.value * pi * 2, child: Container(width: 126, height: 126, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: MysticColors.gold.withValues(alpha: .35)))),),
-          Transform.rotate(angle: -controller.value * pi * 1.4, child: SizedBox(width: 105, height: 105, child: Stack(children: const [Align(alignment: Alignment.topCenter, child: Text('✦', style: TextStyle(color: MysticColors.gold, fontSize: 13))), Align(alignment: Alignment.bottomCenter, child: Text('✧', style: TextStyle(color: MysticColors.lavender, fontSize: 12))), Align(alignment: Alignment.centerLeft, child: Text('·', style: TextStyle(color: MysticColors.gold, fontSize: 22))), Align(alignment: Alignment.centerRight, child: Text('·', style: TextStyle(color: MysticColors.gold, fontSize: 22)))]))),
+          Transform.rotate(angle: -controller.value * pi * 1.4, child: const SizedBox(width: 105, height: 105, child: Stack(children: [Align(alignment: Alignment.topCenter, child: Text('✦', style: TextStyle(color: MysticColors.gold, fontSize: 13))), Align(alignment: Alignment.bottomCenter, child: Text('✧', style: TextStyle(color: MysticColors.lavender, fontSize: 12))), Align(alignment: Alignment.centerLeft, child: Text('·', style: TextStyle(color: MysticColors.gold, fontSize: 22))), Align(alignment: Alignment.centerRight, child: Text('·', style: TextStyle(color: MysticColors.gold, fontSize: 22)))]))),
           Container(width: 82, height: 82, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFF4C3473), Color(0xFF191128)]), border: Border.all(color: MysticColors.gold.withValues(alpha: .52)), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .12 + pulse * .08), blurRadius: 24)]), child: const Text('☾', style: TextStyle(fontSize: 42, color: MysticColors.gold))),
         ]));
       });
