@@ -420,7 +420,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
         child: Column(children: [
           Row(children: List.generate(3, (i) => Expanded(child: Container(height: 3, margin: const EdgeInsets.only(right: 8), decoration: BoxDecoration(color: i <= page ? MysticColors.gold : Colors.white12, borderRadius: BorderRadius.circular(8)))))),
-          Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 350), child: _page(context))),
+          Expanded(child: LayoutBuilder(builder: (context, constraints) => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            child: SingleChildScrollView(
+              key: ValueKey(page),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: _page(context),
+              ),
+            ),
+          ))),
           GoldButton(label: page == 0 ? 'Begin my journey' : page == 1 ? 'Set my intention' : 'Enter Mystic', icon: page == 2 ? Icons.auto_awesome : Icons.arrow_forward, onPressed: page == 1 && name.text.trim().isEmpty ? null : () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention)),
         ]),
       )));
