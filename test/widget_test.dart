@@ -8,7 +8,7 @@ void main() {
     await tester.pumpWidget(const MysticApp());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('Your inner world\nhas a language.'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('Your patterns are\nalready speaking.'), findsOneWidget);
+    expect(find.text('Begin my journey'), findsOneWidget);
   });
 }
