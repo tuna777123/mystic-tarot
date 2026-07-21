@@ -49,6 +49,11 @@ class _MysticAppState extends State<MysticApp> {
         navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: buildMysticTheme(),
+        builder: (context, child) {
+          final width = MediaQuery.sizeOf(context).width;
+          final desktop = width > 620;
+          return ColoredBox(color: const Color(0xFF080711), child: Center(child: Container(width: min(width, 520), clipBehavior: Clip.antiAlias, decoration: BoxDecoration(borderRadius: desktop ? BorderRadius.circular(28) : BorderRadius.zero, border: desktop ? Border.all(color: MysticColors.lavender.withValues(alpha: .16)) : null, boxShadow: desktop ? [BoxShadow(color: Colors.black.withValues(alpha: .72), blurRadius: 70, spreadRadius: 12)] : null), child: child)));
+        },
         home: !ready ? const _MysticLoadingScreen() : onboarded ? _shell() : OnboardingScreen(onDone: _finishOnboarding),
       );
 
@@ -416,18 +421,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(children: [
           Row(children: List.generate(3, (i) => Expanded(child: Container(height: 3, margin: const EdgeInsets.only(right: 8), decoration: BoxDecoration(color: i <= page ? MysticColors.gold : Colors.white12, borderRadius: BorderRadius.circular(8)))))),
           Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 350), child: _page(context))),
-          GoldButton(label: page == 2 ? 'Enter Mystic' : 'Continue', onPressed: () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention)),
+          GoldButton(label: page == 0 ? 'Begin my journey' : page == 1 ? 'Set my intention' : 'Enter Mystic', icon: page == 2 ? Icons.auto_awesome : Icons.arrow_forward, onPressed: page == 1 && name.text.trim().isEmpty ? null : () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention)),
         ]),
       )));
 
   Widget _page(BuildContext context) {
     if (page == 0) {
       return Column(key: const ValueKey(0), mainAxisAlignment: MainAxisAlignment.center, children: [
-      const Text('☾', style: TextStyle(fontSize: 82, color: MysticColors.gold)),
-      const SizedBox(height: 24),
-      Text('Your inner world\nhas a language.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
-      const SizedBox(height: 18),
-      Text('Mystic helps you hear it through reflective tarot, personal rituals, and a journal that grows with you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      const Text('MYSTIC TAROT', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 3.2)),
+      const SizedBox(height: 22),
+      const _OnboardingPortal(),
+      const SizedBox(height: 25),
+      Text('Your patterns are\nalready speaking.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
+      const SizedBox(height: 14),
+      Text('Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      const SizedBox(height: 22),
+      Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: const [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),
       ]);
     }
     if (page == 1) {
@@ -436,7 +445,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: 16),
       Text('Your name helps each reading feel personal.', style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 28),
-      TextField(controller: name, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(hintText: 'Your first name', prefixIcon: Icon(Icons.person_outline))),
+      TextField(controller: name, maxLength: 18, onChanged: (_) => setState(() {}), textCapitalization: TextCapitalization.words, decoration: const InputDecoration(hintText: 'Your first name', prefixIcon: Icon(Icons.person_outline))),
       ]);
     }
     const choices = ['Clarity', 'Love', 'Purpose', 'Healing'];
@@ -448,6 +457,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       Wrap(spacing: 10, runSpacing: 10, children: choices.map((choice) => ChoiceChip(label: Text(choice), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
     ]);
   }
+}
+
+class _OnboardingPortal extends StatefulWidget {
+  const _OnboardingPortal();
+
+  @override
+  State<_OnboardingPortal> createState() => _OnboardingPortalState();
+}
+
+class _OnboardingPortalState extends State<_OnboardingPortal> with SingleTickerProviderStateMixin {
+  late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(seconds: 9))..repeat();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, _) {
+        final pulse = .5 + sin(controller.value * pi * 2) * .5;
+        return SizedBox(width: 150, height: 150, child: Stack(alignment: Alignment.center, children: [
+          Container(width: 142, height: 142, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RadialGradient(colors: [MysticColors.violet.withValues(alpha: .34 + pulse * .08), const Color(0xFF171027).withValues(alpha: .25), Colors.transparent], stops: const [0, .58, 1]), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .18 + pulse * .08), blurRadius: 40, spreadRadius: 4)])),
+          Transform.rotate(angle: controller.value * pi * 2, child: Container(width: 126, height: 126, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: MysticColors.gold.withValues(alpha: .35)))),),
+          Transform.rotate(angle: -controller.value * pi * 1.4, child: SizedBox(width: 105, height: 105, child: Stack(children: const [Align(alignment: Alignment.topCenter, child: Text('✦', style: TextStyle(color: MysticColors.gold, fontSize: 13))), Align(alignment: Alignment.bottomCenter, child: Text('✧', style: TextStyle(color: MysticColors.lavender, fontSize: 12))), Align(alignment: Alignment.centerLeft, child: Text('·', style: TextStyle(color: MysticColors.gold, fontSize: 22))), Align(alignment: Alignment.centerRight, child: Text('·', style: TextStyle(color: MysticColors.gold, fontSize: 22)))]))),
+          Container(width: 82, height: 82, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFF4C3473), Color(0xFF191128)]), border: Border.all(color: MysticColors.gold.withValues(alpha: .52)), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .12 + pulse * .08), blurRadius: 24)]), child: const Text('☾', style: TextStyle(fontSize: 42, color: MysticColors.gold))),
+        ]));
+      });
+}
+
+class _OnboardingProof extends StatelessWidget {
+  const _OnboardingProof({required this.icon, required this.label});
+  final String icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Text('$icon  $label', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 7.5, fontWeight: FontWeight.w900, letterSpacing: .55)));
 }
 
 const _standardReadingKinds = <ReadingKind>[
