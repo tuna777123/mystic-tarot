@@ -97,7 +97,7 @@ class _MysticAppState extends State<MysticApp> {
       _showPremium(source: 'daily_limit');
       return;
     }
-    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, deckStyle: deckStyle, userName: userName, intention: intention, pastRecords: journal, onComplete: (record) {
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, deckStyle: deckStyle, userName: userName, intention: intention, pastRecords: journal, onPremium: () => _showPremium(source: 'oracle_dialogue'), onComplete: (record) {
       final newlyDiscovered = record.cards.map((item) => item.card).where((card) => !discoveredCards.contains(card.name)).toList();
       setState(() {
         journal.insert(0, record);
@@ -742,12 +742,13 @@ class _RewardBurstPainter extends CustomPainter {
 }
 
 class ReadingFlow extends StatefulWidget {
-  const ReadingFlow({required this.kind, required this.deckStyle, required this.userName, required this.intention, required this.pastRecords, required this.onComplete, super.key});
+  const ReadingFlow({required this.kind, required this.deckStyle, required this.userName, required this.intention, required this.pastRecords, required this.onPremium, required this.onComplete, super.key});
   final ReadingKind kind;
   final DeckStyle deckStyle;
   final String userName;
   final String intention;
   final List<ReadingRecord> pastRecords;
+  final VoidCallback onPremium;
   final ValueChanged<ReadingRecord> onComplete;
   @override
   State<ReadingFlow> createState() => _ReadingFlowState();
@@ -761,6 +762,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   bool saved = false;
   bool revealComplete = false;
   bool allowReversals = true;
+  bool oracleQuestionUsed = false;
 
   @override
   void initState() {
@@ -828,6 +830,8 @@ class _ReadingFlowState extends State<ReadingFlow> {
         if (revealComplete && widget.pastRecords.isNotEmpty) const SizedBox(height: 14),
         if (revealComplete && widget.pastRecords.isNotEmpty) _memoryBridge(context),
         if (revealComplete) const SizedBox(height: 14),
+        if (revealComplete) _oracleInvitation(context, record),
+        if (revealComplete) const SizedBox(height: 14),
         if (revealComplete) Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Text('MYSTIC MIRROR • 24H LOOP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1.1)),
           const SizedBox(height: 10),
@@ -866,6 +870,12 @@ class _ReadingFlowState extends State<ReadingFlow> {
     return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF30254A), Color(0xFF181321)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .26))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('◉  ORACLE MEMORY', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)), const SizedBox(height: 9), Text(message, style: Theme.of(context).textTheme.bodyLarge)]));
   }
 
+  Widget _oracleInvitation(BuildContext context, ReadingRecord record) => InkWell(
+        onTap: oracleQuestionUsed ? widget.onPremium : () => Navigator.push(context, MaterialPageRoute(builder: (_) => OracleDialogueScreen(record: record, userName: widget.userName, intention: widget.intention, onQuestionUsed: () { if (mounted) setState(() => oracleQuestionUsed = true); }, onPremium: widget.onPremium))),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF55377A), Color(0xFF21162F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .36))), child: Row(children: [Container(width: 48, height: 48, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: MysticColors.gold.withValues(alpha: .14), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .16), blurRadius: 20)]), child: Text(oracleQuestionUsed ? '✦' : '◉', style: const TextStyle(fontSize: 25, color: MysticColors.gold))), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [const Text('ASK THE ORACLE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)), const Spacer(), Text(oracleQuestionUsed ? 'CONTINUE PLUS' : '1 FREE', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 8, fontWeight: FontWeight.w900))]), const SizedBox(height: 6), Text(oracleQuestionUsed ? 'Your free answer is complete. Continue the dialogue with Mystic Plus.' : 'Go beyond the first interpretation with one personal follow-up question.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))])), const SizedBox(width: 6), const Icon(Icons.arrow_forward, color: MysticColors.gold)])),
+      );
+
   Future<void> _shareReading(ReadingRecord record) async {
     final cards = record.cards.map((item) => '${item.card.name}${item.reversed ? ' (Reversed)' : ''}').join(' • ');
     final text = '✦ My ${record.kind.title} — Mystic Tarot\n\n$cards\n\n${_guidance()}\n\nA reflection, not a fixed prediction.\nTry your own reading: https://tuna777123.github.io/mystic-tarot/';
@@ -887,6 +897,104 @@ class _ReadingFlowState extends State<ReadingFlow> {
       case EmotionalState.uncertain:
         return 'Choose the smallest reversible step. Clarity often appears after movement, not before it.';
     }
+  }
+}
+
+class OracleDialogueScreen extends StatefulWidget {
+  const OracleDialogueScreen({required this.record, required this.userName, required this.intention, required this.onQuestionUsed, required this.onPremium, super.key});
+  final ReadingRecord record;
+  final String userName;
+  final String intention;
+  final VoidCallback onQuestionUsed;
+  final VoidCallback onPremium;
+
+  @override
+  State<OracleDialogueScreen> createState() => _OracleDialogueScreenState();
+}
+
+class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
+  final controller = TextEditingController();
+  String? askedQuestion;
+  String? answer;
+  bool thinking = false;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final suggestions = _suggestions();
+    return Scaffold(appBar: AppBar(title: const Text('Oracle Dialogue')), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 30), children: [
+      Center(child: Container(width: 72, height: 72, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE6A5), Color(0xFF815923)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .25), blurRadius: 34)]), child: const Text('◉', style: TextStyle(fontSize: 35, color: MysticColors.ink)))),
+      const SizedBox(height: 13),
+      Text(widget.userName.isEmpty ? 'The Oracle is listening.' : '${widget.userName}, the Oracle is listening.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      const SizedBox(height: 8),
+      Text('Ask one question about the cards you just revealed. The answer will stay grounded in their symbols and your ${widget.intention.toLowerCase()} path.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      const SizedBox(height: 20),
+      SizedBox(height: 126, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.record.cards.length, separatorBuilder: (_, __) => const SizedBox(width: 9), itemBuilder: (_, index) => TarotCardFace(drawn: widget.record.cards[index], width: 76, height: 122))),
+      const SizedBox(height: 22),
+      if (askedQuestion == null) ...[
+        const Text('CHOOSE A FOLLOW-UP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
+        const SizedBox(height: 10),
+        ...suggestions.map((question) => Padding(padding: const EdgeInsets.only(bottom: 9), child: InkWell(onTap: () => _ask(question), borderRadius: BorderRadius.circular(16), child: Container(padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10)), child: Row(children: [Expanded(child: Text(question, style: const TextStyle(fontFamily: 'Arial', fontSize: 12, fontWeight: FontWeight.w700))), const Icon(Icons.arrow_forward_ios, size: 13, color: MysticColors.gold)]))))),
+        const SizedBox(height: 5),
+        TextField(controller: controller, maxLength: 160, maxLines: 2, textInputAction: TextInputAction.done, onChanged: (_) => setState(() {}), onSubmitted: (value) { if (value.trim().isNotEmpty) _ask(value.trim()); }, decoration: const InputDecoration(hintText: 'Or ask in your own words…', prefixIcon: Icon(Icons.chat_bubble_outline))),
+        const SizedBox(height: 9),
+        GoldButton(label: 'Ask my free question', icon: Icons.auto_awesome, onPressed: controller.text.trim().isEmpty ? null : () => _ask(controller.text.trim())),
+      ],
+      if (askedQuestion != null) ...[
+        _messageBubble(context, askedQuestion!, fromOracle: false),
+        const SizedBox(height: 12),
+        if (thinking) Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(19)), child: const Row(children: [SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), SizedBox(width: 12), Text('The Oracle is connecting your symbols…', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
+        if (answer != null) _messageBubble(context, answer!, fromOracle: true),
+        if (answer != null) const SizedBox(height: 18),
+        if (answer != null) Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF493269), Color(0xFF20162D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(children: [const Row(children: [Icon(Icons.lock_outline, size: 19, color: MysticColors.gold), SizedBox(width: 9), Expanded(child: Text('Continue the conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)))]), const SizedBox(height: 9), Text('Ask unlimited follow-ups, revisit saved conversations, and unlock every deep spread with Mystic Plus.', style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 15), GoldButton(label: 'Unlock Oracle Dialogue', icon: Icons.lock_open_rounded, onPressed: widget.onPremium)])),
+        if (answer != null) const SizedBox(height: 9),
+        if (answer != null) TextButton(onPressed: () => Navigator.pop(context), child: const Text('Return to my reading')),
+      ],
+    ])));
+  }
+
+  Widget _messageBubble(BuildContext context, String text, {required bool fromOracle}) => Align(alignment: fromOracle ? Alignment.centerLeft : Alignment.centerRight, child: Container(constraints: const BoxConstraints(maxWidth: 330), padding: const EdgeInsets.all(17), decoration: BoxDecoration(color: fromOracle ? MysticColors.violet.withValues(alpha: .24) : MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.only(topLeft: const Radius.circular(19), topRight: const Radius.circular(19), bottomLeft: Radius.circular(fromOracle ? 4 : 19), bottomRight: Radius.circular(fromOracle ? 19 : 4)), border: Border.all(color: fromOracle ? MysticColors.lavender.withValues(alpha: .24) : MysticColors.gold.withValues(alpha: .25))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [if (fromOracle) const Text('ORACLE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1.1)), if (fromOracle) const SizedBox(height: 7), Text(text, style: Theme.of(context).textTheme.bodyLarge)])));
+
+  List<String> _suggestions() {
+    switch (widget.record.kind) {
+      case ReadingKind.love:
+      case ReadingKind.compatibility:
+        return ['What am I not seeing in this connection?', 'What boundary or truth needs my attention?', 'What would a healthier next step look like?'];
+      case ReadingKind.career:
+      case ReadingKind.money:
+        return ['Where is the real opportunity in these cards?', 'What risk am I underestimating?', 'What is the smallest useful next move?'];
+      default:
+        return ['What am I not seeing yet?', 'Which card matters most right now?', 'What should I carry into the next 24 hours?'];
+    }
+  }
+
+  Future<void> _ask(String question) async {
+    if (askedQuestion != null || question.trim().isEmpty) return;
+    FocusScope.of(context).unfocus();
+    widget.onQuestionUsed();
+    setState(() { askedQuestion = question.trim(); thinking = true; });
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    if (!mounted) return;
+    setState(() { thinking = false; answer = _composeAnswer(question); });
+  }
+
+  String _composeAnswer(String question) {
+    final first = widget.record.cards.first;
+    final last = widget.record.cards.last;
+    final firstMeaning = first.reversed ? first.card.shadow : first.card.light;
+    final lower = question.toLowerCase();
+    if (lower.contains('not seeing') || lower.contains('underestimating') || lower.contains('risk')) {
+      return '${first.card.name} suggests the hidden part may be this: $firstMeaning ${last.card.advice} Your ${widget.record.emotion.label.toLowerCase()} state can make one detail feel louder than the rest, so separate what you know from what you fear or hope.';
+    }
+    if (lower.contains('which card') || lower.contains('matter')) {
+      return '${last.card.name} carries the closing weight of this spread. ${last.reversed ? last.card.shadow : last.card.light} Its practical invitation is simple: ${last.card.advice} Notice how that supports your ${widget.intention.toLowerCase()} path.';
+    }
+    return '${first.card.name} describes the energy you are entering, while ${last.card.name} points toward the response available to you. ${last.card.advice} Keep the next step small, observable, and reversible; the cards are offering a lens, not issuing a command.';
   }
 }
 
@@ -1594,11 +1702,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 8),
         if (widget.source == 'premium_spread') const Text('PREMIUM SPREAD COLLECTION', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.3)),
         if (widget.source == 'premium_spread') const SizedBox(height: 7),
-        Text(widget.source == 'daily_limit' ? 'Your insight does not\nhave to stop here.' : widget.source == 'premium_spread' ? 'Some questions need\na deeper spread.' : 'Make space for\ndeeper insight.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
+        if (widget.source == 'oracle_dialogue') const Text('UNLIMITED ORACLE DIALOGUE', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.3)),
+        if (widget.source == 'oracle_dialogue') const SizedBox(height: 7),
+        Text(widget.source == 'daily_limit' ? 'Your insight does not\nhave to stop here.' : widget.source == 'premium_spread' ? 'Some questions need\na deeper spread.' : widget.source == 'oracle_dialogue' ? 'The first answer opened\na deeper conversation.' : 'Make space for\ndeeper insight.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
         const SizedBox(height: 12),
-        Text(widget.source == 'daily_limit' ? 'You used today’s three free deep readings. Daily Guidance stays free—or unlock every spread without limits.' : widget.source == 'premium_spread' ? 'Unlock Love Compatibility, Future Timeline, Celtic Cross, and every premium reading in one membership.' : 'Turn occasional readings into a private practice that grows more useful every day.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        Text(widget.source == 'daily_limit' ? 'You used today’s three free deep readings. Daily Guidance stays free—or unlock every spread without limits.' : widget.source == 'premium_spread' ? 'Unlock Love Compatibility, Future Timeline, Celtic Cross, and every premium reading in one membership.' : widget.source == 'oracle_dialogue' ? 'Continue asking follow-ups, keep your conversations, and let every answer build on the cards and patterns already in your private practice.' : 'Turn occasional readings into a private practice that grows more useful every day.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
-        ...['Unlimited readings and every spread', 'Complete journal and weekly pattern history', 'All premium tarot deck themes', 'Future Plus features included', 'No ads—ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 11), child: Row(children: [const CircleAvatar(radius: 11, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 14, color: MysticColors.ink)), const SizedBox(width: 11), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
+        ...['Unlimited readings and every spread', 'Unlimited Oracle follow-up dialogue', 'Complete journal and weekly pattern history', 'All premium tarot deck themes', 'No ads—ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 11), child: Row(children: [const CircleAvatar(radius: 11, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 14, color: MysticColors.ink)), const SizedBox(width: 11), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
         const SizedBox(height: 12),
         SizedBox(height: 128, child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Expanded(child: _plan(0, 'Weekly', r'$4.99', 'per week')),
