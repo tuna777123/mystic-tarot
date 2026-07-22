@@ -815,6 +815,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   EmotionalState emotion = EmotionalState.uncertain;
   List<DrawnCard>? drawn;
   bool saved = false;
+  bool ritualOpened = false;
   bool revealComplete = false;
   bool allowReversals = true;
   bool oracleQuestionUsed = false;
@@ -828,7 +829,19 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: drawn == null ? _selection(context) : _result(context)));
+  Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: drawn == null
+      ? _selection(context)
+      : ritualOpened
+          ? _result(context)
+          : _RevealRitual(
+              kind: widget.kind,
+              cardCount: drawn!.length,
+              deckStyle: widget.deckStyle,
+              question: question.text.trim(),
+              emotion: emotion,
+              onBack: () => setState(() => drawn = null),
+              onReveal: _openRitual,
+            )));
 
   Widget _selection(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(20, 10, 20, 24), child: Column(children: [
         Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)), const Spacer(), Text('${selected.length}/${widget.kind.cardCount}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
@@ -846,24 +859,34 @@ class _ReadingFlowState extends State<ReadingFlow> {
         })),
         const SizedBox(height: 18),
         Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 18), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(style: widget.deckStyle, selected: selected.contains(i), width: 65, height: 110)))),
-        GoldButton(label: selected.length == widget.kind.cardCount ? 'Reveal my reading' : 'Choose ${widget.kind.cardCount - selected.length} more', onPressed: selected.length == widget.kind.cardCount ? _reveal : null, icon: Icons.auto_awesome),
+        GoldButton(label: selected.length == widget.kind.cardCount ? 'Seal my selection' : 'Choose ${widget.kind.cardCount - selected.length} more', onPressed: selected.length == widget.kind.cardCount ? _prepareRitual : null, icon: Icons.auto_awesome),
       ]));
 
-  void _toggle(int index) => setState(() {
+  void _toggle(int index) {
+    HapticFeedback.selectionClick();
+    setState(() {
         if (selected.contains(index)) {
           selected.remove(index);
         } else if (selected.length < widget.kind.cardCount) {
           selected.add(index);
         }
       });
+  }
 
-  Future<void> _reveal() async {
+  void _prepareRitual() {
     final random = Random();
     final pool = [...tarotDeck]..shuffle(random);
+    HapticFeedback.selectionClick();
     setState(() {
       drawn = List.generate(widget.kind.cardCount, (i) => DrawnCard(pool[i], allowReversals && random.nextInt(4) == 0));
+      ritualOpened = false;
       revealComplete = false;
     });
+  }
+
+  Future<void> _openRitual() async {
+    HapticFeedback.mediumImpact();
+    setState(() => ritualOpened = true);
     await Future<void>.delayed(Duration(milliseconds: 850 + widget.kind.cardCount * 520));
     if (mounted) setState(() => revealComplete = true);
   }
@@ -877,7 +900,9 @@ class _ReadingFlowState extends State<ReadingFlow> {
         const SizedBox(height: 10),
         Text('Take what resonates. Tarot is a mirror for reflection—not a fixed prediction.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
-        SizedBox(height: 190, child: ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
+        SizedBox(height: 190, child: drawn!.length <= 3
+            ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [for (var i = 0; i < drawn!.length; i++) ...[if (i > 0) const SizedBox(width: 12), _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520))]])
+            : ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
         const SizedBox(height: 26),
         if (!revealComplete) _ReadingInProgress(cardCount: drawn!.length),
         if (revealComplete) ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
@@ -953,6 +978,66 @@ class _ReadingFlowState extends State<ReadingFlow> {
         return 'Choose the smallest reversible step. Clarity often appears after movement, not before it.';
     }
   }
+}
+
+class _RevealRitual extends StatefulWidget {
+  const _RevealRitual({required this.kind, required this.cardCount, required this.deckStyle, required this.question, required this.emotion, required this.onBack, required this.onReveal});
+  final ReadingKind kind;
+  final int cardCount;
+  final DeckStyle deckStyle;
+  final String question;
+  final EmotionalState emotion;
+  final VoidCallback onBack;
+  final VoidCallback onReveal;
+
+  @override
+  State<_RevealRitual> createState() => _RevealRitualState();
+}
+
+class _RevealRitualState extends State<_RevealRitual> with SingleTickerProviderStateMixin {
+  late final AnimationController pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 2400))..repeat(reverse: true);
+  bool opening = false;
+
+  @override
+  void dispose() {
+    pulse.dispose();
+    super.dispose();
+  }
+
+  Future<void> _open() async {
+    if (opening) return;
+    setState(() => opening = true);
+    await Future<void>.delayed(const Duration(milliseconds: 820));
+    if (mounted) widget.onReveal();
+  }
+
+  @override
+  Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 28), children: [
+        Row(children: [IconButton(onPressed: opening ? null : widget.onBack, icon: const Icon(Icons.arrow_back)), const Spacer(), const Text('REVEAL RITUAL', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.6)), const Spacer(), const SizedBox(width: 48)]),
+        const SizedBox(height: 8),
+        Row(children: [Expanded(child: _ritualStep('01', 'INTENTION', true)), const SizedBox(width: 7), Expanded(child: _ritualStep('02', 'SELECTION', true)), const SizedBox(width: 7), Expanded(child: _ritualStep('03', 'REVEAL', opening))]),
+        const SizedBox(height: 28),
+        Text('Your cards are\nwaiting beneath the veil.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 10),
+        Text(widget.question.isEmpty ? 'Hold your ${widget.kind.title.toLowerCase()} intention in mind. Exhale once, then open the seal when you feel ready.' : '“${widget.question}”', maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 29),
+        AnimatedBuilder(animation: pulse, builder: (context, _) {
+          final value = Curves.easeInOut.transform(pulse.value);
+          return Center(child: SizedBox(width: 210, height: 240, child: Stack(alignment: Alignment.center, children: [
+            Container(width: 170 + value * 18, height: 170 + value * 18, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: MysticColors.gold.withValues(alpha: .08 + value * .14)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .13 + value * .09), blurRadius: 46, spreadRadius: 8)])),
+            for (var i = min(widget.cardCount, 3) - 1; i >= 0; i--)
+              AnimatedContainer(duration: const Duration(milliseconds: 700), curve: Curves.easeInOutCubic, transform: Matrix4.identity()..translateByDouble(opening ? (i - (min(widget.cardCount, 3) - 1) / 2) * 86.0 : (i - (min(widget.cardCount, 3) - 1) / 2) * 12.0, opening ? -18.0 : i * 3.0, 0, 1), child: Transform.rotate(angle: (i - (min(widget.cardCount, 3) - 1) / 2) * (opening ? .13 : .035), child: TarotCardFace(style: widget.deckStyle, selected: opening, width: 108, height: 172))),
+            AnimatedScale(duration: const Duration(milliseconds: 500), scale: opening ? 1.18 : .94 + value * .06, child: AnimatedOpacity(duration: const Duration(milliseconds: 350), opacity: opening ? 0 : 1, child: Container(width: 62, height: 62, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE6A2), Color(0xFF9D7130)]), border: Border.all(color: const Color(0xFFFFE5A0), width: 2), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .32 + value * .18), blurRadius: 30)]), child: const Text('✦', style: TextStyle(color: MysticColors.ink, fontSize: 27)))),
+          ])));
+        }),
+        Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(30), border: Border.all(color: Colors.white10)), child: Text('${widget.emotion.symbol}  ${widget.emotion.label.toUpperCase()}  •  ${widget.cardCount} ${widget.cardCount == 1 ? 'CARD' : 'CARDS'}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)))),
+        const SizedBox(height: 26),
+        GoldButton(label: opening ? 'Opening the veil…' : 'Open the seal', icon: opening ? Icons.hourglass_top_rounded : Icons.touch_app_outlined, onPressed: opening ? null : _open),
+        const SizedBox(height: 10),
+        Text('Take what resonates. The cards offer reflection, not certainty.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+      ]);
+
+  Widget _ritualStep(String number, String label, bool active) => AnimatedContainer(duration: const Duration(milliseconds: 350), height: 42, padding: const EdgeInsets.symmetric(horizontal: 9), decoration: BoxDecoration(color: active ? MysticColors.gold.withValues(alpha: .11) : Colors.white.withValues(alpha: .035), borderRadius: BorderRadius.circular(12), border: Border.all(color: active ? MysticColors.gold.withValues(alpha: .42) : Colors.white10)), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text(number, style: TextStyle(fontFamily: 'Arial', color: active ? MysticColors.gold : MysticColors.muted, fontWeight: FontWeight.w900, fontSize: 8)), const SizedBox(width: 5), Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: active ? MysticColors.mist : MysticColors.muted, fontWeight: FontWeight.w800, fontSize: 7.5, letterSpacing: .4)))]));
 }
 
 class OracleDialogueScreen extends StatefulWidget {
