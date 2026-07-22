@@ -1027,7 +1027,26 @@ class _RevealRitualState extends State<_RevealRitual> with SingleTickerProviderS
             Container(width: 170 + value * 18, height: 170 + value * 18, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: MysticColors.gold.withValues(alpha: .08 + value * .14)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .13 + value * .09), blurRadius: 46, spreadRadius: 8)])),
             for (var i = min(widget.cardCount, 3) - 1; i >= 0; i--)
               AnimatedContainer(duration: const Duration(milliseconds: 700), curve: Curves.easeInOutCubic, transform: Matrix4.identity()..translateByDouble(opening ? (i - (min(widget.cardCount, 3) - 1) / 2) * 86.0 : (i - (min(widget.cardCount, 3) - 1) / 2) * 12.0, opening ? -18.0 : i * 3.0, 0, 1), child: Transform.rotate(angle: (i - (min(widget.cardCount, 3) - 1) / 2) * (opening ? .13 : .035), child: TarotCardFace(style: widget.deckStyle, selected: opening, width: 108, height: 172))),
-            AnimatedScale(duration: const Duration(milliseconds: 500), scale: opening ? 1.18 : .94 + value * .06, child: AnimatedOpacity(duration: const Duration(milliseconds: 350), opacity: opening ? 0 : 1, child: Container(width: 62, height: 62, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE6A2), Color(0xFF9D7130)]), border: Border.all(color: const Color(0xFFFFE5A0), width: 2), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .32 + value * .18), blurRadius: 30)]), child: const Text('✦', style: TextStyle(color: MysticColors.ink, fontSize: 27)))),
+            AnimatedScale(
+              duration: const Duration(milliseconds: 500),
+              scale: opening ? 1.18 : .94 + value * .06,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 350),
+                opacity: opening ? 0 : 1,
+                child: Container(
+                  width: 62,
+                  height: 62,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const RadialGradient(colors: [Color(0xFFFFE6A2), Color(0xFF9D7130)]),
+                    border: Border.all(color: const Color(0xFFFFE5A0), width: 2),
+                    boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .32 + value * .18), blurRadius: 30)],
+                  ),
+                  child: const Text('✦', style: TextStyle(color: MysticColors.ink, fontSize: 27)),
+                ),
+              ),
+            ),
           ])));
         }),
         Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(30), border: Border.all(color: Colors.white10)), child: Text('${widget.emotion.symbol}  ${widget.emotion.label.toUpperCase()}  •  ${widget.cardCount} ${widget.cardCount == 1 ? 'CARD' : 'CARDS'}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)))),
