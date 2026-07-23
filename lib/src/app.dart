@@ -1893,7 +1893,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 10),
         Text(kIsWeb ? 'Planned pricing is shown for transparency. Final localized pricing and trial eligibility will appear in the official store checkout.' : plan == 2 ? r'No charge today. Then $39.99/year unless cancelled.' : 'Cancel anytime in your App Store or Google Play settings.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 10),
-        Text(kIsWeb ? 'This public release cannot charge your card or activate a subscription.' : 'Subscription purchases use the official Apple or Google checkout.', textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
+        const Text(kIsWeb ? 'This public release cannot charge your card or activate a subscription.' : 'Subscription purchases use the official Apple or Google checkout.', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [TextButton(onPressed: () => _openLegal('Terms of Use'), child: const Text('Terms')), const Text('•', style: TextStyle(color: MysticColors.muted)), TextButton(onPressed: () => _openLegal('Privacy Policy'), child: const Text('Privacy'))]),
       ])));
 
