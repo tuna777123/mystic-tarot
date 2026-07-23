@@ -2,6 +2,13 @@ name: Release Candidate
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "assets/**"
+      - "pubspec.yaml"
+      - ".github/workflows/release-candidate.yml"
 
 permissions:
   contents: read
