@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -493,7 +492,7 @@ class _ChapterHero extends StatelessWidget {
           boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .17), blurRadius: 30)],
         ),
         child: Stack(alignment: Alignment.center, children: [
-          Positioned.fill(child: CustomPaint(painter: const _ArcanaHaloPainter())),
+          const Positioned.fill(child: CustomPaint(painter: _ArcanaHaloPainter())),
           Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Text(complete ? mysticText(language, 'CYCLE COMPLETE', 'DÖNGÜ TAMAMLANDI') : mysticText(language, 'DAY $day OF 22', '22 GÜNÜN $day. GÜNÜ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.3)),
             const SizedBox(height: 18),
@@ -577,26 +576,28 @@ class _StoryStudioScreenState extends State<StoryStudioScreen> with SingleTicker
     );
   }
 
-  Future<void> _share(BuildContext context) async {
+  Future<void> _share(BuildContext shareContext) async {
     setState(() => sharing = true);
+    final box = shareContext.findRenderObject() as RenderBox?;
+    final shareOrigin = box == null ? null : box.localToGlobal(Offset.zero) & box.size;
     try {
       final boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) throw StateError('Story canvas is not ready');
       final image = await boundary.toImage(pixelRatio: 3);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null) throw StateError('Story image could not be encoded');
-      final box = context.findRenderObject() as RenderBox?;
       final cards = widget.record.cards.map((item) => item.card.name).join(' • ');
       await SharePlus.instance.share(ShareParams(
         title: 'Mystic Tarot',
         text: '$cards\nhttps://tuna777123.github.io/mystic-tarot/',
         files: [XFile.fromData(bytes.buffer.asUint8List(), mimeType: 'image/png')],
         fileNameOverrides: ['mystic-tarot-story.png'],
-        sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        sharePositionOrigin: shareOrigin,
       ));
     } catch (_) {
       await Clipboard.setData(ClipboardData(text: '${widget.record.cards.map((item) => item.card.name).join(' • ')}\n${widget.guidance}\nhttps://tuna777123.github.io/mystic-tarot/'));
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mysticText(widget.language, 'Sharing was unavailable, so your reading was copied.', 'Paylaşım kullanılamadı; okuman panoya kopyalandı.'))));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mysticText(widget.language, 'Sharing was unavailable, so your reading was copied.', 'Paylaşım kullanılamadı; okuman panoya kopyalandı.'))));
     } finally {
       if (mounted) setState(() => sharing = false);
     }
