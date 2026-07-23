@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'flagship.dart';
 import 'models.dart';
 import 'sound.dart';
 import 'tarot_data.dart';
@@ -28,6 +29,7 @@ class _MysticAppState extends State<MysticApp> {
   int streak = 0;
   int xp = 0;
   int deepReadingsToday = 0;
+  MysticLanguage language = MysticLanguage.english;
   DeckStyle deckStyle = DeckStyle.midnight;
   String userName = '';
   String intention = 'Clarity';
@@ -38,6 +40,9 @@ class _MysticAppState extends State<MysticApp> {
   final Set<String> discoveredCards = {};
   final Set<String> completedRituals = {};
   final Set<int> claimedRewards = {};
+  final Set<int> completedArcanaDays = {};
+  final Map<int, String> arcanaReflections = {};
+  String? lastArcanaCompletionDay;
 
   @override
   void initState() {
@@ -66,6 +71,8 @@ class _MysticAppState extends State<MysticApp> {
             userName: userName,
             intention: intention,
             records: journal,
+            language: language,
+            completedArcanaDays: completedArcanaDays,
             streak: streak,
             xp: xp,
             dailyReadingDone: journal.any((record) => record.kind == ReadingKind.daily && _dayKey(record.createdAt) == _dayKey(DateTime.now())),
@@ -77,21 +84,22 @@ class _MysticAppState extends State<MysticApp> {
             onClaimDailyQuest: _claimDailyQuest,
             onPremiumSpread: _previewPremiumReading,
             onPremium: _showPremium,
+            onOpenDestiny: _openDestinyHub,
           ),
-          JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
+          JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, completedArcanaDays: completedArcanaDays, language: language, onOpenDestiny: _openDestinyHub, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
-          ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, deckStyle: deckStyle, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
+          ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
         ]),
         bottomNavigationBar: NavigationBar(
           selectedIndex: tab,
           onDestinationSelected: (value) => setState(() => tab = value),
           backgroundColor: const Color(0xFF100D1E),
           indicatorColor: MysticColors.violet.withValues(alpha: .45),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.auto_awesome_outlined), selectedIcon: Icon(Icons.auto_awesome), label: 'Read'),
-            NavigationDestination(icon: Icon(Icons.hub_outlined), selectedIcon: Icon(Icons.hub), label: 'Path'),
-            NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Journal'),
-            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'You'),
+          destinations: [
+            NavigationDestination(icon: const Icon(Icons.auto_awesome_outlined), selectedIcon: const Icon(Icons.auto_awesome), label: mysticText(language, 'Read', 'Oku')),
+            NavigationDestination(icon: const Icon(Icons.hub_outlined), selectedIcon: const Icon(Icons.hub), label: mysticText(language, 'Path', 'Yol')),
+            NavigationDestination(icon: const Icon(Icons.menu_book_outlined), selectedIcon: const Icon(Icons.menu_book), label: mysticText(language, 'Journal', 'Günlük')),
+            NavigationDestination(icon: const Icon(Icons.person_outline), selectedIcon: const Icon(Icons.person), label: mysticText(language, 'You', 'Sen')),
           ],
         ),
       );
@@ -105,7 +113,7 @@ class _MysticAppState extends State<MysticApp> {
       _showPremium(source: 'daily_limit');
       return;
     }
-    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, deckStyle: deckStyle, userName: userName, intention: intention, pastRecords: journal, onPremium: () => _showPremium(source: 'oracle_dialogue'), onComplete: (record) {
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => ReadingFlow(kind: kind, deckStyle: deckStyle, userName: userName, intention: intention, language: language, pastRecords: journal, onPremium: () => _showPremium(source: 'oracle_dialogue'), onComplete: (record) {
       final newlyDiscovered = record.cards.map((item) => item.card).where((card) => !discoveredCards.contains(card.name)).toList();
       setState(() {
         journal.insert(0, record);
@@ -169,6 +177,39 @@ class _MysticAppState extends State<MysticApp> {
     _saveProgress();
   }
 
+  void _selectLanguage(MysticLanguage value) {
+    setState(() => language = value);
+    _saveProgress();
+  }
+
+  void _openDestinyHub() {
+    navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => DestinyHubScreen(
+      records: journal,
+      completedDays: completedArcanaDays,
+      reflections: arcanaReflections,
+      lastCompletionDay: lastArcanaCompletionDay,
+      language: language,
+      onCompleteChapter: _completeArcanaChapter,
+      onStartReading: () {
+        navigatorKey.currentState!.pop();
+        setState(() => tab = 0);
+        _startReading(ReadingKind.daily);
+      },
+    )));
+  }
+
+  void _completeArcanaChapter(int index, String reflection) {
+    if (completedArcanaDays.contains(index) || lastArcanaCompletionDay == _dayKey(DateTime.now())) return;
+    setState(() {
+      completedArcanaDays.add(index);
+      arcanaReflections[index] = reflection;
+      lastArcanaCompletionDay = _dayKey(DateTime.now());
+      discoveredCards.add(tarotDeck[index].name);
+      xp += 50;
+    });
+    _saveProgress();
+  }
+
   void _updateProfile(String name, String selectedIntention) {
     final cleanName = name.trim();
     setState(() {
@@ -198,15 +239,20 @@ class _MysticAppState extends State<MysticApp> {
       discoveredCards.clear();
       completedRituals.clear();
       claimedRewards.clear();
+      completedArcanaDays.clear();
+      arcanaReflections.clear();
+      lastArcanaCompletionDay = null;
+      language = MysticLanguage.english;
     });
   }
 
-  Future<void> _finishOnboarding(String name, String selectedIntention) async {
+  Future<void> _finishOnboarding(String name, String selectedIntention, MysticLanguage selectedLanguage) async {
     final cleanName = name.trim();
     setState(() {
       onboarded = true;
       userName = cleanName.length > 18 ? cleanName.substring(0, 18) : cleanName;
       intention = selectedIntention;
+      language = selectedLanguage;
     });
     await _saveProgress();
   }
@@ -229,8 +275,15 @@ class _MysticAppState extends State<MysticApp> {
         deepReadingsDay = savedReadingDay;
         deepReadingsToday = savedReadingDay == today ? prefs.getInt('deep_readings_today') ?? 0 : 0;
         deckStyle = _deckStyleFromName(prefs.getString('deck_style'));
+        language = _languageFromName(prefs.getString('language'));
         discoveredCards.addAll(prefs.getStringList('discovered_cards') ?? const []);
         claimedRewards.addAll((prefs.getStringList('claimed_rewards') ?? const []).map(int.parse));
+        completedArcanaDays.addAll((prefs.getStringList('completed_arcana_days') ?? const []).map(int.parse));
+        lastArcanaCompletionDay = prefs.getString('last_arcana_completion_day');
+        for (final encoded in prefs.getStringList('arcana_reflections') ?? const []) {
+          final separator = encoded.indexOf(':');
+          if (separator > 0) arcanaReflections[int.parse(encoded.substring(0, separator))] = encoded.substring(separator + 1);
+        }
         for (final encoded in prefs.getStringList('journal_records') ?? const []) {
           final record = _decodeRecord(encoded);
           if (record != null) journal.add(record);
@@ -256,10 +309,14 @@ class _MysticAppState extends State<MysticApp> {
         prefs.setStringList('discovered_cards', discoveredCards.toList()),
         prefs.setStringList('completed_rituals', completedRituals.toList()),
         prefs.setStringList('claimed_rewards', claimedRewards.map((item) => '$item').toList()),
+        prefs.setStringList('completed_arcana_days', completedArcanaDays.map((item) => '$item').toList()),
+        prefs.setStringList('arcana_reflections', arcanaReflections.entries.map((entry) => '${entry.key}:${entry.value}').toList()),
         prefs.setStringList('journal_records', journal.take(50).map(_encodeRecord).toList()),
         prefs.setString('ritual_day', _dayKey(DateTime.now())),
         prefs.setString('deep_readings_day', deepReadingsDay ?? _dayKey(DateTime.now())),
         prefs.setString('deck_style', deckStyle.name),
+        prefs.setString('language', language.name),
+        if (lastArcanaCompletionDay != null) prefs.setString('last_arcana_completion_day', lastArcanaCompletionDay!),
         if (dailyQuestClaimedDay != null) prefs.setString('daily_quest_claimed_day', dailyQuestClaimedDay!),
         if (lastActiveDay != null) prefs.setString('last_active_day', lastActiveDay!),
       ]);
@@ -284,6 +341,13 @@ class _MysticAppState extends State<MysticApp> {
       if (style.name == name) return style;
     }
     return DeckStyle.midnight;
+  }
+
+  MysticLanguage _languageFromName(String? name) {
+    for (final item in MysticLanguage.values) {
+      if (item.name == name) return item;
+    }
+    return MysticLanguage.english;
   }
 
   String _encodeRecord(ReadingRecord record) => jsonEncode({
@@ -407,7 +471,7 @@ Color _cardRarityColor(TarotCardData card) {
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({required this.onDone, super.key});
-  final void Function(String name, String intention) onDone;
+  final void Function(String name, String intention, MysticLanguage language) onDone;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -417,6 +481,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int page = 0;
   final name = TextEditingController();
   String intention = 'Clarity';
+  MysticLanguage language = MysticLanguage.english;
 
   @override
   Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: Padding(
@@ -433,7 +498,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ))),
-          GoldButton(label: page == 0 ? 'Begin my journey' : page == 1 ? 'Set my intention' : 'Enter Mystic', icon: page == 2 ? Icons.auto_awesome : Icons.arrow_forward, onPressed: page == 1 && name.text.trim().isEmpty ? null : () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention)),
+          GoldButton(label: page == 0 ? mysticText(language, 'Begin my journey', 'Yolculuğuma başla') : page == 1 ? mysticText(language, 'Set my intention', 'Niyetimi belirle') : mysticText(language, 'Enter Mystic', 'Mystic’e gir'), icon: page == 2 ? Icons.auto_awesome : Icons.arrow_forward, onPressed: page == 1 && name.text.trim().isEmpty ? null : () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention, language)),
         ]),
       )));
 
@@ -444,29 +509,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: 22),
       const _OnboardingPortal(),
       const SizedBox(height: 25),
-      Text('Your patterns are\nalready speaking.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
+      Text(mysticText(language, 'Your patterns are\nalready speaking.', 'Örüntülerin\nçoktan konuşuyor.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 14),
-      Text('Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      Text(mysticText(language, 'Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', 'Kartları aç. Tekrar edenleri izle. İçgörüyü seni hatırlayan özel bir günlük ritüele dönüştür.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 22),
       const Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),
+      const SizedBox(height: 20),
+      SegmentedButton<MysticLanguage>(
+        segments: MysticLanguage.values.map((item) => ButtonSegment(value: item, label: Text(item.label))).toList(),
+        selected: {language},
+        onSelectionChanged: (value) => setState(() => language = value.first),
+      ),
       ]);
     }
     if (page == 1) {
       return Column(key: const ValueKey(1), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('What should we\ncall you?', style: Theme.of(context).textTheme.displaySmall),
+      Text(mysticText(language, 'What should we\ncall you?', 'Sana nasıl\nseslenelim?'), style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 16),
-      Text('Your name helps each reading feel personal.', style: Theme.of(context).textTheme.bodyLarge),
+      Text(mysticText(language, 'Your name helps each reading feel personal.', 'Adın her okumayı sana özel hissettirir.'), style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 28),
-      TextField(controller: name, maxLength: 18, onChanged: (_) => setState(() {}), textCapitalization: TextCapitalization.words, decoration: const InputDecoration(hintText: 'Your first name', prefixIcon: Icon(Icons.person_outline))),
+      TextField(controller: name, maxLength: 18, onChanged: (_) => setState(() {}), textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: mysticText(language, 'Your first name', 'Adın'), prefixIcon: const Icon(Icons.person_outline))),
       ]);
     }
     const choices = ['Clarity', 'Love', 'Purpose', 'Healing'];
     return Column(key: const ValueKey(2), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('Set your first\nintention.', style: Theme.of(context).textTheme.displaySmall),
+      Text(mysticText(language, 'Set your first\nintention.', 'İlk niyetini\nbelirle.'), style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 16),
-      Text('There is no wrong choice. This simply shapes your starting experience.', style: Theme.of(context).textTheme.bodyLarge),
+      Text(mysticText(language, 'There is no wrong choice. This simply shapes your starting experience.', 'Yanlış seçim yok. Bu yalnızca başlangıç deneyimini şekillendirir.'), style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 25),
-      Wrap(spacing: 10, runSpacing: 10, children: choices.map((choice) => ChoiceChip(label: Text(choice), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
+      Wrap(spacing: 10, runSpacing: 10, children: choices.map((choice) => ChoiceChip(label: Text(language == MysticLanguage.turkish ? const {'Clarity': 'Netlik', 'Love': 'Aşk', 'Purpose': 'Amaç', 'Healing': 'İyileşme'}[choice]! : choice), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
     ]);
   }
 }
@@ -524,10 +595,12 @@ const _premiumReadingKinds = <ReadingKind>[
 ];
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.userName, required this.intention, required this.records, required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.freeReadingsLeft, required this.onReading, required this.onClaimDailyQuest, required this.onPremiumSpread, required this.onPremium, super.key});
+  const HomeScreen({required this.userName, required this.intention, required this.records, required this.language, required this.completedArcanaDays, required this.streak, required this.xp, required this.dailyReadingDone, required this.ritualDone, required this.dailyQuestClaimed, required this.deckStyle, required this.freeReadingsLeft, required this.onReading, required this.onClaimDailyQuest, required this.onPremiumSpread, required this.onPremium, required this.onOpenDestiny, super.key});
   final String userName;
   final String intention;
   final List<ReadingRecord> records;
+  final MysticLanguage language;
+  final Set<int> completedArcanaDays;
   final int streak;
   final int xp;
   final bool dailyReadingDone;
@@ -539,12 +612,13 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onClaimDailyQuest;
   final ValueChanged<ReadingKind> onPremiumSpread;
   final VoidCallback onPremium;
+  final VoidCallback onOpenDestiny;
 
   @override
   Widget build(BuildContext context) => MysticBackground(child: CustomScrollView(slivers: [
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 10), sliver: SliverList(delegate: SliverChildListDelegate([
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_greeting(), style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 4), Text(userName.isEmpty ? 'Your cards are waiting' : 'Your cards are waiting, $userName', maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleLarge)])),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_greeting(), style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 4), Text(userName.isEmpty ? mysticText(language, 'Your cards are waiting', 'Kartların seni bekliyor') : mysticText(language, 'Your cards are waiting, $userName', 'Kartların seni bekliyor, $userName'), maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleLarge)])),
             const SizedBox(width: 10),
             InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(30), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(30), border: Border.all(color: MysticColors.gold.withValues(alpha: .4))), child: const Row(children: [Text('✦ ', style: TextStyle(color: MysticColors.gold)), Text('PLUS', style: TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, color: MysticColors.gold, fontSize: 12))]))),
           ]),
@@ -552,6 +626,8 @@ class HomeScreen extends StatelessWidget {
           const _MoonBriefing(),
           const SizedBox(height: 14),
           _PersonalSignal(intention: intention, records: records),
+          const SizedBox(height: 14),
+          DestinyFlagshipCard(records: records, completedDays: completedArcanaDays, language: language, onOpen: onOpenDestiny),
           const SizedBox(height: 14),
           _DailyCard(streak: streak, deckStyle: deckStyle, onTap: () => onReading(ReadingKind.daily)),
           const SizedBox(height: 14),
@@ -582,9 +658,9 @@ class HomeScreen extends StatelessWidget {
 
   String _greeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hour < 12) return mysticText(language, 'Good morning', 'Günaydın');
+    if (hour < 18) return mysticText(language, 'Good afternoon', 'İyi günler');
+    return mysticText(language, 'Good evening', 'İyi akşamlar');
   }
 
   Widget _premiumReadingCard(BuildContext context, ReadingKind kind) => InkWell(onTap: () => onPremiumSpread(kind), borderRadius: BorderRadius.circular(20), child: Container(width: 158, padding: const EdgeInsets.all(15), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF5A3B82), Color(0xFF20152F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -800,11 +876,12 @@ class _RewardBurstPainter extends CustomPainter {
 }
 
 class ReadingFlow extends StatefulWidget {
-  const ReadingFlow({required this.kind, required this.deckStyle, required this.userName, required this.intention, required this.pastRecords, required this.onPremium, required this.onComplete, super.key});
+  const ReadingFlow({required this.kind, required this.deckStyle, required this.userName, required this.intention, required this.language, required this.pastRecords, required this.onPremium, required this.onComplete, super.key});
   final ReadingKind kind;
   final DeckStyle deckStyle;
   final String userName;
   final String intention;
+  final MysticLanguage language;
   final List<ReadingRecord> pastRecords;
   final VoidCallback onPremium;
   final ValueChanged<ReadingRecord> onComplete;
@@ -900,7 +977,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   Widget _result(BuildContext context) {
     final record = ReadingRecord(kind: widget.kind, question: question.text.trim(), cards: drawn!, createdAt: DateTime.now(), emotion: emotion, alignedAction: _alignedAction());
     return CustomScrollView(slivers: [
-      SliverAppBar(backgroundColor: Colors.transparent, title: const Text('Your reading'), actions: [IconButton(onPressed: revealComplete ? () => _shareReading(record) : null, tooltip: 'Share reading', icon: const Icon(Icons.ios_share_outlined))]),
+      SliverAppBar(backgroundColor: Colors.transparent, title: Text(mysticText(widget.language, 'Your reading', 'Okuman')), actions: [IconButton(onPressed: revealComplete ? () => _openStoryStudio(record) : null, tooltip: mysticText(widget.language, 'Share reading', 'Okumayı paylaş'), icon: const Icon(Icons.ios_share_outlined))]),
       SliverPadding(padding: const EdgeInsets.fromLTRB(20, 12, 20, 36), sliver: SliverList(delegate: SliverChildListDelegate([
         Text(_headline(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 10),
@@ -957,18 +1034,12 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   Widget _oracleInvitation(BuildContext context, ReadingRecord record) => InkWell(
-        onTap: oracleQuestionUsed ? widget.onPremium : () => Navigator.push(context, MaterialPageRoute(builder: (_) => OracleDialogueScreen(record: record, userName: widget.userName, intention: widget.intention, onQuestionUsed: () { if (mounted) setState(() => oracleQuestionUsed = true); }, onPremium: widget.onPremium))),
+        onTap: oracleQuestionUsed ? widget.onPremium : () => Navigator.push(context, MaterialPageRoute(builder: (_) => OracleDialogueScreen(record: record, pastRecords: widget.pastRecords, userName: widget.userName, intention: widget.intention, language: widget.language, onQuestionUsed: () { if (mounted) setState(() => oracleQuestionUsed = true); }, onPremium: widget.onPremium))),
         borderRadius: BorderRadius.circular(20),
         child: Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF55377A), Color(0xFF21162F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .36))), child: Row(children: [Container(width: 48, height: 48, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: MysticColors.gold.withValues(alpha: .14), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .16), blurRadius: 20)]), child: Text(oracleQuestionUsed ? '✦' : '◉', style: const TextStyle(fontSize: 25, color: MysticColors.gold))), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [const Text('ASK THE ORACLE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)), const Spacer(), Text(oracleQuestionUsed ? 'CONTINUE PLUS' : '1 FREE', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 8, fontWeight: FontWeight.w900))]), const SizedBox(height: 6), Text(oracleQuestionUsed ? 'Your free answer is complete. Continue the dialogue with Mystic Plus.' : 'Go beyond the first interpretation with one personal follow-up question.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))])), const SizedBox(width: 6), const Icon(Icons.arrow_forward, color: MysticColors.gold)])),
       );
 
-  Future<void> _shareReading(ReadingRecord record) async {
-    final cards = record.cards.map((item) => '${item.card.name}${item.reversed ? ' (Reversed)' : ''}').join(' • ');
-    final text = '✦ My ${record.kind.title} — Mystic Tarot\n\n$cards\n\n${_guidance()}\n\nA reflection, not a fixed prediction.\nTry your own reading: https://tuna777123.github.io/mystic-tarot/';
-    await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted) return;
-    showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))), builder: (context) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(22, 16, 22, 28), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))), const SizedBox(height: 22), const Icon(Icons.auto_awesome, color: MysticColors.gold, size: 38), const SizedBox(height: 12), Text('Your shareable reading is ready', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8), Text('The cards, guidance, and Mystic link were copied. Paste them into Instagram, TikTok, WhatsApp, or anywhere your story continues.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 18), GoldButton(label: 'Done', onPressed: () => Navigator.pop(context), icon: Icons.check)]))));
-  }
+  void _openStoryStudio(ReadingRecord record) => Navigator.push(context, MaterialPageRoute(builder: (_) => StoryStudioScreen(record: record, guidance: _guidance(), language: widget.language)));
   String _guidance() => '${drawn!.last.card.advice} Hold this beside your intention of ${widget.intention.toLowerCase()}. Let it be an invitation, not a command, and notice what changes over the next twenty-four hours.';
   String _alignedAction() {
     switch (emotion) {
@@ -1066,10 +1137,12 @@ class _RevealRitualState extends State<_RevealRitual> with SingleTickerProviderS
 }
 
 class OracleDialogueScreen extends StatefulWidget {
-  const OracleDialogueScreen({required this.record, required this.userName, required this.intention, required this.onQuestionUsed, required this.onPremium, super.key});
+  const OracleDialogueScreen({required this.record, required this.pastRecords, required this.userName, required this.intention, required this.language, required this.onQuestionUsed, required this.onPremium, super.key});
   final ReadingRecord record;
+  final List<ReadingRecord> pastRecords;
   final String userName;
   final String intention;
+  final MysticLanguage language;
   final VoidCallback onQuestionUsed;
   final VoidCallback onPremium;
 
@@ -1092,12 +1165,22 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   @override
   Widget build(BuildContext context) {
     final suggestions = _suggestions();
-    return Scaffold(appBar: AppBar(title: const Text('Oracle Dialogue')), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 30), children: [
+    return Scaffold(appBar: AppBar(title: Text(mysticText(widget.language, 'Oracle Dialogue', 'Oracle Diyaloğu'))), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 30), children: [
       Center(child: Container(width: 72, height: 72, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE6A5), Color(0xFF815923)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .25), blurRadius: 34)]), child: const Text('◉', style: TextStyle(fontSize: 35, color: MysticColors.ink)))),
       const SizedBox(height: 13),
       Text(widget.userName.isEmpty ? 'The Oracle is listening.' : '${widget.userName}, the Oracle is listening.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 8),
       Text('Ask one question about the cards you just revealed. The answer will stay grounded in their symbols and your ${widget.intention.toLowerCase()} path.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      if (widget.pastRecords.isNotEmpty) const SizedBox(height: 12),
+      if (widget.pastRecords.isNotEmpty) Container(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
+        decoration: BoxDecoration(color: MysticColors.lavender.withValues(alpha: .1), borderRadius: BorderRadius.circular(15), border: Border.all(color: MysticColors.lavender.withValues(alpha: .25))),
+        child: Row(children: [
+          const Icon(Icons.memory, size: 17, color: MysticColors.lavender),
+          const SizedBox(width: 9),
+          Expanded(child: Text(mysticText(widget.language, 'Oracle Memory is connecting ${min(12, widget.pastRecords.length)} previous readings on this device.', 'Oracle Hafızası bu cihazdaki ${min(12, widget.pastRecords.length)} önceki okumayı birbirine bağlıyor.'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w700))),
+        ]),
+      ),
       const SizedBox(height: 20),
       SizedBox(height: 126, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.record.cards.length, separatorBuilder: (_, __) => const SizedBox(width: 9), itemBuilder: (_, index) => TarotCardFace(drawn: widget.record.cards[index], width: 76, height: 122))),
       const SizedBox(height: 22),
@@ -1153,13 +1236,33 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     final last = widget.record.cards.last;
     final firstMeaning = first.reversed ? first.card.shadow : first.card.light;
     final lower = question.toLowerCase();
-    if (lower.contains('not seeing') || lower.contains('underestimating') || lower.contains('risk')) {
-      return '${first.card.name} suggests the hidden part may be this: $firstMeaning ${last.card.advice} Your ${widget.record.emotion.label.toLowerCase()} state can make one detail feel louder than the rest, so separate what you know from what you fear or hope.';
+    final memory = _oracleMemory();
+    if (lower.contains('not seeing') || lower.contains('underestimating') || lower.contains('risk') || lower.contains('görm') || lower.contains('risk')) {
+      return '${first.card.name} suggests the hidden part may be this: $firstMeaning ${last.card.advice} Your ${widget.record.emotion.label.toLowerCase()} state can make one detail feel louder than the rest, so separate what you know from what you fear or hope.$memory';
     }
     if (lower.contains('which card') || lower.contains('matter')) {
-      return '${last.card.name} carries the closing weight of this spread. ${last.reversed ? last.card.shadow : last.card.light} Its practical invitation is simple: ${last.card.advice} Notice how that supports your ${widget.intention.toLowerCase()} path.';
+      return '${last.card.name} carries the closing weight of this spread. ${last.reversed ? last.card.shadow : last.card.light} Its practical invitation is simple: ${last.card.advice} Notice how that supports your ${widget.intention.toLowerCase()} path.$memory';
     }
-    return '${first.card.name} describes the energy you are entering, while ${last.card.name} points toward the response available to you. ${last.card.advice} Keep the next step small, observable, and reversible; the cards are offering a lens, not issuing a command.';
+    return '${first.card.name} describes the energy you are entering, while ${last.card.name} points toward the response available to you. ${last.card.advice} Keep the next step small, observable, and reversible; the cards are offering a lens, not issuing a command.$memory';
+  }
+
+  String _oracleMemory() {
+    final recent = widget.pastRecords.take(12).toList();
+    if (recent.isEmpty) return '';
+    final cardCounts = <String, int>{};
+    final emotionCounts = <EmotionalState, int>{};
+    for (final record in recent) {
+      emotionCounts.update(record.emotion, (value) => value + 1, ifAbsent: () => 1);
+      for (final item in record.cards) {
+        cardCounts.update(item.card.name, (value) => value + 1, ifAbsent: () => 1);
+      }
+    }
+    final recurring = cardCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
+    final dominant = emotionCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
+    if (widget.language == MysticLanguage.turkish) {
+      return ' Hafızandaki ${recent.length} okumada ${recurring.key} ${recurring.value} kez göründü ve baskın başlangıç duygun ${dominant.key.label.toLowerCase()} oldu. Bu bir kehanet değil; üzerinde düşünmeye değer tekrar eden bir iz.';
+    }
+    return ' Across ${recent.length} remembered readings, ${recurring.key} appeared ${recurring.value} times and ${dominant.key.label.toLowerCase()} was your most common starting emotion. That is not a prediction; it is a recurring thread worth examining.';
   }
 }
 
@@ -1221,13 +1324,16 @@ class _ReadingInProgress extends StatelessWidget {
 }
 
 class JourneyScreen extends StatefulWidget {
-  const JourneyScreen({required this.streak, required this.xp, required this.records, required this.discoveredCards, required this.completedRituals, required this.claimedRewards, required this.onCompleteRitual, required this.onClaimReward, super.key});
+  const JourneyScreen({required this.streak, required this.xp, required this.records, required this.discoveredCards, required this.completedRituals, required this.claimedRewards, required this.completedArcanaDays, required this.language, required this.onOpenDestiny, required this.onCompleteRitual, required this.onClaimReward, super.key});
   final int streak;
   final int xp;
   final List<ReadingRecord> records;
   final Set<String> discoveredCards;
   final Set<String> completedRituals;
   final Set<int> claimedRewards;
+  final Set<int> completedArcanaDays;
+  final MysticLanguage language;
+  final VoidCallback onOpenDestiny;
   final ValueChanged<String> onCompleteRitual;
   final ValueChanged<int> onClaimReward;
 
@@ -1254,6 +1360,8 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
         Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(18), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Text('LEVEL $level', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1))),
       ]),
       const SizedBox(height: 20),
+      DestinyFlagshipCard(records: widget.records, completedDays: widget.completedArcanaDays, language: widget.language, onOpen: widget.onOpenDestiny),
+      const SizedBox(height: 18),
       AnimatedBuilder(animation: glow, builder: (context, _) => Container(
         height: 245,
         decoration: BoxDecoration(gradient: const RadialGradient(colors: [Color(0xFF49347D), Color(0xFF171128)]), borderRadius: BorderRadius.circular(26), border: Border.all(color: MysticColors.lavender.withValues(alpha: .18 + glow.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + glow.value * .08), blurRadius: 32)]),
@@ -1544,7 +1652,7 @@ class _EmptyJournal extends StatelessWidget {
 }
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({required this.userName, required this.intention, required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.deckStyle, required this.onSelectDeckStyle, required this.onUpdateProfile, required this.onDeleteData, required this.onPremium, super.key});
+  const ProfileScreen({required this.userName, required this.intention, required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.deckStyle, required this.language, required this.onSelectLanguage, required this.onSelectDeckStyle, required this.onUpdateProfile, required this.onDeleteData, required this.onPremium, super.key});
   final String userName;
   final String intention;
   final int streak;
@@ -1554,6 +1662,8 @@ class ProfileScreen extends StatelessWidget {
   final int relics;
   final List<ReadingRecord> records;
   final DeckStyle deckStyle;
+  final MysticLanguage language;
+  final ValueChanged<MysticLanguage> onSelectLanguage;
   final ValueChanged<DeckStyle> onSelectDeckStyle;
   final void Function(String name, String intention) onUpdateProfile;
   final VoidCallback onDeleteData;
@@ -1601,8 +1711,37 @@ class ProfileScreen extends StatelessWidget {
         InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: const Row(children: [Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Unlock Mystic Plus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), SizedBox(height: 4), Text('Go deeper with unlimited readings', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), Icon(Icons.arrow_forward)]))),
         const SizedBox(height: 18),
         ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SoulProfileScreen(initialName: userName, initialIntention: intention, onSave: onUpdateProfile))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.fingerprint, color: MysticColors.gold), title: const Text('Soul profile', style: TextStyle(fontFamily: 'Arial')), subtitle: Text(userName.isEmpty ? '$intention path' : '$userName • $intention path', style: Theme.of(context).textTheme.bodyMedium), trailing: const Icon(Icons.chevron_right)),
+        ListTile(onTap: () => _chooseLanguage(context), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.language, color: MysticColors.gold), title: Text(mysticText(language, 'Language', 'Dil'), style: const TextStyle(fontFamily: 'Arial')), subtitle: Text(language.label, style: Theme.of(context).textTheme.bodyMedium), trailing: const Icon(Icons.chevron_right)),
         ...['Reading preferences', 'Daily reminder', 'Privacy & data', 'Help and support'].map((label) => ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticSettingsScreen(section: label, records: records, onDeleteData: onDeleteData))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(label, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
       ]));
+  }
+
+  void _chooseLanguage(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF171128),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+      builder: (sheetContext) => SafeArea(child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Center(child: Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8)))),
+          const SizedBox(height: 20),
+          Text(mysticText(language, 'Choose language', 'Dil seç'), style: Theme.of(sheetContext).textTheme.headlineMedium),
+          const SizedBox(height: 8),
+          Text(mysticText(language, 'Your flagship journey and navigation update instantly. Full reading translations continue expanding with each release.', 'Ana yolculuğun ve menüler anında güncellenir. Okuma çevirileri her sürümde genişlemeye devam eder.'), style: Theme.of(sheetContext).textTheme.bodyMedium),
+          const SizedBox(height: 14),
+          ...MysticLanguage.values.map((item) => ListTile(
+            onTap: () {
+              onSelectLanguage(item);
+              Navigator.pop(sheetContext);
+            },
+            leading: Icon(item == language ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: item == language ? MysticColors.gold : MysticColors.muted),
+            title: Text(item.label),
+            subtitle: Text(item.code),
+          )),
+        ]),
+      )),
+    );
   }
 
   String _titleForLevel(int level) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/app.dart';
+import 'package:mystic_tarot/src/flagship.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -44,5 +45,58 @@ void main() {
 
     expect(find.text('A fair mystical space'), findsOneWidget);
     expect(find.textContaining('self-reflection and entertainment'), findsOneWidget);
+  });
+
+  testWidgets('living fate map is visible in both launch languages', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: Column(
+            children: [
+              DestinyFlagshipCard(
+                records: const [],
+                completedDays: const {},
+                language: MysticLanguage.english,
+                onOpen: () {},
+              ),
+              DestinyFlagshipCard(
+                records: const [],
+                completedDays: const {},
+                language: MysticLanguage.turkish,
+                onOpen: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('LIVING FATE MAP'), findsOneWidget);
+    expect(find.text('YAŞAYAN KADER HARİTASI'), findsOneWidget);
+    expect(find.textContaining('Day 1 of 22'), findsOneWidget);
+    expect(find.textContaining('22 günün 1. günü'), findsOneWidget);
+  });
+
+  testWidgets('destiny hub opens its private empty state', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: DestinyHubScreen(
+          records: const [],
+          completedDays: const {},
+          reflections: const {},
+          lastCompletionDay: null,
+          language: MysticLanguage.english,
+          onCompleteChapter: (_, __) {},
+          onStartReading: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('My Living Path'), findsOneWidget);
+    expect(find.text('Fate Map'), findsOneWidget);
+    expect(find.text('Create my first signal'), findsOneWidget);
+    expect(find.textContaining('patterns—not predictions'), findsOneWidget);
   });
 }
