@@ -5,6 +5,9 @@ import 'package:mystic_tarot/src/paywall.dart';
 
 void main() {
   testWidgets('renders yearly-first launch offers and safe web messaging', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(const MaterialApp(
       home: MysticPaywallScreen(
         source: PaywallSource.dailyLimit,
@@ -22,5 +25,6 @@ void main() {
     expect(find.text('Start 7-day free trial'), findsOneWidget);
     expect(find.textContaining('free deep-reading limit'), findsOneWidget);
     expect(find.textContaining('No payment is processed'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
