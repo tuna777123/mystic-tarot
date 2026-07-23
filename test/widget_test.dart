@@ -23,7 +23,7 @@ void main() {
 
     expect(find.text('Privacy, in plain language'), findsOneWidget);
     expect(
-      find.textContaining('does not transmit journal content'),
+      find.textContaining('transmit journal content to us'),
       findsOneWidget,
     );
     expect(find.text('Effective July 23, 2026'), findsOneWidget);
