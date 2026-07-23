@@ -30,8 +30,9 @@ void main() {
     expect(find.text(r'$39.99/year'), findsOneWidget);
     expect(find.text(r'$6.99/month'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Monthly'));
     await tester.tap(find.text('Monthly'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Continue with monthly'), findsOneWidget);
   });
