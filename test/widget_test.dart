@@ -26,6 +26,11 @@ void main() {
       find.textContaining('transmit journal content to us'),
       findsOneWidget,
     );
+    await tester.scrollUntilVisible(
+      find.text('Effective July 23, 2026'),
+      200,
+      scrollable: find.byType(Scrollable),
+    );
     expect(find.text('Effective July 23, 2026'), findsOneWidget);
   });
 
