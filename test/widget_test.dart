@@ -96,12 +96,12 @@ void main() {
 
     expect(find.text('My Living Path'), findsOneWidget);
     expect(find.text('Fate Map'), findsOneWidget);
+    expect(find.textContaining('patterns—not predictions'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Create my first signal'),
       240,
       scrollable: find.byType(Scrollable).last,
     );
     expect(find.text('Create my first signal'), findsOneWidget);
-    expect(find.textContaining('patterns—not predictions'), findsOneWidget);
   });
 }
