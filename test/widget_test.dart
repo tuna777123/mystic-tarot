@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,5 +11,33 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('Your patterns are\nalready speaking.'), findsOneWidget);
     expect(find.text('Begin my journey'), findsOneWidget);
+  });
+
+  testWidgets('privacy policy describes local-first storage', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: const LegalDocumentScreen(title: 'Privacy Policy'),
+      ),
+    );
+
+    expect(find.text('Privacy, in plain language'), findsOneWidget);
+    expect(
+      find.textContaining('does not transmit journal content'),
+      findsOneWidget,
+    );
+    expect(find.text('Effective July 23, 2026'), findsOneWidget);
+  });
+
+  testWidgets('terms identify the product as reflection', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: const LegalDocumentScreen(title: 'Terms of Use'),
+      ),
+    );
+
+    expect(find.text('A fair mystical space'), findsOneWidget);
+    expect(find.textContaining('self-reflection and entertainment'), findsOneWidget);
   });
 }

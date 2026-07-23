@@ -1,0 +1,51 @@
+name: Release Candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate native shells
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate branded launcher icon
+        run: dart run flutter_launcher_icons
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build Android QA APK
+        run: flutter build apk --release
+
+      - name: Upload Android QA APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mystic-tarot-android-qa
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14

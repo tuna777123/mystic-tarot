@@ -1,45 +1,57 @@
 # Mystic Tarot
 
-A premium, AI-ready tarot and spiritual companion app built with Flutter for iOS and Android.
+Mystic Tarot is a private, reflection-first tarot ritual built with Flutter. The public release runs as an installable PWA and the same product code is prepared for native iOS and Android packaging.
 
-## Current MVP
+## Live release
 
-- Premium three-step onboarding
-- Seven reading types
-- Interactive card selection and reveal
-- Upright and reversed interpretations
-- Reading journal
-- XP and reflection streaks
-- Profile and Mystic Plus paywall preview
-- Dark luxury visual system
-- Widget test for onboarding
+https://tuna777123.github.io/mystic-tarot/
 
-## Run locally
+Public policies:
 
-Install the Flutter SDK, then run:
+- Privacy: https://tuna777123.github.io/mystic-tarot/privacy.html
+- Terms: https://tuna777123.github.io/mystic-tarot/terms.html
+- Support: https://tuna777123.github.io/mystic-tarot/support.html
+
+## Product
+
+- Premium three-step onboarding and personal intention
+- 78-card deck with upright and reversed meanings
+- Cinematic selection, seal, reveal, and interpretation ritual
+- Daily Guidance plus focused love, career, money, decision, spiritual, and shadow readings
+- Oracle follow-up dialogue grounded in the revealed cards
+- Private local journal, export, and one-tap data deletion
+- Pattern memory, 24-hour Mystic Mirror, weekly wrap, streaks, XP, achievements, rituals, and Arcana Vault
+- Three unlockable visual deck themes
+- Responsive mobile UI and premium desktop presentation
+- Installable PWA metadata and branded icon set
+
+## Privacy posture
+
+The current public release is local-first:
+
+- no account;
+- no advertising SDK;
+- no cross-app tracking;
+- no cloud journal;
+- no payment processing;
+- no transmission of reading questions to the developer.
+
+Native subscriptions must not be enabled until store products, receipt validation, merchant agreements, and store disclosures are configured.
+
+## Development
 
 ```bash
-flutter create .
+flutter create . --platforms=web,android,ios
 flutter pub get
+flutter analyze
+flutter test
 flutter run
 ```
 
-`flutter create .` generates the native Android, iOS, web, macOS, Windows, and Linux project shells without replacing the existing Dart application.
+## Release verification
 
-## Architecture
+Every push to `main` runs static analysis and widget tests. The Pages workflow performs the same checks, builds the release web bundle, and deploys only after they pass.
 
-- `lib/src/app.dart` — navigation and product flows
-- `lib/src/models.dart` — domain models
-- `lib/src/tarot_data.dart` — tarot meanings
-- `lib/src/theme.dart` — design system
-- `lib/src/widgets.dart` — reusable UI components
+See [STORE_RELEASE.md](STORE_RELEASE.md) for approved listing copy, product identifiers, screenshots, review notes, privacy answers, and the remaining account-owned launch actions.
 
-## Next production milestones
-
-1. Run and visually QA the MVP on a real device.
-2. Add durable local state and account authentication.
-3. Connect secure server-side AI interpretations.
-4. Add RevenueCat subscriptions.
-5. Add analytics, crash reporting, privacy controls, and store assets.
-
-Tarot content is designed for reflection and entertainment, not medical, legal, or financial advice.
+Tarot content is for reflection and entertainment, not medical, mental-health, legal, financial, or emergency advice.

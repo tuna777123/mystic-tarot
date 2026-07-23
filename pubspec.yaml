@@ -9,12 +9,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audioplayers: ^6.8.1
   shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
   flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/audio/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/store/app-icon-1024.jpg
+  adaptive_icon_background: "#090816"
+  adaptive_icon_foreground: assets/store/app-icon-1024.jpg
+  adaptive_icon_foreground_inset: 18
+  min_sdk_android: 24
+  remove_alpha_ios: true
+  background_color_ios: "#090816"

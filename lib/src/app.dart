@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
+import 'sound.dart';
 import 'tarot_data.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -40,6 +42,7 @@ class _MysticAppState extends State<MysticApp> {
   @override
   void initState() {
     super.initState();
+    MysticSoundscape.instance.load();
     _loadProgress();
   }
 
@@ -864,6 +867,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
 
   void _toggle(int index) {
     HapticFeedback.selectionClick();
+    MysticSoundscape.instance.selectCard();
     setState(() {
         if (selected.contains(index)) {
           selected.remove(index);
@@ -877,6 +881,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
     final random = Random();
     final pool = [...tarotDeck]..shuffle(random);
     HapticFeedback.selectionClick();
+    MysticSoundscape.instance.sealSelection();
     setState(() {
       drawn = List.generate(widget.kind.cardCount, (i) => DrawnCard(pool[i], allowReversals && random.nextInt(4) == 0));
       ritualOpened = false;
@@ -886,6 +891,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
 
   Future<void> _openRitual() async {
     HapticFeedback.mediumImpact();
+    MysticSoundscape.instance.revealCards();
     setState(() => ritualOpened = true);
     await Future<void>.delayed(Duration(milliseconds: 850 + widget.kind.cardCount * 520));
     if (mounted) setState(() => revealComplete = true);
@@ -1717,6 +1723,7 @@ class MysticSettingsScreen extends StatefulWidget {
 
 class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
   bool allowReversals = true;
+  bool soundEffectsEnabled = true;
   bool reminderEnabled = false;
 
   @override
@@ -1726,6 +1733,7 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
       if (!mounted) return;
       setState(() {
         allowReversals = prefs.getBool('allow_reversals') ?? true;
+        soundEffectsEnabled = prefs.getBool('sound_effects') ?? true;
         reminderEnabled = prefs.getBool('daily_reminder') ?? false;
       });
     });
@@ -1739,6 +1747,8 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
       return [
         _intro(context, 'Shape every reading', 'Mystic should adapt to your practice—not ask you to adapt to it.'),
         SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Allow reversed cards'), subtitle: const Text('Adds shadow meanings to approximately one in four cards.'), value: allowReversals, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => allowReversals = value); final prefs = await SharedPreferences.getInstance(); await prefs.setBool('allow_reversals', value); }),
+        const Divider(),
+        SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Ritual sound effects'), subtitle: const Text('Soft audio cues for selection, sealing, and reveal.'), value: soundEffectsEnabled, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => soundEffectsEnabled = value); await MysticSoundscape.instance.setEnabled(value); }),
         const Divider(),
         const ListTile(contentPadding: EdgeInsets.zero, leading: Icon(Icons.psychology_alt_outlined, color: MysticColors.lavender), title: Text('Reflection-first guidance'), subtitle: Text('Readings remain grounded invitations—not certainty, diagnosis, or professional advice.')),
       ];
@@ -1764,11 +1774,11 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
     return [
       _intro(context, 'We are here to help', 'Clear answers before you begin your next ritual.'),
       _faq('Does Mystic predict the future?', 'No. It uses tarot symbolism as a structured mirror for reflection and possible perspectives.'),
-      _faq('Can I cancel Mystic Plus?', 'Yes. Subscriptions can be managed and cancelled through Apple or Google account settings.'),
-      _faq('How do I restore a purchase?', 'Open Mystic Plus and choose Restore. It will reconnect purchases made with the same store account.'),
-      _faq('Is my journal private?', 'In this preview it is stored locally on your device. Before cloud accounts launch, the privacy policy will identify every processor and retention period.'),
+      _faq('Can I cancel Mystic Plus?', 'When native subscriptions launch, they can be managed and cancelled through Apple or Google account settings. The web release does not process payments.'),
+      _faq('How do I restore a purchase?', 'Restore becomes available with native Apple and Google subscriptions. The current web release does not process or store purchases.'),
+      _faq('Is my journal private?', 'Yes. The current release stores it locally on this device and does not transmit journal content to us. You can export or delete it at any time.'),
       const SizedBox(height: 10),
-      GoldButton(label: 'Copy support link', icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://github.com/tuna777123/mystic-tarot/issues')); if (!context.mounted) return; ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support link copied.'))); }),
+      GoldButton(label: 'Copy support link', icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://tuna777123.github.io/mystic-tarot/support.html')); if (!context.mounted) return; ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support link copied.'))); }),
     ];
   }
 
@@ -1867,6 +1877,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
         const SizedBox(height: 12),
         Text(widget.source == 'daily_limit' ? 'You used today’s three free deep readings. Daily Guidance stays free—or unlock every spread without limits.' : widget.source == 'premium_spread' ? 'Unlock Love Compatibility, Future Timeline, Celtic Cross, and every premium reading in one membership.' : widget.source == 'oracle_dialogue' ? 'Continue asking follow-ups, keep your conversations, and let every answer build on the cards and patterns already in your private practice.' : 'Turn occasional readings into a private practice that grows more useful every day.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
+        if (kIsWeb) Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .09), borderRadius: BorderRadius.circular(16), border: Border.all(color: MysticColors.gold.withValues(alpha: .28))), child: const Row(children: [Icon(Icons.language, size: 18, color: MysticColors.gold), SizedBox(width: 10), Expanded(child: Text('WEB EARLY ACCESS • No payment is collected in this release.', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: .35)))])),
+        if (kIsWeb) const SizedBox(height: 18),
         ...['Unlimited readings and every spread', 'Unlimited Oracle follow-up dialogue', 'Complete journal and weekly pattern history', 'All premium tarot deck themes', 'No ads—ever'].map((item) => Padding(padding: const EdgeInsets.only(bottom: 11), child: Row(children: [const CircleAvatar(radius: 11, backgroundColor: MysticColors.gold, child: Icon(Icons.check, size: 14, color: MysticColors.ink)), const SizedBox(width: 11), Expanded(child: Text(item, style: Theme.of(context).textTheme.bodyLarge))]))),
         const SizedBox(height: 12),
         SizedBox(height: 128, child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -1877,11 +1889,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Expanded(child: _plan(2, 'Yearly', r'$39.99', r'$3.33/month', badge: 'SAVE 67%')),
         ])),
         const SizedBox(height: 18),
-        GoldButton(label: plan == 2 ? 'Start my 7-day free trial' : 'Continue with ${plan == 0 ? 'weekly' : 'monthly'}', onPressed: _beginPurchase, icon: Icons.lock_open_rounded),
+        GoldButton(label: kIsWeb ? 'Mystic Plus mobile launch' : plan == 2 ? 'Start my 7-day free trial' : 'Continue with ${plan == 0 ? 'weekly' : 'monthly'}', onPressed: _beginPurchase, icon: kIsWeb ? Icons.phone_iphone_rounded : Icons.lock_open_rounded),
         const SizedBox(height: 10),
-        Text(plan == 2 ? r'No charge today. Then $39.99/year unless cancelled.' : 'Cancel anytime in your App Store or Google Play settings.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(kIsWeb ? 'Planned pricing is shown for transparency. Final localized pricing and trial eligibility will appear in the official store checkout.' : plan == 2 ? r'No charge today. Then $39.99/year unless cancelled.' : 'Cancel anytime in your App Store or Google Play settings.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 10),
-        const Text('Subscription purchases use the official Apple or Google checkout.', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
+        Text(kIsWeb ? 'This public release cannot charge your card or activate a subscription.' : 'Subscription purchases use the official Apple or Google checkout.', textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4)),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [TextButton(onPressed: () => _openLegal('Terms of Use'), child: const Text('Terms')), const Text('•', style: TextStyle(color: MysticColors.muted)), TextButton(onPressed: () => _openLegal('Privacy Policy'), child: const Text('Privacy'))]),
       ])));
 
@@ -1891,7 +1903,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   void _beginPurchase() {
-    showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))), builder: (context) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(22, 16, 22, 28), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))), const SizedBox(height: 22), const Icon(Icons.verified_user_outlined, color: MysticColors.gold, size: 40), const SizedBox(height: 12), Text('Store checkout is the final launch connection.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 9), Text('This web preview cannot charge you. Apple/Google billing will activate after the store products and merchant accounts are connected.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 18), GoldButton(label: 'Understood', onPressed: () => Navigator.pop(context))]))));
+    showModalBottomSheet<void>(context: context, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))), builder: (context) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(22, 16, 22, 28), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))), const SizedBox(height: 22), const Icon(Icons.verified_user_outlined, color: MysticColors.gold, size: 40), const SizedBox(height: 12), Text(kIsWeb ? 'Mystic Plus is preparing for mobile.' : 'Store checkout is being connected.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 9), Text(kIsWeb ? 'The web release is free early access and cannot charge you. Paid access will use the official Apple or Google checkout.' : 'Purchases remain unavailable until the store products and merchant accounts are connected.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 18), GoldButton(label: 'Continue with free access', onPressed: () => Navigator.pop(context))]))));
   }
 
   void _restore() {
@@ -1911,12 +1923,12 @@ class LegalDocumentScreen extends StatelessWidget {
     return Scaffold(appBar: AppBar(title: Text(title)), body: MysticBackground(child: ListView(padding: const EdgeInsets.all(22), children: [
       Text(privacy ? 'Privacy, in plain language' : 'A fair mystical space', style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 12),
-      Text(privacy ? 'Mystic Tarot currently stores onboarding choices, journal entries, progress, and preferences locally on your device. The web preview does not create an account, sell personal data, or process real payments. You can export or delete your local data from Privacy & data.' : 'Mystic Tarot is a self-reflection and entertainment product. Readings are symbolic prompts, not factual predictions or substitutes for medical, mental-health, legal, or financial advice. Premium access will renew according to the plan shown at checkout and can be cancelled through the store account used to subscribe.', style: Theme.of(context).textTheme.bodyLarge),
+      Text(privacy ? 'Mystic Tarot stores onboarding choices, journal entries, progress, and preferences locally on your device. The current release does not create an account, transmit journal content to us, sell personal data, include advertising trackers, or process payments. You can export or delete your local data from Privacy & data.' : 'Mystic Tarot is a self-reflection and entertainment product. Readings are symbolic prompts, not factual predictions or substitutes for medical, mental-health, legal, financial, or emergency advice. The current web release does not process payments.', style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 20),
-      _legalSection(context, privacy ? 'When services are connected' : 'Subscriptions', privacy ? 'Before accounts, analytics, notifications, AI services, or cloud sync are activated, this policy will identify each provider, purpose, retention period, and deletion method. Store checkout data is handled by Apple, Google, and the configured subscription processor under their own policies.' : 'The exact localized price, renewal period, trial eligibility, and billing date shown by Apple or Google at confirmation control the purchase. Restore Purchases reconnects eligible access on the same store account.'),
+      _legalSection(context, privacy ? 'Payments and future services' : 'Subscriptions', privacy ? 'The public web release does not process payments. Before accounts, analytics, AI services, cloud sync, or native subscriptions are activated, this policy and the store disclosures will identify each provider, purpose, retention period, and deletion method.' : 'The public web release does not process payments. If native subscriptions launch, the exact localized price, renewal period, trial eligibility, billing date, cancellation controls, and refund rules shown by Apple or Google at confirmation will control the purchase.'),
       _legalSection(context, privacy ? 'Your control' : 'Acceptable use', privacy ? 'You may export your journal and permanently delete all local Mystic data at any time from the profile. Deleting browser storage or uninstalling the preview may also remove local records.' : 'Do not rely on a reading for emergencies or high-stakes decisions. You remain responsible for your choices and should consult a qualified professional where appropriate.'),
       const SizedBox(height: 12),
-      const Text('Preview policy • Last updated July 19, 2026', style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10)),
+      const Text('Effective July 23, 2026', style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10)),
     ])));
   }
 

@@ -43,8 +43,17 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      - name: Build web preview
+      - name: Build web release
         run: flutter build web --release --base-href /mystic-tarot/
+
+      - name: Validate release assets
+        run: |
+          test -f build/web/manifest.json
+          test -f build/web/privacy.html
+          test -f build/web/terms.html
+          test -f build/web/support.html
+          test -f build/web/icons/Icon-512.png
+          grep -q "Mystic Tarot" build/web/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
