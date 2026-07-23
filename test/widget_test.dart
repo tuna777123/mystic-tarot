@@ -93,6 +93,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('My Living Path'), findsOneWidget);
     expect(find.text('Fate Map'), findsOneWidget);
