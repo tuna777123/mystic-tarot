@@ -23,7 +23,8 @@ void main() {
     final now = DateTime(2026, 7, 24);
 
     test('free users never receive Plus access', () {
-      expect(const MysticEntitlement.free().isActiveAt(now), isFalse);
+      const entitlement = MysticEntitlement.free();
+      expect(entitlement.isActiveAt(now), isFalse);
     });
 
     test('valid purchases remain active before expiration', () {
@@ -43,7 +44,7 @@ void main() {
         expiresAt: now.subtract(const Duration(seconds: 1)),
         status: PurchaseStatus.expired,
       );
-      final refunded = MysticEntitlement(
+      const refunded = MysticEntitlement(
         isPlus: true,
         plan: MysticPlan.yearly,
         status: PurchaseStatus.refunded,
