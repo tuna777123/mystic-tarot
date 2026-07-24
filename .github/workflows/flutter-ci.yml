@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test-and-build:
@@ -15,89 +15,6 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: Integrate seven-language onboarding and profile
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/mystic-soul-experience'
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          flagship = Path('lib/src/flagship.dart')
-          text = flagship.read_text()
-          enum_pattern = re.compile(
-              r"enum MysticLanguage \{\n\s*english\('English', 'EN'\),\n\s*turkish\('Türkçe', 'TR'\);\n"
-          )
-          enum_replacement = """enum MysticLanguage {
-            english('English', 'EN'),
-            spanish('Español', 'ES'),
-            french('Français', 'FR'),
-            portugueseBrazil('Português (Brasil)', 'PT-BR'),
-            turkish('Türkçe', 'TR'),
-            italian('Italiano', 'IT'),
-            german('Deutsch', 'DE');
-          """.replace('          ', '')
-          text, count = enum_pattern.subn(enum_replacement, text, count=1)
-          if count:
-              flagship.write_text(text)
-
-          app = Path('lib/src/app.dart')
-          text = app.read_text()
-          picker_pattern = re.compile(
-              r"\s{6}SegmentedButton<MysticLanguage>\(\n"
-              r"\s{8}segments: MysticLanguage\.values\.map\(\(item\) => ButtonSegment\(value: item, label: Text\(item\.label\)\)\)\.toList\(\),\n"
-              r"\s{8}selected: \{language\},\n"
-              r"\s{8}onSelectionChanged: \(value\) => setState\(\(\) => language = value\.first\),\n"
-              r"\s{6}\),"
-          )
-          picker_replacement = """      Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: MysticLanguage.values.map((item) => ChoiceChip(
-              label: Text(item.label),
-              selected: language == item,
-              onSelected: (_) => setState(() => language = item),
-              selectedColor: MysticColors.violet,
-            )).toList(),
-          ),""".replace('          ', '')
-          text, count = picker_pattern.subn(picker_replacement, text, count=1)
-          if count:
-              app.write_text(text)
-
-          test = Path('test/mystic_language_integration_test.dart')
-          test.write_text("""import 'package:flutter_test/flutter_test.dart';
-          import 'package:mystic_tarot/src/flagship.dart';
-
-          void main() {
-            test('application language model exposes all seven languages', () {
-              expect(MysticLanguage.values.length, 7);
-              expect(MysticLanguage.values.map((item) => item.label), containsAll(<String>[
-                'English', 'Español', 'Français', 'Português (Brasil)',
-                'Türkçe', 'Italiano', 'Deutsch',
-              ]));
-            });
-
-            test('legacy copy falls back to English outside Turkish', () {
-              for (final language in MysticLanguage.values.where((item) => item != MysticLanguage.turkish)) {
-                expect(mysticText(language, 'Read', 'Oku'), 'Read');
-              }
-              expect(mysticText(MysticLanguage.turkish, 'Read', 'Oku'), 'Oku');
-            });
-          }
-          """.replace('          ', ''))
-          PY
-
-          if ! git diff --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add lib/src/flagship.dart lib/src/app.dart test/mystic_language_integration_test.dart
-            git commit -m "feat: connect seven languages to onboarding and profile"
-            git push origin HEAD:feature/mystic-soul-experience
-          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
