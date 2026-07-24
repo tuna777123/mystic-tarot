@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mystic_tarot/src/app_language.dart';
 import 'package:mystic_tarot/src/identity_engine.dart';
 import 'package:mystic_tarot/src/mystic_identity_screen.dart';
 import 'package:mystic_tarot/src/theme.dart';
@@ -16,17 +17,19 @@ void main() {
     signals: ['Transformation themes repeat.', 'A 5-day rhythm shows intention.'],
   );
 
-  testWidgets('shows identity, evidence, and evolution progress', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildMysticTheme(),
-        home: MysticIdentityScreen(
-          snapshot: snapshot,
-          isTurkish: false,
-          onContinueJourney: () {},
+  Future<void> pumpLanguage(WidgetTester tester, AppLanguage language) => tester.pumpWidget(
+        MaterialApp(
+          theme: buildMysticTheme(),
+          home: MysticIdentityScreen(
+            snapshot: snapshot,
+            language: language,
+            onContinueJourney: () {},
+          ),
         ),
-      ),
-    );
+      );
+
+  testWidgets('shows identity, evidence, and evolution progress', (tester) async {
+    await pumpLanguage(tester, AppLanguage.english);
 
     expect(find.text('The Alchemist'), findsOneWidget);
     expect(find.text('68% identity confidence'), findsOneWidget);
@@ -36,20 +39,37 @@ void main() {
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('uses Turkish navigation copy', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildMysticTheme(),
-        home: MysticIdentityScreen(
-          snapshot: snapshot,
-          isTurkish: true,
-          onContinueJourney: () {},
-        ),
-      ),
-    );
+  final localizedHeaders = <AppLanguage, String>{
+    AppLanguage.english: 'YOUR MYSTIC SOUL',
+    AppLanguage.spanish: 'TU ALMA MÍSTICA',
+    AppLanguage.french: 'VOTRE ÂME MYSTIQUE',
+    AppLanguage.portugueseBrazil: 'SUA ALMA MÍSTICA',
+    AppLanguage.turkish: 'MİSTİK RUHUN',
+    AppLanguage.italian: 'LA TUA ANIMA MISTICA',
+    AppLanguage.german: 'DEINE MYSTISCHE SEELE',
+  };
 
-    expect(find.text('MİSTİK RUHUN'), findsOneWidget);
-    expect(find.text('Yolculuğuma devam et'), findsOneWidget);
-    expect(find.text('%68 kimlik güveni'), findsOneWidget);
+  for (final entry in localizedHeaders.entries) {
+    testWidgets('renders ${entry.key.name} interface copy', (tester) async {
+      await pumpLanguage(tester, entry.key);
+      expect(find.text(entry.value), findsOneWidget);
+    });
+  }
+
+  test('English is the default for unknown persisted values', () {
+    expect(AppLanguage.fromName(null), AppLanguage.english);
+    expect(AppLanguage.fromName('unsupported'), AppLanguage.english);
+  });
+
+  test('all requested languages are available', () {
+    expect(AppLanguage.values, [
+      AppLanguage.english,
+      AppLanguage.spanish,
+      AppLanguage.french,
+      AppLanguage.portugueseBrazil,
+      AppLanguage.turkish,
+      AppLanguage.italian,
+      AppLanguage.german,
+    ]);
   });
 }
