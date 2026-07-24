@@ -24,14 +24,14 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           flagship = Path('lib/src/flagship.dart')
           text = flagship.read_text()
-          old_enum = """enum MysticLanguage {
-            english('English', 'EN'),
-            turkish('Türkçe', 'TR');
-          """.replace('  ', '', 1)
-          new_enum = """enum MysticLanguage {
+          enum_pattern = re.compile(
+              r"enum MysticLanguage \{\n\s*english\('English', 'EN'\),\n\s*turkish\('Türkçe', 'TR'\);\n"
+          )
+          enum_replacement = """enum MysticLanguage {
             english('English', 'EN'),
             spanish('Español', 'ES'),
             french('Français', 'FR'),
@@ -39,19 +39,21 @@ jobs:
             turkish('Türkçe', 'TR'),
             italian('Italiano', 'IT'),
             german('Deutsch', 'DE');
-          """.replace('  ', '', 1)
-          if old_enum in text:
-              flagship.write_text(text.replace(old_enum, new_enum, 1))
+          """.replace('          ', '')
+          text, count = enum_pattern.subn(enum_replacement, text, count=1)
+          if count:
+              flagship.write_text(text)
 
           app = Path('lib/src/app.dart')
           text = app.read_text()
-          old_picker = """      SegmentedButton<MysticLanguage>(
-            segments: MysticLanguage.values.map((item) => ButtonSegment(value: item, label: Text(item.label))).toList(),
-            selected: {language},
-            onSelectionChanged: (value) => setState(() => language = value.first),
-          ),
-          """.replace('  ', '', 1)
-          new_picker = """      Wrap(
+          picker_pattern = re.compile(
+              r"\s{6}SegmentedButton<MysticLanguage>\(\n"
+              r"\s{8}segments: MysticLanguage\.values\.map\(\(item\) => ButtonSegment\(value: item, label: Text\(item\.label\)\)\)\.toList\(\),\n"
+              r"\s{8}selected: \{language\},\n"
+              r"\s{8}onSelectionChanged: \(value\) => setState\(\(\) => language = value\.first\),\n"
+              r"\s{6}\),"
+          )
+          picker_replacement = """      Wrap(
             alignment: WrapAlignment.center,
             spacing: 8,
             runSpacing: 8,
@@ -61,10 +63,10 @@ jobs:
               onSelected: (_) => setState(() => language = item),
               selectedColor: MysticColors.violet,
             )).toList(),
-          ),
-          """.replace('  ', '', 1)
-          if old_picker in text:
-              app.write_text(text.replace(old_picker, new_picker, 1))
+          ),""".replace('          ', '')
+          text, count = picker_pattern.subn(picker_replacement, text, count=1)
+          if count:
+              app.write_text(text)
 
           test = Path('test/mystic_language_integration_test.dart')
           test.write_text("""import 'package:flutter_test/flutter_test.dart';
