@@ -25,7 +25,7 @@ void main() {
     final selected = initial.select(AppLanguage.portugueseBrazil);
 
     expect(selected.appLanguage, AppLanguage.portugueseBrazil);
-    expect(selected.storageValue, 'pt-BR');
+    expect(selected.storageValue, 'pt_BR');
     expect(selected.legacyLanguage, MysticLanguage.english);
   });
 }
