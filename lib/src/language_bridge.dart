@@ -21,7 +21,7 @@ class LanguageSelectionState {
   final AppLanguage appLanguage;
 
   MysticLanguage get legacyLanguage => appLanguage.legacyLanguage;
-  String get storageValue => appLanguage.storageValue;
+  String get storageValue => appLanguage.localeTag;
 
   LanguageSelectionState select(AppLanguage value) => LanguageSelectionState(value);
 }
