@@ -176,13 +176,17 @@ class LivingDestinyExperience extends StatelessWidget {
       case MysticNextActionType.firstReading:
       case MysticNextActionType.dailyReading:
         onStartDailyReading();
+        return;
       case MysticNextActionType.mirrorCheckIn:
       case MysticNextActionType.reviewPattern:
         onOpenPatterns();
+        return;
       case MysticNextActionType.continueJourney:
         onOpenJourney();
+        return;
       case MysticNextActionType.explorePremiumSpread:
         onOpenPremium();
+        return;
     }
   }
 
