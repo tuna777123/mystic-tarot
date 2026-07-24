@@ -13,7 +13,12 @@ import 'widgets.dart';
 
 enum MysticLanguage {
   english('English', 'EN'),
-  turkish('Türkçe', 'TR');
+  spanish('Español', 'ES'),
+  french('Français', 'FR'),
+  portugueseBrazil('Português (Brasil)', 'PT-BR'),
+  turkish('Türkçe', 'TR'),
+  italian('Italiano', 'IT'),
+  german('Deutsch', 'DE');
 
   const MysticLanguage(this.label, this.code);
   final String label;
