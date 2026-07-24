@@ -34,6 +34,7 @@ class LivingDestinyExperience extends StatelessWidget {
       completedArcanaDays: completedArcanaDays,
       freeReadingsLeft: freeReadingsLeft,
     );
+    final action = snapshot.nextAction;
 
     return Semantics(
       container: true,
@@ -122,21 +123,21 @@ class LivingDestinyExperience extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    snapshot.nextAction.title,
+                    action.title,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 7),
                   Text(
-                    snapshot.nextAction.body,
+                    action.body,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      onPressed: () => _execute(snapshot.nextAction.type),
-                      icon: Icon(_actionIcon(snapshot.nextAction.type), size: 18),
-                      label: Text(snapshot.nextAction.cta),
+                      onPressed: _callbackFor(action.type),
+                      icon: Icon(_actionIcon(action.type), size: 18),
+                      label: Text(action.cta),
                     ),
                   ),
                 ],
@@ -147,11 +148,15 @@ class LivingDestinyExperience extends StatelessWidget {
               InkWell(
                 onTap: onOpenPatterns,
                 borderRadius: BorderRadius.circular(16),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
-                  child: const Row(
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 7),
+                  child: Row(
                     children: [
-                      Icon(Icons.insights, size: 18, color: MysticColors.lavender),
+                      Icon(
+                        Icons.insights,
+                        size: 18,
+                        color: MysticColors.lavender,
+                      ),
                       SizedBox(width: 9),
                       Expanded(
                         child: Text(
@@ -171,55 +176,34 @@ class LivingDestinyExperience extends StatelessWidget {
     );
   }
 
-  void _execute(MysticNextActionType type) {
-    switch (type) {
-      case MysticNextActionType.firstReading:
-      case MysticNextActionType.dailyReading:
-        onStartDailyReading();
-        return;
-      case MysticNextActionType.mirrorCheckIn:
-      case MysticNextActionType.reviewPattern:
-        onOpenPatterns();
-        return;
-      case MysticNextActionType.continueJourney:
-        onOpenJourney();
-        return;
-      case MysticNextActionType.explorePremiumSpread:
-        onOpenPremium();
-        return;
-    }
-  }
+  VoidCallback _callbackFor(MysticNextActionType type) => switch (type) {
+        MysticNextActionType.firstReading ||
+        MysticNextActionType.dailyReading =>
+          onStartDailyReading,
+        MysticNextActionType.mirrorCheckIn ||
+        MysticNextActionType.reviewPattern =>
+          onOpenPatterns,
+        MysticNextActionType.continueJourney => onOpenJourney,
+        MysticNextActionType.explorePremiumSpread => onOpenPremium,
+      };
 
-  static String _stageLabel(MysticGrowthStage stage) {
-    switch (stage) {
-      case MysticGrowthStage.newUser:
-        return 'Your story begins here';
-      case MysticGrowthStage.activated:
-        return 'Your first signals are forming';
-      case MysticGrowthStage.engaged:
-        return 'Your path is becoming visible';
-      case MysticGrowthStage.habit:
-        return 'Your ritual has momentum';
-      case MysticGrowthStage.powerUser:
-        return 'Your living pattern is awake';
-    }
-  }
+  static String _stageLabel(MysticGrowthStage stage) => switch (stage) {
+        MysticGrowthStage.newUser => 'Your story begins here',
+        MysticGrowthStage.activated => 'Your first signals are forming',
+        MysticGrowthStage.engaged => 'Your path is becoming visible',
+        MysticGrowthStage.habit => 'Your ritual has momentum',
+        MysticGrowthStage.powerUser => 'Your living pattern is awake',
+      };
 
-  static IconData _actionIcon(MysticNextActionType type) {
-    switch (type) {
-      case MysticNextActionType.firstReading:
-      case MysticNextActionType.dailyReading:
-        return Icons.style;
-      case MysticNextActionType.mirrorCheckIn:
-        return Icons.self_improvement;
-      case MysticNextActionType.continueJourney:
-        return Icons.route;
-      case MysticNextActionType.explorePremiumSpread:
-        return Icons.workspace_premium;
-      case MysticNextActionType.reviewPattern:
-        return Icons.insights;
-    }
-  }
+  static IconData _actionIcon(MysticNextActionType type) => switch (type) {
+        MysticNextActionType.firstReading ||
+        MysticNextActionType.dailyReading =>
+          Icons.style,
+        MysticNextActionType.mirrorCheckIn => Icons.self_improvement,
+        MysticNextActionType.continueJourney => Icons.route,
+        MysticNextActionType.explorePremiumSpread => Icons.workspace_premium,
+        MysticNextActionType.reviewPattern => Icons.insights,
+      };
 }
 
 class _ValueRing extends StatelessWidget {
