@@ -1,17 +1,13 @@
 name: Apply seven-language UI integration
 
-on:
-  push:
-    branches:
-      - feature/mystic-soul-experience
-    paths:
-      - .github/workflows/apply-seven-language-ui.yml
+on: [push]
 
 permissions:
   contents: write
 
 jobs:
   integrate:
+    if: github.ref == 'refs/heads/feature/mystic-soul-experience'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,18 +23,18 @@ jobs:
           flagship = Path('lib/src/flagship.dart')
           text = flagship.read_text()
           old_enum = """enum MysticLanguage {
-            english('English', 'EN'),
-            turkish('Türkçe', 'TR');
-          """
+  english('English', 'EN'),
+  turkish('Türkçe', 'TR');
+"""
           new_enum = """enum MysticLanguage {
-            english('English', 'EN'),
-            spanish('Español', 'ES'),
-            french('Français', 'FR'),
-            portugueseBrazil('Português (Brasil)', 'PT-BR'),
-            turkish('Türkçe', 'TR'),
-            italian('Italiano', 'IT'),
-            german('Deutsch', 'DE');
-          """
+  english('English', 'EN'),
+  spanish('Español', 'ES'),
+  french('Français', 'FR'),
+  portugueseBrazil('Português (Brasil)', 'PT-BR'),
+  turkish('Türkçe', 'TR'),
+  italian('Italiano', 'IT'),
+  german('Deutsch', 'DE');
+"""
           if old_enum not in text:
               raise SystemExit('MysticLanguage enum block not found')
           flagship.write_text(text.replace(old_enum, new_enum, 1))
@@ -46,23 +42,23 @@ jobs:
           app = Path('lib/src/app.dart')
           text = app.read_text()
           old_picker = """      SegmentedButton<MysticLanguage>(
-                segments: MysticLanguage.values.map((item) => ButtonSegment(value: item, label: Text(item.label))).toList(),
-                selected: {language},
-                onSelectionChanged: (value) => setState(() => language = value.first),
-              ),
-          """
+        segments: MysticLanguage.values.map((item) => ButtonSegment(value: item, label: Text(item.label))).toList(),
+        selected: {language},
+        onSelectionChanged: (value) => setState(() => language = value.first),
+      ),
+"""
           new_picker = """      Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
-                children: MysticLanguage.values.map((item) => ChoiceChip(
-                  label: Text(item.label),
-                  selected: language == item,
-                  onSelected: (_) => setState(() => language = item),
-                  selectedColor: MysticColors.violet,
-                )).toList(),
-              ),
-          """
+        alignment: WrapAlignment.center,
+        spacing: 8,
+        runSpacing: 8,
+        children: MysticLanguage.values.map((item) => ChoiceChip(
+          label: Text(item.label),
+          selected: language == item,
+          onSelected: (_) => setState(() => language = item),
+          selectedColor: MysticColors.violet,
+        )).toList(),
+      ),
+"""
           if old_picker not in text:
               raise SystemExit('Onboarding language picker block not found')
           app.write_text(text.replace(old_picker, new_picker, 1))
