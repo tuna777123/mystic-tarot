@@ -1,0 +1,37 @@
+name: Clean onboarding helper duplication
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/seven-language-onboarding
+          fetch-depth: 0
+      - run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
+          marker = "  String _copy({required String en, required String es, required String fr, required String pt, required String tr, required String it, required String de})"
+          first = text.find(marker)
+          second = text.find(marker, first + len(marker))
+          if first >= 0 and second >= 0:
+              end = text.find("  Widget _page(BuildContext context) {", second)
+              text = text[:second] + text[end:]
+          path.write_text(text)
+          Path('analyzer-output.txt').unlink(missing_ok=True)
+          Path('.github/onboarding-cleanup-trigger').unlink(missing_ok=True)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: deduplicate onboarding localization helpers" || exit 0
+          git push origin HEAD:feature/seven-language-onboarding
