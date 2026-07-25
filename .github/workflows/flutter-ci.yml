@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test-and-build:
@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -38,7 +41,19 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Analyze
-        run: flutter analyze
+        run: |
+          set +e
+          flutter analyze > analyzer-output.txt 2>&1
+          status=$?
+          cat analyzer-output.txt
+          if [ "$status" -ne 0 ] && [ "${{ github.head_ref }}" = "feature/mystic-soul-profile-entry" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add analyzer-output.txt
+            git commit -m "chore: capture analyzer diagnostics" || true
+            git push origin HEAD:feature/mystic-soul-profile-entry || true
+          fi
+          exit $status
 
       - name: Test
         run: flutter test
