@@ -515,11 +515,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: 22),
       const Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),
       const SizedBox(height: 20),
-      SegmentedButton<MysticLanguage>(
-        segments: MysticLanguage.values.map((item) => ButtonSegment(value: item, label: Text(item.label))).toList(),
-        selected: {language},
-        onSelectionChanged: (value) => setState(() => language = value.first),
-      ),
+      Wrap(
+  alignment: WrapAlignment.center,
+  spacing: 8,
+  runSpacing: 8,
+  children: MysticLanguage.values.map((item) => ChoiceChip(
+    label: Text(item.label),
+    selected: language == item,
+    onSelected: (_) => setState(() => language = item),
+    selectedColor: MysticColors.violet,
+  )).toList(),
+),
       ]);
     }
     if (page == 1) {
