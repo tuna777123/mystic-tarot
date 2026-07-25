@@ -502,9 +502,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ))),
-          GoldButton(label: page == 0 ? mysticText(language, 'Begin my journey', 'Yolculuğuma başla') : page == 1 ? mysticText(language, 'Set my intention', 'Niyetimi belirle') : mysticText(language, 'Enter Mystic', 'Mystic’e gir'), icon: page == 2 ? Icons.auto_awesome : Icons.arrow_forward, onPressed: page == 1 && name.text.trim().isEmpty ? null : () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention, language)),
+          GoldButton(label: page == 0 ? _copy(en: 'Begin my journey', es: 'Comenzar mi viaje', fr: 'Commencer mon voyage', pt: 'Começar minha jornada', tr: 'Yolculuğuma başla', it: 'Inizia il mio viaggio', de: 'Meine Reise beginnen') : page == 1 ? _copy(en: 'Set my intention', es: 'Definir mi intención', fr: 'Définir mon intention', pt: 'Definir minha intenção', tr: 'Niyetimi belirle', it: 'Imposta la mia intenzione', de: 'Meine Absicht festlegen') : _copy(en: 'Enter Mystic', es: 'Entrar en Mystic', fr: 'Entrer dans Mystic', pt: 'Entrar no Mystic', tr: 'Mystic’e gir', it: 'Entra in Mystic', de: 'Mystic betreten'), icon: page == 2 ? Icons.auto_awesome : Icons.arrow_forward, onPressed: page == 1 && name.text.trim().isEmpty ? null : () => page < 2 ? setState(() => page++) : widget.onDone(name.text.trim(), intention, language)),
         ]),
       )));
+
+  String _copy({required String en, required String es, required String fr, required String pt, required String tr, required String it, required String de}) => localized(language.appLanguage, english: en, spanish: es, french: fr, portugueseBrazil: pt, turkish: tr, italian: it, german: de);
+
+  String _intentionLabel(String value) => switch (value) {
+        'Clarity' => _copy(en: 'Clarity', es: 'Claridad', fr: 'Clarté', pt: 'Clareza', tr: 'Netlik', it: 'Chiarezza', de: 'Klarheit'),
+        'Love' => _copy(en: 'Love', es: 'Amor', fr: 'Amour', pt: 'Amor', tr: 'Aşk', it: 'Amore', de: 'Liebe'),
+        'Purpose' => _copy(en: 'Purpose', es: 'Propósito', fr: 'Mission', pt: 'Propósito', tr: 'Amaç', it: 'Scopo', de: 'Bestimmung'),
+        'Healing' => _copy(en: 'Healing', es: 'Sanación', fr: 'Guérison', pt: 'Cura', tr: 'İyileşme', it: 'Guarigione', de: 'Heilung'),
+        _ => value,
+      };
 
   Widget _page(BuildContext context) {
     if (page == 0) {
@@ -513,11 +523,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       const SizedBox(height: 22),
       const _OnboardingPortal(),
       const SizedBox(height: 25),
-      Text(mysticText(language, 'Your patterns are\nalready speaking.', 'Örüntülerin\nçoktan konuşuyor.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
+      Text(_copy(en: 'Your patterns are\nalready speaking.', es: 'Tus patrones ya\nestán hablando.', fr: 'Vos schémas parlent\ndéjà.', pt: 'Seus padrões já\nestão falando.', tr: 'Örüntülerin\nçoktan konuşuyor.', it: 'I tuoi schemi stanno\ngià parlando.', de: 'Deine Muster\nsprechen bereits.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 14),
-      Text(mysticText(language, 'Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', 'Kartları aç. Tekrar edenleri izle. İçgörüyü seni hatırlayan özel bir günlük ritüele dönüştür.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      Text(_copy(en: 'Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', es: 'Revela las cartas. Observa lo que vuelve. Convierte la intuición en un ritual diario privado que te recuerda.', fr: 'Révélez les cartes. Observez ce qui revient. Transformez l’intuition en un rituel quotidien privé qui se souvient de vous.', pt: 'Revele as cartas. Observe o que retorna. Transforme a percepção em um ritual diário privado que se lembra de você.', tr: 'Kartları aç. Tekrar edenleri izle. İçgörüyü seni hatırlayan özel bir günlük ritüele dönüştür.', it: 'Rivela le carte. Osserva ciò che ritorna. Trasforma l’intuizione in un rituale quotidiano privato che si ricorda di te.', de: 'Enthülle die Karten. Beobachte, was wiederkehrt. Verwandle Erkenntnis in ein privates tägliches Ritual, das sich an dich erinnert.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 22),
-      const Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),
+      Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: _copy(en: '78 ARCANA', es: '78 ARCANOS', fr: '78 ARCANES', pt: '78 ARCANOS', tr: '78 ARKANA', it: '78 ARCANI', de: '78 ARKANA')), _OnboardingProof(icon: '◉', label: _copy(en: 'PATTERN MEMORY', es: 'MEMORIA DE PATRONES', fr: 'MÉMOIRE DES SCHÉMAS', pt: 'MEMÓRIA DE PADRÕES', tr: 'ÖRÜNTÜ HAFIZASI', it: 'MEMORIA DEGLI SCHEMI', de: 'MUSTERGEDÄCHTNIS')), _OnboardingProof(icon: '☾', label: _copy(en: 'PRIVATE JOURNAL', es: 'DIARIO PRIVADO', fr: 'JOURNAL PRIVÉ', pt: 'DIÁRIO PRIVADO', tr: 'ÖZEL GÜNLÜK', it: 'DIARIO PRIVATO', de: 'PRIVATES TAGEBUCH'))]),
       const SizedBox(height: 20),
       Wrap(
   alignment: WrapAlignment.center,
@@ -534,20 +544,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     if (page == 1) {
       return Column(key: const ValueKey(1), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(mysticText(language, 'What should we\ncall you?', 'Sana nasıl\nseslenelim?'), style: Theme.of(context).textTheme.displaySmall),
+      Text(_copy(en: 'What should we\ncall you?', es: '¿Cómo debemos\nllamarte?', fr: 'Comment devons-nous\nvous appeler ?', pt: 'Como devemos\nchamar você?', tr: 'Sana nasıl\nseslenelim?', it: 'Come dovremmo\nchiamarti?', de: 'Wie dürfen wir\ndich nennen?'), style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 16),
-      Text(mysticText(language, 'Your name helps each reading feel personal.', 'Adın her okumayı sana özel hissettirir.'), style: Theme.of(context).textTheme.bodyLarge),
+      Text(_copy(en: 'Your name helps each reading feel personal.', es: 'Tu nombre hace que cada lectura se sienta personal.', fr: 'Votre nom rend chaque tirage plus personnel.', pt: 'Seu nome torna cada leitura mais pessoal.', tr: 'Adın her okumayı sana özel hissettirir.', it: 'Il tuo nome rende ogni lettura più personale.', de: 'Dein Name lässt jede Lesung persönlicher wirken.'), style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 28),
-      TextField(controller: name, maxLength: 18, onChanged: (_) => setState(() {}), textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: mysticText(language, 'Your first name', 'Adın'), prefixIcon: const Icon(Icons.person_outline))),
+      TextField(controller: name, maxLength: 18, onChanged: (_) => setState(() {}), textCapitalization: TextCapitalization.words, decoration: InputDecoration(hintText: _copy(en: 'Your first name', es: 'Tu nombre', fr: 'Votre prénom', pt: 'Seu nome', tr: 'Adın', it: 'Il tuo nome', de: 'Dein Vorname'), prefixIcon: const Icon(Icons.person_outline))),
       ]);
     }
     const choices = ['Clarity', 'Love', 'Purpose', 'Healing'];
     return Column(key: const ValueKey(2), mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(mysticText(language, 'Set your first\nintention.', 'İlk niyetini\nbelirle.'), style: Theme.of(context).textTheme.displaySmall),
+      Text(_copy(en: 'Set your first\nintention.', es: 'Define tu primera\nintención.', fr: 'Définissez votre première\nintention.', pt: 'Defina sua primeira\nintenção.', tr: 'İlk niyetini\nbelirle.', it: 'Imposta la tua prima\nintenzione.', de: 'Lege deine erste\nAbsicht fest.'), style: Theme.of(context).textTheme.displaySmall),
       const SizedBox(height: 16),
-      Text(mysticText(language, 'There is no wrong choice. This simply shapes your starting experience.', 'Yanlış seçim yok. Bu yalnızca başlangıç deneyimini şekillendirir.'), style: Theme.of(context).textTheme.bodyLarge),
+      Text(_copy(en: 'There is no wrong choice. This simply shapes your starting experience.', es: 'No hay una elección incorrecta. Esto solo da forma a tu experiencia inicial.', fr: 'Il n’y a pas de mauvais choix. Cela façonne simplement votre expérience de départ.', pt: 'Não existe escolha errada. Isso apenas molda sua experiência inicial.', tr: 'Yanlış seçim yok. Bu yalnızca başlangıç deneyimini şekillendirir.', it: 'Non esiste una scelta sbagliata. Questo modella semplicemente la tua esperienza iniziale.', de: 'Es gibt keine falsche Wahl. Sie gestaltet lediglich dein erstes Erlebnis.'), style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 25),
-      Wrap(spacing: 10, runSpacing: 10, children: choices.map((choice) => ChoiceChip(label: Text(language == MysticLanguage.turkish ? const {'Clarity': 'Netlik', 'Love': 'Aşk', 'Purpose': 'Amaç', 'Healing': 'İyileşme'}[choice]! : choice), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
+      Wrap(spacing: 10, runSpacing: 10, children: choices.map((choice) => ChoiceChip(label: Text(_intentionLabel(choice)), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
     ]);
   }
 }
