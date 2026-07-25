@@ -1,10 +1,21 @@
+abstract final class MysticProductIds {
+  static const weekly = 'mystic_plus_weekly';
+  static const monthly = 'mystic_plus_monthly';
+  static const yearly = 'mystic_plus_yearly';
+
+  /// Version 1 launches with monthly and yearly only. Weekly remains reserved
+  /// for a future pricing experiment and must not block launch readiness.
+  static const launch = <String>{monthly, yearly};
+  static const all = <String>{weekly, monthly, yearly};
+}
+
 enum MysticPlan {
   monthly,
   yearly;
 
   String get productId => switch (this) {
-        MysticPlan.monthly => 'mystic_plus_monthly',
-        MysticPlan.yearly => 'mystic_plus_yearly',
+        MysticPlan.monthly => MysticProductIds.monthly,
+        MysticPlan.yearly => MysticProductIds.yearly,
       };
 
   bool get includesTrial => this == MysticPlan.yearly;
