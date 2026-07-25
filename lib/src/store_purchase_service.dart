@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-import 'monetization.dart';
+import 'monetization.dart' show MysticProductIds;
 export 'monetization.dart' show MysticProductIds;
 
 enum StorePurchasePhase {
