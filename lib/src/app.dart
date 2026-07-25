@@ -15,6 +15,7 @@ import 'localized_premium_screen.dart';
 import 'premium_value_screen.dart';
 import 'mystic_identity_screen.dart';
 import 'sound.dart';
+import 'store_ready_premium_screen.dart';
 import 'tarot_data.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -386,7 +387,7 @@ class _MysticAppState extends State<MysticApp> {
     }
   }
 
-  void _showPremium({String source = 'organic'}) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumValueScreen(source: source, language: language, onContinue: () => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => LocalizedPremiumScreen(source: source, language: language))))));
+  void _showPremium({String source = 'organic'}) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumValueScreen(source: source, language: language, onContinue: () => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => StoreReadyPremiumScreen(source: source, language: language))))));
 
   void _previewPremiumReading(ReadingKind kind) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumReadingPreview(
         kind: kind,
