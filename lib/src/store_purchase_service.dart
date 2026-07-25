@@ -3,18 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-/// Store product identifiers. These values must match App Store Connect and
-/// Google Play Console before paid access is enabled.
-abstract final class MysticProductIds {
-  static const weekly = 'mystic_plus_weekly';
-  static const monthly = 'mystic_plus_monthly';
-  static const yearly = 'mystic_plus_yearly';
-
-  /// Version 1 launches with monthly and yearly only. Weekly remains reserved
-  /// for a future pricing experiment and must not block launch readiness.
-  static const launch = <String>{monthly, yearly};
-  static const all = <String>{weekly, monthly, yearly};
-}
+import 'monetization.dart';
+export 'monetization.dart' show MysticProductIds;
 
 enum StorePurchasePhase {
   idle,
