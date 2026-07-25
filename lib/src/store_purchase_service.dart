@@ -10,6 +10,9 @@ abstract final class MysticProductIds {
   static const monthly = 'mystic_plus_monthly';
   static const yearly = 'mystic_plus_yearly';
 
+  /// Version 1 launches with monthly and yearly only. Weekly remains reserved
+  /// for a future pricing experiment and must not block launch readiness.
+  static const launch = <String>{monthly, yearly};
   static const all = <String>{weekly, monthly, yearly};
 }
 
@@ -68,16 +71,21 @@ class StorePurchaseService extends ChangeNotifier {
         return;
       }
 
-      final response = await _store.queryProductDetails(MysticProductIds.all);
+      final response =
+          await _store.queryProductDetails(MysticProductIds.launch);
       products = response.productDetails.toList()
         ..sort((a, b) => _rank(a.id).compareTo(_rank(b.id)));
+
+      final missingLaunchProducts = response.notFoundIDs
+          .where(MysticProductIds.launch.contains)
+          .toList(growable: false);
 
       if (response.error != null) {
         phase = StorePurchasePhase.error;
         message = response.error!.message;
-      } else if (products.isEmpty || response.notFoundIDs.isNotEmpty) {
+      } else if (products.isEmpty || missingLaunchProducts.isNotEmpty) {
         phase = StorePurchasePhase.unavailable;
-        message = 'Subscription products are not configured in the store yet.';
+        message = 'Monthly and yearly subscriptions are not configured yet.';
       } else {
         phase = StorePurchasePhase.ready;
       }
@@ -158,9 +166,9 @@ class StorePurchaseService extends ChangeNotifier {
   }
 
   static int _rank(String id) => switch (id) {
-        MysticProductIds.weekly => 0,
-        MysticProductIds.monthly => 1,
-        MysticProductIds.yearly => 2,
+        MysticProductIds.monthly => 0,
+        MysticProductIds.yearly => 1,
+        MysticProductIds.weekly => 2,
         _ => 99,
       };
 
