@@ -1,8 +1,0 @@
-Analyzing mystic-tarot...                                       
-
-warning • The declaration '_copy' isn't referenced. Try removing the declaration of '_copy' • lib/src/app.dart:509:10 • unused_element
-warning • The declaration '_intentionLabel' isn't referenced. Try removing the declaration of '_intentionLabel' • lib/src/app.dart:511:10 • unused_element
-  error • The name '_copy' is already defined. Try renaming one of the declarations • lib/src/app.dart:519:10 • duplicate_definition
-  error • The name '_intentionLabel' is already defined. Try renaming one of the declarations • lib/src/app.dart:521:10 • duplicate_definition
-
-4 issues found. (ran in 10.8s)

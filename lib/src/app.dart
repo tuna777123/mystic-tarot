@@ -516,16 +516,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _ => value,
       };
 
-  String _copy({required String en, required String es, required String fr, required String pt, required String tr, required String it, required String de}) => localized(language.appLanguage, english: en, spanish: es, french: fr, portugueseBrazil: pt, turkish: tr, italian: it, german: de);
-
-  String _intentionLabel(String value) => switch (value) {
-        'Clarity' => _copy(en: 'Clarity', es: 'Claridad', fr: 'Clarté', pt: 'Clareza', tr: 'Netlik', it: 'Chiarezza', de: 'Klarheit'),
-        'Love' => _copy(en: 'Love', es: 'Amor', fr: 'Amour', pt: 'Amor', tr: 'Aşk', it: 'Amore', de: 'Liebe'),
-        'Purpose' => _copy(en: 'Purpose', es: 'Propósito', fr: 'Mission', pt: 'Propósito', tr: 'Amaç', it: 'Scopo', de: 'Bestimmung'),
-        'Healing' => _copy(en: 'Healing', es: 'Sanación', fr: 'Guérison', pt: 'Cura', tr: 'İyileşme', it: 'Guarigione', de: 'Heilung'),
-        _ => value,
-      };
-
   Widget _page(BuildContext context) {
     if (page == 0) {
       return Column(key: const ValueKey(0), mainAxisAlignment: MainAxisAlignment.center, children: [
