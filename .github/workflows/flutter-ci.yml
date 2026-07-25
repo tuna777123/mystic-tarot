@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test-and-build:
@@ -15,66 +15,6 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: Integrate Mystic Soul profile entry
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/mystic-soul-profile-entry'
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('lib/src/app.dart')
-          text = path.read_text()
-
-          replacements = [
-            (
-              "import 'flagship.dart';\nimport 'models.dart';",
-              "import 'app_language.dart';\nimport 'flagship.dart';\nimport 'identity_engine.dart';\nimport 'language_bridge.dart';\nimport 'models.dart';\nimport 'mystic_identity_screen.dart';",
-            ),
-            (
-              "ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium)",
-              "ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, completedArcanaDays: completedArcanaDays.length, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium)",
-            ),
-            (
-              "const ProfileScreen({required this.userName, required this.intention, required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.deckStyle, required this.language, required this.onSelectLanguage, required this.onSelectDeckStyle, required this.onUpdateProfile, required this.onDeleteData, required this.onPremium, super.key});",
-              "const ProfileScreen({required this.userName, required this.intention, required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.completedArcanaDays, required this.deckStyle, required this.language, required this.onSelectLanguage, required this.onSelectDeckStyle, required this.onUpdateProfile, required this.onDeleteData, required this.onPremium, super.key});",
-            ),
-            (
-              "final List<ReadingRecord> records;\n  final DeckStyle deckStyle;",
-              "final List<ReadingRecord> records;\n  final int completedArcanaDays;\n  final DeckStyle deckStyle;",
-            ),
-            (
-              "final progress = (xp % 100) / 100;\n    final badges",
-              "final progress = (xp % 100) / 100;\n    final identity = const MysticIdentityEngine().analyze(\n      records: records,\n      streak: streak,\n      completedArcanaDays: completedArcanaDays,\n      language: language.appLanguage,\n    );\n    final badges",
-            ),
-            (
-              "])),\n        const SizedBox(height: 22),\n        Row(children: [Text('Mystic achievements'",
-              "])),\n        const SizedBox(height: 16),\n        _mysticSoulCard(context, identity),\n        const SizedBox(height: 22),\n        Row(children: [Text('Mystic achievements'",
-            ),
-            (
-              "  void _chooseLanguage(BuildContext context) {",
-              "  Widget _mysticSoulCard(BuildContext context, MysticIdentitySnapshot identity) {\n    final appLanguage = language.appLanguage;\n    final title = localized(appLanguage, english: 'Your Mystic Soul', spanish: 'Tu Alma Mística', french: 'Votre Âme Mystique', portugueseBrazil: 'Sua Alma Mística', turkish: 'Mistik Ruhun', italian: 'La Tua Anima Mistica', german: 'Deine Mystische Seele');\n    final action = localized(appLanguage, english: 'Explore identity', spanish: 'Explorar identidad', french: 'Explorer l’identité', portugueseBrazil: 'Explorar identidade', turkish: 'Kimliğini keşfet', italian: 'Esplora identità', german: 'Identität erkunden');\n    return InkWell(\n      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticIdentityScreen(\n        snapshot: identity,\n        language: appLanguage,\n        onContinueJourney: () => Navigator.pop(context),\n      ))),\n      borderRadius: BorderRadius.circular(24),\n      child: Container(\n        padding: const EdgeInsets.all(19),\n        decoration: BoxDecoration(\n          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF744CB0), Color(0xFF2A1B43), Color(0xFF15101F)]),\n          borderRadius: BorderRadius.circular(24),\n          border: Border.all(color: MysticColors.gold.withValues(alpha: .4)),\n          boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .18), blurRadius: 28)],\n        ),\n        child: Row(children: [\n          Container(width: 58, height: 58, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.black.withValues(alpha: .2), border: Border.all(color: MysticColors.gold.withValues(alpha: .55))), child: const Text('◉', style: TextStyle(fontSize: 29, color: MysticColors.gold))),\n          const SizedBox(width: 14),\n          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [\n            Text(title.toUpperCase(), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.1)),\n            const SizedBox(height: 6),\n            Text(identity.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),\n            const SizedBox(height: 4),\n            Text(identity.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium),\n            const SizedBox(height: 9),\n            Row(children: [Text('$action • ${identity.confidence}%', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w800)), const SizedBox(width: 5), const Icon(Icons.arrow_forward, size: 14, color: MysticColors.gold)]),\n          ])),\n        ]),\n      ),\n    );\n  }\n\n  void _chooseLanguage(BuildContext context) {",
-            ),
-          ]
-
-          for old, new in replacements:
-              if old in text:
-                  text = text.replace(old, new, 1)
-              elif new not in text:
-                  raise SystemExit(f'Expected app integration block not found: {old[:80]}')
-
-          path.write_text(text)
-          PY
-
-          if ! git diff --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add lib/src/app.dart
-            git commit -m "feat: surface Mystic Soul in profile"
-            git push origin HEAD:feature/mystic-soul-profile-entry
-          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
