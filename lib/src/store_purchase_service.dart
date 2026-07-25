@@ -131,23 +131,23 @@ class StorePurchaseService extends ChangeNotifier {
 
   Future<void> _handlePurchases(List<PurchaseDetails> updates) async {
     for (final purchase in updates) {
-      switch (purchase.status) {
-        case PurchaseStatus.pending:
-          phase = StorePurchasePhase.purchasing;
-          message = 'Waiting for the official store confirmation.';
-        case PurchaseStatus.purchased:
-        case PurchaseStatus.restored:
-          // Never unlock premium from a client-side receipt alone. A production
-          // verification endpoint must validate the receipt and subscription
-          // state before the app persists entitlement.
-          phase = StorePurchasePhase.verificationRequired;
-          message = 'Purchase received. Secure entitlement verification is required.';
-        case PurchaseStatus.error:
-          phase = StorePurchasePhase.error;
-          message = purchase.error?.message ?? 'The purchase was not completed.';
-        case PurchaseStatus.canceled:
-          phase = StorePurchasePhase.ready;
-          message = 'The purchase was cancelled.';
+      if (purchase.status == PurchaseStatus.pending) {
+        phase = StorePurchasePhase.purchasing;
+        message = 'Waiting for the official store confirmation.';
+      } else if (purchase.status == PurchaseStatus.purchased ||
+          purchase.status == PurchaseStatus.restored) {
+        // Never unlock premium from a client-side receipt alone. A production
+        // verification endpoint must validate the receipt and subscription
+        // state before the app persists entitlement.
+        phase = StorePurchasePhase.verificationRequired;
+        message =
+            'Purchase received. Secure entitlement verification is required.';
+      } else if (purchase.status == PurchaseStatus.error) {
+        phase = StorePurchasePhase.error;
+        message = purchase.error?.message ?? 'The purchase was not completed.';
+      } else if (purchase.status == PurchaseStatus.canceled) {
+        phase = StorePurchasePhase.ready;
+        message = 'The purchase was cancelled.';
       }
 
       if (purchase.pendingCompletePurchase) {
