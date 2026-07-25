@@ -6,8 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app_language.dart';
 import 'flagship.dart';
+import 'identity_engine.dart';
+import 'language_bridge.dart';
 import 'models.dart';
+import 'mystic_identity_screen.dart';
 import 'sound.dart';
 import 'tarot_data.dart';
 import 'theme.dart';
@@ -88,7 +92,7 @@ class _MysticAppState extends State<MysticApp> {
           ),
           JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, completedArcanaDays: completedArcanaDays, language: language, onOpenDestiny: _openDestinyHub, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
           JournalScreen(records: journal),
-          ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
+          ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, completedArcanaDays: completedArcanaDays.length, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
         ]),
         bottomNavigationBar: NavigationBar(
           selectedIndex: tab,
@@ -1658,7 +1662,7 @@ class _EmptyJournal extends StatelessWidget {
 }
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({required this.userName, required this.intention, required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.deckStyle, required this.language, required this.onSelectLanguage, required this.onSelectDeckStyle, required this.onUpdateProfile, required this.onDeleteData, required this.onPremium, super.key});
+  const ProfileScreen({required this.userName, required this.intention, required this.streak, required this.xp, required this.readings, required this.discovered, required this.relics, required this.records, required this.completedArcanaDays, required this.deckStyle, required this.language, required this.onSelectLanguage, required this.onSelectDeckStyle, required this.onUpdateProfile, required this.onDeleteData, required this.onPremium, super.key});
   final String userName;
   final String intention;
   final int streak;
@@ -1667,6 +1671,7 @@ class ProfileScreen extends StatelessWidget {
   final int discovered;
   final int relics;
   final List<ReadingRecord> records;
+  final int completedArcanaDays;
   final DeckStyle deckStyle;
   final MysticLanguage language;
   final ValueChanged<MysticLanguage> onSelectLanguage;
@@ -1679,6 +1684,12 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final level = xp ~/ 100 + 1;
     final progress = (xp % 100) / 100;
+    final identity = const MysticIdentityEngine().analyze(
+      records: records,
+      streak: streak,
+      completedArcanaDays: completedArcanaDays,
+      language: language.appLanguage,
+    );
     final badges = <(String, String, bool, String)>[
       ('First Signal', '✦', readings >= 1, 'Save 1 reading'),
       ('Flame Keeper', '🔥', streak >= 3, 'Reach a 3-day streak'),
@@ -1701,6 +1712,8 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 8),
           ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: progress, minHeight: 7, backgroundColor: Colors.white10, color: MysticColors.gold)),
         ])),
+        const SizedBox(height: 16),
+        _mysticSoulCard(context, identity),
         const SizedBox(height: 22),
         Row(children: [Text('Mystic achievements', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${badges.where((badge) => badge.$3).length}/${badges.length}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
         const SizedBox(height: 6),
@@ -1720,6 +1733,42 @@ class ProfileScreen extends StatelessWidget {
         ListTile(onTap: () => _chooseLanguage(context), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.language, color: MysticColors.gold), title: Text(mysticText(language, 'Language', 'Dil'), style: const TextStyle(fontFamily: 'Arial')), subtitle: Text(language.label, style: Theme.of(context).textTheme.bodyMedium), trailing: const Icon(Icons.chevron_right)),
         ...['Reading preferences', 'Daily reminder', 'Privacy & data', 'Help and support'].map((label) => ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticSettingsScreen(section: label, records: records, onDeleteData: onDeleteData))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(label, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
       ]));
+  }
+
+  Widget _mysticSoulCard(BuildContext context, MysticIdentitySnapshot identity) {
+    final appLanguage = language.appLanguage;
+    final title = localized(appLanguage, english: 'Your Mystic Soul', spanish: 'Tu Alma Mística', french: 'Votre Âme Mystique', portugueseBrazil: 'Sua Alma Mística', turkish: 'Mistik Ruhun', italian: 'La Tua Anima Mistica', german: 'Deine Mystische Seele');
+    final action = localized(appLanguage, english: 'Explore identity', spanish: 'Explorar identidad', french: 'Explorer l’identité', portugueseBrazil: 'Explorar identidade', turkish: 'Kimliğini keşfet', italian: 'Esplora identità', german: 'Identität erkunden');
+    return InkWell(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticIdentityScreen(
+        snapshot: identity,
+        language: appLanguage,
+        onContinueJourney: () => Navigator.pop(context),
+      ))),
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(19),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF744CB0), Color(0xFF2A1B43), Color(0xFF15101F)]),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .4)),
+          boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .18), blurRadius: 28)],
+        ),
+        child: Row(children: [
+          Container(width: 58, height: 58, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.black.withValues(alpha: .2), border: Border.all(color: MysticColors.gold.withValues(alpha: .55))), child: const Text('◉', style: TextStyle(fontSize: 29, color: MysticColors.gold))),
+          const SizedBox(width: 14),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title.toUpperCase(), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
+            const SizedBox(height: 6),
+            Text(identity.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            Text(identity.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 9),
+            Row(children: [Text('$action • ${identity.confidence}%', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w800)), const SizedBox(width: 5), const Icon(Icons.arrow_forward, size: 14, color: MysticColors.gold)]),
+          ])),
+        ]),
+      ),
+    );
   }
 
   void _chooseLanguage(BuildContext context) {
