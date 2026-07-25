@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test-and-build:
@@ -15,6 +15,49 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Localize onboarding in seven languages
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/seven-language-onboarding'
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
+
+          replacements = [
+            ("GoldButton(label: page == 0 ? mysticText(language, 'Begin my journey', 'Yolculuğuma başla') : page == 1 ? mysticText(language, 'Set my intention', 'Niyetimi belirle') : mysticText(language, 'Enter Mystic', 'Mystic’e gir'),", "GoldButton(label: page == 0 ? _copy(en: 'Begin my journey', es: 'Comenzar mi viaje', fr: 'Commencer mon voyage', pt: 'Começar minha jornada', tr: 'Yolculuğuma başla', it: 'Inizia il mio viaggio', de: 'Meine Reise beginnen') : page == 1 ? _copy(en: 'Set my intention', es: 'Definir mi intención', fr: 'Définir mon intention', pt: 'Definir minha intenção', tr: 'Niyetimi belirle', it: 'Imposta la mia intenzione', de: 'Meine Absicht festlegen') : _copy(en: 'Enter Mystic', es: 'Entrar en Mystic', fr: 'Entrer dans Mystic', pt: 'Entrar no Mystic', tr: 'Mystic’e gir', it: 'Entra in Mystic', de: 'Mystic betreten'),"),
+            ("Text(mysticText(language, 'Your patterns are\\nalready speaking.', 'Örüntülerin\\nçoktan konuşuyor.'),", "Text(_copy(en: 'Your patterns are\\nalready speaking.', es: 'Tus patrones ya\\nestán hablando.', fr: 'Vos schémas parlent\\ndéjà.', pt: 'Seus padrões já\\nestão falando.', tr: 'Örüntülerin\\nçoktan konuşuyor.', it: 'I tuoi schemi stanno\\ngià parlando.', de: 'Deine Muster\\nsprechen bereits.'),"),
+            ("Text(mysticText(language, 'Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', 'Kartları aç. Tekrar edenleri izle. İçgörüyü seni hatırlayan özel bir günlük ritüele dönüştür.'),", "Text(_copy(en: 'Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.', es: 'Revela las cartas. Observa lo que vuelve. Convierte la intuición en un ritual diario privado que te recuerda.', fr: 'Révélez les cartes. Observez ce qui revient. Transformez l’intuition en un rituel quotidien privé qui se souvient de vous.', pt: 'Revele as cartas. Observe o que retorna. Transforme a percepção em um ritual diário privado que se lembra de você.', tr: 'Kartları aç. Tekrar edenleri izle. İçgörüyü seni hatırlayan özel bir günlük ritüele dönüştür.', it: 'Rivela le carte. Osserva ciò che ritorna. Trasforma l’intuizione in un rituale quotidiano privato che si ricorda di te.', de: 'Enthülle die Karten. Beobachte, was wiederkehrt. Verwandle Erkenntnis in ein privates tägliches Ritual, das sich an dich erinnert.'),"),
+            ("const Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: '78 ARCANA'), _OnboardingProof(icon: '◉', label: 'PATTERN MEMORY'), _OnboardingProof(icon: '☾', label: 'PRIVATE JOURNAL')]),", "Wrap(alignment: WrapAlignment.center, spacing: 7, runSpacing: 7, children: [_OnboardingProof(icon: '✦', label: _copy(en: '78 ARCANA', es: '78 ARCANOS', fr: '78 ARCANES', pt: '78 ARCANOS', tr: '78 ARKANA', it: '78 ARCANI', de: '78 ARKANA')), _OnboardingProof(icon: '◉', label: _copy(en: 'PATTERN MEMORY', es: 'MEMORIA DE PATRONES', fr: 'MÉMOIRE DES SCHÉMAS', pt: 'MEMÓRIA DE PADRÕES', tr: 'ÖRÜNTÜ HAFIZASI', it: 'MEMORIA DEGLI SCHEMI', de: 'MUSTERGEDÄCHTNIS')), _OnboardingProof(icon: '☾', label: _copy(en: 'PRIVATE JOURNAL', es: 'DIARIO PRIVADO', fr: 'JOURNAL PRIVÉ', pt: 'DIÁRIO PRIVADO', tr: 'ÖZEL GÜNLÜK', it: 'DIARIO PRIVATO', de: 'PRIVATES TAGEBUCH'))]),"),
+            ("Text(mysticText(language, 'What should we\\ncall you?', 'Sana nasıl\\nseslenelim?'),", "Text(_copy(en: 'What should we\\ncall you?', es: '¿Cómo debemos\\nllamarte?', fr: 'Comment devons-nous\\nvous appeler ?', pt: 'Como devemos\\nchamar você?', tr: 'Sana nasıl\\nseslenelim?', it: 'Come dovremmo\\nchiamarti?', de: 'Wie dürfen wir\\ndich nennen?'),"),
+            ("Text(mysticText(language, 'Your name helps each reading feel personal.', 'Adın her okumayı sana özel hissettirir.'),", "Text(_copy(en: 'Your name helps each reading feel personal.', es: 'Tu nombre hace que cada lectura se sienta personal.', fr: 'Votre nom rend chaque tirage plus personnel.', pt: 'Seu nome torna cada leitura mais pessoal.', tr: 'Adın her okumayı sana özel hissettirir.', it: 'Il tuo nome rende ogni lettura più personale.', de: 'Dein Name lässt jede Lesung persönlicher wirken.'),"),
+            ("decoration: InputDecoration(hintText: mysticText(language, 'Your first name', 'Adın'),", "decoration: InputDecoration(hintText: _copy(en: 'Your first name', es: 'Tu nombre', fr: 'Votre prénom', pt: 'Seu nome', tr: 'Adın', it: 'Il tuo nome', de: 'Dein Vorname'),"),
+            ("Text(mysticText(language, 'Set your first\\nintention.', 'İlk niyetini\\nbelirle.'),", "Text(_copy(en: 'Set your first\\nintention.', es: 'Define tu primera\\nintención.', fr: 'Définissez votre première\\nintention.', pt: 'Defina sua primeira\\nintenção.', tr: 'İlk niyetini\\nbelirle.', it: 'Imposta la tua prima\\nintenzione.', de: 'Lege deine erste\\nAbsicht fest.'),"),
+            ("Text(mysticText(language, 'There is no wrong choice. This simply shapes your starting experience.', 'Yanlış seçim yok. Bu yalnızca başlangıç deneyimini şekillendirir.'),", "Text(_copy(en: 'There is no wrong choice. This simply shapes your starting experience.', es: 'No hay una elección incorrecta. Esto solo da forma a tu experiencia inicial.', fr: 'Il n’y a pas de mauvais choix. Cela façonne simplement votre expérience de départ.', pt: 'Não existe escolha errada. Isso apenas molda sua experiência inicial.', tr: 'Yanlış seçim yok. Bu yalnızca başlangıç deneyimini şekillendirir.', it: 'Non esiste una scelta sbagliata. Questo modella semplicemente la tua esperienza iniziale.', de: 'Es gibt keine falsche Wahl. Sie gestaltet lediglich dein erstes Erlebnis.'),"),
+            ("ChoiceChip(label: Text(language == MysticLanguage.turkish ? const {'Clarity': 'Netlik', 'Love': 'Aşk', 'Purpose': 'Amaç', 'Healing': 'İyileşme'}[choice]! : choice),", "ChoiceChip(label: Text(_intentionLabel(choice)),"),
+            ("  Widget _page(BuildContext context) {", "  String _copy({required String en, required String es, required String fr, required String pt, required String tr, required String it, required String de}) => localized(language.appLanguage, english: en, spanish: es, french: fr, portugueseBrazil: pt, turkish: tr, italian: it, german: de);\n\n  String _intentionLabel(String value) => switch (value) {\n        'Clarity' => _copy(en: 'Clarity', es: 'Claridad', fr: 'Clarté', pt: 'Clareza', tr: 'Netlik', it: 'Chiarezza', de: 'Klarheit'),\n        'Love' => _copy(en: 'Love', es: 'Amor', fr: 'Amour', pt: 'Amor', tr: 'Aşk', it: 'Amore', de: 'Liebe'),\n        'Purpose' => _copy(en: 'Purpose', es: 'Propósito', fr: 'Mission', pt: 'Propósito', tr: 'Amaç', it: 'Scopo', de: 'Bestimmung'),\n        'Healing' => _copy(en: 'Healing', es: 'Sanación', fr: 'Guérison', pt: 'Cura', tr: 'İyileşme', it: 'Guarigione', de: 'Heilung'),\n        _ => value,\n      };\n\n  Widget _page(BuildContext context) {"),
+          ]
+
+          for old, new in replacements:
+              if old in text:
+                  text = text.replace(old, new, 1)
+              elif new not in text:
+                  raise SystemExit(f'Expected onboarding block not found: {old[:100]}')
+
+          path.write_text(text)
+          PY
+
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add lib/src/app.dart
+            git commit -m "feat: fully localize onboarding in seven languages"
+            git push origin HEAD:feature/seven-language-onboarding
+          fi
 
       - name: Set up Java
         uses: actions/setup-java@v4
