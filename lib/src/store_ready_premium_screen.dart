@@ -164,7 +164,6 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
       );
 
   List<String> get _planIds => const [
-        MysticProductIds.weekly,
         MysticProductIds.monthly,
         MysticProductIds.yearly,
       ];
@@ -211,7 +210,6 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
     final product = store.productFor(id);
     final active = selectedId == id;
     final title = switch (id) {
-      MysticProductIds.weekly => t(en: 'Weekly', es: 'Semanal', fr: 'Hebdo', pt: 'Semanal', tr: 'Haftalık', it: 'Settimanale', de: 'Wöchentlich'),
       MysticProductIds.monthly => t(en: 'Monthly', es: 'Mensual', fr: 'Mensuel', pt: 'Mensal', tr: 'Aylık', it: 'Mensile', de: 'Monatlich'),
       _ => t(en: 'Yearly', es: 'Anual', fr: 'Annuel', pt: 'Anual', tr: 'Yıllık', it: 'Annuale', de: 'Jährlich'),
     };
