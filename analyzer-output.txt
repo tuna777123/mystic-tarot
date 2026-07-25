@@ -1,6 +1,0 @@
-Analyzing mystic-tarot...                                       
-
-   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/src/identity_engine.dart:135:73 • prefer_single_quotes
-   info • Unnecessary use of double quotes. Try using single quotes unless the string contains single quotes • lib/src/identity_engine.dart:135:152 • prefer_single_quotes
-
-2 issues found. (ran in 10.9s)

@@ -132,7 +132,7 @@ class MysticIdentityEngine {
         MysticArchetype.seeker => localized(language,
             english: 'The Seeker', spanish: 'El Buscador', french: 'Le Chercheur', portugueseBrazil: 'O Buscador', turkish: 'Arayışçı', italian: 'Il Cercatore', german: 'Der Suchende'),
         MysticArchetype.alchemist => localized(language,
-            english: 'The Alchemist', spanish: 'El Alquimista', french: "L’Alchimiste", portugueseBrazil: 'O Alquimista', turkish: 'Simyacı', italian: "L’Alchimista", german: 'Der Alchemist'),
+            english: 'The Alchemist', spanish: 'El Alquimista', french: 'L’Alchimiste', portugueseBrazil: 'O Alquimista', turkish: 'Simyacı', italian: 'L’Alchimista', german: 'Der Alchemist'),
         MysticArchetype.sage => localized(language,
             english: 'The Sage', spanish: 'El Sabio', french: 'Le Sage', portugueseBrazil: 'O Sábio', turkish: 'Bilge', italian: 'Il Saggio', german: 'Der Weise'),
         MysticArchetype.guardian => localized(language,
