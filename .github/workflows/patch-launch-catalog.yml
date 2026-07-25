@@ -1,0 +1,31 @@
+name: Patch launch catalog UI
+
+on:
+  push:
+    branches: [feature/launch-catalog-hardening]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/launch-catalog-hardening
+      - name: Remove weekly plan from v1 UI
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('lib/src/store_ready_premium_screen.dart')
+          text = path.read_text()
+          text = text.replace("  List<String> get _planIds => const [\n        MysticProductIds.weekly,\n        MysticProductIds.monthly,\n        MysticProductIds.yearly,\n      ];", "  List<String> get _planIds => const [\n        MysticProductIds.monthly,\n        MysticProductIds.yearly,\n      ];")
+          text = text.replace("      MysticProductIds.weekly => t(en: 'Weekly', es: 'Semanal', fr: 'Hebdo', pt: 'Semanal', tr: 'Haftalık', it: 'Settimanale', de: 'Wöchentlich'),\n      MysticProductIds.monthly", "      MysticProductIds.monthly")
+          path.write_text(text)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/store_ready_premium_screen.dart
+          git commit -m "fix: hide weekly plan from v1 checkout" || exit 0
+          git push origin HEAD:feature/launch-catalog-hardening
