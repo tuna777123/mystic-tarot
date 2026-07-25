@@ -11,6 +11,7 @@ import 'flagship.dart';
 import 'identity_engine.dart';
 import 'language_bridge.dart';
 import 'models.dart';
+import 'premium_value_screen.dart';
 import 'mystic_identity_screen.dart';
 import 'sound.dart';
 import 'tarot_data.dart';
@@ -384,7 +385,7 @@ class _MysticAppState extends State<MysticApp> {
     }
   }
 
-  void _showPremium({String source = 'organic'}) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumScreen(source: source)));
+  void _showPremium({String source = 'organic'}) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumValueScreen(source: source, language: language, onContinue: () => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumScreen(source: source))))));
 
   void _previewPremiumReading(ReadingKind kind) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumReadingPreview(
         kind: kind,
