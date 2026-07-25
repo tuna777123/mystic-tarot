@@ -19,6 +19,39 @@ jobs:
           ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
+      - name: Deduplicate onboarding helpers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
+          block = """  String _copy({required String en, required String es, required String fr, required String pt, required String tr, required String it, required String de}) => localized(language.appLanguage, english: en, spanish: es, french: fr, portugueseBrazil: pt, turkish: tr, italian: it, german: de);
+
+  String _intentionLabel(String value) => switch (value) {
+        'Clarity' => _copy(en: 'Clarity', es: 'Claridad', fr: 'Clarté', pt: 'Clareza', tr: 'Netlik', it: 'Chiarezza', de: 'Klarheit'),
+        'Love' => _copy(en: 'Love', es: 'Amor', fr: 'Amour', pt: 'Amor', tr: 'Aşk', it: 'Amore', de: 'Liebe'),
+        'Purpose' => _copy(en: 'Purpose', es: 'Propósito', fr: 'Mission', pt: 'Propósito', tr: 'Amaç', it: 'Scopo', de: 'Bestimmung'),
+        'Healing' => _copy(en: 'Healing', es: 'Sanación', fr: 'Guérison', pt: 'Cura', tr: 'İyileşme', it: 'Guarigione', de: 'Heilung'),
+        _ => value,
+      };
+
+"""
+          if text.count(block) > 1:
+              first = text.find(block)
+              second = text.find(block, first + len(block))
+              text = text[:second] + text[second + len(block):]
+          path.write_text(text)
+          Path('analyzer-output.txt').unlink(missing_ok=True)
+          PY
+
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "fix: deduplicate onboarding localization helpers"
+            git push origin HEAD:feature/seven-language-onboarding
+          fi
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -41,19 +74,7 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Analyze
-        run: |
-          set +e
-          flutter analyze > analyzer-output.txt 2>&1
-          status=$?
-          cat analyzer-output.txt
-          if [ "$status" -ne 0 ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add analyzer-output.txt
-            git commit -m "chore: capture onboarding analyzer diagnostics" || true
-            git push origin HEAD:feature/seven-language-onboarding || true
-          fi
-          exit $status
+        run: flutter analyze
 
       - name: Test
         run: flutter test
@@ -63,3 +84,17 @@ jobs:
 
       - name: Build Android release bundle
         run: flutter build appbundle --release
+
+      - name: Upload web release
+        uses: actions/upload-artifact@v4
+        with:
+          name: mystic-tarot-web
+          path: build/web
+          if-no-files-found: error
+
+      - name: Upload Android bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: mystic-tarot-android-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
