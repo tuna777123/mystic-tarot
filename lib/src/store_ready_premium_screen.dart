@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'app_language.dart';
-import 'flagship.dart';
 import 'language_bridge.dart';
 import 'store_purchase_service.dart';
 import 'theme.dart';
