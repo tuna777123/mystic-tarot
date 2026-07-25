@@ -19,6 +19,26 @@ jobs:
           ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
+      - name: Apply final analyzer cleanup
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/mystic-soul-profile-entry'
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('lib/src/identity_engine.dart')
+          text = path.read_text()
+          text = text.replace('french: "L’Alchimiste"', "french: 'L’Alchimiste'")
+          text = text.replace('italian: "L’Alchimista"', "italian: 'L’Alchimista'")
+          path.write_text(text)
+          Path('analyzer-output.txt').unlink(missing_ok=True)
+          PY
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "fix: satisfy identity localization analysis"
+            git push origin HEAD:feature/mystic-soul-profile-entry
+          fi
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -41,19 +61,7 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Analyze
-        run: |
-          set +e
-          flutter analyze > analyzer-output.txt 2>&1
-          status=$?
-          cat analyzer-output.txt
-          if [ "$status" -ne 0 ] && [ "${{ github.head_ref }}" = "feature/mystic-soul-profile-entry" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add analyzer-output.txt
-            git commit -m "chore: capture analyzer diagnostics" || true
-            git push origin HEAD:feature/mystic-soul-profile-entry || true
-          fi
-          exit $status
+        run: flutter analyze
 
       - name: Test
         run: flutter test
