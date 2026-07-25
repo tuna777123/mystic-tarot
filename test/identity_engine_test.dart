@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mystic_tarot/src/app_language.dart';
 import 'package:mystic_tarot/src/identity_engine.dart';
 import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
@@ -74,5 +75,41 @@ void main() {
 
     expect(result.primary, MysticArchetype.sage);
     expect(result.signals, isNotEmpty);
+  });
+
+  test('identity content is generated in the selected language', () {
+    final turkish = engine.analyze(
+      records: [record(kind: ReadingKind.shadow, emotion: EmotionalState.anxious)],
+      streak: 4,
+      completedArcanaDays: 0,
+      language: AppLanguage.turkish,
+    );
+    final german = engine.analyze(
+      records: [record(kind: ReadingKind.career, emotion: EmotionalState.grounded)],
+      streak: 5,
+      completedArcanaDays: 0,
+      language: AppLanguage.german,
+    );
+
+    expect(turkish.title, 'Simyacı');
+    expect(turkish.signals.join(' '), contains('okuma'));
+    expect(german.title, 'Der Hüter');
+    expect(german.signals.join(' '), contains('Legungen'));
+  });
+
+  test('every supported language produces complete identity copy', () {
+    for (final language in AppLanguage.values) {
+      final result = engine.analyze(
+        records: [record(kind: ReadingKind.love, emotion: EmotionalState.hopeful)],
+        streak: 3,
+        completedArcanaDays: 2,
+        language: language,
+      );
+
+      expect(result.title, isNotEmpty);
+      expect(result.summary, isNotEmpty);
+      expect(result.nextEvolution, isNotEmpty);
+      expect(result.signals, isNotEmpty);
+    }
   });
 }
