@@ -1,27 +1,36 @@
-name: Stage Journey Integration
+name: Apply Journey Integration
 
 on:
-  push:
+  pull_request:
     branches: [main]
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: write
 
 jobs:
   integrate:
-    if: ${{ contains(github.event.head_commit.message, 'ship complete local-first Mystic Journeys') }}
+    if: ${{ github.head_ref == 'feature/journey-final-integration' && !contains(github.event.pull_request.head.sha, 'journey-integrated') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check out main
+      - name: Check out integration branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: feature/journey-final-integration
           fetch-depth: 0
 
-      - name: Create integration branch
-        run: git switch -c feature/journey-final-integration
+      - name: Skip when already integrated
+        id: guard
+        shell: bash
+        run: |
+          if grep -q "import 'mystic_journey_feature.dart';" lib/src/app.dart; then
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Integrate Journey feature
+        if: ${{ steps.guard.outputs.needed == 'true' }}
         shell: python
         run: |
           from pathlib import Path
@@ -72,25 +81,26 @@ jobs:
           path.write_text(text)
 
       - name: Set up Flutter
+        if: ${{ steps.guard.outputs.needed == 'true' }}
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
       - name: Format integration
+        if: ${{ steps.guard.outputs.needed == 'true' }}
         run: dart format lib/src/app.dart lib/src/mystic_journey_feature.dart
 
       - name: Remove one-shot workflow
+        if: ${{ steps.guard.outputs.needed == 'true' }}
         run: rm .github/workflows/apply-journey-integration.yml
 
-      - name: Commit integration branch
+      - name: Commit integration
+        if: ${{ steps.guard.outputs.needed == 'true' }}
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lib/src/app.dart lib/src/mystic_journey_feature.dart .github/workflows/apply-journey-integration.yml
-          git commit -m "feat: integrate Mystic Journeys into the app shell"
-          git push origin feature/journey-final-integration
-
-# One-shot staging workflow. It removes itself from the generated integration branch.
-# Triggered through a reviewed PR so GitHub recognizes the workflow before the push event.
+          git commit -m "feat: integrate Mystic Journeys into the app shell [journey-integrated]"
+          git push origin HEAD:feature/journey-final-integration
