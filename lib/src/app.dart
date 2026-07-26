@@ -13,6 +13,7 @@ import 'language_bridge.dart';
 import 'models.dart';
 import 'premium_value_screen.dart';
 import 'mystic_identity_screen.dart';
+import 'mystic_journey_feature.dart';
 import 'sound.dart';
 import 'store_ready_premium_screen.dart';
 import 'tarot_data.dart';
@@ -92,7 +93,14 @@ class _MysticAppState extends State<MysticApp> {
             onPremium: _showPremium,
             onOpenDestiny: _openDestinyHub,
           ),
-          JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, completedArcanaDays: completedArcanaDays, language: language, onOpenDestiny: _openDestinyHub, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),
+          MysticJourneysFeature(
+            language: language,
+            onOpenDestiny: _openDestinyHub,
+            onStartReading: () {
+              setState(() => tab = 0);
+              _startReading(ReadingKind.daily);
+            },
+          ),
           JournalScreen(records: journal),
           ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, completedArcanaDays: completedArcanaDays.length, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
         ]),
@@ -150,21 +158,6 @@ class _MysticAppState extends State<MysticApp> {
       transitionBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: ScaleTransition(scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack), child: child)),
       pageBuilder: (_, __, ___) => _CardDiscoveryDialog(cards: cards),
     );
-  }
-
-  void _completeRitual(String id) {
-    if (completedRituals.contains(id)) return;
-    setState(() {
-      completedRituals.add(id);
-      xp += 15;
-    });
-    _saveProgress();
-  }
-
-  void _claimReward(int milestone) {
-    if (xp < milestone || claimedRewards.contains(milestone)) return;
-    setState(() => claimedRewards.add(milestone));
-    _saveProgress();
   }
 
   void _claimDailyQuest() {
