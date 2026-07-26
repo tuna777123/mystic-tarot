@@ -93,3 +93,4 @@ jobs:
           git push origin feature/journey-final-integration
 
 # One-shot staging workflow. It removes itself from the generated integration branch.
+# Triggered through a reviewed PR so GitHub recognizes the workflow before the push event.
