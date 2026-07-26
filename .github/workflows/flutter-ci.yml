@@ -10,6 +10,7 @@ permissions:
   contents: read
 
 jobs:
+  # BEGIN JOURNEY INTEGRATION JOB
   integrate-journey:
     if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature/journey-final-integration-v') }}
     runs-on: ubuntu-latest
@@ -80,71 +81,13 @@ jobs:
           if legacy_workflow.exists():
               legacy_workflow.unlink()
 
-          Path('.github/workflows/flutter-ci.yml').write_text("""name: Flutter CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
-
-jobs:
-  test-and-build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Generate platform shells
-        run: flutter create .
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate branded native icons
-        run: dart run flutter_launcher_icons
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Test
-        run: flutter test
-
-      - name: Build web release
-        run: flutter build web --release
-
-      - name: Build Android release bundle
-        run: flutter build appbundle --release
-
-      - name: Upload web release
-        uses: actions/upload-artifact@v4
-        with:
-          name: mystic-tarot-web
-          path: build/web
-          if-no-files-found: error
-
-      - name: Upload Android bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: mystic-tarot-android-aab
-          path: build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
-""")
+          ci_path = Path('.github/workflows/flutter-ci.yml')
+          ci_text = ci_path.read_text()
+          begin_marker = '  # BEGIN ' + 'JOURNEY INTEGRATION JOB\n'
+          end_marker = '  # END ' + 'JOURNEY INTEGRATION JOB\n'
+          start = ci_text.index(begin_marker)
+          finish = ci_text.index(end_marker, start) + len(end_marker)
+          ci_path.write_text(ci_text[:start] + ci_text[finish:])
 
       - name: Commit integrated app shell
         shell: bash
@@ -154,9 +97,10 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/src/app.dart .github/workflows/flutter-ci.yml .github/workflows/apply-journey-integration.yml docs/JOURNEY_INTEGRATION_REQUEST.md
+          git add -A
           git commit -m "feat: integrate Mystic Journeys into the app shell [journey-integrated]"
           git push origin HEAD:${{ github.head_ref }}
+  # END JOURNEY INTEGRATION JOB
 
   test-and-build:
     runs-on: ubuntu-latest
