@@ -1,0 +1,7 @@
+Analyzing mystic-tarot...                                       
+
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre. Try replacing the use of the deprecated member with the replacement • lib/src/mystic_journey_feature.dart:685:19 • deprecated_member_use
+  error • A value of type 'Object' can't be returned from the function '_prefs' because it has a return type of 'Future<SharedPreferences>' • lib/src/mystic_journey_store.dart:39:7 • return_of_invalid_type
+
+2 issues found. (ran in 11.0s)
+ANALYZE_EXIT_CODE=1

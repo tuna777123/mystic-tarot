@@ -84,7 +84,8 @@ class SharedPreferencesMysticJourneyStore implements MysticJourneyStore {
     final currentPayload = preferences.getString(primaryKey);
 
     if (currentPayload != null && currentPayload.trim().isNotEmpty) {
-      final backupSaved = await preferences.setString(backupKey, currentPayload);
+      final backupSaved =
+          await preferences.setString(backupKey, currentPayload);
       if (!backupSaved) {
         throw StateError('Could not preserve the previous journey snapshot.');
       }

@@ -7,7 +7,8 @@ import 'package:mystic_tarot/src/mystic_journey_store.dart';
 import 'package:mystic_tarot/src/theme.dart';
 
 void main() {
-  testWidgets('creates and persists a journey from the empty state', (tester) async {
+  testWidgets('creates and persists a journey from the empty state',
+      (tester) async {
     final store = _MemoryJourneyStore();
     final now = DateTime(2026, 7, 26, 12);
 
@@ -68,7 +69,8 @@ void main() {
 
     await tester.tap(find.text('Career clarity'));
     await tester.pumpAndSettle();
-    expect(find.text('Your first reflection will begin this timeline.'), findsOneWidget);
+    expect(find.text('Your first reflection will begin this timeline.'),
+        findsOneWidget);
 
     await tester.tap(find.text('Add reflection'));
     await tester.pumpAndSettle();
@@ -80,7 +82,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('I need a clearer weekly plan.'), findsOneWidget);
-    expect(store.saved.single.entries.single.reflection, 'I need a clearer weekly plan.');
+    expect(store.saved.single.entries.single.reflection,
+        'I need a clearer weekly plan.');
   });
 
   testWidgets('renders the Turkish empty state', (tester) async {
@@ -99,7 +102,8 @@ void main() {
     expect(find.text('İlk yolculuğu oluştur'), findsOneWidget);
   });
 
-  testWidgets('surfaces backup recovery without blocking the user', (tester) async {
+  testWidgets('surfaces backup recovery without blocking the user',
+      (tester) async {
     final store = _MemoryJourneyStore(
       initial: [
         MysticJourney(

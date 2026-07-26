@@ -314,7 +314,8 @@ class _JourneyEditorSheetState extends State<_JourneyEditorSheet> {
                   maxLength: 48,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: _t(widget.language, 'Journey name', 'Yolculuk adı'),
+                    labelText:
+                        _t(widget.language, 'Journey name', 'Yolculuk adı'),
                     hintText: _t(
                       widget.language,
                       'Career clarity',
@@ -322,7 +323,8 @@ class _JourneyEditorSheetState extends State<_JourneyEditorSheet> {
                     ),
                   ),
                   validator: (value) => value == null || value.trim().isEmpty
-                      ? _t(widget.language, 'A name is required.', 'Bir ad gerekli.')
+                      ? _t(widget.language, 'A name is required.',
+                          'Bir ad gerekli.')
                       : null,
                 ),
                 const SizedBox(height: 12),
@@ -495,7 +497,8 @@ class _JourneyDetailScreenState extends State<_JourneyDetailScreen> {
                     const SizedBox(width: 10),
                     Text(
                       _areaLabel(widget.language, _journey.area),
-                      style: TextStyle(color: accent, fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(color: accent, fontWeight: FontWeight.w700),
                     ),
                     const Spacer(),
                     Text(
@@ -656,7 +659,8 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
                   maxLength: 60,
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: _t(widget.language, 'Title (optional)', 'Başlık (isteğe bağlı)'),
+                    labelText: _t(widget.language, 'Title (optional)',
+                        'Başlık (isteğe bağlı)'),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -667,21 +671,31 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
                   maxLines: 8,
                   maxLength: 1200,
                   decoration: InputDecoration(
-                    labelText: _t(widget.language, 'What did you notice?', 'Ne fark ettin?'),
+                    labelText: _t(widget.language, 'What did you notice?',
+                        'Ne fark ettin?'),
                     alignLabelWithHint: true,
                   ),
                   validator: (value) => value == null || value.trim().isEmpty
-                      ? _t(widget.language, 'Write at least one thought.', 'En az bir düşünce yaz.')
+                      ? _t(widget.language, 'Write at least one thought.',
+                          'En az bir düşünce yaz.')
                       : null,
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   value: _mood,
                   decoration: InputDecoration(
-                    labelText: _t(widget.language, 'Mood (optional)', 'Ruh hâli (isteğe bağlı)'),
+                    labelText: _t(widget.language, 'Mood (optional)',
+                        'Ruh hâli (isteğe bağlı)'),
                   ),
-                  items: const ['calm', 'hopeful', 'uncertain', 'energized', 'heavy']
-                      .map((mood) => DropdownMenuItem(value: mood, child: Text(mood)))
+                  items: const [
+                    'calm',
+                    'hopeful',
+                    'uncertain',
+                    'energized',
+                    'heavy'
+                  ]
+                      .map((mood) =>
+                          DropdownMenuItem(value: mood, child: Text(mood)))
                       .toList(growable: false),
                   onChanged: (value) => setState(() => _mood = value),
                 ),
@@ -690,8 +704,10 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
                   controller: _tagsController,
                   maxLength: 120,
                   decoration: InputDecoration(
-                    labelText: _t(widget.language, 'Tags (comma separated)', 'Etiketler (virgülle ayır)'),
-                    hintText: _t(widget.language, 'clarity, work', 'netlik, iş'),
+                    labelText: _t(widget.language, 'Tags (comma separated)',
+                        'Etiketler (virgülle ayır)'),
+                    hintText:
+                        _t(widget.language, 'clarity, work', 'netlik, iş'),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -700,7 +716,8 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
                   child: FilledButton.icon(
                     onPressed: _submit,
                     icon: const Icon(Icons.check_rounded),
-                    label: Text(_t(widget.language, 'Save reflection', 'Düşünceyi kaydet')),
+                    label: Text(_t(widget.language, 'Save reflection',
+                        'Düşünceyi kaydet')),
                   ),
                 ),
               ],
@@ -826,7 +843,9 @@ class _Metric extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(value, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            Text(value,
+                style:
+                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
             const SizedBox(height: 2),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
@@ -854,7 +873,8 @@ class _TimelineEntry extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(entry.title, style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(entry.title,
+                      style: Theme.of(context).textTheme.titleMedium),
                 ),
                 Text(
                   _dateLabel(entry.createdAt),
@@ -864,7 +884,8 @@ class _TimelineEntry extends StatelessWidget {
             ),
             if (entry.reflection?.isNotEmpty ?? false) ...[
               const SizedBox(height: 10),
-              Text(entry.reflection!, style: Theme.of(context).textTheme.bodyMedium),
+              Text(entry.reflection!,
+                  style: Theme.of(context).textTheme.bodyMedium),
             ],
             if (entry.mood != null || entry.tags.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -895,10 +916,12 @@ class _JourneyEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.hub_rounded, size: 72, color: MysticColors.lavender),
+              const Icon(Icons.hub_rounded,
+                  size: 72, color: MysticColors.lavender),
               const SizedBox(height: 22),
               Text(
-                _t(language, 'Begin a meaningful journey', 'Anlamlı bir yolculuk başlat'),
+                _t(language, 'Begin a meaningful journey',
+                    'Anlamlı bir yolculuk başlat'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
@@ -916,7 +939,8 @@ class _JourneyEmptyState extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onCreate,
                 icon: const Icon(Icons.auto_awesome_rounded),
-                label: Text(_t(language, 'Create first journey', 'İlk yolculuğu oluştur')),
+                label: Text(_t(
+                    language, 'Create first journey', 'İlk yolculuğu oluştur')),
               ),
             ],
           ),
@@ -1064,7 +1088,8 @@ String _areaLabel(MysticLanguage language, JourneyArea area) => switch (area) {
       JourneyArea.custom => _t(language, 'Personal', 'Kişisel'),
     };
 
-String _statusLabel(MysticLanguage language, JourneyStatus status) => switch (status) {
+String _statusLabel(MysticLanguage language, JourneyStatus status) =>
+    switch (status) {
       JourneyStatus.active => _t(language, 'Active', 'Aktif'),
       JourneyStatus.paused => _t(language, 'Paused', 'Duraklatıldı'),
       JourneyStatus.completed => _t(language, 'Completed', 'Tamamlandı'),

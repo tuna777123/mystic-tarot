@@ -32,7 +32,8 @@ void main() {
     expect(result.rejectedItems, 0);
   });
 
-  test('preserves the previous snapshot before replacing primary data', () async {
+  test('preserves the previous snapshot before replacing primary data',
+      () async {
     final preferences = await SharedPreferences.getInstance();
     final store = SharedPreferencesMysticJourneyStore(
       preferences: preferences,
@@ -67,7 +68,8 @@ void main() {
     expect(result.recoveredFromBackup, isTrue);
   });
 
-  test('returns a safe empty result when both snapshots are corrupted', () async {
+  test('returns a safe empty result when both snapshots are corrupted',
+      () async {
     SharedPreferences.setMockInitialValues({
       SharedPreferencesMysticJourneyStore.primaryKey: 'bad-primary',
       SharedPreferencesMysticJourneyStore.backupKey: 'bad-backup',
@@ -93,11 +95,15 @@ void main() {
     await store.save([journey('two')]);
     await store.clear();
 
-    expect(preferences.containsKey(
-      SharedPreferencesMysticJourneyStore.primaryKey,
-    ), isFalse);
-    expect(preferences.containsKey(
-      SharedPreferencesMysticJourneyStore.backupKey,
-    ), isFalse);
+    expect(
+        preferences.containsKey(
+          SharedPreferencesMysticJourneyStore.primaryKey,
+        ),
+        isFalse);
+    expect(
+        preferences.containsKey(
+          SharedPreferencesMysticJourneyStore.backupKey,
+        ),
+        isFalse);
   });
 }
