@@ -56,7 +56,8 @@ class MysticJourney {
   bool get canAcceptEntries =>
       status == JourneyStatus.active || status == JourneyStatus.paused;
 
-  int get reflectionCount => entries.where((entry) => entry.hasReflection).length;
+  int get reflectionCount =>
+      entries.where((entry) => entry.hasReflection).length;
 
   double get reflectionRate =>
       entries.isEmpty ? 0 : reflectionCount / entries.length;
