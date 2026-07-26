@@ -131,7 +131,7 @@ void main() {
       themes: const {MemoryTheme.relationship},
     );
 
-    final TurkishResults = MysticMemorySearch.search(
+    final turkishResults = MysticMemorySearch.search(
       [relationship, career],
       'iş',
     );
@@ -140,9 +140,9 @@ void main() {
       'promotion',
     );
 
-    expect(TurkishResults.single.event.id, 'career');
+    expect(turkishResults.single.event.id, 'career');
     expect(
-      TurkishResults.single.matchedTerms,
+      turkishResults.single.matchedTerms,
       contains(MemoryTheme.career.name),
     );
     expect(tagResults.single.event.id, 'career');
