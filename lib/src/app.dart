@@ -14,6 +14,7 @@ import 'models.dart';
 import 'premium_value_screen.dart';
 import 'mystic_identity_screen.dart';
 import 'mystic_journey_feature.dart';
+import 'mystic_living_journal_feature.dart';
 import 'sound.dart';
 import 'store_ready_premium_screen.dart';
 import 'tarot_data.dart';
@@ -101,7 +102,10 @@ class _MysticAppState extends State<MysticApp> {
               _startReading(ReadingKind.daily);
             },
           ),
-          JournalScreen(records: journal),
+          MysticLivingJournalFeature(
+  records: journal,
+  language: language,
+),
           ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, completedArcanaDays: completedArcanaDays.length, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
         ]),
         bottomNavigationBar: NavigationBar(
