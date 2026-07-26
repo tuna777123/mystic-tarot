@@ -35,8 +35,11 @@ class SharedPreferencesMysticJourneyStore implements MysticJourneyStore {
 
   final SharedPreferences? _preferences;
 
-  Future<SharedPreferences> get _prefs async =>
-      _preferences ?? SharedPreferences.getInstance();
+  Future<SharedPreferences> get _prefs async {
+    final injected = _preferences;
+    if (injected != null) return injected;
+    return SharedPreferences.getInstance();
+  }
 
   @override
   Future<JourneyLoadResult> load() async {
