@@ -91,3 +91,5 @@ jobs:
           git add lib/src/app.dart lib/src/mystic_journey_feature.dart .github/workflows/apply-journey-integration.yml
           git commit -m "feat: integrate Mystic Journeys into the app shell"
           git push origin feature/journey-final-integration
+
+# One-shot staging workflow. It removes itself from the generated integration branch.
