@@ -39,35 +39,39 @@ jobs:
               text = text.replace(import_needle, import_replacement, 1)
 
               tab_needle = "          JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, completedArcanaDays: completedArcanaDays, language: language, onOpenDestiny: _openDestinyHub, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),\n"
-              tab_replacement = """          MysticJourneysFeature(
-            language: language,
-            onOpenDestiny: _openDestinyHub,
-            onStartReading: () {
-              setState(() => tab = 0);
-              _startReading(ReadingKind.daily);
-            },
-          ),
-"""
+              tab_replacement = "\n".join([
+                  "          MysticJourneysFeature(",
+                  "            language: language,",
+                  "            onOpenDestiny: _openDestinyHub,",
+                  "            onStartReading: () {",
+                  "              setState(() => tab = 0);",
+                  "              _startReading(ReadingKind.daily);",
+                  "            },",
+                  "          ),",
+                  "",
+              ])
               if text.count(tab_needle) != 1:
                   raise SystemExit('Path tab anchor was not unique')
               text = text.replace(tab_needle, tab_replacement, 1)
 
-              methods_needle = """  void _completeRitual(String id) {
-    if (completedRituals.contains(id)) return;
-    setState(() {
-      completedRituals.add(id);
-      xp += 15;
-    });
-    _saveProgress();
-  }
-
-  void _claimReward(int milestone) {
-    if (xp < milestone || claimedRewards.contains(milestone)) return;
-    setState(() => claimedRewards.add(milestone));
-    _saveProgress();
-  }
-
-"""
+              methods_needle = "\n".join([
+                  "  void _completeRitual(String id) {",
+                  "    if (completedRituals.contains(id)) return;",
+                  "    setState(() {",
+                  "      completedRituals.add(id);",
+                  "      xp += 15;",
+                  "    });",
+                  "    _saveProgress();",
+                  "  }",
+                  "",
+                  "  void _claimReward(int milestone) {",
+                  "    if (xp < milestone || claimedRewards.contains(milestone)) return;",
+                  "    setState(() => claimedRewards.add(milestone));",
+                  "    _saveProgress();",
+                  "  }",
+                  "",
+                  "",
+              ])
               if text.count(methods_needle) != 1:
                   raise SystemExit('Legacy Path method anchor was not unique')
               text = text.replace(methods_needle, '', 1)
@@ -154,5 +158,3 @@ jobs:
           name: mystic-tarot-android-aab
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
-
-# Registered through a standard pull request merge.
