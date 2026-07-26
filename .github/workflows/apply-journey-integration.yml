@@ -1,0 +1,87 @@
+name: Apply Journey Integration
+
+on:
+  push:
+    branches: [feature/journey-dashboard-ui-clean]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: ${{ !contains(github.event.head_commit.message, '[journey-integrated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: feature/journey-dashboard-ui-clean
+
+      - name: Integrate Journey feature
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
+
+          import_needle = "import 'mystic_identity_screen.dart';\n"
+          import_replacement = import_needle + "import 'mystic_journey_feature.dart';\n"
+          if text.count(import_needle) != 1:
+              raise SystemExit('Journey import anchor was not unique')
+          text = text.replace(import_needle, import_replacement, 1)
+
+          tab_needle = "          JourneyScreen(streak: streak, xp: xp, records: journal, discoveredCards: discoveredCards, completedRituals: completedRituals, claimedRewards: claimedRewards, completedArcanaDays: completedArcanaDays, language: language, onOpenDestiny: _openDestinyHub, onCompleteRitual: _completeRitual, onClaimReward: _claimReward),\n"
+          tab_replacement = """          MysticJourneysFeature(
+            language: language,
+            onOpenDestiny: _openDestinyHub,
+            onStartReading: () {
+              setState(() => tab = 0);
+              _startReading(ReadingKind.daily);
+            },
+          ),
+"""
+          if text.count(tab_needle) != 1:
+              raise SystemExit('Path tab anchor was not unique')
+          text = text.replace(tab_needle, tab_replacement, 1)
+
+          methods_needle = """  void _completeRitual(String id) {
+    if (completedRituals.contains(id)) return;
+    setState(() {
+      completedRituals.add(id);
+      xp += 15;
+    });
+    _saveProgress();
+  }
+
+  void _claimReward(int milestone) {
+    if (xp < milestone || claimedRewards.contains(milestone)) return;
+    setState(() => claimedRewards.add(milestone));
+    _saveProgress();
+  }
+
+"""
+          if text.count(methods_needle) != 1:
+              raise SystemExit('Legacy Path method anchor was not unique')
+          text = text.replace(methods_needle, '', 1)
+
+          path.write_text(text)
+
+      - name: Format integration
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Run formatter
+        run: dart format lib/src/app.dart lib/src/mystic_journey_feature.dart
+
+      - name: Commit integration
+        shell: bash
+        run: |
+          rm .github/workflows/apply-journey-integration.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/app.dart lib/src/mystic_journey_feature.dart .github/workflows/apply-journey-integration.yml
+          git commit -m "feat: integrate Mystic Journeys into the app shell [journey-integrated]"
+          git push origin HEAD:feature/journey-dashboard-ui-clean
