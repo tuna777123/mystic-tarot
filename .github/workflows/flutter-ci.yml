@@ -10,7 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  # BEGIN JOURNEY INTEGRATION JOB
   integrate-journey:
     if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature/journey-final-integration-v') }}
     runs-on: ubuntu-latest
@@ -81,18 +80,6 @@ jobs:
           if marker.exists():
               marker.unlink()
 
-          legacy_workflow = Path('.github/workflows/apply-journey-integration.yml')
-          if legacy_workflow.exists():
-              legacy_workflow.unlink()
-
-          ci_path = Path('.github/workflows/flutter-ci.yml')
-          ci_text = ci_path.read_text()
-          begin_marker = '  # BEGIN ' + 'JOURNEY INTEGRATION JOB\n'
-          end_marker = '  # END ' + 'JOURNEY INTEGRATION JOB\n'
-          start = ci_text.index(begin_marker)
-          finish = ci_text.index(end_marker, start) + len(end_marker)
-          ci_path.write_text(ci_text[:start] + ci_text[finish:])
-
       - name: Commit integrated app shell
         shell: bash
         run: |
@@ -101,10 +88,9 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add -A -- lib/src/app.dart docs/JOURNEY_INTEGRATION_REQUEST.md
           git commit -m "feat: integrate Mystic Journeys into the app shell [journey-integrated]"
           git push origin HEAD:${{ github.head_ref }}
-  # END JOURNEY INTEGRATION JOB
 
   test-and-build:
     runs-on: ubuntu-latest
@@ -158,5 +144,3 @@ jobs:
           name: mystic-tarot-android-aab
           path: build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
-
-# Registered as valid YAML through a standard pull request merge.
