@@ -1,0 +1,77 @@
+name: Apply Living Journal integration
+
+on:
+  push:
+    branches: [feature/living-journal-ui-clean]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/living-journal-ui-clean
+          fetch-depth: 0
+
+      - name: Apply restricted app-shell patch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          app = Path('lib/src/app.dart')
+          text = app.read_text()
+
+          import_line = "import 'mystic_living_journal_feature.dart';\n"
+          anchor = "import 'mystic_journey_feature.dart';\n"
+          if import_line not in text:
+              if text.count(anchor) != 1:
+                  raise SystemExit('Expected exactly one Journey import anchor.')
+              text = text.replace(anchor, anchor + import_line, 1)
+
+          old_screen = "          JournalScreen(records: journal),"
+          new_screen = """          MysticLivingJournalFeature(
+            records: journal,
+            language: language,
+          ),"""
+          if new_screen not in text:
+              if text.count(old_screen) != 1:
+                  raise SystemExit('Expected exactly one JournalScreen anchor.')
+              text = text.replace(old_screen, new_screen, 1)
+
+          app.write_text(text)
+
+          feature = Path('lib/src/mystic_living_journal_feature.dart')
+          feature_text = feature.read_text()
+          old_title = """          title: '$now'.isEmpty
+              ? ''
+              : mysticText(
+                  language,
+                  '${now.year} Review',
+                  '${now.year} Özeti',
+                ),"""
+          new_title = """          title: mysticText(
+            language,
+            '${now.year} Review',
+            '${now.year} Özeti',
+          ),"""
+          if old_title in feature_text:
+              feature_text = feature_text.replace(old_title, new_title, 1)
+              feature.write_text(feature_text)
+          PY
+
+      - name: Commit integration
+        run: |
+          if git diff --quiet -- lib/src/app.dart lib/src/mystic_living_journal_feature.dart; then
+            echo "Integration is already applied."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/app.dart lib/src/mystic_living_journal_feature.dart
+          git commit -m "feat: activate Living Journal in the app shell"
+          git push origin HEAD:feature/living-journal-ui-clean
