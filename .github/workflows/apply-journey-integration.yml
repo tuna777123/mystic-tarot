@@ -1,21 +1,25 @@
-name: Apply Journey Integration
+name: Stage Journey Integration
 
 on:
   push:
-    branches: [feature/journey-dashboard-ui-clean]
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   integrate:
-    if: ${{ !contains(github.event.head_commit.message, '[journey-integrated]') }}
+    if: ${{ contains(github.event.head_commit.message, 'ship complete local-first Mystic Journeys') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Check out main
         uses: actions/checkout@v4
         with:
-          ref: feature/journey-dashboard-ui-clean
+          ref: main
+          fetch-depth: 0
+
+      - name: Create integration branch
+        run: git switch -c feature/journey-final-integration
 
       - name: Integrate Journey feature
         shell: python
@@ -67,21 +71,23 @@ jobs:
 
           path.write_text(text)
 
-      - name: Format integration
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Run formatter
+      - name: Format integration
         run: dart format lib/src/app.dart lib/src/mystic_journey_feature.dart
 
-      - name: Commit integration
+      - name: Remove one-shot workflow
+        run: rm .github/workflows/apply-journey-integration.yml
+
+      - name: Commit integration branch
         shell: bash
         run: |
-          rm .github/workflows/apply-journey-integration.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lib/src/app.dart lib/src/mystic_journey_feature.dart .github/workflows/apply-journey-integration.yml
-          git commit -m "feat: integrate Mystic Journeys into the app shell [journey-integrated]"
-          git push origin HEAD:feature/journey-dashboard-ui-clean
+          git commit -m "feat: integrate Mystic Journeys into the app shell"
+          git push origin feature/journey-final-integration
