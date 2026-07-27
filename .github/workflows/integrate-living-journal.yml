@@ -1,0 +1,66 @@
+name: Integrate Living Journal
+
+on:
+  push:
+    branches:
+      - feature/living-journal-integration
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch app shell
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
+
+          import_line = "import 'mystic_journey_feature.dart';\n"
+          new_import = "import 'mystic_journey_feature.dart';\nimport 'mystic_living_journal_feature.dart';\n"
+          if "import 'mystic_living_journal_feature.dart';" not in text:
+              if import_line not in text:
+                  raise SystemExit('Journey import anchor not found')
+              text = text.replace(import_line, new_import, 1)
+
+          old_widget = '          JournalScreen(records: journal),'
+          new_widget = "          MysticLivingJournalFeature(\n            records: journal,\n            language: language,\n            onPremium: () => _showPremium(source: 'living_journal'),\n          ),"
+          if 'MysticLivingJournalFeature(' not in text:
+              if old_widget not in text:
+                  raise SystemExit('Journal widget anchor not found')
+              text = text.replace(old_widget, new_widget, 1)
+
+          path.write_text(text)
+          PY
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Validate
+        run: |
+          flutter pub get
+          dart format --set-exit-if-changed lib/src/mystic_living_journal_feature.dart lib/src/app.dart
+          flutter analyze
+          flutter test
+
+      - name: Commit integration
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/app.dart lib/src/mystic_living_journal_feature.dart
+          git commit -m "feat: integrate Living Journal into navigation"
+          git push
