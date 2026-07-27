@@ -47,7 +47,23 @@ jobs:
         run: flutter build web --release
 
       - name: Build Android release bundle
-        run: flutter build appbundle --release
+        id: android_build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          flutter build appbundle --release 2>&1 | tee android-build.log
+
+      - name: Upload Android build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mystic-tarot-android-build-log
+          path: android-build.log
+          if-no-files-found: warn
+
+      - name: Fail if Android build failed
+        if: steps.android_build.outcome == 'failure'
+        run: exit 1
 
       - name: Upload web release
         uses: actions/upload-artifact@v4
