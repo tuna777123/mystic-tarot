@@ -1,56 +1,41 @@
 name: Integrate Living Journal
 
 on:
-  push:
-    branches:
-      - feature/living-journal-integration
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   integrate:
+    if: github.head_ref == 'feature/living-journal-integration'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out feature branch
+        uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Patch feature and app shell
+      - name: Patch app shell
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          feature_path = Path('lib/src/mystic_living_journal_feature.dart')
-          feature = feature_path.read_text()
-          feature = feature.replace(
-              "import 'app_language.dart';\n",
-              "import 'flagship.dart';\n",
-              1,
-          )
-          feature_path.write_text(feature)
-
-          language_path = Path('lib/src/app_language.dart')
-          language = language_path.read_text()
-          language = language.replace(
-              "export 'flagship.dart' show MysticLanguage;\n\n",
-              '',
-              1,
-          )
-          language_path.write_text(language)
-
-          app_path = Path('lib/src/app.dart')
-          app = app_path.read_text()
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
 
           import_anchor = "import 'mystic_journey_feature.dart';\n"
           integrated_imports = (
               "import 'mystic_journey_feature.dart';\n"
               "import 'mystic_living_journal_feature.dart';\n"
           )
-          if "import 'mystic_living_journal_feature.dart';" not in app:
-              if import_anchor not in app:
+          if "import 'mystic_living_journal_feature.dart';" not in text:
+              if import_anchor not in text:
                   raise SystemExit('Journey import anchor not found')
-              app = app.replace(import_anchor, integrated_imports, 1)
+              text = text.replace(import_anchor, integrated_imports, 1)
 
           old_widget = '          JournalScreen(records: journal),'
           new_widget = (
@@ -60,34 +45,44 @@ jobs:
               "            onPremium: () => _showPremium(source: 'living_journal'),\n"
               '          ),'
           )
-          if 'MysticLivingJournalFeature(' not in app:
-              if old_widget not in app:
+          if 'MysticLivingJournalFeature(' not in text:
+              if old_widget not in text:
                   raise SystemExit('Journal widget anchor not found')
-              app = app.replace(old_widget, new_widget, 1)
+              text = text.replace(old_widget, new_widget, 1)
 
-          app_path.write_text(app)
+          path.write_text(text)
           PY
 
-      - name: Install Flutter
+      - name: Restore production CI
+        run: git checkout origin/main -- .github/workflows/flutter-ci.yml
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
-      - name: Validate
+      - name: Validate integrated application
         run: |
+          flutter create .
           flutter pub get
-          dart format lib/src/app_language.dart lib/src/mystic_living_journal_feature.dart lib/src/app.dart
+          dart format lib/src/app.dart lib/src/mystic_living_journal_feature.dart
           flutter analyze
           flutter test
+          flutter build web --release
+          flutter build appbundle --release
 
-      - name: Commit integration
+      - name: Commit integration and remove temporary workflow
         run: |
-          if git diff --quiet; then
-            exit 0
-          fi
+          git rm .github/workflows/integrate-living-journal.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/src/app.dart lib/src/app_language.dart lib/src/mystic_living_journal_feature.dart
-          git commit -m "feat: integrate Living Journal into navigation"
-          git push
+          git add lib/src/app.dart lib/src/mystic_living_journal_feature.dart .github/workflows/flutter-ci.yml
+          git commit -m "feat: activate Living Journal in app navigation"
+          git push origin HEAD:${{ github.head_ref }}
