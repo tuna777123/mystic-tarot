@@ -16,29 +16,56 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Patch app shell
+      - name: Patch feature and app shell
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          path = Path('lib/src/app.dart')
-          text = path.read_text()
+          feature_path = Path('lib/src/mystic_living_journal_feature.dart')
+          feature = feature_path.read_text()
+          feature = feature.replace(
+              "import 'app_language.dart';\n",
+              "import 'flagship.dart';\n",
+              1,
+          )
+          feature_path.write_text(feature)
 
-          import_line = "import 'mystic_journey_feature.dart';\n"
-          new_import = "import 'mystic_journey_feature.dart';\nimport 'mystic_living_journal_feature.dart';\n"
-          if "import 'mystic_living_journal_feature.dart';" not in text:
-              if import_line not in text:
+          language_path = Path('lib/src/app_language.dart')
+          language = language_path.read_text()
+          language = language.replace(
+              "export 'flagship.dart' show MysticLanguage;\n\n",
+              '',
+              1,
+          )
+          language_path.write_text(language)
+
+          app_path = Path('lib/src/app.dart')
+          app = app_path.read_text()
+
+          import_anchor = "import 'mystic_journey_feature.dart';\n"
+          integrated_imports = (
+              "import 'mystic_journey_feature.dart';\n"
+              "import 'mystic_living_journal_feature.dart';\n"
+          )
+          if "import 'mystic_living_journal_feature.dart';" not in app:
+              if import_anchor not in app:
                   raise SystemExit('Journey import anchor not found')
-              text = text.replace(import_line, new_import, 1)
+              app = app.replace(import_anchor, integrated_imports, 1)
 
           old_widget = '          JournalScreen(records: journal),'
-          new_widget = "          MysticLivingJournalFeature(\n            records: journal,\n            language: language,\n            onPremium: () => _showPremium(source: 'living_journal'),\n          ),"
-          if 'MysticLivingJournalFeature(' not in text:
-              if old_widget not in text:
+          new_widget = (
+              '          MysticLivingJournalFeature(\n'
+              '            records: journal,\n'
+              '            language: language,\n'
+              "            onPremium: () => _showPremium(source: 'living_journal'),\n"
+              '          ),'
+          )
+          if 'MysticLivingJournalFeature(' not in app:
+              if old_widget not in app:
                   raise SystemExit('Journal widget anchor not found')
-              text = text.replace(old_widget, new_widget, 1)
+              app = app.replace(old_widget, new_widget, 1)
 
-          path.write_text(text)
+          app_path.write_text(app)
           PY
 
       - name: Install Flutter
@@ -50,7 +77,7 @@ jobs:
       - name: Validate
         run: |
           flutter pub get
-          dart format --set-exit-if-changed lib/src/mystic_living_journal_feature.dart lib/src/app.dart
+          dart format lib/src/app_language.dart lib/src/mystic_living_journal_feature.dart lib/src/app.dart
           flutter analyze
           flutter test
 
@@ -61,6 +88,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/src/app.dart lib/src/mystic_living_journal_feature.dart
+          git add lib/src/app.dart lib/src/app_language.dart lib/src/mystic_living_journal_feature.dart
           git commit -m "feat: integrate Living Journal into navigation"
           git push
