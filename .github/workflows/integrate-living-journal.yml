@@ -26,7 +26,6 @@ jobs:
 
           path = Path('lib/src/app.dart')
           text = path.read_text()
-
           import_anchor = "import 'mystic_journey_feature.dart';\n"
           integrated_imports = (
               "import 'mystic_journey_feature.dart';\n"
@@ -49,7 +48,6 @@ jobs:
               if old_widget not in text:
                   raise SystemExit('Journal widget anchor not found')
               text = text.replace(old_widget, new_widget, 1)
-
           path.write_text(text)
           PY
 
@@ -70,13 +68,33 @@ jobs:
 
       - name: Validate integrated application
         run: |
-          flutter create .
-          flutter pub get
-          dart format lib/src/app.dart lib/src/mystic_living_journal_feature.dart
-          flutter analyze
-          flutter test
-          flutter build web --release
-          flutter build appbundle --release
+          set +e
+          {
+            flutter create .
+            flutter pub get
+            dart format lib/src/app.dart lib/src/mystic_living_journal_feature.dart
+            flutter analyze
+            flutter test
+            flutter build web --release
+            flutter build appbundle --release
+          } > integration-validation.log 2>&1
+          status=$?
+          echo "$status" > integration-validation.status
+          cat integration-validation.log
+          exit 0
+
+      - name: Upload integration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: living-journal-integration-log
+          path: |
+            integration-validation.log
+            integration-validation.status
+          if-no-files-found: error
+
+      - name: Fail when validation failed
+        run: test "$(cat integration-validation.status)" = "0"
 
       - name: Commit integration and remove temporary workflow
         run: |
