@@ -14,6 +14,12 @@ dependencies:
   share_plus: ^12.0.2
   shared_preferences: ^2.5.3
 
+dependency_overrides:
+  # jni 1.0.1 currently fails during Android Gradle evaluation because its
+  # Kotlin extension is not available in this project's generated shell.
+  # Keep the last known-good release until the upstream package is corrected.
+  jni: 1.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
