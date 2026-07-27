@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'flagship.dart';
 import 'models.dart';
+import 'mystic_memory_map_feature.dart';
 import 'theme.dart';
 
-enum _JournalSection { timeline, insights, search }
+enum _JournalSection { timeline, insights, map, search }
 
 class MysticLivingJournalFeature extends StatefulWidget {
   const MysticLivingJournalFeature({
@@ -78,10 +79,7 @@ class _MysticLivingJournalFeatureState
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  _copy(
-                    'Your story remembers.',
-                    'Hikâyen seni hatırlıyor.',
-                  ),
+                  _copy('Your story remembers.', 'Hikâyen seni hatırlıyor.'),
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 5),
@@ -136,6 +134,11 @@ class _MysticLivingJournalFeatureState
             label: Text(_copy('Insights', 'İçgörü')),
           ),
           ButtonSegment<_JournalSection>(
+            value: _JournalSection.map,
+            icon: const Icon(Icons.hub_outlined, size: 17),
+            label: Text(_copy('Map', 'Harita')),
+          ),
+          ButtonSegment<_JournalSection>(
             value: _JournalSection.search,
             icon: const Icon(Icons.search, size: 17),
             label: Text(_copy('Search', 'Ara')),
@@ -159,6 +162,11 @@ class _MysticLivingJournalFeatureState
             key: const ValueKey<String>('timeline'),
           ),
         _JournalSection.insights => _buildInsights(),
+        _JournalSection.map => MysticMemoryMapFeature(
+            key: const ValueKey<String>('memory-map'),
+            records: widget.records,
+            language: widget.language,
+          ),
         _JournalSection.search => _buildSearch(),
       },
     );
@@ -403,8 +411,10 @@ class _MysticLivingJournalFeatureState
           const SizedBox(height: 14),
           if (rows.isEmpty)
             Text(
-              _copy('More readings will reveal this pattern.',
-                  'Daha fazla okuma bu örüntüyü gösterecek.'),
+              _copy(
+                'More readings will reveal this pattern.',
+                'Daha fazla okuma bu örüntüyü gösterecek.',
+              ),
               style: const TextStyle(color: MysticColors.mist),
             )
           else
