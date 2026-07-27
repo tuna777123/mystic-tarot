@@ -185,9 +185,8 @@ class _MysticLivingJournalFeatureState
 
   Widget _buildRecordCard(BuildContext context, ReadingRecord record) {
     final cards = record.cards.map((drawn) {
-      final orientation = drawn.reversed
-          ? _copy('reversed', 'ters')
-          : _copy('upright', 'düz');
+      final orientation =
+          drawn.reversed ? _copy('reversed', 'ters') : _copy('upright', 'düz');
       return '${drawn.card.name} · $orientation';
     }).join('\n');
 
