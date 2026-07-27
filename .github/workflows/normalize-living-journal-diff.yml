@@ -1,0 +1,77 @@
+name: Normalize Living Journal Diff
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.head_ref == 'feature/living-journal-integration'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Restore and minimally patch app shell
+        run: |
+          git checkout origin/main -- lib/src/app.dart
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/app.dart')
+          text = path.read_text()
+          import_anchor = "import 'mystic_journey_feature.dart';\n"
+          text = text.replace(
+              import_anchor,
+              import_anchor + "import 'mystic_living_journal_feature.dart';\n",
+              1,
+          )
+          old_widget = '          JournalScreen(records: journal),'
+          new_widget = (
+              '          MysticLivingJournalFeature(\n'
+              '            records: journal,\n'
+              '            language: language,\n'
+              "            onPremium: () => _showPremium(source: 'living_journal'),\n"
+              '          ),'
+          )
+          if old_widget not in text:
+              raise SystemExit('Journal widget anchor not found')
+          path.write_text(text.replace(old_widget, new_widget, 1))
+          PY
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Validate minimal integration
+        run: |
+          flutter create .
+          flutter pub get
+          flutter analyze
+          flutter test
+          flutter build web --release
+          flutter build appbundle --release
+
+      - name: Commit minimal diff and remove workflow
+        run: |
+          git rm .github/workflows/normalize-living-journal-diff.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/app.dart
+          git commit -m "chore: keep Living Journal app integration minimal"
+          git push origin HEAD:${{ github.head_ref }}
