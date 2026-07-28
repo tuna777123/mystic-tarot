@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 typedef MysticErrorReporter = FutureOr<void> Function(
   Object error,
