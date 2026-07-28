@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'src/app.dart';
@@ -8,7 +10,9 @@ Future<void> main() async {
   MysticAppObservability.configure();
   await MysticAppObservability.run(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await MysticAnalytics.instance.track(MysticAnalyticsEvent.appOpened);
+    unawaited(
+      MysticAnalytics.instance.track(MysticAnalyticsEvent.appOpened),
+    );
     runApp(const MysticApp());
   });
 }
