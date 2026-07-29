@@ -73,4 +73,19 @@ void main() {
       {'source': 'daily_limit'},
     ]);
   });
+
+  test('tracks completion only with coarse verified purchase metadata', () async {
+    await bindings.purchaseCompleted(
+      source: 'store_checkout',
+      plan: 'mystic_plus_yearly',
+      restored: false,
+    );
+
+    expect(sink.events.single, 'purchase_completed');
+    expect(sink.payloads.single, {
+      'source': 'store_checkout',
+      'plan': 'mystic_plus_yearly',
+      'restored': false,
+    });
+  });
 }
