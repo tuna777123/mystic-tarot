@@ -71,6 +71,20 @@ final class MysticAnalyticsBindings {
         },
       );
 
+  Future<void> purchaseCompleted({
+    required String source,
+    required String plan,
+    required bool restored,
+  }) =>
+      _analytics.track(
+        MysticAnalyticsEvent.purchaseCompleted,
+        properties: {
+          'source': source,
+          'plan': plan,
+          'restored': restored,
+        },
+      );
+
   Future<void> purchaseRestored({required String source}) => _analytics.track(
         MysticAnalyticsEvent.purchaseRestored,
         properties: {
