@@ -5,6 +5,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'app_analytics_bindings.dart';
 import 'monetization.dart' show MysticProductIds;
+import 'store_entitlement_verifier.dart';
 export 'monetization.dart' show MysticProductIds;
 
 enum StorePurchasePhase {
@@ -14,6 +15,7 @@ enum StorePurchasePhase {
   purchasing,
   restoring,
   verificationRequired,
+  entitled,
   unavailable,
   error,
 }
@@ -22,12 +24,15 @@ class StorePurchaseService extends ChangeNotifier {
   StorePurchaseService({
     InAppPurchase? store,
     MysticAnalyticsBindings? analytics,
+    MysticEntitlementVerifier? verifier,
     this.analyticsSource = 'store_checkout',
   })  : _store = store ?? InAppPurchase.instance,
-        _analytics = analytics ?? const MysticAnalyticsBindings();
+        _analytics = analytics ?? const MysticAnalyticsBindings(),
+        _verifier = verifier ?? const DeferredMysticEntitlementVerifier();
 
   final InAppPurchase _store;
   final MysticAnalyticsBindings _analytics;
+  final MysticEntitlementVerifier _verifier;
   final String analyticsSource;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
@@ -153,12 +158,7 @@ class StorePurchaseService extends ChangeNotifier {
         message = 'Waiting for the official store confirmation.';
       } else if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
-        // Never unlock premium from a client-side receipt alone. A production
-        // verification endpoint must validate the receipt and subscription
-        // state before the app persists entitlement.
-        phase = StorePurchasePhase.verificationRequired;
-        message =
-            'Purchase received. Secure entitlement verification is required.';
+        await _verifyPurchase(purchase);
       } else if (purchase.status == PurchaseStatus.error) {
         phase = StorePurchasePhase.error;
         message = purchase.error?.message ?? 'The purchase was not completed.';
@@ -166,12 +166,42 @@ class StorePurchaseService extends ChangeNotifier {
         phase = StorePurchasePhase.ready;
         message = 'The purchase was cancelled.';
       }
-
-      if (purchase.pendingCompletePurchase) {
-        await _store.completePurchase(purchase);
-      }
     }
     notifyListeners();
+  }
+
+  Future<void> _verifyPurchase(PurchaseDetails purchase) async {
+    MysticEntitlementVerificationResult verification;
+    try {
+      verification = await _verifier.verify(purchase);
+    } catch (_) {
+      verification = const MysticEntitlementVerificationResult(
+        MysticEntitlementVerificationStatus.unavailable,
+      );
+    }
+
+    if (!verification.isVerified) {
+      phase = StorePurchasePhase.verificationRequired;
+      message = verification.status ==
+              MysticEntitlementVerificationStatus.rejected
+          ? 'The store receipt could not be verified. Premium remains locked.'
+          : 'Purchase received. Secure entitlement verification is required.';
+      return;
+    }
+
+    phase = StorePurchasePhase.entitled;
+    message = 'Mystic Plus is verified and active.';
+    unawaited(
+      _analytics.purchaseCompleted(
+        source: analyticsSource,
+        plan: purchase.productID,
+        restored: purchase.status == PurchaseStatus.restored,
+      ),
+    );
+
+    if (purchase.pendingCompletePurchase) {
+      await _store.completePurchase(purchase);
+    }
   }
 
   static int _rank(String id) => switch (id) {
