@@ -8,12 +8,26 @@ enum MysticEntitlementVerificationStatus {
 }
 
 final class MysticEntitlementVerificationResult {
-  const MysticEntitlementVerificationResult(this.status);
+  const MysticEntitlementVerificationResult(
+    this.status, {
+    this.productId,
+    this.expiresAt,
+  });
 
   final MysticEntitlementVerificationStatus status;
 
+  /// Canonical product identifier returned by the trusted backend.
+  final String? productId;
+
+  /// Server-derived subscription expiry. This is required before an
+  /// entitlement may be cached across app launches.
+  final DateTime? expiresAt;
+
   bool get isVerified =>
       status == MysticEntitlementVerificationStatus.verified;
+
+  bool get canBeCached =>
+      isVerified && productId != null && expiresAt != null;
 }
 
 /// Verifies an App Store or Google Play purchase with a trusted backend.
