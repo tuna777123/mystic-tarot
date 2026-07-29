@@ -103,6 +103,79 @@ final class MysticAnalytics {
     }
   }
 
+  Future<void> onboardingCompleted({
+    required String language,
+    required String intention,
+  }) =>
+      track(
+        MysticAnalyticsEvent.onboardingCompleted,
+        properties: {
+          'language': language,
+          'intention': intention,
+        },
+      );
+
+  Future<void> readingStarted({
+    required String readingKind,
+    required String deckStyle,
+    required int cardCount,
+    required String language,
+  }) =>
+      track(
+        MysticAnalyticsEvent.readingStarted,
+        properties: {
+          'reading_kind': readingKind,
+          'deck_style': deckStyle,
+          'card_count': cardCount,
+          'language': language,
+        },
+      );
+
+  Future<void> readingCompleted({
+    required String readingKind,
+    required String deckStyle,
+    required int cardCount,
+    required String language,
+    required bool hadQuestion,
+  }) =>
+      track(
+        MysticAnalyticsEvent.readingCompleted,
+        properties: {
+          'reading_kind': readingKind,
+          'deck_style': deckStyle,
+          'card_count': cardCount,
+          'language': language,
+          'had_question': hadQuestion,
+        },
+      );
+
+  Future<void> journalViewed({required int savedReadingCount}) => track(
+        MysticAnalyticsEvent.journalViewed,
+        properties: {'saved_reading_count': savedReadingCount},
+      );
+
+  Future<void> premiumViewed({required String source}) => track(
+        MysticAnalyticsEvent.premiumViewed,
+        properties: {'source': source},
+      );
+
+  Future<void> purchaseStarted({
+    required String source,
+    required String plan,
+  }) =>
+      track(
+        MysticAnalyticsEvent.purchaseStarted,
+        properties: {
+          'source': source,
+          'plan': plan,
+        },
+      );
+
+  Future<void> purchaseRestored({required String source}) => track(
+        MysticAnalyticsEvent.purchaseRestored,
+        properties: {'source': source},
+      );
+
   Map<String, Object?> _sanitize(Map<String, Object?> input) {
     const blockedFragments = {
       'name',
