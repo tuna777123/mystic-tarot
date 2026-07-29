@@ -5,6 +5,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'app_analytics_bindings.dart';
 import 'monetization.dart' show MysticProductIds;
+import 'mystic_entitlement_controller.dart';
 import 'store_entitlement_cache.dart';
 import 'store_entitlement_verifier.dart';
 export 'monetization.dart' show MysticProductIds;
@@ -27,36 +28,40 @@ class StorePurchaseService extends ChangeNotifier {
     InAppPurchase? store,
     MysticAnalyticsBindings? analytics,
     MysticEntitlementVerifier? verifier,
+    MysticEntitlementController? entitlementController,
     MysticEntitlementCache? entitlementCache,
     DateTime Function()? now,
     this.analyticsSource = 'store_checkout',
   })  : _store = store ?? InAppPurchase.instance,
         _analytics = analytics ?? const MysticAnalyticsBindings(),
         _verifier = verifier ?? const DeferredMysticEntitlementVerifier(),
-        _entitlementCache = entitlementCache ??
-            const SharedPreferencesMysticEntitlementCache(),
-        _now = now ?? DateTime.now;
+        _entitlementController = entitlementController ??
+            MysticEntitlementController(
+              cache: entitlementCache,
+              now: now,
+            );
 
   final InAppPurchase _store;
   final MysticAnalyticsBindings _analytics;
   final MysticEntitlementVerifier _verifier;
-  final MysticEntitlementCache _entitlementCache;
-  final DateTime Function() _now;
+  final MysticEntitlementController _entitlementController;
   final String analyticsSource;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   StorePurchasePhase phase = StorePurchasePhase.idle;
   List<ProductDetails> products = const [];
-  MysticEntitlementSnapshot? cachedEntitlement;
   String? message;
+
+  MysticEntitlementSnapshot? get cachedEntitlement =>
+      _entitlementController.snapshot;
 
   bool get canPurchase =>
       !kIsWeb && phase == StorePurchasePhase.ready && products.isNotEmpty;
 
-  bool get isEntitled => phase == StorePurchasePhase.entitled;
+  bool get isEntitled => _entitlementController.isActive;
 
   bool get hasCachedEntitlement =>
-      cachedEntitlement?.isActiveAt(_now().toUtc()) ?? false;
+      _entitlementController.hasCachedEntitlement;
 
   Future<void> initialize() async {
     if (kIsWeb) {
@@ -66,7 +71,14 @@ class StorePurchaseService extends ChangeNotifier {
       return;
     }
 
-    await _loadCachedEntitlement();
+    await _entitlementController.initialize();
+
+    if (_entitlementController.isActive) {
+      phase = StorePurchasePhase.entitled;
+      message = 'Mystic Plus is verified and active.';
+      notifyListeners();
+      return;
+    }
 
     phase = StorePurchasePhase.loading;
     message = null;
@@ -222,8 +234,9 @@ class StorePurchaseService extends ChangeNotifier {
 
     if (!verification.isVerified) {
       if (verification.status == MysticEntitlementVerificationStatus.rejected) {
-        cachedEntitlement = null;
-        await _entitlementCache.clear();
+        await _entitlementController.markRejected();
+      } else {
+        await _entitlementController.requireReverification();
       }
       phase = StorePurchasePhase.verificationRequired;
       message = verification.status ==
@@ -233,18 +246,24 @@ class StorePurchaseService extends ChangeNotifier {
       return;
     }
 
-    final productId = verification.productId ?? purchase.productID;
+    final productId = verification.productId;
     final expiresAt = verification.expiresAt?.toUtc();
-    if (verification.canBeCached &&
-        expiresAt != null &&
-        expiresAt.isAfter(_now().toUtc())) {
-      final snapshot = MysticEntitlementSnapshot(
-        productId: productId,
-        verifiedAt: _now().toUtc(),
-        expiresAt: expiresAt,
-      );
-      cachedEntitlement = snapshot;
-      await _entitlementCache.save(snapshot);
+    if (productId == null || expiresAt == null) {
+      await _entitlementController.requireReverification();
+      phase = StorePurchasePhase.verificationRequired;
+      message =
+          'Trusted verification did not include a current subscription expiry.';
+      return;
+    }
+
+    final activated = await _entitlementController.markVerified(
+      productId: productId,
+      expiresAt: expiresAt,
+    );
+    if (!activated) {
+      phase = StorePurchasePhase.verificationRequired;
+      message = 'The verified subscription is no longer active.';
+      return;
     }
 
     phase = StorePurchasePhase.entitled;
@@ -259,23 +278,6 @@ class StorePurchaseService extends ChangeNotifier {
 
     if (purchase.pendingCompletePurchase) {
       await _store.completePurchase(purchase);
-    }
-  }
-
-  Future<void> _loadCachedEntitlement() async {
-    try {
-      final snapshot = await _entitlementCache.load();
-      if (snapshot == null) return;
-      if (!snapshot.isActiveAt(_now().toUtc())) {
-        await _entitlementCache.clear();
-        return;
-      }
-      cachedEntitlement = snapshot;
-      phase = StorePurchasePhase.cachedEntitlement;
-      message = _cachedEntitlementMessage();
-      notifyListeners();
-    } catch (_) {
-      cachedEntitlement = null;
     }
   }
 
