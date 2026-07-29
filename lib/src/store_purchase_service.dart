@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import 'app_analytics_bindings.dart';
 import 'monetization.dart' show MysticProductIds;
 export 'monetization.dart' show MysticProductIds;
 
@@ -18,10 +19,16 @@ enum StorePurchasePhase {
 }
 
 class StorePurchaseService extends ChangeNotifier {
-  StorePurchaseService({InAppPurchase? store})
-      : _store = store ?? InAppPurchase.instance;
+  StorePurchaseService({
+    InAppPurchase? store,
+    MysticAnalyticsBindings? analytics,
+    this.analyticsSource = 'store_checkout',
+  })  : _store = store ?? InAppPurchase.instance,
+        _analytics = analytics ?? const MysticAnalyticsBindings();
 
   final InAppPurchase _store;
+  final MysticAnalyticsBindings _analytics;
+  final String analyticsSource;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   StorePurchasePhase phase = StorePurchasePhase.idle;
@@ -98,6 +105,13 @@ class StorePurchaseService extends ChangeNotifier {
     final product = productFor(productId);
     if (!canPurchase || product == null) return;
 
+    unawaited(
+      _analytics.purchaseStarted(
+        source: analyticsSource,
+        plan: productId,
+      ),
+    );
+
     phase = StorePurchasePhase.purchasing;
     message = null;
     notifyListeners();
@@ -115,6 +129,11 @@ class StorePurchaseService extends ChangeNotifier {
 
   Future<void> restore() async {
     if (kIsWeb) return;
+
+    unawaited(
+      _analytics.purchaseRestored(source: analyticsSource),
+    );
+
     phase = StorePurchasePhase.restoring;
     message = null;
     notifyListeners();
