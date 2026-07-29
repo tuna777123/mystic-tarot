@@ -56,6 +56,38 @@ void main() {
     expect(sink.properties['card_count'], 1);
   });
 
+  test('typed reading helper emits only coarse funnel metadata', () async {
+    final sink = _RecordingSink();
+    MysticAnalytics.instance.configure(sink: sink);
+
+    await MysticAnalytics.instance.readingCompleted(
+      readingKind: 'love',
+      deckStyle: 'midnight',
+      cardCount: 3,
+      language: 'turkish',
+      hadQuestion: true,
+    );
+
+    expect(sink.eventName, 'reading_completed');
+    expect(sink.properties, {
+      'reading_kind': 'love',
+      'deck_style': 'midnight',
+      'card_count': 3,
+      'language': 'turkish',
+      'had_question': true,
+    });
+  });
+
+  test('typed premium helper preserves attribution source', () async {
+    final sink = _RecordingSink();
+    MysticAnalytics.instance.configure(sink: sink);
+
+    await MysticAnalytics.instance.premiumViewed(source: 'daily_limit');
+
+    expect(sink.eventName, 'premium_viewed');
+    expect(sink.properties, {'source': 'daily_limit'});
+  });
+
   test('removes sensitive free-text properties', () async {
     final sink = _RecordingSink();
     MysticAnalytics.instance.configure(sink: sink);
