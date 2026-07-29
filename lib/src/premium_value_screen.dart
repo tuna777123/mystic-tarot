@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import 'app_analytics_bindings.dart';
 import 'app_language.dart';
 import 'flagship.dart';
 import 'language_bridge.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
-class PremiumValueScreen extends StatelessWidget {
+class PremiumValueScreen extends StatefulWidget {
   const PremiumValueScreen({
     required this.source,
     required this.language,
@@ -19,8 +22,21 @@ class PremiumValueScreen extends StatelessWidget {
   final VoidCallback onContinue;
 
   @override
+  State<PremiumValueScreen> createState() => _PremiumValueScreenState();
+}
+
+class _PremiumValueScreenState extends State<PremiumValueScreen> {
+  static const _analytics = MysticAnalyticsBindings();
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_analytics.premiumViewed(source: widget.source));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final appLanguage = language.appLanguage;
+    final appLanguage = widget.language.appLanguage;
     final message = _sourceMessage(appLanguage);
     final benefits = <({IconData icon, String title, String body})>[
       (
@@ -94,7 +110,7 @@ class PremiumValueScreen extends StatelessWidget {
               GoldButton(
                 label: localized(appLanguage, english: 'See plans', spanish: 'Ver planes', french: 'Voir les offres', portugueseBrazil: 'Ver planos', turkish: 'Planları gör', italian: 'Vedi i piani', german: 'Pläne ansehen'),
                 icon: Icons.arrow_forward,
-                onPressed: onContinue,
+                onPressed: widget.onContinue,
               ),
               const SizedBox(height: 10),
               Text(
@@ -110,7 +126,7 @@ class PremiumValueScreen extends StatelessWidget {
   }
 
   (String, String) _sourceMessage(AppLanguage language) {
-    return switch (source) {
+    return switch (widget.source) {
       'daily_limit' => (
           localized(language, english: 'Keep going when the question still matters.', spanish: 'Continúa cuando la pregunta aún importa.', french: 'Continuez lorsque la question compte encore.', portugueseBrazil: 'Continue quando a pergunta ainda importa.', turkish: 'Soru hâlâ önemliyken devam et.', italian: 'Continua quando la domanda conta ancora.', german: 'Mach weiter, wenn die Frage noch wichtig ist.'),
           localized(language, english: 'You used today’s free deep readings. Mystic Plus removes the daily limit while keeping Daily Guidance free.', spanish: 'Usaste las lecturas profundas gratuitas de hoy. Mystic Plus elimina el límite diario y mantiene gratuita la Guía diaria.', french: 'Vous avez utilisé les tirages approfondis gratuits du jour. Mystic Plus supprime la limite quotidienne tout en gardant le Guide du jour gratuit.', portugueseBrazil: 'Você usou as leituras profundas gratuitas de hoje. O Mystic Plus remove o limite diário e mantém a Orientação Diária gratuita.', turkish: 'Bugünkü ücretsiz derin okumalarını kullandın. Mystic Plus günlük sınırı kaldırırken Günlük Rehberlik ücretsiz kalır.', italian: 'Hai usato le letture approfondite gratuite di oggi. Mystic Plus rimuove il limite giornaliero mantenendo gratuita la Guida quotidiana.', german: 'Du hast die heutigen kostenlosen Tiefenlegungen genutzt. Mystic Plus entfernt das Tageslimit, während die tägliche Führung kostenlos bleibt.'),
