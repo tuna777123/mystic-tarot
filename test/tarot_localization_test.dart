@@ -77,4 +77,37 @@ void main() {
     expect(find.text('Deli'), findsOneWidget);
     expect(find.text('THE FOOL'), findsNothing);
   });
+
+  test('all 78 cards have distinct Turkish upright and reversed guidance', () {
+    final uprightMeanings = <String>{};
+    final reversedMeanings = <String>{};
+    final advice = <String>{};
+
+    for (final card in tarotDeck) {
+      uprightMeanings.add(
+        localizedTarotCardMeaning(
+          DrawnCard(card, false),
+          turkish: true,
+        ),
+      );
+      reversedMeanings.add(
+        localizedTarotCardMeaning(
+          DrawnCard(card, true),
+          turkish: true,
+        ),
+      );
+      advice.add(
+        localizedTarotCardAdvice(
+          DrawnCard(card, false),
+          turkish: true,
+        ),
+      );
+    }
+
+    expect(uprightMeanings, hasLength(78));
+    expect(reversedMeanings, hasLength(78));
+    expect(advice, hasLength(78));
+    expect(uprightMeanings.every((text) => text.length > 80), isTrue);
+    expect(reversedMeanings.every((text) => text.length > 80), isTrue);
+  });
 }
