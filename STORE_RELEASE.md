@@ -37,6 +37,18 @@ https://tuna777123.github.io/mystic-tarot/support.html
 **Marketing URL**  
 https://tuna777123.github.io/mystic-tarot/
 
+**Turkish localized metadata**
+
+See `docs/STORE_LISTING_TR.md`.
+
+**Turkish privacy policy URL**
+
+https://tuna777123.github.io/mystic-tarot/privacy-tr.html
+
+**Turkish support URL**
+
+https://tuna777123.github.io/mystic-tarot/support-tr.html
+
 ## Google Play metadata
 
 **App name (30 characters max)**  
