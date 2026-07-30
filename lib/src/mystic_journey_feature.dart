@@ -902,16 +902,34 @@ class _EmptyJourneys extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 22, 24, 34),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.hub_rounded,
-              size: 72,
-              color: MysticColors.lavender,
+            Container(
+              width: 84,
+              height: 84,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6948A9), Color(0xFF211735)],
+                ),
+                border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
+                boxShadow: [
+                  BoxShadow(
+                    color: MysticColors.violet.withValues(alpha: .35),
+                    blurRadius: 32,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.hub_rounded,
+                size: 42,
+                color: MysticColors.gold,
+              ),
             ),
             const SizedBox(height: 22),
             Text(
@@ -933,12 +951,47 @@ class _EmptyJourneys extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onCreate,
-              icon: const Icon(Icons.auto_awesome_rounded),
-              label: Text(
-                _copy(language, 'Create first journey', 'İlk yolculuğu oluştur'),
+            const SizedBox(height: 22),
+            Container(
+              padding: const EdgeInsets.all(17),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2B2046), Color(0xFF15111F)],
+                ),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: MysticColors.lavender.withValues(alpha: .24)),
+              ),
+              child: Column(
+                children: [
+                  _JourneyPromise(
+                    number: '01',
+                    title: _copy(language, 'Name what matters', 'Önemli olanı adlandır'),
+                    body: _copy(language, 'Love, work, healing or your own path', 'Aşk, iş, iyileşme veya kendi yolun'),
+                  ),
+                  const SizedBox(height: 15),
+                  _JourneyPromise(
+                    number: '02',
+                    title: _copy(language, 'Connect your readings', 'Okumalarını birbirine bağla'),
+                    body: _copy(language, 'Watch one question evolve over time', 'Tek bir sorunun zamanla değişimini gör'),
+                  ),
+                  const SizedBox(height: 15),
+                  _JourneyPromise(
+                    number: '03',
+                    title: _copy(language, 'See your turning points', 'Dönüm noktalarını gör'),
+                    body: _copy(language, 'Mystic reveals the pattern behind your choices', 'Mystic seçimlerinin ardındaki örüntüyü gösterir'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onCreate,
+                icon: const Icon(Icons.auto_awesome_rounded),
+                label: Text(
+                  _copy(language, 'Create first journey', 'İlk yolculuğu oluştur'),
+                ),
               ),
             ),
           ],
@@ -946,6 +999,54 @@ class _EmptyJourneys extends StatelessWidget {
       ),
     );
   }
+}
+
+class _JourneyPromise extends StatelessWidget {
+  const _JourneyPromise({
+    required this.number,
+    required this.title,
+    required this.body,
+  });
+
+  final String number;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: MysticColors.gold.withValues(alpha: .12),
+              border: Border.all(color: MysticColors.gold.withValues(alpha: .36)),
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(
+                fontFamily: 'Arial',
+                color: MysticColors.gold,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                const SizedBox(height: 3),
+                Text(body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+              ],
+            ),
+          ),
+        ],
+      );
 }
 
 class _Notice extends StatelessWidget {
