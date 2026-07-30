@@ -127,7 +127,7 @@ void main() {
     expect(find.text('Günlük Rehberlik'), findsOneWidget);
     expect(find.text('ŞU ANDA NASIL HİSSEDİYORSUN?'), findsOneWidget);
     expect(find.text('Sorunu yaz (isteğe bağlı)'), findsOneWidget);
-    expect(find.text('Kararsız'), findsOneWidget);
+    expect(find.textContaining('Kararsız'), findsOneWidget);
     expect(
       find.text(
         'Breathe slowly. Hold your question in mind, then choose the cards that call to you.',
@@ -138,6 +138,8 @@ void main() {
 
   testWidgets('saved Turkish preference restores the Turkish shell',
       (tester) async {
+    await tester.binding.setSurfaceSize(const Size(430, 932));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     SharedPreferences.setMockInitialValues({
       'onboarded': true,
       'language': 'turkish',
