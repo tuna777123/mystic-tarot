@@ -1,3 +1,19 @@
+# Version 1.4.0 — Complete Turkish Journey
+
+Mystic Tarot now preserves a complete Turkish experience beyond the reading
+flow:
+
+- Mystic Path, Inner Constellation, XP progress, daily rituals, rewards, and
+  streak messaging remain Turkish when Turkish is selected;
+- Weekly Mystic Wrapped localizes emotions, repeating cards, reflection
+  summaries, and calls to action;
+- Arcana Vault localizes collection progress, locked states, rarity labels, and
+  all 78 card names;
+- opened Vault cards use the full card-specific Turkish interpretation engine
+  for Light, Shadow, and Aligned Action;
+- mobile regression coverage prevents English fallback across the Journey,
+  Weekly Wrapped, and Arcana Vault experience.
+
 # Version 1.1.0 — Living Fate
 
 Mystic Tarot now turns separate readings into one private, evolving story:
