@@ -52,6 +52,9 @@ jobs:
           test -f build/web/privacy.html
           test -f build/web/terms.html
           test -f build/web/support.html
+          test -f build/web/privacy-tr.html
+          test -f build/web/terms-tr.html
+          test -f build/web/support-tr.html
           test -f build/web/icons/Icon-512.png
           grep -q "Mystic Tarot" build/web/index.html
 
