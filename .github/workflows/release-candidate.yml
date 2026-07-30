@@ -39,8 +39,11 @@ jobs:
       - name: Set permanent store identifiers
         run: |
           find android ios -type f \( -name "*.kt" -o -name "*.gradle.kts" -o -name "project.pbxproj" \) -print0 \
-            | xargs -0 sed -i 's/com\.tunabozcali\.mystic_tarot/com.tunabozcali.mystictarot/g'
-          grep -R "com.tunabozcali.mystictarot" android/app ios/Runner.xcodeproj/project.pbxproj
+            | xargs -0 sed -i \
+                -e 's/com\.tunabozcali\.mystic_tarot/com.tunabozcali.mystictarot/g' \
+                -e 's/com\.tunabozcali\.mysticTarot/com.tunabozcali.mystictarot/g'
+          grep -R "com.tunabozcali.mystictarot" android/app
+          grep "com.tunabozcali.mystictarot" ios/Runner.xcodeproj/project.pbxproj
 
       - name: Install dependencies
         run: flutter pub get
