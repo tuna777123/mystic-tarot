@@ -29,7 +29,13 @@ jobs:
           cache: true
 
       - name: Generate platform shells
-        run: flutter create .
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
+
+      - name: Set permanent store identifiers
+        run: |
+          find android ios -type f \( -name "*.kt" -o -name "*.gradle.kts" -o -name "project.pbxproj" \) -print0 \
+            | xargs -0 sed -i 's/com\.tunabozcali\.mystic_tarot/com.tunabozcali.mystictarot/g'
+          grep -R "com.tunabozcali.mystictarot" android/app ios/Runner.xcodeproj/project.pbxproj
 
       - name: Install dependencies
         run: flutter pub get
