@@ -21,6 +21,11 @@ import 'tarot_data.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
+const launchLanguages = <MysticLanguage>[
+  MysticLanguage.english,
+  MysticLanguage.turkish,
+];
+
 class MysticApp extends StatefulWidget {
   const MysticApp({super.key});
 
@@ -157,11 +162,11 @@ class _MysticAppState extends State<MysticApp> {
     showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Close discovery',
+      barrierLabel: mysticText(language, 'Close discovery', 'Keşfi kapat'),
       barrierColor: Colors.black.withValues(alpha: .82),
       transitionDuration: const Duration(milliseconds: 500),
       transitionBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: ScaleTransition(scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack), child: child)),
-      pageBuilder: (_, __, ___) => _CardDiscoveryDialog(cards: cards),
+      pageBuilder: (_, __, ___) => _CardDiscoveryDialog(cards: cards, language: language),
     );
   }
 
@@ -389,6 +394,7 @@ class _MysticAppState extends State<MysticApp> {
   void _previewPremiumReading(ReadingKind kind) => navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => PremiumReadingPreview(
         kind: kind,
         deckStyle: deckStyle,
+        language: language,
         onUnlock: () => _showPremium(source: 'premium_spread'),
       )));
 }
@@ -405,8 +411,9 @@ class _MysticLoadingScreen extends StatelessWidget {
 }
 
 class _CardDiscoveryDialog extends StatefulWidget {
-  const _CardDiscoveryDialog({required this.cards});
+  const _CardDiscoveryDialog({required this.cards, required this.language});
   final List<TarotCardData> cards;
+  final MysticLanguage language;
 
   @override
   State<_CardDiscoveryDialog> createState() => _CardDiscoveryDialogState();
@@ -430,17 +437,17 @@ class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog> with SingleT
     return Center(child: Material(color: Colors.transparent, child: Container(width: 330, padding: const EdgeInsets.fromLTRB(20, 22, 20, 20), decoration: BoxDecoration(gradient: const RadialGradient(center: Alignment(0, -.3), radius: 1.2, colors: [Color(0xFF5B3D7D), Color(0xFF17101F)]), borderRadius: BorderRadius.circular(30), border: Border.all(color: color.withValues(alpha: .7)), boxShadow: [BoxShadow(color: color.withValues(alpha: .28), blurRadius: 55)]), child: AnimatedBuilder(animation: controller, builder: (context, _) => Column(mainAxisSize: MainAxisSize.min, children: [
       Row(children: [const Spacer(), Text('${index + 1}/${widget.cards.length}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold)), const Spacer(), InkWell(onTap: () => Navigator.pop(context), child: const Icon(Icons.close, size: 20, color: MysticColors.muted))]),
       const SizedBox(height: 5),
-      const Text('✦  NEW ARCANA AWAKENED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.25)),
+      Text(mysticText(widget.language, '✦  NEW ARCANA AWAKENED', '✦  YENİ ARKANA UYANDI'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.25)),
       const SizedBox(height: 18),
       Transform.scale(scale: .72 + Curves.elasticOut.transform(controller.value) * .28, child: Transform.rotate(angle: sin(controller.value * pi * 3) * (1 - controller.value) * .06, child: Container(width: 132, height: 198, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color.withValues(alpha: .45), const Color(0xFF17101F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: color, width: 1.5), boxShadow: [BoxShadow(color: color.withValues(alpha: .32), blurRadius: 35)]), child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: .45))), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 23), Text(card.symbol, style: TextStyle(fontSize: 50, color: color)), const SizedBox(height: 23), Text(card.name, maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, fontWeight: FontWeight.bold))]))))),
       const SizedBox(height: 17),
-      Text(_cardRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+      Text(_localizedRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
       const SizedBox(height: 6),
       Text(card.name, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 8),
-      Text(card.light, maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
+      Text(_localizedCardMeaning(DrawnCard(card, false), widget.language), maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
       const SizedBox(height: 20),
-      GoldButton(label: hasNext ? 'Reveal next card' : 'Add to Arcana Vault', onPressed: () {
+      GoldButton(label: hasNext ? mysticText(widget.language, 'Reveal next card', 'Sonraki kartı aç') : mysticText(widget.language, 'Add to Arcana Vault', 'Arkana Kasası’na ekle'), onPressed: () {
         if (hasNext) {
           setState(() => index++);
           controller.forward(from: 0);
@@ -450,6 +457,13 @@ class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog> with SingleT
       }, icon: hasNext ? Icons.auto_awesome : Icons.check),
     ])))));
   }
+
+  String _localizedRarity(TarotCardData card) => switch (_cardRarity(card)) {
+        'Legendary' => mysticText(widget.language, 'Legendary', 'Efsanevi'),
+        'Epic' => mysticText(widget.language, 'Epic', 'Destansı'),
+        'Rare' => mysticText(widget.language, 'Rare', 'Nadir'),
+        _ => mysticText(widget.language, 'Common', 'Yaygın'),
+      };
 }
 
 String _cardRarity(TarotCardData card) {
@@ -533,7 +547,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   alignment: WrapAlignment.center,
   spacing: 8,
   runSpacing: 8,
-  children: MysticLanguage.values.map((item) => ChoiceChip(
+  children: launchLanguages.map((item) => ChoiceChip(
     label: Text(item.label),
     selected: language == item,
     onSelected: (_) => setState(() => language = item),
@@ -643,9 +657,9 @@ class HomeScreen extends StatelessWidget {
             InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(30), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(30), border: Border.all(color: MysticColors.gold.withValues(alpha: .4))), child: const Row(children: [Text('✦ ', style: TextStyle(color: MysticColors.gold)), Text('PLUS', style: TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, color: MysticColors.gold, fontSize: 12))]))),
           ]),
           const SizedBox(height: 18),
-          const _MoonBriefing(),
+          _MoonBriefing(language: language),
           const SizedBox(height: 14),
-          _PersonalSignal(intention: intention, records: records),
+          _PersonalSignal(intention: intention, records: records, language: language),
           const SizedBox(height: 14),
           DestinyFlagshipCard(records: records, completedDays: completedArcanaDays, language: language, onOpen: onOpenDestiny),
           const SizedBox(height: 14),
@@ -655,22 +669,23 @@ class HomeScreen extends StatelessWidget {
             readingDone: dailyReadingDone,
             ritualDone: ritualDone,
             claimed: dailyQuestClaimed,
+            language: language,
             onClaim: onClaimDailyQuest,
           ),
           const SizedBox(height: 12),
-          _ReadingAllowance(readingsLeft: freeReadingsLeft, onUpgrade: onPremium),
+          _ReadingAllowance(readingsLeft: freeReadingsLeft, language: language, onUpgrade: onPremium),
           const SizedBox(height: 26),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Choose a reading', style: Theme.of(context).textTheme.titleLarge), Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(mysticText(language, 'Choose a reading', 'Bir okuma seç'), style: Theme.of(context).textTheme.titleLarge), Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
           const SizedBox(height: 12),
         ]))),
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 28), sliver: SliverGrid(delegate: SliverChildBuilderDelegate((context, index) {
           final kind = _standardReadingKinds[index];
-          return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(kind.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text('${kind.cardCount} cards', style: Theme.of(context).textTheme.bodyMedium)])])));
+          return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_readingKindTitle(kind, language), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text(mysticText(language, '${kind.cardCount} cards', '${kind.cardCount} kart'), style: Theme.of(context).textTheme.bodyMedium)])])));
         }, childCount: _standardReadingKinds.length), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.12, crossAxisSpacing: 12, mainAxisSpacing: 12))),
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 32), sliver: SliverToBoxAdapter(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [Text('Mystic Plus readings', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: MysticColors.gold, borderRadius: BorderRadius.circular(12)), child: const Text('PLUS', style: TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .7)))]),
+          Row(children: [Text(mysticText(language, 'Mystic Plus readings', 'Mystic Plus okumaları'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: MysticColors.gold, borderRadius: BorderRadius.circular(12)), child: const Text('PLUS', style: TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .7)))]),
           const SizedBox(height: 6),
-          Text('High-depth spreads built for the questions people return to most.', style: Theme.of(context).textTheme.bodyMedium),
+          Text(mysticText(language, 'High-depth spreads built for the questions people return to most.', 'En çok geri dönülen sorular için tasarlanmış derin açılımlar.'), style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 12),
           SizedBox(height: 166, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: _premiumReadingKinds.length, separatorBuilder: (_, __) => const SizedBox(width: 10), itemBuilder: (_, index) => _premiumReadingCard(context, _premiumReadingKinds[index]))),
         ]))),
@@ -686,16 +701,17 @@ class HomeScreen extends StatelessWidget {
   Widget _premiumReadingCard(BuildContext context, ReadingKind kind) => InkWell(onTap: () => onPremiumSpread(kind), borderRadius: BorderRadius.circular(20), child: Container(width: 158, padding: const EdgeInsets.all(15), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF5A3B82), Color(0xFF20152F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Row(children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), const Spacer(), const Icon(Icons.lock_outline, color: MysticColors.gold, size: 17)]),
     const Spacer(),
-    Text(kind.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+    Text(_readingKindTitle(kind, language), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
     const SizedBox(height: 5),
-    Text('${kind.cardCount}-card premium spread', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10)),
+    Text(mysticText(language, '${kind.cardCount}-card premium spread', '${kind.cardCount} kartlık premium açılım'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10)),
   ])));
 }
 
 class _PersonalSignal extends StatelessWidget {
-  const _PersonalSignal({required this.intention, required this.records});
+  const _PersonalSignal({required this.intention, required this.records, required this.language});
   final String intention;
   final List<ReadingRecord> records;
+  final MysticLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -711,19 +727,29 @@ class _PersonalSignal extends StatelessWidget {
     final recurringCard = cardCounts.entries.where((entry) => entry.value > 1).fold<MapEntry<String, int>?>(null, (best, entry) => best == null || entry.value > best.value ? entry : best);
     final dominantEmotion = emotionCounts.entries.fold<MapEntry<EmotionalState, int>?>(null, (best, entry) => best == null || entry.value > best.value ? entry : best);
     final hasPattern = recent.length >= 2;
-    final title = hasPattern ? 'Mystic remembers your pattern' : 'Your $intention path is opening';
+    final title = hasPattern
+        ? mysticText(language, 'Mystic remembers your pattern', 'Mystic örüntünü hatırlıyor')
+        : mysticText(language, 'Your $intention path is opening', '${_intentionTitle(intention, language)} yolun açılıyor');
     final body = recurringCard != null
-        ? '${recurringCard.key} has returned ${recurringCard.value} times. Mystic is watching what this symbol keeps asking you to notice.'
+        ? mysticText(language, '${recurringCard.key} has returned ${recurringCard.value} times. Mystic is watching what this symbol keeps asking you to notice.', '${recurringCard.key} ${recurringCard.value} kez geri döndü. Mystic bu sembolün senden neyi fark etmeni istediğini izliyor.')
         : dominantEmotion != null && hasPattern
-            ? 'You have entered recent readings feeling ${dominantEmotion.key.label.toLowerCase()}. Your next reading will hold that emotional thread in view.'
-            : 'Save two readings and Mystic will begin connecting recurring cards, emotions, and choices into a private pattern map.';
+            ? mysticText(language, 'You have entered recent readings feeling ${dominantEmotion.key.label.toLowerCase()}. Your next reading will hold that emotional thread in view.', 'Son okumalarına ${_emotionLabel(dominantEmotion.key, language).toLowerCase()} hissederek girdin. Sonraki okuman bu duygusal izi dikkate alacak.')
+            : mysticText(language, 'Save two readings and Mystic will begin connecting recurring cards, emotions, and choices into a private pattern map.', 'İki okuma kaydet; Mystic tekrar eden kartları, duyguları ve seçimleri özel örüntü haritanda birleştirmeye başlasın.');
     return Container(padding: const EdgeInsets.all(17), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF2D2348), Color(0xFF171321)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .24))), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: MysticColors.violet.withValues(alpha: .28)), child: const Text('◉', style: TextStyle(color: MysticColors.gold, fontSize: 21))), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, fontSize: 12)), const SizedBox(height: 5), Text(body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, height: 1.4))]))]));
   }
+
+  String _intentionTitle(String value, MysticLanguage selectedLanguage) => switch (value) {
+        'Love' => mysticText(selectedLanguage, 'Love', 'Aşk'),
+        'Purpose' => mysticText(selectedLanguage, 'Purpose', 'Amaç'),
+        'Healing' => mysticText(selectedLanguage, 'Healing', 'İyileşme'),
+        _ => mysticText(selectedLanguage, 'Clarity', 'Netlik'),
+      };
 }
 
 class _ReadingAllowance extends StatelessWidget {
-  const _ReadingAllowance({required this.readingsLeft, required this.onUpgrade});
+  const _ReadingAllowance({required this.readingsLeft, required this.language, required this.onUpgrade});
   final int readingsLeft;
+  final MysticLanguage language;
   final VoidCallback onUpgrade;
 
   @override
@@ -735,15 +761,16 @@ class _ReadingAllowance extends StatelessWidget {
       child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), decoration: BoxDecoration(color: empty ? MysticColors.gold.withValues(alpha: .1) : Colors.white.withValues(alpha: .04), borderRadius: BorderRadius.circular(16), border: Border.all(color: empty ? MysticColors.gold.withValues(alpha: .38) : Colors.white10)), child: Row(children: [
         Container(width: 35, height: 35, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: empty ? MysticColors.gold : MysticColors.violet.withValues(alpha: .28)), child: Icon(empty ? Icons.lock_outline : Icons.bolt, color: empty ? MysticColors.ink : MysticColors.gold, size: 18)),
         const SizedBox(width: 11),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(empty ? 'Free deep readings used' : '$readingsLeft free deep readings left today', style: const TextStyle(fontFamily: 'Arial', fontSize: 12, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text(empty ? 'Unlock unlimited readings with Mystic Plus.' : 'Your Daily Guidance remains free every day.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11))])),
-        Text(empty ? 'VIEW PLUS' : '${3 - readingsLeft}/3', style: TextStyle(fontFamily: 'Arial', color: empty ? MysticColors.gold : MysticColors.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .6)),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(empty ? mysticText(language, 'Free deep readings used', 'Ücretsiz derin okumalar kullanıldı') : mysticText(language, '$readingsLeft free deep readings left today', 'Bugün $readingsLeft ücretsiz derin okuman kaldı'), style: const TextStyle(fontFamily: 'Arial', fontSize: 12, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text(empty ? mysticText(language, 'Unlock unlimited readings with Mystic Plus.', 'Mystic Plus ile sınırsız okumaları aç.') : mysticText(language, 'Your Daily Guidance remains free every day.', 'Günlük Rehberliğin her gün ücretsiz kalır.'), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11))])),
+        Text(empty ? mysticText(language, 'VIEW PLUS', 'PLUS’I GÖR') : '${3 - readingsLeft}/3', style: TextStyle(fontFamily: 'Arial', color: empty ? MysticColors.gold : MysticColors.muted, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .6)),
       ])),
     );
   }
 }
 
 class _MoonBriefing extends StatelessWidget {
-  const _MoonBriefing();
+  const _MoonBriefing({required this.language});
+  final MysticLanguage language;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -757,11 +784,11 @@ class _MoonBriefing extends StatelessWidget {
           Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFFF5DFA6), Color(0xFF8F6FD8)]), boxShadow: [BoxShadow(color: MysticColors.lavender.withValues(alpha: .25), blurRadius: 18)]), child: const Text('◐', style: TextStyle(color: MysticColors.ink, fontSize: 23))),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('TONIGHT’S MYSTIC PULSE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
+            Text(mysticText(language, 'TONIGHT’S MYSTIC PULSE', 'BU GECENİN MYSTIC NABZI'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
             const SizedBox(height: 4),
-            Text('Release urgency. Choose the honest next step.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
+            Text(mysticText(language, 'Release urgency. Choose the honest next step.', 'Acele hissini bırak. Dürüst olan bir sonraki adımı seç.'), style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
           ])),
-          const Text('2 MIN', style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold)),
+          Text(mysticText(language, '2 MIN', '2 DK'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10, fontWeight: FontWeight.bold)),
         ]),
       );
 }
@@ -806,10 +833,11 @@ class _DailyCardState extends State<_DailyCard> with SingleTickerProviderStateMi
 }
 
 class _DailyQuest extends StatelessWidget {
-  const _DailyQuest({required this.readingDone, required this.ritualDone, required this.claimed, required this.onClaim});
+  const _DailyQuest({required this.readingDone, required this.ritualDone, required this.claimed, required this.language, required this.onClaim});
   final bool readingDone;
   final bool ritualDone;
   final bool claimed;
+  final MysticLanguage language;
   final VoidCallback onClaim;
 
   @override
@@ -829,15 +857,15 @@ class _DailyQuest extends StatelessWidget {
           Container(width: 45, height: 45, alignment: Alignment.center, decoration: BoxDecoration(color: complete ? MysticColors.gold.withValues(alpha: .16) : Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(14)), child: Text(claimed ? '✦' : complete ? '◇' : '☾', style: const TextStyle(color: MysticColors.gold, fontSize: 25))),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('DAILY SOUL QUEST', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
+            Text(mysticText(language, 'DAILY SOUL QUEST', 'GÜNLÜK RUH GÖREVİ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
             const SizedBox(height: 4),
-            Text(claimed ? 'Today’s relic is yours.' : complete ? 'Your chest is ready to open.' : 'Complete both steps • +40 XP', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 14)),
+            Text(claimed ? mysticText(language, 'Today’s relic is yours.', 'Bugünün yadigârı senin.') : complete ? mysticText(language, 'Your chest is ready to open.', 'Sandığın açılmaya hazır.') : mysticText(language, 'Complete both steps • +40 XP', 'İki adımı da tamamla • +40 XP'), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 14)),
           ])),
           if (complete && !claimed) IconButton(onPressed: () => _claim(context), style: IconButton.styleFrom(backgroundColor: MysticColors.gold, foregroundColor: MysticColors.ink), icon: const Icon(Icons.lock_open_rounded)),
           if (claimed) const Icon(Icons.check_circle, color: MysticColors.gold),
         ]),
         const SizedBox(height: 13),
-        Row(children: [_step(context, '1', 'Daily card', readingDone), const SizedBox(width: 8), _step(context, '2', 'One ritual', ritualDone)]),
+        Row(children: [_step(context, '1', mysticText(language, 'Daily card', 'Günlük kart'), readingDone), const SizedBox(width: 8), _step(context, '2', mysticText(language, 'One ritual', 'Bir ritüel'), ritualDone)]),
         const SizedBox(height: 12),
         ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: claimed ? 1.0 : progress, minHeight: 5, backgroundColor: Colors.white10, color: MysticColors.gold)),
       ]),
@@ -851,17 +879,18 @@ class _DailyQuest extends StatelessWidget {
     showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Close reward',
+      barrierLabel: mysticText(language, 'Close reward', 'Ödülü kapat'),
       barrierColor: Colors.black.withValues(alpha: .78),
       transitionDuration: const Duration(milliseconds: 450),
       transitionBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: ScaleTransition(scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack), child: child)),
-      pageBuilder: (_, __, ___) => const _QuestRewardDialog(),
+      pageBuilder: (_, __, ___) => _QuestRewardDialog(language: language),
     );
   }
 }
 
 class _QuestRewardDialog extends StatefulWidget {
-  const _QuestRewardDialog();
+  const _QuestRewardDialog({required this.language});
+  final MysticLanguage language;
 
   @override
   State<_QuestRewardDialog> createState() => _QuestRewardDialogState();
@@ -882,13 +911,13 @@ class _QuestRewardDialogState extends State<_QuestRewardDialog> with SingleTicke
       Positioned.fill(child: CustomPaint(painter: _RewardBurstPainter(controller.value))),
       Transform.scale(scale: .7 + Curves.elasticOut.transform(controller.value) * .3, child: Transform.rotate(angle: sin(controller.value * pi * 4) * (1 - controller.value) * .08, child: Container(width: 88, height: 88, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFFF4DB8F), Color(0xFFB88231)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .5), blurRadius: 35)]), child: Text(controller.value > .55 ? '✦' : '◇', style: const TextStyle(fontSize: 43, color: MysticColors.ink))))),
     ])),
-    const Text('SOUL CHEST OPENED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+    Text(mysticText(widget.language, 'SOUL CHEST OPENED', 'RUH SANDIĞI AÇILDI'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
     const SizedBox(height: 9),
     Text('+40 XP', style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: 34)),
     const SizedBox(height: 8),
-    Text('Moon Shard added to your constellation.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+    Text(mysticText(widget.language, 'Moon Shard added to your constellation.', 'Ay Parçası takımyıldızına eklendi.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
     const SizedBox(height: 20),
-    GoldButton(label: 'Continue my path', onPressed: () => Navigator.pop(context), icon: Icons.auto_awesome),
+    GoldButton(label: mysticText(widget.language, 'Continue my path', 'Yoluma devam et'), onPressed: () => Navigator.pop(context), icon: Icons.auto_awesome),
   ])))));
 }
 
@@ -1840,47 +1869,52 @@ class ProfileScreen extends StatelessWidget {
       language: language.appLanguage,
     );
     final badges = <(String, String, bool, String)>[
-      ('First Signal', '✦', readings >= 1, 'Save 1 reading'),
-      ('Flame Keeper', '🔥', streak >= 3, 'Reach a 3-day streak'),
-      ('Arcana Seeker', '◈', discovered >= 10, 'Awaken 10 cards'),
-      ('Relic Keeper', '♛', relics >= 1, 'Claim an XP relic'),
+      (mysticText(language, 'First Signal', 'İlk İşaret'), '✦', readings >= 1, mysticText(language, 'Save 1 reading', '1 okuma kaydet')),
+      (mysticText(language, 'Flame Keeper', 'Alev Koruyucusu'), '🔥', streak >= 3, mysticText(language, 'Reach a 3-day streak', '3 günlük seriye ulaş')),
+      (mysticText(language, 'Arcana Seeker', 'Arkana Arayıcısı'), '◈', discovered >= 10, mysticText(language, 'Awaken 10 cards', '10 kartı uyandır')),
+      (mysticText(language, 'Relic Keeper', 'Yadigâr Koruyucusu'), '♛', relics >= 1, mysticText(language, 'Claim an XP relic', 'Bir XP yadigârı kazan')),
+    ];
+    final settings = <(String, String)>[
+      ('Reading preferences', mysticText(language, 'Reading preferences', 'Okuma tercihleri')),
+      ('Privacy & data', mysticText(language, 'Privacy & data', 'Gizlilik ve veriler')),
+      ('Help and support', mysticText(language, 'Help and support', 'Yardım ve destek')),
     ];
     return MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 28, 20, 28), children: [
-        Text('Your space', style: Theme.of(context).textTheme.headlineMedium),
+        Text(mysticText(language, 'Your space', 'Senin alanın'), style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 22),
         Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const RadialGradient(center: Alignment(0, -.9), radius: 1.35, colors: [Color(0xFF4B3471), Color(0xFF191326)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .24))), child: Column(children: [
           Container(width: 78, height: 78, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFF8B63D6), Color(0xFF3B285F)]), border: Border.all(color: MysticColors.gold.withValues(alpha: .55), width: 2), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .3), blurRadius: 28)]), child: const Text('☾', style: TextStyle(fontSize: 34, color: MysticColors.gold))),
           const SizedBox(height: 12),
           Text(userName.isEmpty ? _titleForLevel(level) : userName, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
-          Text('${_titleForLevel(level).toUpperCase()} • $intention PATH • LEVEL $level', textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .8)),
+          Text('${_titleForLevel(level).toUpperCase()} • ${_intentionLabel(intention).toUpperCase()} • ${mysticText(language, 'LEVEL', 'SEVİYE')} $level', textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .8)),
           const SizedBox(height: 16),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('$streak', 'day streak'), _stat('$readings', 'readings'), _stat('$discovered', 'arcana')]),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('$streak', mysticText(language, 'day streak', 'günlük seri')), _stat('$readings', mysticText(language, 'readings', 'okuma')), _stat('$discovered', mysticText(language, 'arcana', 'arkana'))]),
           const SizedBox(height: 18),
-          Row(children: [Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('${100 - (xp % 100)} XP to level ${level + 1}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10))]),
+          Row(children: [Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text(mysticText(language, '${100 - (xp % 100)} XP to level ${level + 1}', '${level + 1}. seviyeye ${100 - (xp % 100)} XP'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 10))]),
           const SizedBox(height: 8),
           ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: progress, minHeight: 7, backgroundColor: Colors.white10, color: MysticColors.gold)),
         ])),
         const SizedBox(height: 16),
         _mysticSoulCard(context, identity),
         const SizedBox(height: 22),
-        Row(children: [Text('Mystic achievements', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${badges.where((badge) => badge.$3).length}/${badges.length}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
+        Row(children: [Text(mysticText(language, 'Mystic achievements', 'Mystic başarımları'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${badges.where((badge) => badge.$3).length}/${badges.length}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
         const SizedBox(height: 6),
-        Text('Your practice leaves permanent marks on your path.', style: Theme.of(context).textTheme.bodyMedium),
+        Text(mysticText(language, 'Your practice leaves permanent marks on your path.', 'Pratiğin yolunda kalıcı izler bırakır.'), style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 12),
         GridView.count(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, childAspectRatio: 1.48, crossAxisSpacing: 10, mainAxisSpacing: 10, children: badges.map((badge) => _badge(context, badge.$1, badge.$2, badge.$3, badge.$4)).toList()),
         const SizedBox(height: 24),
-        Text('Your tarot deck', style: Theme.of(context).textTheme.titleLarge),
+        Text(mysticText(language, 'Your tarot deck', 'Tarot desten'), style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 6),
-        Text('Choose the visual energy that follows every reading.', style: Theme.of(context).textTheme.bodyMedium),
+        Text(mysticText(language, 'Choose the visual energy that follows every reading.', 'Her okumaya eşlik edecek görsel enerjiyi seç.'), style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 12),
         SizedBox(height: 178, child: ListView(scrollDirection: Axis.horizontal, children: DeckStyle.values.map((style) => _deckOption(context, style)).toList())),
         const SizedBox(height: 14),
-        InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: const Row(children: [Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Unlock Mystic Plus', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), SizedBox(height: 4), Text('Go deeper with unlimited readings', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), Icon(Icons.arrow_forward)]))),
+        InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(22), child: Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF6847B7), Color(0xFF312057)]), borderRadius: BorderRadius.circular(22)), child: Row(children: [const Text('✦', style: TextStyle(fontSize: 28, color: MysticColors.gold)), const SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(language, 'Unlock Mystic Plus', 'Mystic Plus’ı aç'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), const SizedBox(height: 4), Text(mysticText(language, 'Go deeper with unlimited readings', 'Sınırsız okumalarla daha derine in'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender))])), const Icon(Icons.arrow_forward)]))),
         const SizedBox(height: 18),
-        ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SoulProfileScreen(initialName: userName, initialIntention: intention, onSave: onUpdateProfile))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.fingerprint, color: MysticColors.gold), title: const Text('Soul profile', style: TextStyle(fontFamily: 'Arial')), subtitle: Text(userName.isEmpty ? '$intention path' : '$userName • $intention path', style: Theme.of(context).textTheme.bodyMedium), trailing: const Icon(Icons.chevron_right)),
+        ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SoulProfileScreen(initialName: userName, initialIntention: intention, language: language, onSave: onUpdateProfile))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.fingerprint, color: MysticColors.gold), title: Text(mysticText(language, 'Soul profile', 'Ruh profili'), style: const TextStyle(fontFamily: 'Arial')), subtitle: Text(userName.isEmpty ? _intentionLabel(intention) : '$userName • ${_intentionLabel(intention)}', style: Theme.of(context).textTheme.bodyMedium), trailing: const Icon(Icons.chevron_right)),
         ListTile(onTap: () => _chooseLanguage(context), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.language, color: MysticColors.gold), title: Text(mysticText(language, 'Language', 'Dil'), style: const TextStyle(fontFamily: 'Arial')), subtitle: Text(language.label, style: Theme.of(context).textTheme.bodyMedium), trailing: const Icon(Icons.chevron_right)),
-        ...['Reading preferences', 'Daily reminder', 'Privacy & data', 'Help and support'].map((label) => ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticSettingsScreen(section: label, records: records, onDeleteData: onDeleteData))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(label, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
+        ...settings.map((item) => ListTile(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => MysticSettingsScreen(section: item.$1, title: item.$2, language: language, records: records, onDeleteData: onDeleteData))), contentPadding: const EdgeInsets.symmetric(horizontal: 4), leading: const Icon(Icons.auto_awesome_outlined, color: MysticColors.lavender), title: Text(item.$2, style: const TextStyle(fontFamily: 'Arial')), trailing: const Icon(Icons.chevron_right))),
       ]));
   }
 
@@ -1932,9 +1966,9 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text(mysticText(language, 'Choose language', 'Dil seç'), style: Theme.of(sheetContext).textTheme.headlineMedium),
           const SizedBox(height: 8),
-          Text(mysticText(language, 'Your flagship journey and navigation update instantly. Full reading translations continue expanding with each release.', 'Ana yolculuğun ve menüler anında güncellenir. Okuma çevirileri her sürümde genişlemeye devam eder.'), style: Theme.of(sheetContext).textTheme.bodyMedium),
+          Text(mysticText(language, 'Mystic is fully available in English and Turkish for this release.', 'Mystic bu sürümde Türkçe ve İngilizce olarak eksiksiz kullanılabilir.'), style: Theme.of(sheetContext).textTheme.bodyMedium),
           const SizedBox(height: 14),
-          ...MysticLanguage.values.map((item) => ListTile(
+          ...launchLanguages.map((item) => ListTile(
             onTap: () {
               onSelectLanguage(item);
               Navigator.pop(sheetContext);
@@ -1949,16 +1983,23 @@ class ProfileScreen extends StatelessWidget {
   }
 
   String _titleForLevel(int level) {
-    if (level >= 10) return 'Astral Sage';
-    if (level >= 6) return 'Mystic Oracle';
-    if (level >= 3) return 'Arcana Seeker';
-    return 'Mystic Initiate';
+    if (level >= 10) return mysticText(language, 'Astral Sage', 'Astral Bilge');
+    if (level >= 6) return mysticText(language, 'Mystic Oracle', 'Mystic Kâhin');
+    if (level >= 3) return mysticText(language, 'Arcana Seeker', 'Arkana Arayıcısı');
+    return mysticText(language, 'Mystic Initiate', 'Mystic Yolcusu');
   }
+
+  String _intentionLabel(String value) => switch (value) {
+        'Love' => mysticText(language, 'Love path', 'Aşk yolu'),
+        'Purpose' => mysticText(language, 'Purpose path', 'Amaç yolu'),
+        'Healing' => mysticText(language, 'Healing path', 'İyileşme yolu'),
+        _ => mysticText(language, 'Clarity path', 'Netlik yolu'),
+      };
 
   Widget _badge(BuildContext context, String title, String symbol, bool unlocked, String goal) => AnimatedContainer(duration: const Duration(milliseconds: 350), padding: const EdgeInsets.all(13), decoration: BoxDecoration(gradient: unlocked ? const LinearGradient(colors: [Color(0xFF4A326D), Color(0xFF21172F)]) : const LinearGradient(colors: [Color(0xFF1D1924), Color(0xFF121017)]), borderRadius: BorderRadius.circular(17), border: Border.all(color: unlocked ? MysticColors.gold.withValues(alpha: .45) : Colors.white10)), child: Row(children: [
     Container(width: 38, height: 38, alignment: Alignment.center, decoration: BoxDecoration(color: unlocked ? MysticColors.gold.withValues(alpha: .14) : Colors.white.withValues(alpha: .035), shape: BoxShape.circle), child: Text(unlocked ? symbol : '🔒', style: TextStyle(fontSize: unlocked ? 21 : 15, color: MysticColors.gold))),
     const SizedBox(width: 9),
-    Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)), const SizedBox(height: 4), Text(unlocked ? 'UNLOCKED' : goal, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.gold : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: unlocked ? .7 : 0))]))
+    Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)), const SizedBox(height: 4), Text(unlocked ? mysticText(language, 'UNLOCKED', 'AÇILDI') : goal, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.gold : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: unlocked ? .7 : 0))]))
   ]));
 
   Widget _deckOption(BuildContext context, DeckStyle style) {
@@ -1972,9 +2013,9 @@ class ProfileScreen extends StatelessWidget {
         Align(alignment: Alignment.topRight, child: Icon(active ? Icons.check_circle : unlocked ? Icons.radio_button_unchecked : Icons.lock, color: active ? accent : MysticColors.muted, size: 16)),
         Text(unlocked ? style.symbol : '◈', style: TextStyle(fontSize: 34, color: unlocked ? accent : Colors.white24)),
         const Spacer(),
-        Text(style.label, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)),
+        Text(_deckLabel(style), textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 11, fontWeight: FontWeight.w800)),
         const SizedBox(height: 5),
-        Text(active ? 'ACTIVE DECK' : style.subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: active ? accent : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: active ? .6 : 0)),
+        Text(active ? mysticText(language, 'ACTIVE DECK', 'AKTİF DESTE') : _deckSubtitle(style), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: active ? accent : MysticColors.muted, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: active ? .6 : 0)),
       ])),
     );
   }
@@ -2001,13 +2042,26 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
+  String _deckLabel(DeckStyle style) => switch (style) {
+        DeckStyle.solarGold => mysticText(language, 'Solar Gold', 'Güneş Altını'),
+        DeckStyle.bloodMoon => mysticText(language, 'Blood Moon', 'Kanlı Ay'),
+        DeckStyle.midnight => mysticText(language, 'Midnight', 'Gece Yarısı'),
+      };
+
+  String _deckSubtitle(DeckStyle style) => switch (style) {
+        DeckStyle.solarGold => mysticText(language, style.subtitle, '10 kart keşfederek aç'),
+        DeckStyle.bloodMoon => mysticText(language, style.subtitle, '400 XP ile aç'),
+        DeckStyle.midnight => mysticText(language, style.subtitle, 'Klasik Mystic destesi'),
+      };
+
   Widget _stat(String value, String label) => Column(children: [Text(value, style: const TextStyle(fontFamily: 'Arial', fontSize: 20, color: MysticColors.gold, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 12))]);
 }
 
 class SoulProfileScreen extends StatefulWidget {
-  const SoulProfileScreen({required this.initialName, required this.initialIntention, required this.onSave, super.key});
+  const SoulProfileScreen({required this.initialName, required this.initialIntention, required this.language, required this.onSave, super.key});
   final String initialName;
   final String initialIntention;
+  final MysticLanguage language;
   final void Function(String name, String intention) onSave;
 
   @override
@@ -2034,29 +2088,38 @@ class _SoulProfileScreenState extends State<SoulProfileScreen> {
   @override
   Widget build(BuildContext context) {
     const choices = ['Clarity', 'Love', 'Purpose', 'Healing'];
-    return Scaffold(appBar: AppBar(title: const Text('Soul profile')), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(22, 24, 22, 30), children: [
+    return Scaffold(appBar: AppBar(title: Text(mysticText(widget.language, 'Soul profile', 'Ruh profili'))), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(22, 24, 22, 30), children: [
       const Center(child: Text('◉', style: TextStyle(fontSize: 58, color: MysticColors.gold))),
       const SizedBox(height: 12),
-      Text('Make Mystic yours', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      Text(mysticText(widget.language, 'Make Mystic yours', 'Mystic’i kendine göre şekillendir'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 8),
-      Text('Your name and intention shape the language, memory, and guidance around every reading.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      Text(mysticText(widget.language, 'Your name and intention shape the language, memory, and guidance around every reading.', 'Adın ve niyetin her okumadaki dili, hafızayı ve rehberliği şekillendirir.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 28),
-      TextField(controller: name, maxLength: 18, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Your name', prefixIcon: Icon(Icons.person_outline))),
+      TextField(controller: name, maxLength: 18, textCapitalization: TextCapitalization.words, decoration: InputDecoration(labelText: mysticText(widget.language, 'Your name', 'Adın'), prefixIcon: const Icon(Icons.person_outline))),
       const SizedBox(height: 18),
-      const Text('YOUR CURRENT PATH', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
+      Text(mysticText(widget.language, 'YOUR CURRENT PATH', 'ŞU ANKİ YOLUN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
       const SizedBox(height: 10),
-      Wrap(spacing: 9, runSpacing: 9, children: choices.map((choice) => ChoiceChip(label: Text(choice), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
+      Wrap(spacing: 9, runSpacing: 9, children: choices.map((choice) => ChoiceChip(label: Text(_choiceLabel(choice)), selected: intention == choice, onSelected: (_) => setState(() => intention = choice), selectedColor: MysticColors.violet)).toList()),
       const SizedBox(height: 30),
-      GoldButton(label: 'Save my soul profile', icon: Icons.auto_awesome, onPressed: () { widget.onSave(name.text, intention); Navigator.pop(context); }),
+      GoldButton(label: mysticText(widget.language, 'Save my soul profile', 'Ruh profilimi kaydet'), icon: Icons.auto_awesome, onPressed: () { widget.onSave(name.text, intention); Navigator.pop(context); }),
       const SizedBox(height: 10),
-      const Text('Stored privately on this device.', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9)),
+      Text(mysticText(widget.language, 'Stored privately on this device.', 'Bu cihazda özel olarak saklanır.'), textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9)),
     ])));
   }
+
+  String _choiceLabel(String value) => switch (value) {
+        'Love' => mysticText(widget.language, 'Love', 'Aşk'),
+        'Purpose' => mysticText(widget.language, 'Purpose', 'Amaç'),
+        'Healing' => mysticText(widget.language, 'Healing', 'İyileşme'),
+        _ => mysticText(widget.language, 'Clarity', 'Netlik'),
+      };
 }
 
 class MysticSettingsScreen extends StatefulWidget {
-  const MysticSettingsScreen({required this.section, required this.records, required this.onDeleteData, super.key});
+  const MysticSettingsScreen({required this.section, required this.title, required this.language, required this.records, required this.onDeleteData, super.key});
   final String section;
+  final String title;
+  final MysticLanguage language;
   final List<ReadingRecord> records;
   final VoidCallback onDeleteData;
 
@@ -2067,7 +2130,6 @@ class MysticSettingsScreen extends StatefulWidget {
 class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
   bool allowReversals = true;
   bool soundEffectsEnabled = true;
-  bool reminderEnabled = false;
 
   @override
   void initState() {
@@ -2077,66 +2139,59 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
       setState(() {
         allowReversals = prefs.getBool('allow_reversals') ?? true;
         soundEffectsEnabled = prefs.getBool('sound_effects') ?? true;
-        reminderEnabled = prefs.getBool('daily_reminder') ?? false;
       });
     });
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(widget.section)), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 30), children: _content(context))));
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(widget.title)), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 30), children: _content(context))));
 
   List<Widget> _content(BuildContext context) {
     if (widget.section == 'Reading preferences') {
       return [
-        _intro(context, 'Shape every reading', 'Mystic should adapt to your practice—not ask you to adapt to it.'),
-        SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Allow reversed cards'), subtitle: const Text('Adds shadow meanings to approximately one in four cards.'), value: allowReversals, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => allowReversals = value); final prefs = await SharedPreferences.getInstance(); await prefs.setBool('allow_reversals', value); }),
+        _intro(context, t('Shape every reading', 'Her okumayı şekillendir'), t('Mystic should adapt to your practice—not ask you to adapt to it.', 'Mystic senin pratiğine uyum sağlamalı; senden kendisine uymanı istememeli.')),
+        SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(t('Allow reversed cards', 'Ters kartlara izin ver')), subtitle: Text(t('Adds shadow meanings to approximately one in four cards.', 'Yaklaşık her dört karttan birine gölge anlamı ekler.')), value: allowReversals, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => allowReversals = value); final prefs = await SharedPreferences.getInstance(); await prefs.setBool('allow_reversals', value); }),
         const Divider(),
-        SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Ritual sound effects'), subtitle: const Text('Soft audio cues for selection, sealing, and reveal.'), value: soundEffectsEnabled, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => soundEffectsEnabled = value); await MysticSoundscape.instance.setEnabled(value); }),
+        SwitchListTile(contentPadding: EdgeInsets.zero, title: Text(t('Ritual sound effects', 'Ritüel ses efektleri')), subtitle: Text(t('Soft audio cues for selection, sealing, and reveal.', 'Seçim, mühürleme ve açılış için yumuşak sesler.')), value: soundEffectsEnabled, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => soundEffectsEnabled = value); await MysticSoundscape.instance.setEnabled(value); }),
         const Divider(),
-        const ListTile(contentPadding: EdgeInsets.zero, leading: Icon(Icons.psychology_alt_outlined, color: MysticColors.lavender), title: Text('Reflection-first guidance'), subtitle: Text('Readings remain grounded invitations—not certainty, diagnosis, or professional advice.')),
-      ];
-    }
-    if (widget.section == 'Daily reminder') {
-      return [
-        _intro(context, 'Protect your daily ritual', 'A gentle return works better than endless notifications.'),
-        SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Daily Guidance reminder'), subtitle: Text(reminderEnabled ? 'Scheduled for 9:00 AM on supported mobile devices.' : 'Off'), value: reminderEnabled, activeThumbColor: MysticColors.gold, onChanged: (value) async { setState(() => reminderEnabled = value); final prefs = await SharedPreferences.getInstance(); await prefs.setBool('daily_reminder', value); }),
-        const SizedBox(height: 12),
-        _notice('Web preview note', 'Notification permission and system scheduling activate in the native iOS/Android release.'),
+        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.psychology_alt_outlined, color: MysticColors.lavender), title: Text(t('Reflection-first guidance', 'Önce düşünme yaklaşımı')), subtitle: Text(t('Readings remain grounded invitations—not certainty, diagnosis, or professional advice.', 'Okumalar kesinlik, teşhis veya profesyonel tavsiye değil; gerçekçi düşünme davetleridir.'))),
       ];
     }
     if (widget.section == 'Privacy & data') {
       return [
-        _intro(context, 'Your inner world stays yours', 'This preview keeps your journal and progress locally on this device. No questions are sold to advertisers.'),
-        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.download_outlined, color: MysticColors.gold), title: const Text('Export my journal'), subtitle: Text('${widget.records.length} saved readings'), trailing: const Icon(Icons.chevron_right), onTap: _exportJournal),
+        _intro(context, t('Your inner world stays yours', 'İç dünyan sana aittir'), t('This release keeps your journal and progress locally on this device. No questions are sold to advertisers.', 'Bu sürüm günlüğünü ve ilerlemeni bu cihazda yerel olarak saklar. Soruların reklamverenlere satılmaz.')),
+        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.download_outlined, color: MysticColors.gold), title: Text(t('Export my journal', 'Günlüğümü dışa aktar')), subtitle: Text(t('${widget.records.length} saved readings', '${widget.records.length} kayıtlı okuma')), trailing: const Icon(Icons.chevron_right), onTap: _exportJournal),
         const Divider(),
-        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.delete_outline, color: Color(0xFFFF8090)), title: const Text('Delete all Mystic data'), subtitle: const Text('Permanently removes local journal, XP, streak, and settings.'), onTap: _confirmDelete),
+        ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.delete_outline, color: Color(0xFFFF8090)), title: Text(t('Delete all Mystic data', 'Tüm Mystic verilerini sil')), subtitle: Text(t('Permanently removes local journal, XP, streak, and settings.', 'Yerel günlüğü, XP’yi, seriyi ve ayarları kalıcı olarak kaldırır.')), onTap: _confirmDelete),
         const SizedBox(height: 14),
-        _notice('Entertainment & reflection', 'Mystic Tarot is designed for personal reflection and entertainment. It does not provide medical, legal, financial, or mental-health advice.'),
+        _notice(t('Entertainment & reflection', 'Eğlence ve öz değerlendirme'), t('Mystic Tarot is designed for personal reflection and entertainment. It does not provide medical, legal, financial, or mental-health advice.', 'Mystic Tarot kişisel düşünme ve eğlence için tasarlanmıştır. Tıbbi, hukuki, finansal veya ruh sağlığı tavsiyesi vermez.')),
       ];
     }
     return [
-      _intro(context, 'We are here to help', 'Clear answers before you begin your next ritual.'),
-      _faq('Does Mystic predict the future?', 'No. It uses tarot symbolism as a structured mirror for reflection and possible perspectives.'),
-      _faq('Can I cancel Mystic Plus?', 'When native subscriptions launch, they can be managed and cancelled through Apple or Google account settings. The web release does not process payments.'),
-      _faq('How do I restore a purchase?', 'Restore becomes available with native Apple and Google subscriptions. The current web release does not process or store purchases.'),
-      _faq('Is my journal private?', 'Yes. The current release stores it locally on this device and does not transmit journal content to us. You can export or delete it at any time.'),
+      _intro(context, t('We are here to help', 'Yardım etmek için buradayız'), t('Clear answers before you begin your next ritual.', 'Sonraki ritüeline başlamadan önce net cevaplar.')),
+      _faq(t('Does Mystic predict the future?', 'Mystic geleceği tahmin eder mi?'), t('No. It uses tarot symbolism as a structured mirror for reflection and possible perspectives.', 'Hayır. Tarot sembollerini düşünme ve olası bakış açıları için yapılandırılmış bir ayna olarak kullanır.')),
+      _faq(t('Can I cancel Mystic Plus?', 'Mystic Plus’ı iptal edebilir miyim?'), t('When native subscriptions launch, they can be managed and cancelled through Apple or Google account settings. The web release does not process payments.', 'Yerel abonelikler başladığında Apple veya Google hesap ayarlarından yönetilip iptal edilebilir. Web sürümü ödeme işlemez.')),
+      _faq(t('How do I restore a purchase?', 'Satın almayı nasıl geri yüklerim?'), t('Restore becomes available with native Apple and Google subscriptions. The current web release does not process or store purchases.', 'Geri yükleme, yerel Apple ve Google abonelikleriyle kullanılabilir. Mevcut web sürümü satın alma işlemez veya saklamaz.')),
+      _faq(t('Is my journal private?', 'Günlüğüm özel mi?'), t('Yes. The current release stores it locally on this device and does not transmit journal content to us. You can export or delete it at any time.', 'Evet. Mevcut sürüm günlüğünü bu cihazda yerel olarak saklar ve içeriğini bize iletmez. İstediğin zaman dışa aktarabilir veya silebilirsin.')),
       const SizedBox(height: 10),
-      GoldButton(label: 'Copy support link', icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://tuna777123.github.io/mystic-tarot/support.html')); if (!context.mounted) return; ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Support link copied.'))); }),
+      GoldButton(label: t('Copy support link', 'Destek bağlantısını kopyala'), icon: Icons.support_agent, onPressed: () async { await Clipboard.setData(const ClipboardData(text: 'https://tuna777123.github.io/mystic-tarot/support.html')); if (!context.mounted) return; ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t('Support link copied.', 'Destek bağlantısı kopyalandı.')))); }),
     ];
   }
+
+  String t(String english, String turkish) => mysticText(widget.language, english, turkish);
 
   Widget _intro(BuildContext context, String title, String body) => Padding(padding: const EdgeInsets.only(bottom: 18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text(body, style: Theme.of(context).textTheme.bodyLarge)]));
   Widget _notice(String title, String body) => Container(padding: const EdgeInsets.all(17), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(18), border: Border.all(color: Colors.white10)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const SizedBox(height: 7), Text(body, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, height: 1.45))]));
   Widget _faq(String question, String answer) => ExpansionTile(tilePadding: EdgeInsets.zero, childrenPadding: const EdgeInsets.only(bottom: 14), title: Text(question, style: const TextStyle(fontFamily: 'Arial', fontSize: 14, fontWeight: FontWeight.bold)), children: [Align(alignment: Alignment.centerLeft, child: Text(answer, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, height: 1.45)))]);
 
   Future<void> _exportJournal() async {
-    final text = widget.records.isEmpty ? 'Mystic Tarot Journal\n\nNo saved readings yet.' : widget.records.map((record) => '${record.createdAt.toLocal()} — ${record.kind.title}\n${record.cards.map((item) => '${item.card.name}${item.reversed ? ' (Reversed)' : ''}').join(', ')}\nAligned action: ${record.alignedAction}').join('\n\n');
+    final text = widget.records.isEmpty ? t('Mystic Tarot Journal\n\nNo saved readings yet.', 'Mystic Tarot Günlüğü\n\nHenüz kayıtlı okuma yok.') : widget.records.map((record) => '${record.createdAt.toLocal()} — ${_readingKindTitle(record.kind, widget.language)}\n${record.cards.map((item) => '${item.card.name}${item.reversed ? t(' (Reversed)', ' (Ters)') : ''}').join(', ')}\n${t('Aligned action', 'Uyumlu eylem')}: ${record.alignedAction}').join('\n\n');
     await Clipboard.setData(ClipboardData(text: text));
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your journal was copied for export.')));
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t('Your journal was copied for export.', 'Günlüğün dışa aktarmak için kopyalandı.'))));
   }
 
   Future<void> _confirmDelete() async {
-    final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: const Text('Delete all Mystic data?'), content: const Text('This cannot be undone. Your journal, card collection, streak, XP, and preferences will be removed from this device.'), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep my data')), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete everything', style: TextStyle(color: Color(0xFFFF8090))))])) ?? false;
+    final confirmed = await showDialog<bool>(context: context, builder: (context) => AlertDialog(title: Text(t('Delete all Mystic data?', 'Tüm Mystic verileri silinsin mi?')), content: Text(t('This cannot be undone. Your journal, card collection, streak, XP, and preferences will be removed from this device.', 'Bu işlem geri alınamaz. Günlüğün, kart koleksiyonun, serin, XP’n ve tercihlerin bu cihazdan kaldırılır.')), actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: Text(t('Keep my data', 'Verilerimi koru'))), TextButton(onPressed: () => Navigator.pop(context, true), child: Text(t('Delete everything', 'Her şeyi sil'), style: const TextStyle(color: Color(0xFFFF8090))))])) ?? false;
     if (!confirmed || !mounted) return;
     Navigator.pop(context);
     widget.onDeleteData();
@@ -2144,9 +2199,10 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
 }
 
 class PremiumReadingPreview extends StatefulWidget {
-  const PremiumReadingPreview({required this.kind, required this.deckStyle, required this.onUnlock, super.key});
+  const PremiumReadingPreview({required this.kind, required this.deckStyle, required this.language, required this.onUnlock, super.key});
   final ReadingKind kind;
   final DeckStyle deckStyle;
+  final MysticLanguage language;
   final VoidCallback onUnlock;
 
   @override
@@ -2169,30 +2225,30 @@ class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
 
   @override
   Widget build(BuildContext context) => Scaffold(body: MysticBackground(child: SafeArea(child: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 30), children: [
-        Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .13), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: const Text('PLUS PREVIEW', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)))]),
+        Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .13), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Text(mysticText(widget.language, 'PLUS PREVIEW', 'PLUS ÖNİZLEME'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1)))]),
         const SizedBox(height: 12),
         Text(widget.kind.symbol, textAlign: TextAlign.center, style: const TextStyle(fontSize: 38, color: MysticColors.gold)),
         const SizedBox(height: 7),
-        Text(widget.kind.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+        Text(_readingKindTitle(widget.kind, widget.language), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
-        Text('One card is yours. The complete ${widget.kind.cardCount}-card story waits behind it.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        Text(mysticText(widget.language, 'One card is yours. The complete ${widget.kind.cardCount}-card story waits behind it.', 'Bir kart senin. ${widget.kind.cardCount} kartlık hikâyenin tamamı onun arkasında bekliyor.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
         Center(child: AnimatedSwitcher(duration: const Duration(milliseconds: 650), transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: ScaleTransition(scale: Tween(begin: .82, end: 1.0).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutBack)), child: child)), child: TarotCardFace(key: ValueKey(revealed), drawn: revealed ? previewCard : null, selected: revealed, style: widget.deckStyle, width: 142, height: 222))),
         const SizedBox(height: 20),
         AnimatedCrossFade(
           duration: const Duration(milliseconds: 500),
           crossFadeState: revealed ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          firstChild: const Center(child: Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), SizedBox(width: 10), Text('The first signal is forming…', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
-          secondChild: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF3B285A), Color(0xFF1B1428)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .25))), child: Column(children: [const Text('YOUR FIRST SIGNAL', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.25)), const SizedBox(height: 8), Text(previewCard.card.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)), const SizedBox(height: 7), Text(previewCard.reversed ? previewCard.card.shadow : previewCard.card.light, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge), const SizedBox(height: 8), Text(previewCard.reversed ? 'Reversed energy' : 'Upright energy', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.bold))])),
+          firstChild: Center(child: Row(mainAxisSize: MainAxisSize.min, children: [const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), const SizedBox(width: 10), Text(mysticText(widget.language, 'The first signal is forming…', 'İlk işaret şekilleniyor…'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
+          secondChild: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF3B285A), Color(0xFF1B1428)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .25))), child: Column(children: [Text(mysticText(widget.language, 'YOUR FIRST SIGNAL', 'İLK İŞARETİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.25)), const SizedBox(height: 8), Text(previewCard.card.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)), const SizedBox(height: 7), Text(_localizedCardMeaning(previewCard, widget.language), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge), const SizedBox(height: 8), Text(previewCard.reversed ? mysticText(widget.language, 'Reversed energy', 'Ters enerji') : mysticText(widget.language, 'Upright energy', 'Düz enerji'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.bold))])),
         ),
         const SizedBox(height: 22),
-        Row(children: [Text('The rest of your spread', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.kind.cardCount - 1} LOCKED', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .8))]),
+        Row(children: [Text(mysticText(widget.language, 'The rest of your spread', 'Açılımının geri kalanı'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text(mysticText(widget.language, '${widget.kind.cardCount - 1} LOCKED', '${widget.kind.cardCount - 1} KİLİTLİ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .8))]),
         const SizedBox(height: 12),
         SizedBox(height: 104, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.kind.cardCount - 1, separatorBuilder: (_, __) => const SizedBox(width: 8), itemBuilder: (_, index) => Stack(alignment: Alignment.center, children: [Opacity(opacity: .48, child: TarotCardFace(style: widget.deckStyle, width: 64, height: 100)), Container(width: 29, height: 29, decoration: BoxDecoration(color: const Color(0xFF171122).withValues(alpha: .92), shape: BoxShape.circle, border: Border.all(color: MysticColors.gold.withValues(alpha: .45))), child: const Icon(Icons.lock, size: 14, color: MysticColors.gold))]))),
         const SizedBox(height: 22),
-        GoldButton(label: 'Unlock the full ${widget.kind.title}', onPressed: widget.onUnlock, icon: Icons.auto_awesome),
+        GoldButton(label: mysticText(widget.language, 'Unlock the full ${_readingKindTitle(widget.kind, widget.language)}', '${_readingKindTitle(widget.kind, widget.language)} açılımının tamamını aç'), onPressed: widget.onUnlock, icon: Icons.auto_awesome),
         const SizedBox(height: 9),
-        const Text('Included with Mystic Plus • Cancel anytime', textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9)),
+        Text(mysticText(widget.language, 'Included with Mystic Plus • Cancel anytime', 'Mystic Plus’a dâhil • İstediğin zaman iptal et'), textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9)),
       ]))));
 }
 
