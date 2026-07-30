@@ -44,6 +44,13 @@ jobs:
           grep -R "com.tunabozcali.mystictarot" android/app
           grep "com.tunabozcali.mystictarot" ios/Runner.xcodeproj/project.pbxproj
 
+      - name: Validate protected signing configurator
+        run: |
+          cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts
+          dart run tool/configure_android_signing.dart
+          grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
+          mv /tmp/mystic-build.gradle.kts android/app/build.gradle.kts
+
       - name: Install dependencies
         run: flutter pub get
 
