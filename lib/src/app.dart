@@ -1173,18 +1173,59 @@ class _ReadingFlowState extends State<ReadingFlow> {
         Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)), const Spacer(), Text('${selected.length}/${widget.kind.cardCount}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
         Text(_readingKindTitle(widget.kind, widget.language), style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
-        Text(mysticText(widget.language, 'Breathe slowly. Hold your question in mind, then choose the cards that call to you.', 'Yavaşça nefes al. Sorunu zihninde tut, sonra sana seslenen kartları seç.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          mysticText(widget.language, 'Breathe slowly. Hold your question in mind, then choose the cards that call to you.', 'Yavaşça nefes al. Sorunu zihninde tut, sonra sana seslenen kartları seç.'),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: MysticColors.mist,
+                fontSize: 13,
+                height: 1.4,
+              ),
+        ),
         const SizedBox(height: 16),
         TextField(controller: question, maxLines: 2, decoration: InputDecoration(hintText: mysticText(widget.language, 'Write your question (optional)', 'Sorunu yaz (isteğe bağlı)'), prefixIcon: const Icon(Icons.edit_outlined))),
         const SizedBox(height: 14),
         Align(alignment: Alignment.centerLeft, child: Text(mysticText(widget.language, 'HOW DO YOU FEEL RIGHT NOW?', 'ŞU ANDA NASIL HİSSEDİYORSUN?'), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, letterSpacing: 1.1))),
         const SizedBox(height: 8),
-        SizedBox(height: 38, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: EmotionalState.values.length, separatorBuilder: (_, __) => const SizedBox(width: 7), itemBuilder: (_, i) {
-          final item = EmotionalState.values[i];
-          return ChoiceChip(label: Text('${item.symbol} ${_emotionLabel(item, widget.language)}'), selected: emotion == item, onSelected: (_) => setState(() => emotion = item));
-        })),
-        const SizedBox(height: 18),
-        Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 18), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(style: widget.deckStyle, selected: selected.contains(i), width: 65, height: 110)))),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              for (final item in EmotionalState.values)
+                ChoiceChip(
+                  label: Text('${item.symbol} ${_emotionLabel(item, widget.language)}'),
+                  selected: emotion == item,
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onSelected: (_) => setState(() => emotion = item),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Text(
+              mysticText(widget.language, 'CHOOSE YOUR CARDS', 'KARTLARINI SEÇ'),
+              style: const TextStyle(
+                fontFamily: 'Arial',
+                color: MysticColors.gold,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.15,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              mysticText(widget.language, 'Trust the first pull', 'İlk çekime güven'),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10),
+            ),
+          ],
+        ),
+        const SizedBox(height: 9),
+        Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 14), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(style: widget.deckStyle, selected: selected.contains(i), width: 65, height: 110)))),
         GoldButton(label: selected.length == widget.kind.cardCount
             ? mysticText(widget.language, 'Seal my selection', 'Seçimimi mühürle')
             : mysticText(widget.language, 'Choose ${widget.kind.cardCount - selected.length} more', '${widget.kind.cardCount - selected.length} kart daha seç'), onPressed: selected.length == widget.kind.cardCount ? _prepareRitual : null, icon: Icons.auto_awesome),
@@ -1635,57 +1676,17 @@ String _emotionLabel(EmotionalState emotion, MysticLanguage language) {
 }
 
 String _localizedCardMeaning(DrawnCard drawn, MysticLanguage language) {
-  if (language != MysticLanguage.turkish) {
-    return drawn.reversed ? drawn.card.shadow : drawn.card.light;
-  }
-
-  final theme = _turkishCardTheme(drawn.card.name);
-  return drawn.reversed
-      ? '$theme konusunda gecikme, aşırılık veya içsel bir direnç görünür olabilir. Kart, dışarıdan kesin bir cevap aramak yerine bu gerilimin sende neyi koruduğunu dürüstçe incelemeye çağırıyor.'
-      : '$theme enerjisi şu anda daha görünür. Kart, bu alanı bilinçli biçimde kullanabileceğini ve küçük ama net bir seçimle ilerleyebileceğini hatırlatıyor.';
+  return localizedTarotCardMeaning(
+    drawn,
+    turkish: language == MysticLanguage.turkish,
+  );
 }
 
 String _localizedCardAdvice(DrawnCard drawn, MysticLanguage language) {
-  if (language != MysticLanguage.turkish) return drawn.card.advice;
-  final theme = _turkishCardTheme(drawn.card.name).toLowerCase();
-  return drawn.reversed
-      ? '$theme alanında hemen tepki vermeden önce varsayımlarını gerçeklerden ayır.'
-      : '$theme alanında bugün tamamlayabileceğin küçük ve gözlemlenebilir bir adım seç.';
-}
-
-String _turkishCardTheme(String name) {
-  const majorThemes = <String, String>{
-    'The Fool': 'yeni başlangıç ve cesaret',
-    'The Magician': 'irade, beceri ve eylem',
-    'The High Priestess': 'sezgi ve içsel bilgi',
-    'The Empress': 'üretkenlik, şefkat ve büyüme',
-    'The Emperor': 'düzen, sınırlar ve sorumluluk',
-    'The Hierophant': 'değerler, öğrenme ve gelenek',
-    'The Lovers': 'bağ, uyum ve bilinçli seçim',
-    'The Chariot': 'yön, kararlılık ve ilerleme',
-    'Strength': 'sakin cesaret ve özdenetim',
-    'The Hermit': 'içe dönüş ve kişisel bilgelik',
-    'Wheel of Fortune': 'değişim, döngüler ve fırsat',
-    'Justice': 'denge, dürüstlük ve sonuçlar',
-    'The Hanged Man': 'bekleme ve farklı açıdan görme',
-    'Death': 'bitiş, dönüşüm ve bırakma',
-    'Temperance': 'ölçü, sabır ve bütünleşme',
-    'The Devil': 'bağımlılık, gölge ve özgürleşme',
-    'The Tower': 'ani gerçek, çözülme ve yeniden kurma',
-    'The Star': 'umut, iyileşme ve ilham',
-    'The Moon': 'belirsizlik, sezgi ve korkular',
-    'The Sun': 'açıklık, canlılık ve sevinç',
-    'Judgement': 'uyanış, değerlendirme ve çağrı',
-    'The World': 'tamamlanma, bütünlük ve yeni döngü',
-  };
-  final major = majorThemes[name];
-  if (major != null) return major;
-
-  if (name.contains('Wands')) return 'motivasyon, yaratıcılık ve girişim';
-  if (name.contains('Cups')) return 'duygular, ilişkiler ve kalpten bağ';
-  if (name.contains('Swords')) return 'düşünceler, iletişim ve karar';
-  if (name.contains('Pentacles')) return 'para, emek, beden ve güven';
-  return 'farkındalık ve bilinçli seçim';
+  return localizedTarotCardAdvice(
+    drawn,
+    turkish: language == MysticLanguage.turkish,
+  );
 }
 
 class JourneyScreen extends StatefulWidget {
