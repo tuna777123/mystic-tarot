@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import 'models.dart';
 import 'tarot_data.dart';
+import 'tarot_localization.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -503,7 +504,7 @@ class _ChapterHero extends StatelessWidget {
             const SizedBox(height: 18),
             Text(card.symbol, style: const TextStyle(fontSize: 65, color: MysticColors.gold)),
             const SizedBox(height: 12),
-            Text(card.name, style: Theme.of(context).textTheme.headlineMedium),
+            Text(localizedTarotCardName(card.name, turkish: language == MysticLanguage.turkish), style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 4),
             Text(card.number, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold)),
           ]),
@@ -591,7 +592,7 @@ class _StoryStudioScreenState extends State<StoryStudioScreen> with SingleTicker
       final image = await boundary.toImage(pixelRatio: 3);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null) throw StateError('Story image could not be encoded');
-      final cards = widget.record.cards.map((item) => item.card.name).join(' • ');
+      final cards = widget.record.cards.map((item) => localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)).join(' • ');
       await SharePlus.instance.share(ShareParams(
         title: 'Mystic Tarot',
         text: '$cards\nhttps://tuna777123.github.io/mystic-tarot/',
@@ -600,7 +601,7 @@ class _StoryStudioScreenState extends State<StoryStudioScreen> with SingleTicker
         sharePositionOrigin: shareOrigin,
       ));
     } catch (_) {
-      await Clipboard.setData(ClipboardData(text: '${widget.record.cards.map((item) => item.card.name).join(' • ')}\n${widget.guidance}\nhttps://tuna777123.github.io/mystic-tarot/'));
+      await Clipboard.setData(ClipboardData(text: '${widget.record.cards.map((item) => localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)).join(' • ')}\n${widget.guidance}\nhttps://tuna777123.github.io/mystic-tarot/'));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mysticText(widget.language, 'Sharing was unavailable, so your reading was copied.', 'Paylaşım kullanılamadı; okuman panoya kopyalandı.'))));
     } finally {
@@ -652,7 +653,7 @@ class _StoryCanvas extends StatelessWidget {
               const SizedBox(height: 20),
               Transform.rotate(angle: item.reversed ? pi : 0, child: Text(item.card.symbol, style: TextStyle(fontSize: record.cards.length == 1 ? 44 : 31, color: accent))),
               const SizedBox(height: 18),
-              Text(item.card.name, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 8, fontWeight: FontWeight.w800)),
+              Text(localizedTarotCardName(item.card.name, turkish: language == MysticLanguage.turkish), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 8, fontWeight: FontWeight.w800)),
             ]),
           )).toList())),
           const SizedBox(height: 18),
