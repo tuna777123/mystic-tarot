@@ -1,3 +1,25 @@
+# Version 1.1.0 — Living Fate
+
+Mystic Tarot now turns separate readings into one private, evolving story:
+
+- Living Fate Map connects recurring cards, emotions, life areas, and real-world
+  check-ins without presenting reflection as certainty;
+- the 22-day Major Arcana Journey adds one focused chapter, practical ritual,
+  and private reflection per day, with no punishment for missed days;
+- Oracle Memory connects the current reading with recent on-device history and
+  offers a contextual follow-up dialogue;
+- Mystic Story Studio exports a privacy-safe, high-resolution 9:16 story image
+  for social sharing without including the user's question or journal notes;
+- Living Journal adds a visual Memory Map and private semantic search across
+  saved readings;
+- language selection persists across sessions, with English and Turkish
+  flagship experiences plus an expanding seven-language interface foundation;
+- local-first storage, export, deletion, subscription disclosure, restore
+  handling, and public legal/support pages remain part of the release.
+
+This release does not claim deterministic predictions or remote AI. Personal
+history stays on the device unless the user explicitly exports or shares it.
+
 # Version 1.0.0 — Public Early Access
 
 Mystic Tarot opens its first complete ritual:
