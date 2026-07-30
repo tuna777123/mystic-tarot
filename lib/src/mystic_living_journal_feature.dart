@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'flagship.dart';
 import 'models.dart';
 import 'mystic_memory_map_feature.dart';
+import 'tarot_localization.dart';
 import 'theme.dart';
 
 enum _JournalSection { timeline, insights, map, search }
@@ -195,7 +196,7 @@ class _MysticLivingJournalFeatureState
     final cards = record.cards.map((drawn) {
       final orientation =
           drawn.reversed ? _copy('reversed', 'ters') : _copy('upright', 'düz');
-      return '${drawn.card.name} · $orientation';
+      return '${localizedTarotCardName(drawn.card.name, turkish: _isTurkish)} · $orientation';
     }).join('\n');
 
     return Container(
@@ -342,7 +343,10 @@ class _MysticLivingJournalFeatureState
         _buildPatternCard(
           title: _copy('Cards returning to you', 'Sana dönen kartlar'),
           rows: rankedCards.take(4).map((entry) {
-            return _InsightRow(entry.key, '${entry.value}×');
+            return _InsightRow(
+              localizedTarotCardName(entry.key, turkish: _isTurkish),
+              '${entry.value}×',
+            );
           }).toList(),
         ),
         const SizedBox(height: 12),
@@ -350,7 +354,7 @@ class _MysticLivingJournalFeatureState
           title: _copy('Emotional weather', 'Duygusal hava'),
           rows: rankedEmotions.take(3).map((entry) {
             return _InsightRow(
-              '${entry.key.symbol} ${entry.key.label}',
+              '${entry.key.symbol} ${_emotionLabel(entry.key)}',
               '${entry.value}×',
             );
           }).toList(),
@@ -524,10 +528,22 @@ class _MysticLivingJournalFeatureState
         record.emotion.label,
         record.alignedAction,
         ...record.cards.map((drawn) => drawn.card.name),
+        ...record.cards.map(
+          (drawn) =>
+              localizedTarotCardName(drawn.card.name, turkish: _isTurkish),
+        ),
       ].join(' ').toLowerCase();
       return searchableText.contains(normalized);
     }).toList();
   }
+
+  String _emotionLabel(EmotionalState emotion) => switch (emotion) {
+        EmotionalState.anxious => _copy('Anxious', 'Kaygılı'),
+        EmotionalState.hopeful => _copy('Hopeful', 'Umutlu'),
+        EmotionalState.grounded => _copy('Grounded', 'Dengeli'),
+        EmotionalState.curious => _copy('Curious', 'Meraklı'),
+        EmotionalState.uncertain => _copy('Uncertain', 'Kararsız'),
+      };
 
   Widget _buildEmptyState({required Key key}) {
     return Center(
