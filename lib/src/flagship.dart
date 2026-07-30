@@ -246,7 +246,7 @@ class _DestinyMap extends StatelessWidget {
     final recent = records.take(12).toList();
     final recurring = _mostFrequentCard(recent);
     final emotion = _dominantEmotion(recent);
-    final focus = _dominantFocus(recent);
+    final focus = _dominantFocus(recent, language);
     final currentIndex = min(21, completedDays.length);
     final currentCard = tarotDeck[currentIndex];
     final hasSignal = recent.length >= 2;
@@ -271,7 +271,7 @@ class _DestinyMap extends StatelessWidget {
             ),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(currentCard.symbol, style: const TextStyle(fontSize: 36, color: MysticColors.ink)),
-              Text(currentCard.name, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900)),
+              Text(localizedTarotCardName(currentCard.name, turkish: language == MysticLanguage.turkish), textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900)),
             ]),
           )),
           Positioned(left: 18, top: 17, child: Text(mysticText(language, 'YOUR LIVING SIGNALS', 'YAŞAYAN SİNYALLERİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.2))),
@@ -287,8 +287,8 @@ class _DestinyMap extends StatelessWidget {
       const SizedBox(height: 18),
       Text(mysticText(language, 'What your path is saying', 'Yolunun söylediği şey'), style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 10),
-      _signalTile(context, '◉', mysticText(language, 'RECURRING SYMBOL', 'TEKRARLAYAN SEMBOL'), recurring == null ? mysticText(language, 'No repeated card yet', 'Henüz tekrarlayan kart yok') : '${recurring.$1} ×${recurring.$2}', MysticColors.gold),
-      _signalTile(context, emotion.symbol, mysticText(language, 'INNER WEATHER', 'İÇ HAVA'), recent.isEmpty ? mysticText(language, 'Waiting for your first reading', 'İlk okumanı bekliyor') : emotion.label, MysticColors.lavender),
+      _signalTile(context, '◉', mysticText(language, 'RECURRING SYMBOL', 'TEKRARLAYAN SEMBOL'), recurring == null ? mysticText(language, 'No repeated card yet', 'Henüz tekrarlayan kart yok') : '${localizedTarotCardName(recurring.$1, turkish: language == MysticLanguage.turkish)} ×${recurring.$2}', MysticColors.gold),
+      _signalTile(context, emotion.symbol, mysticText(language, 'INNER WEATHER', 'İÇ HAVA'), recent.isEmpty ? mysticText(language, 'Waiting for your first reading', 'İlk okumanı bekliyor') : localizedEmotionLabel(emotion, turkish: language == MysticLanguage.turkish), MysticColors.lavender),
       _signalTile(context, '✦', mysticText(language, 'ACTIVE LIFE AREA', 'AKTİF YAŞAM ALANI'), focus, const Color(0xFF82D8D0)),
       const SizedBox(height: 8),
       Container(
@@ -299,13 +299,13 @@ class _DestinyMap extends StatelessWidget {
           border: Border.all(color: MysticColors.gold.withValues(alpha: .23)),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(mysticText(language, 'CURRENT CHAPTER • ${currentCard.name.toUpperCase()}', 'MEVCUT BÖLÜM • ${currentCard.name.toUpperCase()}'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)),
+          Text(mysticText(language, 'CURRENT CHAPTER • ${currentCard.name.toUpperCase()}', 'MEVCUT BÖLÜM • ${localizedTarotCardName(currentCard.name, turkish: true).toUpperCase()}'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)),
           const SizedBox(height: 9),
           Text(mysticText(language, arcanaChapters[currentIndex].focusEn, arcanaChapters[currentIndex].focusTr), style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 7),
           Text(
             hasSignal
-                ? mysticText(language, 'Your recent $focus questions have carried ${emotion.label.toLowerCase()} energy. This chapter asks you to ${arcanaChapters[currentIndex].ritualEn.toLowerCase()}', 'Son $focus soruların ${emotion.label.toLowerCase()} enerjisi taşıdı. Bu bölüm senden şunu istiyor: ${arcanaChapters[currentIndex].ritualTr}')
+                ? mysticText(language, 'Your recent $focus questions have carried ${emotion.label.toLowerCase()} energy. This chapter asks you to ${arcanaChapters[currentIndex].ritualEn.toLowerCase()}', 'Son $focus soruların ${localizedEmotionLabel(emotion, turkish: true).toLowerCase()} enerjisi taşıdı. Bu bölüm senden şunu istiyor: ${arcanaChapters[currentIndex].ritualTr}')
                 : mysticText(language, 'Begin with one honest reading. Mystic will connect the cards, emotions, and actions that return.', 'Dürüst bir okumayla başla. Mystic tekrar eden kartları, duyguları ve eylemleri birbirine bağlayacak.'),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
@@ -781,11 +781,21 @@ EmotionalState _dominantEmotion(List<ReadingRecord> records) {
   return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
 }
 
-String _dominantFocus(List<ReadingRecord> records) {
-  if (records.isEmpty) return 'Clarity';
+String _dominantFocus(
+  List<ReadingRecord> records,
+  MysticLanguage language,
+) {
+  if (records.isEmpty) {
+    return mysticText(language, 'Clarity', 'Netlik');
+  }
   final counts = <ReadingKind, int>{};
   for (final record in records) {
     counts.update(record.kind, (value) => value + 1, ifAbsent: () => 1);
   }
-  return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key.title;
+  final kind =
+      counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+  return localizedReadingKindTitle(
+    kind,
+    turkish: language == MysticLanguage.turkish,
+  );
 }
