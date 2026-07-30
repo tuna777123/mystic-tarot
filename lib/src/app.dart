@@ -18,6 +18,7 @@ import 'mystic_living_journal_feature.dart';
 import 'sound.dart';
 import 'store_ready_premium_screen.dart';
 import 'tarot_data.dart';
+import 'tarot_localization.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -439,11 +440,11 @@ class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog> with SingleT
       const SizedBox(height: 5),
       Text(mysticText(widget.language, '✦  NEW ARCANA AWAKENED', '✦  YENİ ARKANA UYANDI'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.25)),
       const SizedBox(height: 18),
-      Transform.scale(scale: .72 + Curves.elasticOut.transform(controller.value) * .28, child: Transform.rotate(angle: sin(controller.value * pi * 3) * (1 - controller.value) * .06, child: Container(width: 132, height: 198, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color.withValues(alpha: .45), const Color(0xFF17101F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: color, width: 1.5), boxShadow: [BoxShadow(color: color.withValues(alpha: .32), blurRadius: 35)]), child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: .45))), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 23), Text(card.symbol, style: TextStyle(fontSize: 50, color: color)), const SizedBox(height: 23), Text(card.name, maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, fontWeight: FontWeight.bold))]))))),
+      Transform.scale(scale: .72 + Curves.elasticOut.transform(controller.value) * .28, child: Transform.rotate(angle: sin(controller.value * pi * 3) * (1 - controller.value) * .06, child: Container(width: 132, height: 198, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [color.withValues(alpha: .45), const Color(0xFF17101F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: color, width: 1.5), boxShadow: [BoxShadow(color: color.withValues(alpha: .32), blurRadius: 35)]), child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), border: Border.all(color: color.withValues(alpha: .45))), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 23), Text(card.symbol, style: TextStyle(fontSize: 50, color: color)), const SizedBox(height: 23), Text(_cardName(card.name), maxLines: 2, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 11, fontWeight: FontWeight.bold))]))))),
       const SizedBox(height: 17),
       Text(_localizedRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
       const SizedBox(height: 6),
-      Text(card.name, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      Text(_cardName(card.name), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 8),
       Text(_localizedCardMeaning(DrawnCard(card, false), widget.language), maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist)),
       const SizedBox(height: 20),
@@ -464,6 +465,11 @@ class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog> with SingleT
         'Rare' => mysticText(widget.language, 'Rare', 'Nadir'),
         _ => mysticText(widget.language, 'Common', 'Yaygın'),
       };
+
+  String _cardName(String name) => localizedTarotCardName(
+        name,
+        turkish: widget.language == MysticLanguage.turkish,
+      );
 }
 
 String _cardRarity(TarotCardData card) {
@@ -727,11 +733,17 @@ class _PersonalSignal extends StatelessWidget {
     final recurringCard = cardCounts.entries.where((entry) => entry.value > 1).fold<MapEntry<String, int>?>(null, (best, entry) => best == null || entry.value > best.value ? entry : best);
     final dominantEmotion = emotionCounts.entries.fold<MapEntry<EmotionalState, int>?>(null, (best, entry) => best == null || entry.value > best.value ? entry : best);
     final hasPattern = recent.length >= 2;
+    final recurringName = recurringCard == null
+        ? null
+        : localizedTarotCardName(
+            recurringCard.key,
+            turkish: language == MysticLanguage.turkish,
+          );
     final title = hasPattern
         ? mysticText(language, 'Mystic remembers your pattern', 'Mystic örüntünü hatırlıyor')
         : mysticText(language, 'Your $intention path is opening', '${_intentionTitle(intention, language)} yolun açılıyor');
     final body = recurringCard != null
-        ? mysticText(language, '${recurringCard.key} has returned ${recurringCard.value} times. Mystic is watching what this symbol keeps asking you to notice.', '${recurringCard.key} ${recurringCard.value} kez geri döndü. Mystic bu sembolün senden neyi fark etmeni istediğini izliyor.')
+        ? mysticText(language, '$recurringName has returned ${recurringCard.value} times. Mystic is watching what this symbol keeps asking you to notice.', '$recurringName ${recurringCard.value} kez geri döndü. Mystic bu sembolün senden neyi fark etmeni istediğini izliyor.')
         : dominantEmotion != null && hasPattern
             ? mysticText(language, 'You have entered recent readings feeling ${dominantEmotion.key.label.toLowerCase()}. Your next reading will hold that emotional thread in view.', 'Son okumalarına ${_emotionLabel(dominantEmotion.key, language).toLowerCase()} hissederek girdin. Sonraki okuman bu duygusal izi dikkate alacak.')
             : mysticText(language, 'Save two readings and Mystic will begin connecting recurring cards, emotions, and choices into a private pattern map.', 'İki okuma kaydet; Mystic tekrar eden kartları, duyguları ve seçimleri özel örüntü haritanda birleştirmeye başlasın.');
@@ -1085,7 +1097,8 @@ class _ReadingFlowState extends State<ReadingFlow> {
         ? const ['Seni çevreleyen enerji', 'Dikkat isteyen konu', 'Sıradaki uyumlu adım']
         : const ['What surrounds you', 'What asks for attention', 'Your next aligned step'];
     final meaning = _localizedCardMeaning(card, widget.language);
-    return Padding(padding: const EdgeInsets.only(bottom: 22), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(index < positions.length ? positions[index].toUpperCase() : mysticText(widget.language, 'MESSAGE', 'MESAJ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)), const SizedBox(height: 6), Text('${card.card.name}${card.reversed ? mysticText(widget.language, ' — Reversed', ' — Ters') : ''}', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8), Text(meaning, style: Theme.of(context).textTheme.bodyLarge)]));
+    final cardName = localizedTarotCardName(card.card.name, turkish: widget.language == MysticLanguage.turkish);
+    return Padding(padding: const EdgeInsets.only(bottom: 22), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(index < positions.length ? positions[index].toUpperCase() : mysticText(widget.language, 'MESSAGE', 'MESAJ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)), const SizedBox(height: 6), Text('$cardName${card.reversed ? mysticText(widget.language, ' — Reversed', ' — Ters') : ''}', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8), Text(meaning, style: Theme.of(context).textTheme.bodyLarge)]));
   }
 
   String _headline() {
@@ -1102,7 +1115,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
 
   Widget _memoryBridge(BuildContext context) {
     final previous = widget.pastRecords.first;
-    final returning = drawn!.where((current) => previous.cards.any((old) => old.card.name == current.card.name)).map((item) => item.card.name).toList();
+    final returning = drawn!.where((current) => previous.cards.any((old) => old.card.name == current.card.name)).map((item) => localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)).toList();
     final message = returning.isNotEmpty
         ? mysticText(widget.language, '${returning.first} also appeared in your last saved reading. Repeating symbols often become useful when you compare what changed between the two moments.', '${returning.first} son kaydettiğin okumada da görünmüştü. Tekrarlayan semboller, iki an arasında neyin değiştiğini karşılaştırdığında anlam kazanır.')
         : mysticText(widget.language, 'Your previous reading began from ${previous.emotion.label.toLowerCase()}; today you chose ${emotion.label.toLowerCase()}. Mystic is connecting the emotional shift—not just the cards.', 'Önceki okuman ${_emotionLabel(previous.emotion, widget.language).toLowerCase()} duygusuyla başlamıştı; bugün ${_emotionLabel(emotion, widget.language).toLowerCase()} seçtin. Mystic yalnızca kartları değil, duygusal değişimi de birbirine bağlıyor.');
@@ -1334,12 +1347,12 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     final memory = _oracleMemory();
     if (widget.language == MysticLanguage.turkish) {
       if (lower.contains('gör') || lower.contains('risk')) {
-        return '${first.card.name}, görünmeyen kısmın şu olabileceğini söylüyor: $firstMeaning ${_localizedCardAdvice(last, widget.language)} ${_emotionLabel(widget.record.emotion, widget.language)} duygusu bir ayrıntıyı diğerlerinden daha yüksek gösterebilir. Bildiklerini, korktuklarını ve umut ettiklerini ayır.$memory';
+        return '${localizedTarotCardName(first.card.name, turkish: true)}, görünmeyen kısmın şu olabileceğini söylüyor: $firstMeaning ${_localizedCardAdvice(last, widget.language)} ${_emotionLabel(widget.record.emotion, widget.language)} duygusu bir ayrıntıyı diğerlerinden daha yüksek gösterebilir. Bildiklerini, korktuklarını ve umut ettiklerini ayır.$memory';
       }
       if (lower.contains('hangi kart') || lower.contains('önemli')) {
-        return '${last.card.name} bu açılımın kapanış ağırlığını taşıyor. ${_localizedCardMeaning(last, widget.language)} Pratik daveti şu: ${_localizedCardAdvice(last, widget.language)} Bunun seçtiğin yolu nasıl desteklediğine dikkat et.$memory';
+        return '${localizedTarotCardName(last.card.name, turkish: true)} bu açılımın kapanış ağırlığını taşıyor. ${_localizedCardMeaning(last, widget.language)} Pratik daveti şu: ${_localizedCardAdvice(last, widget.language)} Bunun seçtiğin yolu nasıl desteklediğine dikkat et.$memory';
       }
-      return '${first.card.name} içine girdiğin enerjiyi, ${last.card.name} ise verebileceğin karşılığı gösteriyor. ${_localizedCardAdvice(last, widget.language)} Sonraki adımı küçük, gözlemlenebilir ve geri döndürülebilir tut; kartlar emir vermiyor, farklı bir bakış sunuyor.$memory';
+      return '${localizedTarotCardName(first.card.name, turkish: true)} içine girdiğin enerjiyi, ${localizedTarotCardName(last.card.name, turkish: true)} ise verebileceğin karşılığı gösteriyor. ${_localizedCardAdvice(last, widget.language)} Sonraki adımı küçük, gözlemlenebilir ve geri döndürülebilir tut; kartlar emir vermiyor, farklı bir bakış sunuyor.$memory';
     }
     if (lower.contains('not seeing') || lower.contains('underestimating') || lower.contains('risk') || lower.contains('görm') || lower.contains('risk')) {
       return '${first.card.name} suggests the hidden part may be this: $firstMeaning ${last.card.advice} Your ${widget.record.emotion.label.toLowerCase()} state can make one detail feel louder than the rest, so separate what you know from what you fear or hope.$memory';
@@ -2185,7 +2198,7 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
   Widget _faq(String question, String answer) => ExpansionTile(tilePadding: EdgeInsets.zero, childrenPadding: const EdgeInsets.only(bottom: 14), title: Text(question, style: const TextStyle(fontFamily: 'Arial', fontSize: 14, fontWeight: FontWeight.bold)), children: [Align(alignment: Alignment.centerLeft, child: Text(answer, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, height: 1.45)))]);
 
   Future<void> _exportJournal() async {
-    final text = widget.records.isEmpty ? t('Mystic Tarot Journal\n\nNo saved readings yet.', 'Mystic Tarot Günlüğü\n\nHenüz kayıtlı okuma yok.') : widget.records.map((record) => '${record.createdAt.toLocal()} — ${_readingKindTitle(record.kind, widget.language)}\n${record.cards.map((item) => '${item.card.name}${item.reversed ? t(' (Reversed)', ' (Ters)') : ''}').join(', ')}\n${t('Aligned action', 'Uyumlu eylem')}: ${record.alignedAction}').join('\n\n');
+    final text = widget.records.isEmpty ? t('Mystic Tarot Journal\n\nNo saved readings yet.', 'Mystic Tarot Günlüğü\n\nHenüz kayıtlı okuma yok.') : widget.records.map((record) => '${record.createdAt.toLocal()} — ${_readingKindTitle(record.kind, widget.language)}\n${record.cards.map((item) => '${localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)}${item.reversed ? t(' (Reversed)', ' (Ters)') : ''}').join(', ')}\n${t('Aligned action', 'Uyumlu eylem')}: ${record.alignedAction}').join('\n\n');
     await Clipboard.setData(ClipboardData(text: text));
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t('Your journal was copied for export.', 'Günlüğün dışa aktarmak için kopyalandı.'))));
   }
@@ -2239,7 +2252,7 @@ class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
           duration: const Duration(milliseconds: 500),
           crossFadeState: revealed ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           firstChild: Center(child: Row(mainAxisSize: MainAxisSize.min, children: [const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), const SizedBox(width: 10), Text(mysticText(widget.language, 'The first signal is forming…', 'İlk işaret şekilleniyor…'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
-          secondChild: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF3B285A), Color(0xFF1B1428)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .25))), child: Column(children: [Text(mysticText(widget.language, 'YOUR FIRST SIGNAL', 'İLK İŞARETİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.25)), const SizedBox(height: 8), Text(previewCard.card.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)), const SizedBox(height: 7), Text(_localizedCardMeaning(previewCard, widget.language), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge), const SizedBox(height: 8), Text(previewCard.reversed ? mysticText(widget.language, 'Reversed energy', 'Ters enerji') : mysticText(widget.language, 'Upright energy', 'Düz enerji'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.bold))])),
+          secondChild: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF3B285A), Color(0xFF1B1428)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .25))), child: Column(children: [Text(mysticText(widget.language, 'YOUR FIRST SIGNAL', 'İLK İŞARETİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.25)), const SizedBox(height: 8), Text(localizedTarotCardName(previewCard.card.name, turkish: widget.language == MysticLanguage.turkish), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)), const SizedBox(height: 7), Text(_localizedCardMeaning(previewCard, widget.language), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge), const SizedBox(height: 8), Text(previewCard.reversed ? mysticText(widget.language, 'Reversed energy', 'Ters enerji') : mysticText(widget.language, 'Upright energy', 'Düz enerji'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.bold))])),
         ),
         const SizedBox(height: 22),
         Row(children: [Text(mysticText(widget.language, 'The rest of your spread', 'Açılımının geri kalanı'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text(mysticText(widget.language, '${widget.kind.cardCount - 1} LOCKED', '${widget.kind.cardCount - 1} KİLİTLİ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .8))]),
