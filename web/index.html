@@ -67,6 +67,11 @@
   <script>
     let installPrompt = null;
     const installButton = document.getElementById('install-app');
+    const turkishDevice = navigator.language.toLowerCase().startsWith('tr');
+    if (turkishDevice) {
+      installButton.textContent = '✦ Mystic’i Yükle';
+      installButton.setAttribute('aria-label', 'Mystic Tarot’u yükle');
+    }
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault();
       installPrompt = event;
