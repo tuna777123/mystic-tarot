@@ -136,6 +136,38 @@ void main() {
     );
   });
 
+  testWidgets('Turkish emotion choices fit a phone without clipping',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({'allow_reversals': true});
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: ReadingFlow(
+          kind: ReadingKind.daily,
+          deckStyle: DeckStyle.midnight,
+          userName: 'Tuna',
+          intention: 'Clarity',
+          language: MysticLanguage.turkish,
+          pastRecords: const [],
+          onPremium: () {},
+          onComplete: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    for (final label in ['Kararsız', 'Umutlu', 'Kaygılı', 'Dengeli', 'Meraklı']) {
+      expect(find.textContaining(label), findsOneWidget);
+    }
+    expect(find.text('KARTLARINI SEÇ'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('saved Turkish preference restores the Turkish shell',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));
