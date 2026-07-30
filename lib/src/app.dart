@@ -1064,8 +1064,8 @@ class _ReadingFlowState extends State<ReadingFlow> {
         Text(mysticText(widget.language, 'Take what resonates. Tarot is a mirror for reflection—not a fixed prediction.', 'Sana uyan mesajı al. Tarot kesin bir kehanet değil, düşünmek için bir aynadır.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
         SizedBox(height: 190, child: drawn!.length <= 3
-            ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [for (var i = 0; i < drawn!.length; i++) ...[if (i > 0) const SizedBox(width: 12), _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520))]])
-            : ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
+            ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [for (var i = 0; i < drawn!.length; i++) ...[if (i > 0) const SizedBox(width: 12), _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, language: widget.language, delay: Duration(milliseconds: 350 + i * 520))]])
+            : ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, language: widget.language, delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
         const SizedBox(height: 26),
         if (!revealComplete) _ReadingInProgress(cardCount: drawn!.length, language: widget.language),
         if (revealComplete) ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
@@ -1278,7 +1278,7 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
         ]),
       ),
       const SizedBox(height: 20),
-      SizedBox(height: 126, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.record.cards.length, separatorBuilder: (_, __) => const SizedBox(width: 9), itemBuilder: (_, index) => TarotCardFace(drawn: widget.record.cards[index], width: 76, height: 122))),
+      SizedBox(height: 126, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.record.cards.length, separatorBuilder: (_, __) => const SizedBox(width: 9), itemBuilder: (_, index) => TarotCardFace(drawn: widget.record.cards[index], displayName: localizedTarotCardName(widget.record.cards[index].card.name, turkish: widget.language == MysticLanguage.turkish), reversedLabel: mysticText(widget.language, 'Reversed', 'Ters'), width: 76, height: 122))),
       const SizedBox(height: 22),
       if (askedQuestion == null) ...[
         Text(mysticText(widget.language, 'CHOOSE A FOLLOW-UP', 'DEVAM SORUSU SEÇ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
@@ -1384,9 +1384,10 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
 }
 
 class _RitualRevealCard extends StatefulWidget {
-  const _RitualRevealCard({required this.card, required this.deckStyle, required this.delay});
+  const _RitualRevealCard({required this.card, required this.deckStyle, required this.language, required this.delay});
   final DrawnCard card;
   final DeckStyle deckStyle;
+  final MysticLanguage language;
   final Duration delay;
 
   @override
@@ -1417,7 +1418,15 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
             transform: Matrix4.identity()..setEntry(3, 2, .0014)..rotateY(angle),
             child: Transform.flip(
               flipX: showFace,
-              child: TarotCardFace(drawn: showFace ? widget.card : null, style: widget.deckStyle),
+              child: TarotCardFace(
+                drawn: showFace ? widget.card : null,
+                displayName: localizedTarotCardName(
+                  widget.card.card.name,
+                  turkish: widget.language == MysticLanguage.turkish,
+                ),
+                reversedLabel: mysticText(widget.language, 'Reversed', 'Ters'),
+                style: widget.deckStyle,
+              ),
             ),
           );
         },
@@ -2246,7 +2255,7 @@ class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
         const SizedBox(height: 8),
         Text(mysticText(widget.language, 'One card is yours. The complete ${widget.kind.cardCount}-card story waits behind it.', 'Bir kart senin. ${widget.kind.cardCount} kartlık hikâyenin tamamı onun arkasında bekliyor.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 24),
-        Center(child: AnimatedSwitcher(duration: const Duration(milliseconds: 650), transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: ScaleTransition(scale: Tween(begin: .82, end: 1.0).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutBack)), child: child)), child: TarotCardFace(key: ValueKey(revealed), drawn: revealed ? previewCard : null, selected: revealed, style: widget.deckStyle, width: 142, height: 222))),
+        Center(child: AnimatedSwitcher(duration: const Duration(milliseconds: 650), transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: ScaleTransition(scale: Tween(begin: .82, end: 1.0).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutBack)), child: child)), child: TarotCardFace(key: ValueKey(revealed), drawn: revealed ? previewCard : null, displayName: localizedTarotCardName(previewCard.card.name, turkish: widget.language == MysticLanguage.turkish), reversedLabel: mysticText(widget.language, 'Reversed', 'Ters'), selected: revealed, style: widget.deckStyle, width: 142, height: 222))),
         const SizedBox(height: 20),
         AnimatedCrossFade(
           duration: const Duration(milliseconds: 500),
