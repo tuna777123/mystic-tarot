@@ -90,8 +90,10 @@ class GoldButton extends StatelessWidget {
 }
 
 class TarotCardFace extends StatelessWidget {
-  const TarotCardFace({this.drawn, this.selected = false, this.style = DeckStyle.midnight, this.width = 116, this.height = 184, super.key});
+  const TarotCardFace({this.drawn, this.displayName, this.reversedLabel = 'REVERSED', this.selected = false, this.style = DeckStyle.midnight, this.width = 116, this.height = 184, super.key});
   final DrawnCard? drawn;
+  final String? displayName;
+  final String reversedLabel;
   final bool selected;
   final DeckStyle style;
   final double width;
@@ -166,8 +168,8 @@ class TarotCardFace extends StatelessWidget {
       const SizedBox(height: 2),
       Expanded(child: Transform.rotate(angle: drawn!.reversed ? pi : 0, child: CustomPaint(painter: _ArcanaArtworkPainter(seed: seed, accent: accent), child: Center(child: Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF120D1D).withValues(alpha: .72), border: Border.all(color: accent.withValues(alpha: .45)), boxShadow: [BoxShadow(color: accent.withValues(alpha: .15), blurRadius: 16)]), child: Text(card.symbol, style: TextStyle(color: accent, fontSize: 27))))))),
       const SizedBox(height: 3),
-      Text(card.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 7.5, height: 1.05, fontWeight: FontWeight.w800, letterSpacing: .55)),
-      if (drawn!.reversed) Padding(padding: const EdgeInsets.only(top: 2), child: Text('REVERSED', style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .82), fontSize: 5.5, fontWeight: FontWeight.w900, letterSpacing: .75))),
+      Text(displayName ?? card.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 7.5, height: 1.05, fontWeight: FontWeight.w800, letterSpacing: .55)),
+      if (drawn!.reversed) Padding(padding: const EdgeInsets.only(top: 2), child: Text(reversedLabel.toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .82), fontSize: 5.5, fontWeight: FontWeight.w900, letterSpacing: .75))),
     ]));
   }
 }
