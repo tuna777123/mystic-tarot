@@ -221,5 +221,7 @@ void main() {
     expect(find.text('PLUS ÖNİZLEME'), findsOneWidget);
     expect(find.textContaining('kartlık hikâyenin tamamı'), findsOneWidget);
     expect(find.text('PLUS PREVIEW'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 700));
   });
 }
