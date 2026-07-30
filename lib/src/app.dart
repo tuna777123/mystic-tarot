@@ -939,27 +939,30 @@ class _ReadingFlowState extends State<ReadingFlow> {
               deckStyle: widget.deckStyle,
               question: question.text.trim(),
               emotion: emotion,
+              language: widget.language,
               onBack: () => setState(() => drawn = null),
               onReveal: _openRitual,
             )));
 
   Widget _selection(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(20, 10, 20, 24), child: Column(children: [
         Row(children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back)), const Spacer(), Text('${selected.length}/${widget.kind.cardCount}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
-        Text(widget.kind.title, style: Theme.of(context).textTheme.headlineMedium),
+        Text(_readingKindTitle(widget.kind, widget.language), style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
-        Text('Breathe slowly. Hold your question in mind, then choose the cards that call to you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(mysticText(widget.language, 'Breathe slowly. Hold your question in mind, then choose the cards that call to you.', 'Yavaşça nefes al. Sorunu zihninde tut, sonra sana seslenen kartları seç.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 16),
-        TextField(controller: question, maxLines: 2, decoration: const InputDecoration(hintText: 'Write your question (optional)', prefixIcon: Icon(Icons.edit_outlined))),
+        TextField(controller: question, maxLines: 2, decoration: InputDecoration(hintText: mysticText(widget.language, 'Write your question (optional)', 'Sorunu yaz (isteğe bağlı)'), prefixIcon: const Icon(Icons.edit_outlined))),
         const SizedBox(height: 14),
-        Align(alignment: Alignment.centerLeft, child: Text('HOW DO YOU FEEL RIGHT NOW?', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, letterSpacing: 1.1))),
+        Align(alignment: Alignment.centerLeft, child: Text(mysticText(widget.language, 'HOW DO YOU FEEL RIGHT NOW?', 'ŞU ANDA NASIL HİSSEDİYORSUN?'), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11, letterSpacing: 1.1))),
         const SizedBox(height: 8),
         SizedBox(height: 38, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: EmotionalState.values.length, separatorBuilder: (_, __) => const SizedBox(width: 7), itemBuilder: (_, i) {
           final item = EmotionalState.values[i];
-          return ChoiceChip(label: Text('${item.symbol} ${item.label}'), selected: emotion == item, onSelected: (_) => setState(() => emotion = item));
+          return ChoiceChip(label: Text('${item.symbol} ${_emotionLabel(item, widget.language)}'), selected: emotion == item, onSelected: (_) => setState(() => emotion = item));
         })),
         const SizedBox(height: 18),
         Expanded(child: GridView.builder(padding: const EdgeInsets.symmetric(horizontal: 18), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: .62, crossAxisSpacing: 8, mainAxisSpacing: 10), itemCount: 12, itemBuilder: (_, i) => GestureDetector(onTap: () => _toggle(i), child: TarotCardFace(style: widget.deckStyle, selected: selected.contains(i), width: 65, height: 110)))),
-        GoldButton(label: selected.length == widget.kind.cardCount ? 'Seal my selection' : 'Choose ${widget.kind.cardCount - selected.length} more', onPressed: selected.length == widget.kind.cardCount ? _prepareRitual : null, icon: Icons.auto_awesome),
+        GoldButton(label: selected.length == widget.kind.cardCount
+            ? mysticText(widget.language, 'Seal my selection', 'Seçimimi mühürle')
+            : mysticText(widget.language, 'Choose ${widget.kind.cardCount - selected.length} more', '${widget.kind.cardCount - selected.length} kart daha seç'), onPressed: selected.length == widget.kind.cardCount ? _prepareRitual : null, icon: Icons.auto_awesome),
       ]));
 
   void _toggle(int index) {
@@ -1001,89 +1004,100 @@ class _ReadingFlowState extends State<ReadingFlow> {
       SliverPadding(padding: const EdgeInsets.fromLTRB(20, 12, 20, 36), sliver: SliverList(delegate: SliverChildListDelegate([
         Text(_headline(), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 10),
-        Text('Take what resonates. Tarot is a mirror for reflection—not a fixed prediction.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(mysticText(widget.language, 'Take what resonates. Tarot is a mirror for reflection—not a fixed prediction.', 'Sana uyan mesajı al. Tarot kesin bir kehanet değil, düşünmek için bir aynadır.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
         SizedBox(height: 190, child: drawn!.length <= 3
             ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [for (var i = 0; i < drawn!.length; i++) ...[if (i > 0) const SizedBox(width: 12), _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520))]])
             : ListView.separated(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 4), itemBuilder: (_, i) => _RitualRevealCard(card: drawn![i], deckStyle: widget.deckStyle, delay: Duration(milliseconds: 350 + i * 520)), separatorBuilder: (_, __) => const SizedBox(width: 12), itemCount: drawn!.length)),
         const SizedBox(height: 26),
-        if (!revealComplete) _ReadingInProgress(cardCount: drawn!.length),
+        if (!revealComplete) _ReadingInProgress(cardCount: drawn!.length, language: widget.language),
         if (revealComplete) ...drawn!.asMap().entries.map((entry) => _interpretation(context, entry.key, entry.value)),
-        if (revealComplete) Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('✦  YOUR GUIDANCE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
+        if (revealComplete) Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .09), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(widget.language, '✦  YOUR GUIDANCE', '✦  REHBERLİĞİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold, letterSpacing: 1)), const SizedBox(height: 12), Text(_guidance(), style: Theme.of(context).textTheme.bodyLarge)])),
         if (revealComplete && widget.pastRecords.isNotEmpty) const SizedBox(height: 14),
         if (revealComplete && widget.pastRecords.isNotEmpty) _memoryBridge(context),
         if (revealComplete) const SizedBox(height: 14),
         if (revealComplete) _oracleInvitation(context, record),
         if (revealComplete) const SizedBox(height: 14),
         if (revealComplete) Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF34235C), Color(0xFF1B1530)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .28))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('MYSTIC MIRROR • 24H LOOP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1.1)),
+          Text(mysticText(widget.language, 'MYSTIC MIRROR • 24H LOOP', 'MYSTIC AYNA • 24 SAATLİK DÖNGÜ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1.1)),
           const SizedBox(height: 10),
-          Text('Your aligned action', style: Theme.of(context).textTheme.titleLarge),
+          Text(mysticText(widget.language, 'Your aligned action', 'Sana uygun eylem'), style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(_alignedAction(), style: Theme.of(context).textTheme.bodyLarge),
           const SizedBox(height: 10),
-          Text('Tomorrow, Mystic will ask what actually changed. Your answer becomes part of your personal pattern map.', style: Theme.of(context).textTheme.bodyMedium),
+          Text(mysticText(widget.language, 'Tomorrow, Mystic will ask what actually changed. Your answer becomes part of your personal pattern map.', 'Mystic yarın gerçekte neyin değiştiğini soracak. Cevabın kişisel örüntü haritanın bir parçası olacak.'), style: Theme.of(context).textTheme.bodyMedium),
         ])),
         if (revealComplete) const SizedBox(height: 20),
-        if (revealComplete) GoldButton(label: saved ? 'Saved to your journal' : 'Save this reading', icon: saved ? Icons.check : Icons.bookmark_add_outlined, onPressed: saved ? null : () { widget.onComplete(record); setState(() => saved = true); }),
+        if (revealComplete) GoldButton(label: saved ? mysticText(widget.language, 'Saved to your journal', 'Günlüğüne kaydedildi') : mysticText(widget.language, 'Save this reading', 'Bu okumayı kaydet'), icon: saved ? Icons.check : Icons.bookmark_add_outlined, onPressed: saved ? null : () { widget.onComplete(record); setState(() => saved = true); }),
         if (revealComplete) const SizedBox(height: 10),
-        if (revealComplete) TextButton(onPressed: () => Navigator.pop(context), child: const Text('Return home')),
+        if (revealComplete) TextButton(onPressed: () => Navigator.pop(context), child: Text(mysticText(widget.language, 'Return home', 'Ana sayfaya dön'))),
       ]))),
     ]);
   }
 
   Widget _interpretation(BuildContext context, int index, DrawnCard card) {
-    const positions = ['What surrounds you', 'What asks for attention', 'Your next aligned step'];
-    final meaning = card.reversed ? card.card.shadow : card.card.light;
-    return Padding(padding: const EdgeInsets.only(bottom: 22), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(index < positions.length ? positions[index].toUpperCase() : 'MESSAGE', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)), const SizedBox(height: 6), Text('${card.card.name}${card.reversed ? ' — Reversed' : ''}', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8), Text(meaning, style: Theme.of(context).textTheme.bodyLarge)]));
+    final positions = widget.language == MysticLanguage.turkish
+        ? const ['Seni çevreleyen enerji', 'Dikkat isteyen konu', 'Sıradaki uyumlu adım']
+        : const ['What surrounds you', 'What asks for attention', 'Your next aligned step'];
+    final meaning = _localizedCardMeaning(card, widget.language);
+    return Padding(padding: const EdgeInsets.only(bottom: 22), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(index < positions.length ? positions[index].toUpperCase() : mysticText(widget.language, 'MESSAGE', 'MESAJ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2)), const SizedBox(height: 6), Text('${card.card.name}${card.reversed ? mysticText(widget.language, ' — Reversed', ' — Ters') : ''}', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 8), Text(meaning, style: Theme.of(context).textTheme.bodyLarge)]));
   }
 
   String _headline() {
     final hopeful = drawn!.any((c) => c.card.name == 'The Star' || c.card.name == 'The Sun');
-    if (widget.userName.isEmpty) return hopeful ? 'A hopeful path is becoming visible.' : 'The truth arrives when you slow down.';
-    return hopeful ? '${widget.userName}, a hopeful path is becoming visible.' : '${widget.userName}, the truth arrives when you slow down.';
+    if (widget.userName.isEmpty) return hopeful
+        ? mysticText(widget.language, 'A hopeful path is becoming visible.', 'Umut veren bir yol görünür oluyor.')
+        : mysticText(widget.language, 'The truth arrives when you slow down.', 'Yavaşladığında gerçek belirginleşiyor.');
+    return hopeful
+        ? mysticText(widget.language, '${widget.userName}, a hopeful path is becoming visible.', '${widget.userName}, umut veren bir yol görünür oluyor.')
+        : mysticText(widget.language, '${widget.userName}, the truth arrives when you slow down.', '${widget.userName}, yavaşladığında gerçek belirginleşiyor.');
   }
 
   Widget _memoryBridge(BuildContext context) {
     final previous = widget.pastRecords.first;
     final returning = drawn!.where((current) => previous.cards.any((old) => old.card.name == current.card.name)).map((item) => item.card.name).toList();
     final message = returning.isNotEmpty
-        ? '${returning.first} also appeared in your last saved reading. Repeating symbols often become useful when you compare what changed between the two moments.'
-        : 'Your previous reading began from ${previous.emotion.label.toLowerCase()}; today you chose ${emotion.label.toLowerCase()}. Mystic is connecting the emotional shift—not just the cards.';
-    return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF30254A), Color(0xFF181321)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .26))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('◉  ORACLE MEMORY', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)), const SizedBox(height: 9), Text(message, style: Theme.of(context).textTheme.bodyLarge)]));
+        ? mysticText(widget.language, '${returning.first} also appeared in your last saved reading. Repeating symbols often become useful when you compare what changed between the two moments.', '${returning.first} son kaydettiğin okumada da görünmüştü. Tekrarlayan semboller, iki an arasında neyin değiştiğini karşılaştırdığında anlam kazanır.')
+        : mysticText(widget.language, 'Your previous reading began from ${previous.emotion.label.toLowerCase()}; today you chose ${emotion.label.toLowerCase()}. Mystic is connecting the emotional shift—not just the cards.', 'Önceki okuman ${_emotionLabel(previous.emotion, widget.language).toLowerCase()} duygusuyla başlamıştı; bugün ${_emotionLabel(emotion, widget.language).toLowerCase()} seçtin. Mystic yalnızca kartları değil, duygusal değişimi de birbirine bağlıyor.');
+    return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF30254A), Color(0xFF181321)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .26))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(widget.language, '◉  ORACLE MEMORY', '◉  ORACLE HAFIZASI'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)), const SizedBox(height: 9), Text(message, style: Theme.of(context).textTheme.bodyLarge)]));
   }
 
   Widget _oracleInvitation(BuildContext context, ReadingRecord record) => InkWell(
         onTap: oracleQuestionUsed ? widget.onPremium : () => Navigator.push(context, MaterialPageRoute(builder: (_) => OracleDialogueScreen(record: record, pastRecords: widget.pastRecords, userName: widget.userName, intention: widget.intention, language: widget.language, onQuestionUsed: () { if (mounted) setState(() => oracleQuestionUsed = true); }, onPremium: widget.onPremium))),
         borderRadius: BorderRadius.circular(20),
-        child: Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF55377A), Color(0xFF21162F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .36))), child: Row(children: [Container(width: 48, height: 48, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: MysticColors.gold.withValues(alpha: .14), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .16), blurRadius: 20)]), child: Text(oracleQuestionUsed ? '✦' : '◉', style: const TextStyle(fontSize: 25, color: MysticColors.gold))), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [const Text('ASK THE ORACLE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)), const Spacer(), Text(oracleQuestionUsed ? 'CONTINUE PLUS' : '1 FREE', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 8, fontWeight: FontWeight.w900))]), const SizedBox(height: 6), Text(oracleQuestionUsed ? 'Your free answer is complete. Continue the dialogue with Mystic Plus.' : 'Go beyond the first interpretation with one personal follow-up question.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))])), const SizedBox(width: 6), const Icon(Icons.arrow_forward, color: MysticColors.gold)])),
+        child: Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF55377A), Color(0xFF21162F)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .36))), child: Row(children: [Container(width: 48, height: 48, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: MysticColors.gold.withValues(alpha: .14), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .16), blurRadius: 20)]), child: Text(oracleQuestionUsed ? '✦' : '◉', style: const TextStyle(fontSize: 25, color: MysticColors.gold))), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Text(mysticText(widget.language, 'ASK THE ORACLE', 'ORACLE’A SOR'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)), const Spacer(), Text(oracleQuestionUsed ? mysticText(widget.language, 'CONTINUE PLUS', 'PLUS İLE DEVAM') : mysticText(widget.language, '1 FREE', '1 ÜCRETSİZ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 8, fontWeight: FontWeight.w900))]), const SizedBox(height: 6), Text(oracleQuestionUsed ? mysticText(widget.language, 'Your free answer is complete. Continue the dialogue with Mystic Plus.', 'Ücretsiz cevabın tamamlandı. Diyaloğa Mystic Plus ile devam et.') : mysticText(widget.language, 'Go beyond the first interpretation with one personal follow-up question.', 'Kişisel bir devam sorusuyla ilk yorumun ötesine geç.'), style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))])), const SizedBox(width: 6), const Icon(Icons.arrow_forward, color: MysticColors.gold)])),
       );
 
   void _openStoryStudio(ReadingRecord record) => Navigator.push(context, MaterialPageRoute(builder: (_) => StoryStudioScreen(record: record, guidance: _guidance(), language: widget.language)));
-  String _guidance() => '${drawn!.last.card.advice} Hold this beside your intention of ${widget.intention.toLowerCase()}. Let it be an invitation, not a command, and notice what changes over the next twenty-four hours.';
+  String _guidance() => mysticText(
+        widget.language,
+        '${drawn!.last.card.advice} Hold this beside your intention of ${widget.intention.toLowerCase()}. Let it be an invitation, not a command, and notice what changes over the next twenty-four hours.',
+        '${_localizedCardAdvice(drawn!.last, widget.language)} Bunu seçtiğin niyetin yanında tut. Bir emir değil, davet olarak gör ve önümüzdeki yirmi dört saatte neyin değiştiğini fark et.',
+      );
   String _alignedAction() {
     switch (emotion) {
       case EmotionalState.anxious:
-        return 'Delay one fear-based decision. Write down what is known, what is assumed, and what can wait until tomorrow.';
+        return mysticText(widget.language, 'Delay one fear-based decision. Write down what is known, what is assumed, and what can wait until tomorrow.', 'Korkuya dayanan bir kararı ertele. Bildiklerini, varsaydıklarını ve yarına kalabilecekleri ayrı ayrı yaz.');
       case EmotionalState.hopeful:
-        return 'Turn hope into evidence: take one small action that your future self can continue tomorrow.';
+        return mysticText(widget.language, 'Turn hope into evidence: take one small action that your future self can continue tomorrow.', 'Umudu kanıta dönüştür: yarın da sürdürebileceğin küçük bir adım at.');
       case EmotionalState.grounded:
-        return 'Use today’s steadiness to complete one conversation or task you have been leaving open.';
+        return mysticText(widget.language, 'Use today’s steadiness to complete one conversation or task you have been leaving open.', 'Bugünkü dengeni, açık bıraktığın bir konuşmayı veya işi tamamlamak için kullan.');
       case EmotionalState.curious:
-        return 'Ask one honest question without trying to control the answer.';
+        return mysticText(widget.language, 'Ask one honest question without trying to control the answer.', 'Cevabı kontrol etmeye çalışmadan dürüst bir soru sor.');
       case EmotionalState.uncertain:
-        return 'Choose the smallest reversible step. Clarity often appears after movement, not before it.';
+        return mysticText(widget.language, 'Choose the smallest reversible step. Clarity often appears after movement, not before it.', 'Geri döndürülebilir en küçük adımı seç. Netlik çoğu zaman hareketten önce değil, sonra gelir.');
     }
   }
 }
 
 class _RevealRitual extends StatefulWidget {
-  const _RevealRitual({required this.kind, required this.cardCount, required this.deckStyle, required this.question, required this.emotion, required this.onBack, required this.onReveal});
+  const _RevealRitual({required this.kind, required this.cardCount, required this.deckStyle, required this.question, required this.emotion, required this.language, required this.onBack, required this.onReveal});
   final ReadingKind kind;
   final int cardCount;
   final DeckStyle deckStyle;
   final String question;
   final EmotionalState emotion;
+  final MysticLanguage language;
   final VoidCallback onBack;
   final VoidCallback onReveal;
 
@@ -1110,13 +1124,13 @@ class _RevealRitualState extends State<_RevealRitual> with SingleTickerProviderS
 
   @override
   Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(20, 10, 20, 28), children: [
-        Row(children: [IconButton(onPressed: opening ? null : widget.onBack, icon: const Icon(Icons.arrow_back)), const Spacer(), const Text('REVEAL RITUAL', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.6)), const Spacer(), const SizedBox(width: 48)]),
+        Row(children: [IconButton(onPressed: opening ? null : widget.onBack, icon: const Icon(Icons.arrow_back)), const Spacer(), Text(mysticText(widget.language, 'REVEAL RITUAL', 'AÇILIŞ RİTÜELİ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1.6)), const Spacer(), const SizedBox(width: 48)]),
         const SizedBox(height: 8),
-        Row(children: [Expanded(child: _ritualStep('01', 'INTENTION', true)), const SizedBox(width: 7), Expanded(child: _ritualStep('02', 'SELECTION', true)), const SizedBox(width: 7), Expanded(child: _ritualStep('03', 'REVEAL', opening))]),
+        Row(children: [Expanded(child: _ritualStep('01', mysticText(widget.language, 'INTENTION', 'NİYET'), true)), const SizedBox(width: 7), Expanded(child: _ritualStep('02', mysticText(widget.language, 'SELECTION', 'SEÇİM'), true)), const SizedBox(width: 7), Expanded(child: _ritualStep('03', mysticText(widget.language, 'REVEAL', 'AÇILIŞ'), opening))]),
         const SizedBox(height: 28),
-        Text('Your cards are\nwaiting beneath the veil.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+        Text(mysticText(widget.language, 'Your cards are\nwaiting beneath the veil.', 'Kartların perdenin\nardında seni bekliyor.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 10),
-        Text(widget.question.isEmpty ? 'Hold your ${widget.kind.title.toLowerCase()} intention in mind. Exhale once, then open the seal when you feel ready.' : '“${widget.question}”', maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+        Text(widget.question.isEmpty ? mysticText(widget.language, 'Hold your ${widget.kind.title.toLowerCase()} intention in mind. Exhale once, then open the seal when you feel ready.', '${_readingKindTitle(widget.kind, widget.language)} niyetini zihninde tut. Bir kez nefes ver, hazır hissettiğinde mührü aç.') : '“${widget.question}”', maxLines: 3, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 29),
         AnimatedBuilder(animation: pulse, builder: (context, _) {
           final value = Curves.easeInOut.transform(pulse.value);
@@ -1146,11 +1160,11 @@ class _RevealRitualState extends State<_RevealRitual> with SingleTickerProviderS
             ),
           ])));
         }),
-        Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(30), border: Border.all(color: Colors.white10)), child: Text('${widget.emotion.symbol}  ${widget.emotion.label.toUpperCase()}  •  ${widget.cardCount} ${widget.cardCount == 1 ? 'CARD' : 'CARDS'}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)))),
+        Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .05), borderRadius: BorderRadius.circular(30), border: Border.all(color: Colors.white10)), child: Text('${widget.emotion.symbol}  ${_emotionLabel(widget.emotion, widget.language).toUpperCase()}  •  ${widget.cardCount} ${mysticText(widget.language, widget.cardCount == 1 ? 'CARD' : 'CARDS', 'KART')}', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)))),
         const SizedBox(height: 26),
-        GoldButton(label: opening ? 'Opening the veil…' : 'Open the seal', icon: opening ? Icons.hourglass_top_rounded : Icons.touch_app_outlined, onPressed: opening ? null : _open),
+        GoldButton(label: opening ? mysticText(widget.language, 'Opening the veil…', 'Perde açılıyor…') : mysticText(widget.language, 'Open the seal', 'Mührü aç'), icon: opening ? Icons.hourglass_top_rounded : Icons.touch_app_outlined, onPressed: opening ? null : _open),
         const SizedBox(height: 10),
-        Text('Take what resonates. The cards offer reflection, not certainty.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
+        Text(mysticText(widget.language, 'Take what resonates. The cards offer reflection, not certainty.', 'Sana uyan mesajı al. Kartlar kesinlik değil, düşünme alanı sunar.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
       ]);
 
   Widget _ritualStep(String number, String label, bool active) => AnimatedContainer(duration: const Duration(milliseconds: 350), height: 42, padding: const EdgeInsets.symmetric(horizontal: 9), decoration: BoxDecoration(color: active ? MysticColors.gold.withValues(alpha: .11) : Colors.white.withValues(alpha: .035), borderRadius: BorderRadius.circular(12), border: Border.all(color: active ? MysticColors.gold.withValues(alpha: .42) : Colors.white10)), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text(number, style: TextStyle(fontFamily: 'Arial', color: active ? MysticColors.gold : MysticColors.muted, fontWeight: FontWeight.w900, fontSize: 8)), const SizedBox(width: 5), Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(fontFamily: 'Arial', color: active ? MysticColors.mist : MysticColors.muted, fontWeight: FontWeight.w800, fontSize: 7.5, letterSpacing: .4)))]));
@@ -1188,9 +1202,11 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     return Scaffold(appBar: AppBar(title: Text(mysticText(widget.language, 'Oracle Dialogue', 'Oracle Diyaloğu'))), body: MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 30), children: [
       Center(child: Container(width: 72, height: 72, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, gradient: const RadialGradient(colors: [Color(0xFFFFE6A5), Color(0xFF815923)]), boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .25), blurRadius: 34)]), child: const Text('◉', style: TextStyle(fontSize: 35, color: MysticColors.ink)))),
       const SizedBox(height: 13),
-      Text(widget.userName.isEmpty ? 'The Oracle is listening.' : '${widget.userName}, the Oracle is listening.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      Text(widget.userName.isEmpty
+          ? mysticText(widget.language, 'The Oracle is listening.', 'Oracle seni dinliyor.')
+          : mysticText(widget.language, '${widget.userName}, the Oracle is listening.', '${widget.userName}, Oracle seni dinliyor.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 8),
-      Text('Ask one question about the cards you just revealed. The answer will stay grounded in their symbols and your ${widget.intention.toLowerCase()} path.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      Text(mysticText(widget.language, 'Ask one question about the cards you just revealed. The answer will stay grounded in their symbols and your ${widget.intention.toLowerCase()} path.', 'Az önce açtığın kartlarla ilgili bir soru sor. Cevap, kartların sembollerine ve seçtiğin yola bağlı kalacak.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
       if (widget.pastRecords.isNotEmpty) const SizedBox(height: 12),
       if (widget.pastRecords.isNotEmpty) Container(
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
@@ -1205,23 +1221,23 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
       SizedBox(height: 126, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: widget.record.cards.length, separatorBuilder: (_, __) => const SizedBox(width: 9), itemBuilder: (_, index) => TarotCardFace(drawn: widget.record.cards[index], width: 76, height: 122))),
       const SizedBox(height: 22),
       if (askedQuestion == null) ...[
-        const Text('CHOOSE A FOLLOW-UP', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
+        Text(mysticText(widget.language, 'CHOOSE A FOLLOW-UP', 'DEVAM SORUSU SEÇ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
         const SizedBox(height: 10),
         ...suggestions.map((question) => Padding(padding: const EdgeInsets.only(bottom: 9), child: InkWell(onTap: () => _ask(question), borderRadius: BorderRadius.circular(16), child: Container(padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10)), child: Row(children: [Expanded(child: Text(question, style: const TextStyle(fontFamily: 'Arial', fontSize: 12, fontWeight: FontWeight.w700))), const Icon(Icons.arrow_forward_ios, size: 13, color: MysticColors.gold)]))))),
         const SizedBox(height: 5),
-        TextField(controller: controller, maxLength: 160, maxLines: 2, textInputAction: TextInputAction.done, onChanged: (_) => setState(() {}), onSubmitted: (value) { if (value.trim().isNotEmpty) _ask(value.trim()); }, decoration: const InputDecoration(hintText: 'Or ask in your own words…', prefixIcon: Icon(Icons.chat_bubble_outline))),
+        TextField(controller: controller, maxLength: 160, maxLines: 2, textInputAction: TextInputAction.done, onChanged: (_) => setState(() {}), onSubmitted: (value) { if (value.trim().isNotEmpty) _ask(value.trim()); }, decoration: InputDecoration(hintText: mysticText(widget.language, 'Or ask in your own words…', 'Ya da kendi cümlelerinle sor…'), prefixIcon: const Icon(Icons.chat_bubble_outline))),
         const SizedBox(height: 9),
-        GoldButton(label: 'Ask my free question', icon: Icons.auto_awesome, onPressed: controller.text.trim().isEmpty ? null : () => _ask(controller.text.trim())),
+        GoldButton(label: mysticText(widget.language, 'Ask my free question', 'Ücretsiz sorumu sor'), icon: Icons.auto_awesome, onPressed: controller.text.trim().isEmpty ? null : () => _ask(controller.text.trim())),
       ],
       if (askedQuestion != null) ...[
         _messageBubble(context, askedQuestion!, fromOracle: false),
         const SizedBox(height: 12),
-        if (thinking) Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(19)), child: const Row(children: [SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), SizedBox(width: 12), Text('The Oracle is connecting your symbols…', style: TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
+        if (thinking) Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(19)), child: Row(children: [const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)), const SizedBox(width: 12), Text(mysticText(widget.language, 'The Oracle is connecting your symbols…', 'Oracle sembollerini birbirine bağlıyor…'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 11))])),
         if (answer != null) _messageBubble(context, answer!, fromOracle: true),
         if (answer != null) const SizedBox(height: 18),
-        if (answer != null) Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF493269), Color(0xFF20162D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(children: [const Row(children: [Icon(Icons.lock_outline, size: 19, color: MysticColors.gold), SizedBox(width: 9), Expanded(child: Text('Continue the conversation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)))]), const SizedBox(height: 9), Text('Ask unlimited follow-ups, revisit saved conversations, and unlock every deep spread with Mystic Plus.', style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 15), GoldButton(label: 'Unlock Oracle Dialogue', icon: Icons.lock_open_rounded, onPressed: widget.onPremium)])),
+        if (answer != null) Container(padding: const EdgeInsets.all(19), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF493269), Color(0xFF20162D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.gold.withValues(alpha: .3))), child: Column(children: [Row(children: [const Icon(Icons.lock_outline, size: 19, color: MysticColors.gold), const SizedBox(width: 9), Expanded(child: Text(mysticText(widget.language, 'Continue the conversation', 'Sohbete devam et'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)))]), const SizedBox(height: 9), Text(mysticText(widget.language, 'Ask unlimited follow-ups, revisit saved conversations, and unlock every deep spread with Mystic Plus.', 'Sınırsız devam sorusu sor, kayıtlı sohbetlere dön ve Mystic Plus ile tüm derin açılımları aç.'), style: Theme.of(context).textTheme.bodyMedium), const SizedBox(height: 15), GoldButton(label: mysticText(widget.language, 'Unlock Oracle Dialogue', 'Oracle Diyaloğunu Aç'), icon: Icons.lock_open_rounded, onPressed: widget.onPremium)])),
         if (answer != null) const SizedBox(height: 9),
-        if (answer != null) TextButton(onPressed: () => Navigator.pop(context), child: const Text('Return to my reading')),
+        if (answer != null) TextButton(onPressed: () => Navigator.pop(context), child: Text(mysticText(widget.language, 'Return to my reading', 'Okumama dön'))),
       ],
     ])));
   }
@@ -1229,6 +1245,18 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   Widget _messageBubble(BuildContext context, String text, {required bool fromOracle}) => Align(alignment: fromOracle ? Alignment.centerLeft : Alignment.centerRight, child: Container(constraints: const BoxConstraints(maxWidth: 330), padding: const EdgeInsets.all(17), decoration: BoxDecoration(color: fromOracle ? MysticColors.violet.withValues(alpha: .24) : MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.only(topLeft: const Radius.circular(19), topRight: const Radius.circular(19), bottomLeft: Radius.circular(fromOracle ? 4 : 19), bottomRight: Radius.circular(fromOracle ? 19 : 4)), border: Border.all(color: fromOracle ? MysticColors.lavender.withValues(alpha: .24) : MysticColors.gold.withValues(alpha: .25))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [if (fromOracle) const Text('ORACLE', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 1.1)), if (fromOracle) const SizedBox(height: 7), Text(text, style: Theme.of(context).textTheme.bodyLarge)])));
 
   List<String> _suggestions() {
+    if (widget.language == MysticLanguage.turkish) {
+      switch (widget.record.kind) {
+        case ReadingKind.love:
+        case ReadingKind.compatibility:
+          return ['Bu bağda görmediğim şey ne?', 'Hangi sınır veya gerçek dikkatimi istiyor?', 'Daha sağlıklı bir sonraki adım nasıl görünür?'];
+        case ReadingKind.career:
+        case ReadingKind.money:
+          return ['Bu kartlardaki gerçek fırsat nerede?', 'Hangi riski küçümsüyorum?', 'Atabileceğim en küçük faydalı adım ne?'];
+        default:
+          return ['Henüz görmediğim şey ne?', 'Şu anda en önemli kart hangisi?', 'Önümüzdeki 24 saate ne taşımalıyım?'];
+      }
+    }
     switch (widget.record.kind) {
       case ReadingKind.love:
       case ReadingKind.compatibility:
@@ -1254,9 +1282,18 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   String _composeAnswer(String question) {
     final first = widget.record.cards.first;
     final last = widget.record.cards.last;
-    final firstMeaning = first.reversed ? first.card.shadow : first.card.light;
+    final firstMeaning = _localizedCardMeaning(first, widget.language);
     final lower = question.toLowerCase();
     final memory = _oracleMemory();
+    if (widget.language == MysticLanguage.turkish) {
+      if (lower.contains('gör') || lower.contains('risk')) {
+        return '${first.card.name}, görünmeyen kısmın şu olabileceğini söylüyor: $firstMeaning ${_localizedCardAdvice(last, widget.language)} ${_emotionLabel(widget.record.emotion, widget.language)} duygusu bir ayrıntıyı diğerlerinden daha yüksek gösterebilir. Bildiklerini, korktuklarını ve umut ettiklerini ayır.$memory';
+      }
+      if (lower.contains('hangi kart') || lower.contains('önemli')) {
+        return '${last.card.name} bu açılımın kapanış ağırlığını taşıyor. ${_localizedCardMeaning(last, widget.language)} Pratik daveti şu: ${_localizedCardAdvice(last, widget.language)} Bunun seçtiğin yolu nasıl desteklediğine dikkat et.$memory';
+      }
+      return '${first.card.name} içine girdiğin enerjiyi, ${last.card.name} ise verebileceğin karşılığı gösteriyor. ${_localizedCardAdvice(last, widget.language)} Sonraki adımı küçük, gözlemlenebilir ve geri döndürülebilir tut; kartlar emir vermiyor, farklı bir bakış sunuyor.$memory';
+    }
     if (lower.contains('not seeing') || lower.contains('underestimating') || lower.contains('risk') || lower.contains('görm') || lower.contains('risk')) {
       return '${first.card.name} suggests the hidden part may be this: $firstMeaning ${last.card.advice} Your ${widget.record.emotion.label.toLowerCase()} state can make one detail feel louder than the rest, so separate what you know from what you fear or hope.$memory';
     }
@@ -1328,19 +1365,103 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
 }
 
 class _ReadingInProgress extends StatelessWidget {
-  const _ReadingInProgress({required this.cardCount});
+  const _ReadingInProgress({required this.cardCount, required this.language});
   final int cardCount;
+  final MysticLanguage language;
 
   @override
   Widget build(BuildContext context) => Column(children: [
         const SizedBox(height: 10),
         const SizedBox(width: 30, height: 30, child: CircularProgressIndicator(strokeWidth: 2, color: MysticColors.gold)),
         const SizedBox(height: 15),
-        Text(cardCount == 1 ? 'Your card is finding its voice…' : 'The cards are forming a pattern…', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
+        Text(cardCount == 1
+            ? mysticText(language, 'Your card is finding its voice…', 'Kartın kendi sesini buluyor…')
+            : mysticText(language, 'The cards are forming a pattern…', 'Kartlar bir örüntü oluşturuyor…'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 7),
-        Text('Stay with your first feeling. The full interpretation appears after the final card turns.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(mysticText(language, 'Stay with your first feeling. The full interpretation appears after the final card turns.', 'İlk hissettiğin şeyle kal. Son kart döndükten sonra yorumun tamamı görünecek.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 24),
       ]);
+}
+
+String _readingKindTitle(ReadingKind kind, MysticLanguage language) {
+  if (language != MysticLanguage.turkish) return kind.title;
+  return switch (kind) {
+    ReadingKind.daily => 'Günlük Rehberlik',
+    ReadingKind.love => 'Aşk ve Bağ',
+    ReadingKind.career => 'Kariyer Yolu',
+    ReadingKind.money => 'Para Enerjisi',
+    ReadingKind.decision => 'Karar Açılımı',
+    ReadingKind.spiritual => 'Ruhsal Gelişim',
+    ReadingKind.shadow => 'Gölge Çalışması',
+    ReadingKind.compatibility => 'Aşk Uyumu',
+    ReadingKind.timeline => 'Gelecek Zaman Çizgisi',
+    ReadingKind.celticCross => 'Kelt Haçı',
+  };
+}
+
+String _emotionLabel(EmotionalState emotion, MysticLanguage language) {
+  if (language != MysticLanguage.turkish) return emotion.label;
+  return switch (emotion) {
+    EmotionalState.anxious => 'Kaygılı',
+    EmotionalState.hopeful => 'Umutlu',
+    EmotionalState.grounded => 'Dengeli',
+    EmotionalState.curious => 'Meraklı',
+    EmotionalState.uncertain => 'Kararsız',
+  };
+}
+
+String _localizedCardMeaning(DrawnCard drawn, MysticLanguage language) {
+  if (language != MysticLanguage.turkish) {
+    return drawn.reversed ? drawn.card.shadow : drawn.card.light;
+  }
+
+  final theme = _turkishCardTheme(drawn.card.name);
+  return drawn.reversed
+      ? '$theme konusunda gecikme, aşırılık veya içsel bir direnç görünür olabilir. Kart, dışarıdan kesin bir cevap aramak yerine bu gerilimin sende neyi koruduğunu dürüstçe incelemeye çağırıyor.'
+      : '$theme enerjisi şu anda daha görünür. Kart, bu alanı bilinçli biçimde kullanabileceğini ve küçük ama net bir seçimle ilerleyebileceğini hatırlatıyor.';
+}
+
+String _localizedCardAdvice(DrawnCard drawn, MysticLanguage language) {
+  if (language != MysticLanguage.turkish) return drawn.card.advice;
+  final theme = _turkishCardTheme(drawn.card.name).toLowerCase();
+  return drawn.reversed
+      ? '$theme alanında hemen tepki vermeden önce varsayımlarını gerçeklerden ayır.'
+      : '$theme alanında bugün tamamlayabileceğin küçük ve gözlemlenebilir bir adım seç.';
+}
+
+String _turkishCardTheme(String name) {
+  const majorThemes = <String, String>{
+    'The Fool': 'yeni başlangıç ve cesaret',
+    'The Magician': 'irade, beceri ve eylem',
+    'The High Priestess': 'sezgi ve içsel bilgi',
+    'The Empress': 'üretkenlik, şefkat ve büyüme',
+    'The Emperor': 'düzen, sınırlar ve sorumluluk',
+    'The Hierophant': 'değerler, öğrenme ve gelenek',
+    'The Lovers': 'bağ, uyum ve bilinçli seçim',
+    'The Chariot': 'yön, kararlılık ve ilerleme',
+    'Strength': 'sakin cesaret ve özdenetim',
+    'The Hermit': 'içe dönüş ve kişisel bilgelik',
+    'Wheel of Fortune': 'değişim, döngüler ve fırsat',
+    'Justice': 'denge, dürüstlük ve sonuçlar',
+    'The Hanged Man': 'bekleme ve farklı açıdan görme',
+    'Death': 'bitiş, dönüşüm ve bırakma',
+    'Temperance': 'ölçü, sabır ve bütünleşme',
+    'The Devil': 'bağımlılık, gölge ve özgürleşme',
+    'The Tower': 'ani gerçek, çözülme ve yeniden kurma',
+    'The Star': 'umut, iyileşme ve ilham',
+    'The Moon': 'belirsizlik, sezgi ve korkular',
+    'The Sun': 'açıklık, canlılık ve sevinç',
+    'Judgement': 'uyanış, değerlendirme ve çağrı',
+    'The World': 'tamamlanma, bütünlük ve yeni döngü',
+  };
+  final major = majorThemes[name];
+  if (major != null) return major;
+
+  if (name.contains('Wands')) return 'motivasyon, yaratıcılık ve girişim';
+  if (name.contains('Cups')) return 'duygular, ilişkiler ve kalpten bağ';
+  if (name.contains('Swords')) return 'düşünceler, iletişim ve karar';
+  if (name.contains('Pentacles')) return 'para, emek, beden ve güven';
+  return 'farkındalık ve bilinçli seçim';
 }
 
 class JourneyScreen extends StatefulWidget {
