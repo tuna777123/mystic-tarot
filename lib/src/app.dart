@@ -1045,9 +1045,11 @@ class _ReadingFlowState extends State<ReadingFlow> {
 
   String _headline() {
     final hopeful = drawn!.any((c) => c.card.name == 'The Star' || c.card.name == 'The Sun');
-    if (widget.userName.isEmpty) return hopeful
-        ? mysticText(widget.language, 'A hopeful path is becoming visible.', 'Umut veren bir yol görünür oluyor.')
-        : mysticText(widget.language, 'The truth arrives when you slow down.', 'Yavaşladığında gerçek belirginleşiyor.');
+    if (widget.userName.isEmpty) {
+      return hopeful
+          ? mysticText(widget.language, 'A hopeful path is becoming visible.', 'Umut veren bir yol görünür oluyor.')
+          : mysticText(widget.language, 'The truth arrives when you slow down.', 'Yavaşladığında gerçek belirginleşiyor.');
+    }
     return hopeful
         ? mysticText(widget.language, '${widget.userName}, a hopeful path is becoming visible.', '${widget.userName}, umut veren bir yol görünür oluyor.')
         : mysticText(widget.language, '${widget.userName}, the truth arrives when you slow down.', '${widget.userName}, yavaşladığında gerçek belirginleşiyor.');
