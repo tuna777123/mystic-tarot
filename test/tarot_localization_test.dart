@@ -32,6 +32,35 @@ void main() {
     );
   });
 
+  test('reading, emotion, and deck labels remain Turkish', () {
+    for (final kind in ReadingKind.values) {
+      expect(
+        localizedReadingKindTitle(kind, turkish: true),
+        isNot(kind.title),
+        reason: '${kind.name} title must not fall back to English.',
+      );
+      expect(
+        localizedReadingKindSubtitle(kind, turkish: true),
+        isNot(kind.subtitle),
+        reason: '${kind.name} subtitle must not fall back to English.',
+      );
+    }
+    for (final emotion in EmotionalState.values) {
+      expect(
+        localizedEmotionLabel(emotion, turkish: true),
+        isNot(emotion.label),
+        reason: '${emotion.name} must not fall back to English.',
+      );
+    }
+    for (final style in DeckStyle.values) {
+      expect(
+        localizedDeckStyleLabel(style, turkish: true),
+        isNot(style.label),
+        reason: '${style.name} must not fall back to English.',
+      );
+    }
+  });
+
   testWidgets('card artwork can render the localized display name',
       (tester) async {
     await tester.pumpWidget(
