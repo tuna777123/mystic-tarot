@@ -230,7 +230,10 @@ class _MysticLivingJournalFeatureState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      record.kind.title,
+                      localizedReadingKindTitle(
+                        record.kind,
+                        turkish: _isTurkish,
+                      ),
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 2),
@@ -245,7 +248,7 @@ class _MysticLivingJournalFeatureState
                 ),
               ),
               Text(
-                '${record.emotion.symbol} ${record.emotion.label}',
+                '${record.emotion.symbol} ${localizedEmotionLabel(record.emotion, turkish: _isTurkish)}',
                 style: const TextStyle(
                   color: MysticColors.lavender,
                   fontSize: 11,
@@ -524,8 +527,10 @@ class _MysticLivingJournalFeatureState
     return widget.records.where((record) {
       final searchableText = <String>[
         record.kind.title,
+        localizedReadingKindTitle(record.kind, turkish: _isTurkish),
         record.question,
         record.emotion.label,
+        localizedEmotionLabel(record.emotion, turkish: _isTurkish),
         record.alignedAction,
         ...record.cards.map((drawn) => drawn.card.name),
         ...record.cards.map(
