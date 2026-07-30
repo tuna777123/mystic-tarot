@@ -166,18 +166,23 @@ class TarotCardFace extends StatelessWidget {
     return Padding(padding: const EdgeInsets.fromLTRB(4, 4, 4, 5), child: Column(children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: accent, fontSize: 8, fontWeight: FontWeight.bold)), Text(drawn!.reversed ? 'R' : '✦', style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .75), fontSize: 7, fontWeight: FontWeight.w900))]),
       const SizedBox(height: 2),
-      Expanded(child: Transform.rotate(angle: drawn!.reversed ? pi : 0, child: CustomPaint(painter: _ArcanaArtworkPainter(seed: seed, accent: accent), child: Center(child: Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF120D1D).withValues(alpha: .72), border: Border.all(color: accent.withValues(alpha: .45)), boxShadow: [BoxShadow(color: accent.withValues(alpha: .15), blurRadius: 16)]), child: Text(card.symbol, style: TextStyle(color: accent, fontSize: 27))))))),
+      Expanded(child: Transform.rotate(angle: drawn!.reversed ? pi : 0, child: CustomPaint(painter: _ArcanaArtworkPainter(seed: seed, accent: accent, cardName: card.name), child: Center(child: Container(width: 34, height: 34, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF120D1D).withValues(alpha: .62), border: Border.all(color: accent.withValues(alpha: .36)), boxShadow: [BoxShadow(color: accent.withValues(alpha: .16), blurRadius: 18)]), child: Text(card.symbol, style: TextStyle(color: accent, fontSize: 21))))))),
       const SizedBox(height: 3),
-      Text(displayName ?? card.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 7.5, height: 1.05, fontWeight: FontWeight.w800, letterSpacing: .55)),
-      if (drawn!.reversed) Padding(padding: const EdgeInsets.only(top: 2), child: Text(reversedLabel.toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .82), fontSize: 5.5, fontWeight: FontWeight.w900, letterSpacing: .75))),
+      Text(displayName ?? card.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', fontSize: width >= 100 ? 9 : 7.5, height: 1.05, fontWeight: FontWeight.w800, letterSpacing: .42)),
+      if (drawn!.reversed) Padding(padding: const EdgeInsets.only(top: 2), child: Text(reversedLabel.toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .88), fontSize: width >= 100 ? 6.8 : 5.5, fontWeight: FontWeight.w900, letterSpacing: .65))),
     ]));
   }
 }
 
 class _ArcanaArtworkPainter extends CustomPainter {
-  const _ArcanaArtworkPainter({required this.seed, required this.accent});
+  const _ArcanaArtworkPainter({
+    required this.seed,
+    required this.accent,
+    required this.cardName,
+  });
   final int seed;
   final Color accent;
+  final String cardName;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -210,8 +215,171 @@ class _ArcanaArtworkPainter extends CustomPainter {
     }
     final archRect = Rect.fromCenter(center: Offset(center.dx, size.height * .58), width: radius * 1.7, height: radius * 1.9);
     canvas.drawArc(archRect, pi, pi, false, line);
+    _drawCardMotif(canvas, size, center, radius);
+  }
+
+  void _drawCardMotif(Canvas canvas, Size size, Offset center, double radius) {
+    final name = cardName.toLowerCase();
+    final strong = Paint()
+      ..color = accent.withValues(alpha: .62)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.35
+      ..strokeCap = StrokeCap.round;
+    final softFill = Paint()
+      ..color = accent.withValues(alpha: .12)
+      ..style = PaintingStyle.fill;
+    final upper = Offset(center.dx, size.height * .34);
+    final lower = Offset(center.dx, size.height * .68);
+
+    if (name.contains('sun')) {
+      canvas.drawCircle(upper, radius * .28, softFill);
+      canvas.drawCircle(upper, radius * .22, strong);
+      for (var i = 0; i < 12; i++) {
+        final angle = i * pi / 6;
+        canvas.drawLine(
+          upper + Offset(cos(angle), sin(angle)) * radius * .31,
+          upper + Offset(cos(angle), sin(angle)) * radius * .45,
+          strong,
+        );
+      }
+      _drawHorizon(canvas, size, lower, strong);
+      return;
+    }
+    if (name.contains('moon')) {
+      canvas.drawCircle(upper, radius * .3, softFill);
+      canvas.drawArc(
+        Rect.fromCircle(center: upper, radius: radius * .27),
+        -.9,
+        pi * 1.55,
+        false,
+        strong,
+      );
+      canvas.drawLine(Offset(size.width * .28, lower.dy), Offset(size.width * .28, lower.dy - radius * .38), strong);
+      canvas.drawLine(Offset(size.width * .72, lower.dy), Offset(size.width * .72, lower.dy - radius * .38), strong);
+      _drawHorizon(canvas, size, lower, strong);
+      return;
+    }
+    if (name.contains('star')) {
+      _drawStar(canvas, upper, radius * .38, strong, softFill);
+      _drawHorizon(canvas, size, lower, strong);
+      return;
+    }
+    if (name.contains('tower')) {
+      final tower = Rect.fromCenter(center: lower, width: radius * .66, height: radius * 1.15);
+      canvas.drawRect(tower, softFill);
+      canvas.drawRect(tower, strong);
+      final bolt = Path()
+        ..moveTo(size.width * .65, size.height * .22)
+        ..lineTo(size.width * .49, size.height * .42)
+        ..lineTo(size.width * .6, size.height * .42)
+        ..lineTo(size.width * .43, size.height * .61);
+      canvas.drawPath(bolt, strong);
+      return;
+    }
+    if (name.contains('lovers')) {
+      canvas.drawCircle(Offset(center.dx - radius * .32, upper.dy), radius * .16, strong);
+      canvas.drawCircle(Offset(center.dx + radius * .32, upper.dy), radius * .16, strong);
+      canvas.drawArc(
+        Rect.fromCenter(center: lower, width: radius * 1.25, height: radius * 1.1),
+        pi,
+        pi,
+        false,
+        strong,
+      );
+      return;
+    }
+    if (name.contains('world')) {
+      canvas.drawOval(
+        Rect.fromCenter(center: center, width: radius * 1.15, height: radius * 1.65),
+        strong,
+      );
+      _drawStar(canvas, center, radius * .24, strong, softFill);
+      return;
+    }
+    if (name.contains('wands')) {
+      canvas.save();
+      canvas.translate(center.dx, center.dy);
+      canvas.rotate(-.22);
+      canvas.drawLine(Offset(0, -radius * .75), Offset(0, radius * .75), strong);
+      canvas.drawCircle(Offset.zero, radius * .18, softFill);
+      canvas.restore();
+      canvas.drawArc(
+        Rect.fromCenter(center: Offset(center.dx, size.height * .28), width: radius * .4, height: radius * .55),
+        .15,
+        pi * 1.4,
+        false,
+        strong,
+      );
+      return;
+    }
+    if (name.contains('cups')) {
+      final cup = Path()
+        ..moveTo(center.dx - radius * .43, upper.dy)
+        ..quadraticBezierTo(center.dx - radius * .34, center.dy, center.dx, center.dy + radius * .08)
+        ..quadraticBezierTo(center.dx + radius * .34, center.dy, center.dx + radius * .43, upper.dy);
+      canvas.drawPath(cup, strong);
+      canvas.drawLine(Offset(center.dx, center.dy + radius * .08), Offset(center.dx, lower.dy), strong);
+      canvas.drawLine(Offset(center.dx - radius * .27, lower.dy), Offset(center.dx + radius * .27, lower.dy), strong);
+      return;
+    }
+    if (name.contains('swords')) {
+      canvas.drawLine(Offset(center.dx, size.height * .24), Offset(center.dx, size.height * .75), strong);
+      canvas.drawLine(
+        Offset(center.dx - radius * .32, size.height * .63),
+        Offset(center.dx + radius * .32, size.height * .63),
+        strong,
+      );
+      final tip = Path()
+        ..moveTo(center.dx, size.height * .18)
+        ..lineTo(center.dx - radius * .09, size.height * .29)
+        ..lineTo(center.dx + radius * .09, size.height * .29)
+        ..close();
+      canvas.drawPath(tip, softFill);
+      canvas.drawPath(tip, strong);
+      return;
+    }
+    if (name.contains('pentacles')) {
+      canvas.drawCircle(center, radius * .48, softFill);
+      canvas.drawCircle(center, radius * .48, strong);
+      _drawStar(canvas, center, radius * .4, strong, Paint()..color = Colors.transparent);
+      return;
+    }
+
+    _drawStar(canvas, upper, radius * .28, strong, softFill);
+    final path = Path()
+      ..moveTo(size.width * .27, lower.dy)
+      ..quadraticBezierTo(center.dx, lower.dy - radius * .38, size.width * .73, lower.dy);
+    canvas.drawPath(path, strong);
+  }
+
+  void _drawHorizon(Canvas canvas, Size size, Offset center, Paint paint) {
+    final path = Path()
+      ..moveTo(size.width * .18, center.dy)
+      ..quadraticBezierTo(size.width * .36, center.dy - 9, size.width * .5, center.dy)
+      ..quadraticBezierTo(size.width * .66, center.dy + 9, size.width * .82, center.dy);
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawStar(Canvas canvas, Offset center, double radius, Paint line, Paint fill) {
+    final path = Path();
+    for (var i = 0; i < 10; i++) {
+      final pointRadius = i.isEven ? radius : radius * .42;
+      final angle = -pi / 2 + i * pi / 5;
+      final point = center + Offset(cos(angle), sin(angle)) * pointRadius;
+      if (i == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, fill);
+    canvas.drawPath(path, line);
   }
 
   @override
-  bool shouldRepaint(covariant _ArcanaArtworkPainter oldDelegate) => oldDelegate.seed != seed || oldDelegate.accent != accent;
+  bool shouldRepaint(covariant _ArcanaArtworkPainter oldDelegate) =>
+      oldDelegate.seed != seed ||
+      oldDelegate.accent != accent ||
+      oldDelegate.cardName != cardName;
 }
