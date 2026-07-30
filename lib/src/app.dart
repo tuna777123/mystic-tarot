@@ -1722,8 +1722,8 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
     final levelProgress = (widget.xp % 100) / 100;
     return MysticBackground(child: ListView(padding: const EdgeInsets.fromLTRB(20, 24, 20, 34), children: [
       Row(children: [
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Your Mystic Path', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 5), Text('Your inner world becomes visible as you practice.', style: Theme.of(context).textTheme.bodyMedium)])),
-        Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(18), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Text('LEVEL $level', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1))),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(widget.language, 'Your Mystic Path', 'Mistik Yolun'), style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 5), Text(mysticText(widget.language, 'Your inner world becomes visible as you practice.', 'Pratik yaptıkça iç dünyan görünür hâle gelir.'), style: Theme.of(context).textTheme.bodyMedium)])),
+        Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(18), border: Border.all(color: MysticColors.gold.withValues(alpha: .35))), child: Text(mysticText(widget.language, 'LEVEL $level', 'SEVİYE $level'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1))),
       ]),
       const SizedBox(height: 20),
       DestinyFlagshipCard(records: widget.records, completedDays: widget.completedArcanaDays, language: widget.language, onOpen: widget.onOpenDestiny),
@@ -1733,40 +1733,40 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
         decoration: BoxDecoration(gradient: const RadialGradient(colors: [Color(0xFF49347D), Color(0xFF171128)]), borderRadius: BorderRadius.circular(26), border: Border.all(color: MysticColors.lavender.withValues(alpha: .18 + glow.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + glow.value * .08), blurRadius: 32)]),
         child: Stack(children: [
           Positioned.fill(child: CustomPaint(painter: _ConstellationPainter(unlocked: widget.discoveredCards.length, pulse: glow.value))),
-          Positioned(left: 18, top: 17, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('INNER CONSTELLATION', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 10, letterSpacing: 1.3)), const SizedBox(height: 4), Text('${widget.discoveredCards.length} of 78 cards awakened', style: Theme.of(context).textTheme.bodyMedium)])),
+          Positioned(left: 18, top: 17, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(widget.language, 'INNER CONSTELLATION', 'İÇ TAKIMYILDIZIN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, fontSize: 10, letterSpacing: 1.3)), const SizedBox(height: 4), Text(mysticText(widget.language, '${widget.discoveredCards.length} of 78 cards awakened', '78 kartın ${widget.discoveredCards.length} tanesi uyandı'), style: Theme.of(context).textTheme.bodyMedium)])),
           Positioned(left: 18, right: 18, bottom: 17, child: ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: widget.discoveredCards.length / 78, minHeight: 5, backgroundColor: Colors.white10, color: MysticColors.gold))),
         ]),
       )),
       const SizedBox(height: 18),
-      _WeeklyMirror(records: widget.records),
+      _WeeklyMirror(records: widget.records, language: widget.language),
       const SizedBox(height: 18),
-      _ArcanaVault(discoveredCards: widget.discoveredCards),
+      _ArcanaVault(discoveredCards: widget.discoveredCards, language: widget.language),
       const SizedBox(height: 18),
       Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(children: [
-        Row(children: [Text('${widget.xp} XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const Spacer(), Text('${(levelProgress * 100).round()}% to Level ${level + 1}', style: Theme.of(context).textTheme.bodyMedium)]),
+        Row(children: [Text('${widget.xp} XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold)), const Spacer(), Text(mysticText(widget.language, '${(levelProgress * 100).round()}% to Level ${level + 1}', '${level + 1}. seviyeye %${(levelProgress * 100).round()}'), style: Theme.of(context).textTheme.bodyMedium)]),
         const SizedBox(height: 10),
         ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: levelProgress, minHeight: 7, backgroundColor: Colors.white10, color: MysticColors.violet)),
       ])),
       const SizedBox(height: 25),
-      Row(children: [Text('Today’s rituals', style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
+      Row(children: [Text(mysticText(widget.language, 'Today’s rituals', 'Bugünün ritüelleri'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
       const SizedBox(height: 6),
-      Text('Small actions turn insight into change. Each ritual grants +15 XP.', style: Theme.of(context).textTheme.bodyMedium),
+      Text(mysticText(widget.language, 'Small actions turn insight into change. Each ritual grants +15 XP.', 'Küçük eylemler içgörüyü değişime dönüştürür. Her ritüel +15 XP kazandırır.'), style: Theme.of(context).textTheme.bodyMedium),
       const SizedBox(height: 12),
-      _ritual(context, 'breathe', '60-second reset', 'Breathe in for four, out for six.', Icons.air),
-      _ritual(context, 'truth', 'Name the truth', 'Write one sentence you have been avoiding.', Icons.edit_note),
-      _ritual(context, 'action', 'Aligned action', 'Take the smallest reversible next step.', Icons.bolt),
+      _ritual(context, 'breathe', mysticText(widget.language, '60-second reset', '60 saniyelik sıfırlanma'), mysticText(widget.language, 'Breathe in for four, out for six.', 'Dört saniye nefes al, altı saniye ver.'), Icons.air),
+      _ritual(context, 'truth', mysticText(widget.language, 'Name the truth', 'Gerçeğin adını koy'), mysticText(widget.language, 'Write one sentence you have been avoiding.', 'Kaçındığın tek bir cümleyi yaz.'), Icons.edit_note),
+      _ritual(context, 'action', mysticText(widget.language, 'Aligned action', 'Uyumlu eylem'), mysticText(widget.language, 'Take the smallest reversible next step.', 'Geri alınabilir en küçük sonraki adımı at.'), Icons.bolt),
       const SizedBox(height: 15),
-      Text('Mystic rewards', style: Theme.of(context).textTheme.titleLarge),
+      Text(mysticText(widget.language, 'Mystic rewards', 'Mystic ödülleri'), style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 6),
-      Text('Your practice unlocks cosmetic relics—never better answers.', style: Theme.of(context).textTheme.bodyMedium),
+      Text(mysticText(widget.language, 'Your practice unlocks cosmetic relics—never better answers.', 'Pratiğin yalnızca kozmetik yadigârlar açar; daha “iyi” cevaplar değil.'), style: Theme.of(context).textTheme.bodyMedium),
       const SizedBox(height: 12),
       SizedBox(height: 145, child: ListView(scrollDirection: Axis.horizontal, children: [
-        _reward(context, 100, 'Moon Dust', '✦'),
-        _reward(context, 300, 'Oracle Flame', '◉'),
-        _reward(context, 600, 'Astral Crown', '♛'),
+        _reward(context, 100, mysticText(widget.language, 'Moon Dust', 'Ay Tozu'), '✦'),
+        _reward(context, 300, mysticText(widget.language, 'Oracle Flame', 'Oracle Alevi'), '◉'),
+        _reward(context, 600, mysticText(widget.language, 'Astral Crown', 'Astral Taç'), '♛'),
       ])),
       const SizedBox(height: 18),
-      Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF33245C), Color(0xFF1A142D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .2))), child: Row(children: [const Text('🔥', style: TextStyle(fontSize: 30)), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${widget.streak}-day flame', style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text('Return tomorrow to keep your constellation alive.', style: Theme.of(context).textTheme.bodyMedium)]))])),
+      Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF33245C), Color(0xFF1A142D)]), borderRadius: BorderRadius.circular(20), border: Border.all(color: MysticColors.lavender.withValues(alpha: .2))), child: Row(children: [const Text('🔥', style: TextStyle(fontSize: 30)), const SizedBox(width: 13), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(widget.language, '${widget.streak}-day flame', '${widget.streak} günlük alev'), style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4), Text(mysticText(widget.language, 'Return tomorrow to keep your constellation alive.', 'Takımyıldızını canlı tutmak için yarın geri dön.'), style: Theme.of(context).textTheme.bodyMedium)]))])),
     ]));
   }
 
@@ -1778,7 +1778,7 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
       const Spacer(),
       Text(title, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.bold, fontSize: 12)),
       const SizedBox(height: 5),
-      SizedBox(height: 28, child: TextButton(onPressed: unlocked && !claimed ? () { widget.onClaimReward(milestone); setState(() {}); } : null, style: TextButton.styleFrom(padding: EdgeInsets.zero), child: Text(claimed ? 'CLAIMED' : unlocked ? 'CLAIM' : '$milestone XP', style: const TextStyle(fontFamily: 'Arial', fontSize: 10, fontWeight: FontWeight.w800)))),
+      SizedBox(height: 28, child: TextButton(onPressed: unlocked && !claimed ? () { widget.onClaimReward(milestone); setState(() {}); } : null, style: TextButton.styleFrom(padding: EdgeInsets.zero), child: Text(claimed ? mysticText(widget.language, 'CLAIMED', 'ALINDI') : unlocked ? mysticText(widget.language, 'CLAIM', 'AL') : '$milestone XP', style: const TextStyle(fontFamily: 'Arial', fontSize: 10, fontWeight: FontWeight.w800)))),
     ]));
   }
 
@@ -1790,7 +1790,7 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
       child: AnimatedContainer(duration: const Duration(milliseconds: 320), padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: done ? MysticColors.gold.withValues(alpha: .1) : Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(18), border: Border.all(color: done ? MysticColors.gold.withValues(alpha: .42) : Colors.white.withValues(alpha: .08))), child: Row(children: [
         CircleAvatar(backgroundColor: done ? MysticColors.gold : MysticColors.violet.withValues(alpha: .35), child: Icon(done ? Icons.check : icon, color: done ? MysticColors.ink : MysticColors.lavender, size: 20)),
         const SizedBox(width: 13),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w700)), const SizedBox(height: 3), Text(done ? 'Ritual complete • +15 XP' : subtitle, style: Theme.of(context).textTheme.bodyMedium)])),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w700)), const SizedBox(height: 3), Text(done ? mysticText(widget.language, 'Ritual complete • +15 XP', 'Ritüel tamamlandı • +15 XP') : subtitle, style: Theme.of(context).textTheme.bodyMedium)])),
         if (!done) const Icon(Icons.arrow_forward_ios, size: 14, color: MysticColors.muted),
       ])),
     ));
@@ -1798,8 +1798,9 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
 }
 
 class _ArcanaVault extends StatelessWidget {
-  const _ArcanaVault({required this.discoveredCards});
+  const _ArcanaVault({required this.discoveredCards, required this.language});
   final Set<String> discoveredCards;
+  final MysticLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -1815,14 +1816,14 @@ class _ArcanaVault extends StatelessWidget {
         decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF251A3C), Color(0xFF12101C)]), borderRadius: BorderRadius.circular(22), border: Border.all(color: MysticColors.gold.withValues(alpha: .24))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            const Text('ARCANA VAULT', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.35)),
+            Text(mysticText(language, 'ARCANA VAULT', 'ARKANA KASASI'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.35)),
             const Spacer(),
             Text('${discoveredCards.length}/78', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 12, fontWeight: FontWeight.bold)),
             const SizedBox(width: 5),
             const Icon(Icons.arrow_forward_ios, size: 12, color: MysticColors.muted),
           ]),
           const SizedBox(height: 6),
-          Text(discoveredCards.isEmpty ? 'Every reading can awaken a card.' : discoveredCards.length == 78 ? 'The entire deck has answered you.' : '${nextMilestone - discoveredCards.length} more cards until your next collection milestone.', style: Theme.of(context).textTheme.bodyMedium),
+          Text(discoveredCards.isEmpty ? mysticText(language, 'Every reading can awaken a card.', 'Her okuma bir kartı uyandırabilir.') : discoveredCards.length == 78 ? mysticText(language, 'The entire deck has answered you.', 'Tüm deste sana cevap verdi.') : mysticText(language, '${nextMilestone - discoveredCards.length} more cards until your next collection milestone.', 'Sonraki koleksiyon eşiğine ${nextMilestone - discoveredCards.length} kart kaldı.'), style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 15),
           Row(children: [for (var i = 0; i < preview.length; i++) ...[if (i > 0) const SizedBox(width: 9), Expanded(child: _previewCard(preview[i], discoveredCards.contains(preview[i].name)))]]),
         ]),
@@ -1835,7 +1836,7 @@ class _ArcanaVault extends StatelessWidget {
     return Container(height: 112, padding: const EdgeInsets.all(9), decoration: BoxDecoration(gradient: unlocked ? LinearGradient(colors: [color.withValues(alpha: .25), const Color(0xFF191323)]) : const LinearGradient(colors: [Color(0xFF1C1824), Color(0xFF100E16)]), borderRadius: BorderRadius.circular(14), border: Border.all(color: unlocked ? color.withValues(alpha: .55) : Colors.white10)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Text(unlocked ? card.symbol : '◈', style: TextStyle(fontSize: 28, color: unlocked ? color : Colors.white24)),
       const SizedBox(height: 8),
-      Text(unlocked ? card.name : 'Undiscovered', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
+      Text(unlocked ? localizedTarotCardName(card.name, turkish: language == MysticLanguage.turkish) : mysticText(language, 'Undiscovered', 'Keşfedilmedi'), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
     ]));
   }
 
@@ -1852,7 +1853,7 @@ class _ArcanaVault extends StatelessWidget {
             const SizedBox(height: 12),
             Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))),
             Padding(padding: const EdgeInsets.fromLTRB(20, 18, 20, 12), child: Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Your Arcana Vault', style: Theme.of(sheetContext).textTheme.headlineMedium), const SizedBox(height: 4), Text('${discoveredCards.length} awakened • ${78 - discoveredCards.length} still hidden', style: Theme.of(sheetContext).textTheme.bodyMedium)])),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(language, 'Your Arcana Vault', 'Arkana Kasan'), style: Theme.of(sheetContext).textTheme.headlineMedium), const SizedBox(height: 4), Text(mysticText(language, '${discoveredCards.length} awakened • ${78 - discoveredCards.length} still hidden', '${discoveredCards.length} uyandı • ${78 - discoveredCards.length} hâlâ gizli'), style: Theme.of(sheetContext).textTheme.bodyMedium)])),
               Container(padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .1), borderRadius: BorderRadius.circular(16)), child: Text('${((discoveredCards.length / 78) * 100).round()}%', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))),
             ])),
             Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: discoveredCards.length / 78, minHeight: 6, backgroundColor: Colors.white10, color: MysticColors.gold))),
@@ -1878,9 +1879,9 @@ class _ArcanaVault extends StatelessWidget {
         const Spacer(),
         Text(unlocked ? card.symbol : '?', style: TextStyle(fontSize: 30, color: unlocked ? color : Colors.white24)),
         const Spacer(),
-        Text(unlocked ? card.name : 'Locked', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
+        Text(unlocked ? localizedTarotCardName(card.name, turkish: language == MysticLanguage.turkish) : mysticText(language, 'Locked', 'Kilitli'), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', color: unlocked ? MysticColors.mist : MysticColors.muted, fontSize: 10, fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
-        Text(unlocked ? _cardRarity(card).toUpperCase() : 'UNDISCOVERED', style: TextStyle(fontFamily: 'Arial', color: unlocked ? color : Colors.white24, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: .7)),
+        Text(unlocked ? _localizedRarity(card).toUpperCase() : mysticText(language, 'UNDISCOVERED', 'KEŞFEDİLMEDİ'), style: TextStyle(fontFamily: 'Arial', color: unlocked ? color : Colors.white24, fontSize: 7, fontWeight: FontWeight.w900, letterSpacing: .7)),
       ])),
     );
   }
@@ -1891,25 +1892,33 @@ class _ArcanaVault extends StatelessWidget {
       Align(alignment: Alignment.centerRight, child: IconButton(onPressed: () => Navigator.pop(dialogContext), icon: const Icon(Icons.close))),
       Container(width: 118, height: 176, alignment: Alignment.center, decoration: BoxDecoration(gradient: LinearGradient(colors: [color.withValues(alpha: .35), const Color(0xFF17111F)]), borderRadius: BorderRadius.circular(18), border: Border.all(color: color.withValues(alpha: .75)), boxShadow: [BoxShadow(color: color.withValues(alpha: .2), blurRadius: 28)]), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 18), Text(card.symbol, style: TextStyle(fontSize: 48, color: color))])),
       const SizedBox(height: 18),
-      Text(_cardRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
+      Text(_localizedRarity(card).toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.4)),
       const SizedBox(height: 6),
-      Text(card.name, textAlign: TextAlign.center, style: Theme.of(dialogContext).textTheme.headlineMedium),
+      Text(localizedTarotCardName(card.name, turkish: language == MysticLanguage.turkish), textAlign: TextAlign.center, style: Theme.of(dialogContext).textTheme.headlineMedium),
       const SizedBox(height: 20),
-      _meaningBlock(dialogContext, 'LIGHT', card.light, MysticColors.gold),
+      _meaningBlock(dialogContext, mysticText(language, 'LIGHT', 'IŞIK'), _localizedCardMeaning(DrawnCard(card, false), language), MysticColors.gold),
       const SizedBox(height: 10),
-      _meaningBlock(dialogContext, 'SHADOW', card.shadow, MysticColors.lavender),
+      _meaningBlock(dialogContext, mysticText(language, 'SHADOW', 'GÖLGE'), _localizedCardMeaning(DrawnCard(card, true), language), MysticColors.lavender),
       const SizedBox(height: 10),
-      _meaningBlock(dialogContext, 'ALIGNED ACTION', card.advice, color),
+      _meaningBlock(dialogContext, mysticText(language, 'ALIGNED ACTION', 'UYUMLU EYLEM'), _localizedCardAdvice(DrawnCard(card, false), language), color),
     ])))));
   }
 
   Widget _meaningBlock(BuildContext context, String label, String text, Color color) => Container(width: double.infinity, padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .045), borderRadius: BorderRadius.circular(15), border: Border.all(color: color.withValues(alpha: .16))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: TextStyle(fontFamily: 'Arial', color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.1)), const SizedBox(height: 6), Text(text, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MysticColors.mist))]));
 
+  String _localizedRarity(TarotCardData card) => switch (_cardRarity(card)) {
+        'Legendary' => mysticText(language, 'Legendary', 'Efsanevi'),
+        'Epic' => mysticText(language, 'Epic', 'Destansı'),
+        'Rare' => mysticText(language, 'Rare', 'Nadir'),
+        _ => mysticText(language, 'Common', 'Yaygın'),
+      };
+
 }
 
 class _WeeklyMirror extends StatelessWidget {
-  const _WeeklyMirror({required this.records});
+  const _WeeklyMirror({required this.records, required this.language});
   final List<ReadingRecord> records;
+  final MysticLanguage language;
 
   @override
   Widget build(BuildContext context) {
@@ -1923,7 +1932,7 @@ class _WeeklyMirror extends StatelessWidget {
       child: Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF7550BA), Color(0xFF2A1D48)]), borderRadius: BorderRadius.circular(22), border: Border.all(color: MysticColors.lavender.withValues(alpha: .3))), child: Row(children: [
         Container(width: 52, height: 52, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.white.withValues(alpha: .1), shape: BoxShape.circle), child: Text(recent.isEmpty ? '☾' : emotion.symbol, style: const TextStyle(fontSize: 26, color: MysticColors.gold))),
         const SizedBox(width: 14),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR WEEKLY MYSTIC WRAPPED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.1)), const SizedBox(height: 6), Text(recent.isEmpty ? 'Your story is waiting for its first signal.' : '${emotion.label} led your week • ${recent.length} reflections', style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 14))])),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(mysticText(language, 'YOUR WEEKLY MYSTIC WRAPPED', 'HAFTALIK MYSTIC ÖZETİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.1)), const SizedBox(height: 6), Text(recent.isEmpty ? mysticText(language, 'Your story is waiting for its first signal.', 'Hikâyen ilk sinyalini bekliyor.') : mysticText(language, '${emotion.label} led your week • ${recent.length} reflections', '${localizedEmotionLabel(emotion, turkish: true)} haftana yön verdi • ${recent.length} yansıma'), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 14))])),
         const Icon(Icons.arrow_forward, color: MysticColors.mist),
       ])),
     );
@@ -1945,22 +1954,22 @@ class _WeeklyMirror extends StatelessWidget {
         counts.update(card.card.name, (value) => value + 1, ifAbsent: () => 1);
       }
     }
-    return counts.isEmpty ? 'No card yet' : counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+    return counts.isEmpty ? '' : counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
   void _showWrapped(BuildContext context, List<ReadingRecord> recent, EmotionalState emotion, String card) {
     showModalBottomSheet<void>(context: context, isScrollControlled: true, backgroundColor: const Color(0xFF171128), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))), builder: (context) => Padding(padding: const EdgeInsets.fromLTRB(22, 14, 22, 32), child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
       Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(8))),
       const SizedBox(height: 25),
-      const Text('✦  MYSTIC WRAPPED', style: TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, letterSpacing: 1.4)),
+      Text(mysticText(language, '✦  MYSTIC WRAPPED', '✦  MYSTIC ÖZETİ'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.w800, letterSpacing: 1.4)),
       const SizedBox(height: 18),
-      Text(recent.isEmpty ? 'Your first pattern begins with one honest reading.' : '${emotion.symbol} ${emotion.label} was your dominant inner weather.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
+      Text(recent.isEmpty ? mysticText(language, 'Your first pattern begins with one honest reading.', 'İlk örüntün dürüst bir okumayla başlar.') : mysticText(language, '${emotion.symbol} ${emotion.label} was your dominant inner weather.', '${emotion.symbol} ${localizedEmotionLabel(emotion, turkish: true)} baskın iç havan oldu.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
       const SizedBox(height: 22),
-      Row(children: [_wrappedStat(context, '${recent.length}', 'REFLECTIONS'), const SizedBox(width: 10), _wrappedStat(context, card, 'REPEATING CARD')]),
+      Row(children: [_wrappedStat(context, '${recent.length}', mysticText(language, 'REFLECTIONS', 'YANSIMALAR')), const SizedBox(width: 10), _wrappedStat(context, card.isEmpty ? mysticText(language, 'No card yet', 'Henüz kart yok') : localizedTarotCardName(card, turkish: language == MysticLanguage.turkish), mysticText(language, 'REPEATING CARD', 'TEKRARLAYAN KART'))]),
       const SizedBox(height: 16),
-      Text(recent.isEmpty ? 'Complete a reading and return here to watch your emotional patterns become visible.' : 'Your invitation: notice where ${emotion.label.toLowerCase()} energy protected you—and where it quietly chose for you.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
+      Text(recent.isEmpty ? mysticText(language, 'Complete a reading and return here to watch your emotional patterns become visible.', 'Bir okuma tamamla; duygusal örüntülerinin görünür oluşunu izlemek için buraya dön.') : mysticText(language, 'Your invitation: notice where ${emotion.label.toLowerCase()} energy protected you—and where it quietly chose for you.', 'Davetin: ${localizedEmotionLabel(emotion, turkish: true).toLowerCase()} enerjisinin seni nerede koruduğunu ve nerede sessizce senin yerine seçim yaptığını fark et.'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
       const SizedBox(height: 24),
-      GoldButton(label: recent.isEmpty ? 'Begin my first reading' : 'Keep building my pattern', onPressed: () => Navigator.pop(context), icon: Icons.auto_awesome),
+      GoldButton(label: recent.isEmpty ? mysticText(language, 'Begin my first reading', 'İlk okumamı başlat') : mysticText(language, 'Keep building my pattern', 'Örüntümü geliştirmeyi sürdür'), onPressed: () => Navigator.pop(context), icon: Icons.auto_awesome),
     ]))));
   }
 
