@@ -111,6 +111,10 @@ class _MysticAppState extends State<MysticApp> {
           MysticLivingJournalFeature(
             records: journal,
             language: language,
+            onStartReading: () {
+              setState(() => tab = 0);
+              _startReading(ReadingKind.daily);
+            },
             onPremium: () => _showPremium(source: 'living_journal'),
           ),
           ProfileScreen(userName: userName, intention: intention, streak: streak, xp: xp, readings: journal.length, discovered: discoveredCards.length, relics: claimedRewards.length, records: journal, completedArcanaDays: completedArcanaDays.length, deckStyle: deckStyle, language: language, onSelectLanguage: _selectLanguage, onSelectDeckStyle: _selectDeckStyle, onUpdateProfile: _updateProfile, onDeleteData: _deleteAllData, onPremium: _showPremium),
@@ -663,12 +667,6 @@ class HomeScreen extends StatelessWidget {
             InkWell(onTap: onPremium, borderRadius: BorderRadius.circular(30), child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(color: MysticColors.gold.withValues(alpha: .12), borderRadius: BorderRadius.circular(30), border: Border.all(color: MysticColors.gold.withValues(alpha: .4))), child: const Row(children: [Text('✦ ', style: TextStyle(color: MysticColors.gold)), Text('PLUS', style: TextStyle(fontFamily: 'Arial', fontWeight: FontWeight.w800, color: MysticColors.gold, fontSize: 12))]))),
           ]),
           const SizedBox(height: 18),
-          _MoonBriefing(language: language),
-          const SizedBox(height: 14),
-          _PersonalSignal(intention: intention, records: records, language: language),
-          const SizedBox(height: 14),
-          DestinyFlagshipCard(records: records, completedDays: completedArcanaDays, language: language, onOpen: onOpenDestiny),
-          const SizedBox(height: 14),
           _DailyCard(streak: streak, deckStyle: deckStyle, language: language, onTap: () => onReading(ReadingKind.daily)),
           const SizedBox(height: 14),
           _DailyQuest(
@@ -679,21 +677,76 @@ class HomeScreen extends StatelessWidget {
             onClaim: onClaimDailyQuest,
           ),
           const SizedBox(height: 12),
+          _MoonBriefing(language: language),
+          const SizedBox(height: 12),
           _ReadingAllowance(readingsLeft: freeReadingsLeft, language: language, onUpgrade: onPremium),
-          const SizedBox(height: 26),
+          const SizedBox(height: 24),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(mysticText(language, 'Choose a reading', 'Bir okuma seç'), style: Theme.of(context).textTheme.titleLarge), Text('$xp XP', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
           const SizedBox(height: 12),
         ]))),
-        SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 28), sliver: SliverGrid(delegate: SliverChildBuilderDelegate((context, index) {
-          final kind = _standardReadingKinds[index];
-          return InkWell(onTap: () => onReading(kind), borderRadius: BorderRadius.circular(20), child: Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .055), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: .08))), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(kind.symbol, style: const TextStyle(fontSize: 27, color: MysticColors.gold)), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_readingKindTitle(kind, language), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)), const SizedBox(height: 5), Text(mysticText(language, '${kind.cardCount} cards', '${kind.cardCount} kart'), style: Theme.of(context).textTheme.bodyMedium)])])));
-        }, childCount: _standardReadingKinds.length), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.12, crossAxisSpacing: 12, mainAxisSpacing: 12))),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 126,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 3,
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    itemBuilder: (_, index) => _featuredReadingCard(
+                      context,
+                      const [
+                        ReadingKind.love,
+                        ReadingKind.career,
+                        ReadingKind.decision,
+                      ][index],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () => _showAllReadings(context),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: .04),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.white.withValues(alpha: .09)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.grid_view_rounded, size: 18, color: MysticColors.lavender),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            mysticText(language, 'Explore every reading', 'Tüm okumaları keşfet'),
+                            style: const TextStyle(fontFamily: 'Arial', fontSize: 12, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_rounded, size: 18, color: MysticColors.gold),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 32), sliver: SliverToBoxAdapter(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [Text(mysticText(language, 'Mystic Plus readings', 'Mystic Plus okumaları'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5), decoration: BoxDecoration(color: MysticColors.gold, borderRadius: BorderRadius.circular(12)), child: const Text('PLUS', style: TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: .7)))]),
           const SizedBox(height: 6),
           Text(mysticText(language, 'High-depth spreads built for the questions people return to most.', 'En çok geri dönülen sorular için tasarlanmış derin açılımlar.'), style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 12),
           SizedBox(height: 166, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: _premiumReadingKinds.length, separatorBuilder: (_, __) => const SizedBox(width: 10), itemBuilder: (_, index) => _premiumReadingCard(context, _premiumReadingKinds[index]))),
+          const SizedBox(height: 26),
+          Text(mysticText(language, 'Your path remembers', 'Yolun seni hatırlıyor'), style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          _PersonalSignal(intention: intention, records: records, language: language),
+          const SizedBox(height: 14),
+          DestinyFlagshipCard(records: records, completedDays: completedArcanaDays, language: language, onOpen: onOpenDestiny),
         ]))),
       ]));
 
@@ -711,6 +764,121 @@ class HomeScreen extends StatelessWidget {
     const SizedBox(height: 5),
     Text(mysticText(language, '${kind.cardCount}-card premium spread', '${kind.cardCount} kartlık premium açılım'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10)),
   ])));
+
+  Widget _featuredReadingCard(BuildContext context, ReadingKind kind) => InkWell(
+        onTap: () => onReading(kind),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 136,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2B2146), Color(0xFF171321)],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: MysticColors.lavender.withValues(alpha: .2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(kind.symbol, style: const TextStyle(fontSize: 25, color: MysticColors.gold)),
+                  const Spacer(),
+                  const Icon(Icons.arrow_outward_rounded, color: MysticColors.lavender, size: 16),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                _readingKindTitle(kind, language),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                mysticText(language, '${kind.cardCount} cards', '${kind.cardCount} kart'),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Future<void> _showAllReadings(BuildContext context) => showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: const Color(0xFF171321),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        builder: (sheetContext) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    mysticText(language, 'Reading library', 'Okuma kütüphanesi'),
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    mysticText(
+                      language,
+                      'Choose the question that needs your attention now.',
+                      'Şimdi ilgini isteyen soruyu seç.',
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ..._standardReadingKinds.map(
+                    (kind) => Padding(
+                      padding: const EdgeInsets.only(bottom: 9),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          onReading(kind);
+                        },
+                        tileColor: Colors.white.withValues(alpha: .045),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        leading: Container(
+                          width: 42,
+                          height: 42,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: MysticColors.violet.withValues(alpha: .24),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: Text(kind.symbol, style: const TextStyle(fontSize: 21, color: MysticColors.gold)),
+                        ),
+                        title: Text(_readingKindTitle(kind, language)),
+                        subtitle: Text(mysticText(language, '${kind.cardCount} card spread', '${kind.cardCount} kartlık açılım')),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: MysticColors.lavender),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _PersonalSignal extends StatelessWidget {
