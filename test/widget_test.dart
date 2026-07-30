@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/app.dart';
 import 'package:mystic_tarot/src/flagship.dart';
+import 'package:mystic_tarot/src/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -101,5 +102,53 @@ void main() {
       scrollable: find.byType(Scrollable).last,
     );
     expect(find.text('Create my first signal'), findsOneWidget);
+  });
+
+  testWidgets('Turkish remains active inside the card selection flow',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({'allow_reversals': true});
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: ReadingFlow(
+          kind: ReadingKind.daily,
+          deckStyle: DeckStyle.midnight,
+          userName: 'Tuna',
+          intention: 'Clarity',
+          language: MysticLanguage.turkish,
+          pastRecords: const [],
+          onPremium: () {},
+          onComplete: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Günlük Rehberlik'), findsOneWidget);
+    expect(find.text('ŞU ANDA NASIL HİSSEDİYORSUN?'), findsOneWidget);
+    expect(find.text('Sorunu yaz (isteğe bağlı)'), findsOneWidget);
+    expect(find.text('Kararsız'), findsOneWidget);
+    expect(
+      find.text(
+        'Breathe slowly. Hold your question in mind, then choose the cards that call to you.',
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('saved Turkish preference restores the Turkish shell',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'onboarded': true,
+      'language': 'turkish',
+    });
+    await tester.pumpWidget(const MysticApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+
+    expect(find.text('Oku'), findsOneWidget);
+    expect(find.text('Yol'), findsOneWidget);
+    expect(find.text('Günlük'), findsOneWidget);
+    expect(find.text('Sen'), findsOneWidget);
   });
 }
