@@ -123,7 +123,6 @@ The codebase contains `shared_preferences` only and keeps product data on-device
 
 Do not activate these products until billing and server-side entitlement validation are connected.
 
-- `mystic_plus_weekly`
 - `mystic_plus_monthly`
 - `mystic_plus_yearly`
 
@@ -132,8 +131,15 @@ Recommended launch test:
 - Keep Daily Guidance free.
 - Keep three deep readings per day free.
 - Offer monthly and yearly plans first.
-- Do not launch the weekly plan in version 1; it weakens trust and makes the pricing screen feel aggressive.
 - Test the seven-day trial only on yearly.
+
+## Launch languages
+
+Version 1 launches in English and Turkish. Both languages must remain complete
+across onboarding, readings, reveal, results, premium previews, profile, settings,
+privacy controls, and support. Other locale models remain reserved in source but
+must not appear in the production selector until their complete user paths pass
+the same release tests.
 
 ## Account-owned actions before native submission
 
