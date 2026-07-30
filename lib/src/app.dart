@@ -649,7 +649,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 14),
           DestinyFlagshipCard(records: records, completedDays: completedArcanaDays, language: language, onOpen: onOpenDestiny),
           const SizedBox(height: 14),
-          _DailyCard(streak: streak, deckStyle: deckStyle, onTap: () => onReading(ReadingKind.daily)),
+          _DailyCard(streak: streak, deckStyle: deckStyle, language: language, onTap: () => onReading(ReadingKind.daily)),
           const SizedBox(height: 14),
           _DailyQuest(
             readingDone: dailyReadingDone,
@@ -767,9 +767,10 @@ class _MoonBriefing extends StatelessWidget {
 }
 
 class _DailyCard extends StatefulWidget {
-  const _DailyCard({required this.streak, required this.deckStyle, required this.onTap});
+  const _DailyCard({required this.streak, required this.deckStyle, required this.language, required this.onTap});
   final int streak;
   final DeckStyle deckStyle;
+  final MysticLanguage language;
   final VoidCallback onTap;
 
   @override
@@ -786,7 +787,22 @@ class _DailyCardState extends State<_DailyCard> with SingleTickerProviderStateMi
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, child) => InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(24), child: Container(height: 196, padding: const EdgeInsets.all(22), decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color.lerp(const Color(0xFF6C45B5), const Color(0xFF8356C5), controller.value)!, const Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .32 + controller.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + controller.value * .08), blurRadius: 28, spreadRadius: 1)]), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('YOUR DAILY PORTAL', style: TextStyle(fontFamily: 'Arial', letterSpacing: 1.8, color: MysticColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)), const Spacer(), Text('Reveal what\nneeds you today', style: Theme.of(context).textTheme.headlineMedium), const SizedBox(height: 8), Text('🔥 ${widget.streak} day streak  •  +25 XP', style: Theme.of(context).textTheme.bodyMedium)])), TarotCardFace(style: widget.deckStyle, width: 90, height: 142)]))));
+  Widget build(BuildContext context) => AnimatedBuilder(animation: controller, builder: (context, child) => InkWell(onTap: widget.onTap, borderRadius: BorderRadius.circular(24), child: Container(
+        constraints: const BoxConstraints(minHeight: 214),
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color.lerp(const Color(0xFF6C45B5), const Color(0xFF8356C5), controller.value)!, const Color(0xFF251944)]), borderRadius: BorderRadius.circular(24), border: Border.all(color: MysticColors.lavender.withValues(alpha: .32 + controller.value * .18)), boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .12 + controller.value * .08), blurRadius: 28, spreadRadius: 1)]),
+        child: Row(children: [
+          Expanded(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(mysticText(widget.language, 'YOUR DAILY PORTAL', 'GÜNLÜK PORTALIN'), style: const TextStyle(fontFamily: 'Arial', letterSpacing: 1.5, color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            Text(mysticText(widget.language, 'Reveal what\nneeds you today', 'Bugün senden\nne istendiğini gör'), maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 10),
+            Text(mysticText(widget.language, '🔥 ${widget.streak} day streak  •  +25 XP', '🔥 ${widget.streak} günlük seri  •  +25 XP'), maxLines: 2, style: Theme.of(context).textTheme.bodyMedium),
+          ])),
+          const SizedBox(width: 12),
+          TarotCardFace(style: widget.deckStyle, width: 82, height: 132),
+        ]),
+      )));
 }
 
 class _DailyQuest extends StatelessWidget {
