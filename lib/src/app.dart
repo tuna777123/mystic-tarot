@@ -1377,7 +1377,7 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     final recurring = cardCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
     final dominant = emotionCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
     if (widget.language == MysticLanguage.turkish) {
-      return ' Hafızandaki ${recent.length} okumada ${recurring.key} ${recurring.value} kez göründü ve baskın başlangıç duygun ${dominant.key.label.toLowerCase()} oldu. Bu bir kehanet değil; üzerinde düşünmeye değer tekrar eden bir iz.';
+      return ' Hafızandaki ${recent.length} okumada ${localizedTarotCardName(recurring.key, turkish: true)} ${recurring.value} kez göründü ve baskın başlangıç duygun ${localizedEmotionLabel(dominant.key, turkish: true).toLowerCase()} oldu. Bu bir kehanet değil; üzerinde düşünmeye değer tekrar eden bir iz.';
     }
     return ' Across ${recent.length} remembered readings, ${recurring.key} appeared ${recurring.value} times and ${dominant.key.label.toLowerCase()} was your most common starting emotion. That is not a prediction; it is a recurring thread worth examining.';
   }
@@ -1453,30 +1453,17 @@ class _ReadingInProgress extends StatelessWidget {
 }
 
 String _readingKindTitle(ReadingKind kind, MysticLanguage language) {
-  if (language != MysticLanguage.turkish) return kind.title;
-  return switch (kind) {
-    ReadingKind.daily => 'Günlük Rehberlik',
-    ReadingKind.love => 'Aşk ve Bağ',
-    ReadingKind.career => 'Kariyer Yolu',
-    ReadingKind.money => 'Para Enerjisi',
-    ReadingKind.decision => 'Karar Açılımı',
-    ReadingKind.spiritual => 'Ruhsal Gelişim',
-    ReadingKind.shadow => 'Gölge Çalışması',
-    ReadingKind.compatibility => 'Aşk Uyumu',
-    ReadingKind.timeline => 'Gelecek Zaman Çizgisi',
-    ReadingKind.celticCross => 'Kelt Haçı',
-  };
+  return localizedReadingKindTitle(
+    kind,
+    turkish: language == MysticLanguage.turkish,
+  );
 }
 
 String _emotionLabel(EmotionalState emotion, MysticLanguage language) {
-  if (language != MysticLanguage.turkish) return emotion.label;
-  return switch (emotion) {
-    EmotionalState.anxious => 'Kaygılı',
-    EmotionalState.hopeful => 'Umutlu',
-    EmotionalState.grounded => 'Dengeli',
-    EmotionalState.curious => 'Meraklı',
-    EmotionalState.uncertain => 'Kararsız',
-  };
+  return localizedEmotionLabel(
+    emotion,
+    turkish: language == MysticLanguage.turkish,
+  );
 }
 
 String _localizedCardMeaning(DrawnCard drawn, MysticLanguage language) {
