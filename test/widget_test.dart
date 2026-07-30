@@ -153,4 +153,73 @@ void main() {
     expect(find.text('Günlük'), findsOneWidget);
     expect(find.text('Sen'), findsOneWidget);
   });
+
+  test('launch language selector exposes only complete languages', () {
+    expect(
+      launchLanguages,
+      const [MysticLanguage.english, MysticLanguage.turkish],
+    );
+  });
+
+  testWidgets('Turkish remains active in profile and settings',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'allow_reversals': true,
+      'sound_effects': true,
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: SoulProfileScreen(
+          initialName: 'Tuna',
+          initialIntention: 'Clarity',
+          language: MysticLanguage.turkish,
+          onSave: (_, __) {},
+        ),
+      ),
+    );
+
+    expect(find.text('Ruh profili'), findsOneWidget);
+    expect(find.text('Mystic’i kendine göre şekillendir'), findsOneWidget);
+    expect(find.text('Ruh profilimi kaydet'), findsOneWidget);
+    expect(find.text('Make Mystic yours'), findsNothing);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: MysticSettingsScreen(
+          section: 'Reading preferences',
+          title: 'Okuma tercihleri',
+          language: MysticLanguage.turkish,
+          records: const [],
+          onDeleteData: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Okuma tercihleri'), findsOneWidget);
+    expect(find.text('Ters kartlara izin ver'), findsOneWidget);
+    expect(find.text('Daily Guidance reminder'), findsNothing);
+  });
+
+  testWidgets('Turkish premium preview never falls back to English',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: PremiumReadingPreview(
+          kind: ReadingKind.compatibility,
+          deckStyle: DeckStyle.midnight,
+          language: MysticLanguage.turkish,
+          onUnlock: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('Aşk Uyumu'), findsOneWidget);
+    expect(find.text('PLUS ÖNİZLEME'), findsOneWidget);
+    expect(find.textContaining('kartlık hikâyenin tamamı'), findsOneWidget);
+    expect(find.text('PLUS PREVIEW'), findsNothing);
+  });
 }
