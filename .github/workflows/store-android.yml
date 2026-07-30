@@ -1,0 +1,98 @@
+name: Signed Android Store Bundle
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  signed-aab:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Require protected signing secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_B64"
+          test -n "$KEY_ALIAS"
+          test -n "$STORE_PASSWORD"
+          test -n "$KEY_PASSWORD"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Android platform shell
+        run: flutter create . --platforms=android --org com.tunabozcali
+
+      - name: Set permanent application identifier
+        run: |
+          find android -type f \( -name "*.kt" -o -name "*.gradle.kts" \) -print0 \
+            | xargs -0 sed -i \
+                -e 's/com\.tunabozcali\.mystic_tarot/com.tunabozcali.mystictarot/g' \
+                -e 's/com\.tunabozcali\.mysticTarot/com.tunabozcali.mystictarot/g'
+          grep -R "com.tunabozcali.mystictarot" android/app
+
+      - name: Configure protected upload key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            printf 'storeFile=upload-keystore.jks\n'
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > android/key.properties
+          dart run tool/configure_android_signing.dart
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate branded launcher icon
+        run: dart run flutter_launcher_icons
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build signed store bundle
+        run: flutter build appbundle --release
+
+      - name: Verify bundle signature
+        run: jarsigner -verify -strict -certs build/app/outputs/bundle/release/app-release.aab
+
+      - name: Upload signed store bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: mystic-tarot-signed-store-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Remove temporary key material
+        if: always()
+        run: |
+          rm -f android/app/upload-keystore.jks
+          rm -f android/key.properties
