@@ -31,3 +31,18 @@
 - `flutter build web --release`
 - `flutter build appbundle --release`
 - iOS archive and StoreKit sandbox test on macOS before App Store submission.
+
+## Protected Android signing
+
+The manual `Signed Android Store Bundle` workflow is the only workflow intended
+to create a Play Console upload. Configure these GitHub Environment secrets in
+the protected `production` environment:
+
+- `ANDROID_UPLOAD_KEYSTORE_BASE64`
+- `ANDROID_UPLOAD_KEY_ALIAS`
+- `ANDROID_UPLOAD_STORE_PASSWORD`
+- `ANDROID_UPLOAD_KEY_PASSWORD`
+
+Keep environment approval enabled. Never place the keystore, aliases, or
+passwords in source, issue comments, workflow inputs, or chat. The regular CI
+AAB and QA APK remain test artifacts and must not be submitted to a store.
