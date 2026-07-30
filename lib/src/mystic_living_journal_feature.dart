@@ -13,12 +13,14 @@ class MysticLivingJournalFeature extends StatefulWidget {
     required this.records,
     required this.language,
     required this.onPremium,
+    this.onStartReading,
     super.key,
   });
 
   final List<ReadingRecord> records;
   final MysticLanguage language;
   final VoidCallback onPremium;
+  final VoidCallback? onStartReading;
 
   @override
   State<MysticLivingJournalFeature> createState() =>
@@ -551,18 +553,36 @@ class _MysticLivingJournalFeatureState
       };
 
   Widget _buildEmptyState({required Key key}) {
-    return Center(
+    return SingleChildScrollView(
       key: key,
-      child: Padding(
-        padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.fromLTRB(22, 26, 22, 30),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '☾',
-              style: TextStyle(fontSize: 50, color: MysticColors.gold),
+            Container(
+              width: 78,
+              height: 78,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6D4DB3), Color(0xFF271A42)],
+                ),
+                border: Border.all(color: MysticColors.gold.withValues(alpha: .45)),
+                boxShadow: [
+                  BoxShadow(
+                    color: MysticColors.violet.withValues(alpha: .32),
+                    blurRadius: 30,
+                  ),
+                ],
+              ),
+              child: const Text(
+                '☾',
+                style: TextStyle(fontSize: 42, color: MysticColors.gold),
+              ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
             Text(
               _copy('Your journal is waiting.', 'Günlüğün seni bekliyor.'),
               textAlign: TextAlign.center,
@@ -577,11 +597,81 @@ class _MysticLivingJournalFeatureState
               textAlign: TextAlign.center,
               style: const TextStyle(color: MysticColors.mist),
             ),
+            const SizedBox(height: 22),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF251B3D), Color(0xFF15111F)],
+                ),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: MysticColors.lavender.withValues(alpha: .22)),
+              ),
+              child: Column(
+                children: [
+                  _emptyPreviewRow(
+                    Icons.timeline_rounded,
+                    _copy('Your reading timeline', 'Okuma zaman çizgin'),
+                    _copy('Every saved reading, in context', 'Her kayıtlı okuma, kendi bağlamında'),
+                  ),
+                  const Divider(height: 22, color: Colors.white10),
+                  _emptyPreviewRow(
+                    Icons.auto_graph_rounded,
+                    _copy('Recurring patterns', 'Tekrar eden örüntüler'),
+                    _copy('Cards and emotions that return', 'Geri dönen kartlar ve duygular'),
+                  ),
+                  const Divider(height: 22, color: Colors.white10),
+                  _emptyPreviewRow(
+                    Icons.hub_outlined,
+                    _copy('Private memory map', 'Özel hafıza haritası'),
+                    _copy('Connections only you can see', 'Yalnızca senin görebileceğin bağlar'),
+                  ),
+                ],
+              ),
+            ),
+            if (widget.onStartReading != null) ...[
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: widget.onStartReading,
+                  icon: const Icon(Icons.auto_awesome_rounded),
+                  label: Text(_copy('Create my first memory', 'İlk anımı oluştur')),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
+
+  Widget _emptyPreviewRow(IconData icon, String title, String body) => Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: MysticColors.violet.withValues(alpha: .22),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, size: 19, color: MysticColors.gold),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                const SizedBox(height: 3),
+                Text(body, style: const TextStyle(color: MysticColors.muted, fontSize: 11)),
+              ],
+            ),
+          ),
+          const Icon(Icons.lock_outline_rounded, size: 16, color: MysticColors.lavender),
+        ],
+      );
 
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
