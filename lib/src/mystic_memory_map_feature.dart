@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'flagship.dart';
 import 'models.dart';
+import 'tarot_localization.dart';
 import 'theme.dart';
 
 class MysticMemoryMapFeature extends StatefulWidget {
@@ -333,7 +334,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                       Expanded(
                         child: Text(
                           record.question.trim().isEmpty
-                              ? record.kind.title
+                              ? localizedReadingKindTitle(
+                                  record.kind,
+                                  turkish: _isTurkish,
+                                )
                               : record.question,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -420,7 +424,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
               children: [
                 Text(
                   record.question.trim().isEmpty
-                      ? record.kind.title
+                      ? localizedReadingKindTitle(
+                          record.kind,
+                          turkish: _isTurkish,
+                        )
                       : record.question,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -428,7 +435,7 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_themeLabel(_themeFor(record.kind))} · ${record.emotion.label}',
+                  '${_themeLabel(_themeFor(record.kind))} · ${localizedEmotionLabel(record.emotion, turkish: _isTurkish)}',
                   style: const TextStyle(
                     color: MysticColors.lavender,
                     fontSize: 11,
@@ -467,8 +474,14 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
     final results = <_ScoredRecord>[];
     for (final record in records) {
       final title = _normalize(record.kind.title);
+      final localizedTitle = _normalize(
+        localizedReadingKindTitle(record.kind, turkish: _isTurkish),
+      );
       final question = _normalize(record.question);
       final emotion = _normalize(record.emotion.label);
+      final localizedEmotion = _normalize(
+        localizedEmotionLabel(record.emotion, turkish: _isTurkish),
+      );
       final action = _normalize(record.alignedAction);
       final cards = record.cards.map((drawn) => _normalize(drawn.card.name));
       final themeTerms = _semanticAliases[_themeFor(record.kind).name] ?? const <String>{};
@@ -476,9 +489,11 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
 
       for (final term in expandedTerms) {
         if (question.contains(term)) score += 8;
-        if (title.contains(term)) score += 6;
+        if (title.contains(term) || localizedTitle.contains(term)) score += 6;
         if (action.contains(term)) score += 5;
-        if (emotion.contains(term)) score += 5;
+        if (emotion.contains(term) || localizedEmotion.contains(term)) {
+          score += 5;
+        }
         if (cards.any((card) => card.contains(term))) score += 4;
         if (themeTerms.contains(term)) score += 7;
       }
