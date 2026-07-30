@@ -14,6 +14,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: release-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   android-qa:
     runs-on: ubuntu-latest
