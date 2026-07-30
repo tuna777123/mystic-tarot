@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 import 'package:mystic_tarot/src/tarot_localization.dart';
+import 'package:mystic_tarot/src/widgets.dart';
 
 void main() {
   test('all 78 tarot cards have a Turkish display name', () {
@@ -27,5 +30,22 @@ void main() {
       localizedTarotCardName('The Sun', turkish: false),
       'The Sun',
     );
+  });
+
+  testWidgets('card artwork can render the localized display name',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TarotCardFace(
+            drawn: DrawnCard(tarotDeck.first, false),
+            displayName: 'Deli',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Deli'), findsOneWidget);
+    expect(find.text('THE FOOL'), findsNothing);
   });
 }
