@@ -256,4 +256,61 @@ void main() {
     await tester.pump(const Duration(milliseconds: 900));
     await tester.pump(const Duration(milliseconds: 700));
   });
+
+  testWidgets('Turkish journey, weekly summary and Arcana Vault stay localized',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(430, 932));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: JourneyScreen(
+          streak: 3,
+          xp: 125,
+          records: const [],
+          discoveredCards: const {'The Fool'},
+          completedRituals: const {},
+          claimedRewards: const {},
+          completedArcanaDays: const {},
+          language: MysticLanguage.turkish,
+          onOpenDestiny: () {},
+          onCompleteRitual: (_) {},
+          onClaimReward: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Mistik Yolun'), findsOneWidget);
+    expect(find.text('Your Mystic Path'), findsNothing);
+    expect(find.text('İÇ TAKIMYILDIZIN'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('HAFTALIK MYSTIC ÖZETİN'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('YOUR WEEKLY MYSTIC WRAPPED'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.text('ARKANA KASASI'),
+      260,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('ARKANA KASASI'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Arkana Kasan'), findsOneWidget);
+    expect(find.textContaining('hâlâ gizli'), findsOneWidget);
+    expect(find.text('Deli'), findsWidgets);
+    expect(find.text('Your Arcana Vault'), findsNothing);
+
+    await tester.tap(find.text('Deli').last);
+    await tester.pumpAndSettle();
+    expect(find.text('IŞIK'), findsOneWidget);
+    expect(find.text('GÖLGE'), findsOneWidget);
+    expect(find.text('UYUMLU EYLEM'), findsOneWidget);
+    expect(find.text('LIGHT'), findsNothing);
+  });
 }
