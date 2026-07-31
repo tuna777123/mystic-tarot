@@ -301,7 +301,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(find.text('ARKANA KASASI'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
 
     expect(find.text('Arkana Kasan'), findsOneWidget);
     expect(find.textContaining('hâlâ gizli'), findsOneWidget);
@@ -309,7 +310,8 @@ void main() {
     expect(find.text('Your Arcana Vault'), findsNothing);
 
     await tester.tap(find.text('Deli').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
     expect(find.text('IŞIK'), findsOneWidget);
     expect(find.text('GÖLGE'), findsOneWidget);
     expect(find.text('UYUMLU EYLEM'), findsOneWidget);
