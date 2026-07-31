@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/store_purchase_service.dart';
 import 'package:mystic_tarot/src/subscription_client.dart';
 import 'package:mystic_tarot/src/subscription_config.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 void main() {
   const environment = SubscriptionEnvironment(
@@ -122,6 +123,25 @@ void main() {
     expect(service.isPlus, isFalse);
     expect(client.configureCalls, 0);
     service.dispose();
+  });
+
+  test('only trusted entitlement signatures may unlock Plus', () {
+    expect(
+      isTrustedEntitlementVerification(VerificationResult.verified),
+      isTrue,
+    );
+    expect(
+      isTrustedEntitlementVerification(VerificationResult.verifiedOnDevice),
+      isTrue,
+    );
+    expect(
+      isTrustedEntitlementVerification(VerificationResult.failed),
+      isFalse,
+    );
+    expect(
+      isTrustedEntitlementVerification(VerificationResult.notRequested),
+      isFalse,
+    );
   });
 }
 
