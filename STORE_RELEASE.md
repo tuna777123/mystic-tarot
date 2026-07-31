@@ -1,12 +1,23 @@
 # Mystic Tarot — Store Release Pack
 
-This is the canonical launch handoff for App Store Connect and Google Play Console.
+This is the canonical launch handoff for App Store Connect, Google Play Console, and RevenueCat.
 
 ## Positioning
 
 **Category:** Lifestyle  
 **Primary promise:** A private daily tarot ritual that remembers recurring cards, emotions, and choices.  
 **Differentiator:** Mystic combines cinematic readings with pattern memory, a 24-hour reflection loop, and a collectible 78-card journey instead of delivering one disposable prediction.
+
+## Permanent identifiers
+
+- iOS bundle ID: `com.tunabozcali.mystictarot`
+- Android application ID: `com.tunabozcali.mystictarot`
+- RevenueCat entitlement: `mystic_plus`
+- Monthly product: `mystic_plus_monthly`
+- Yearly product: `mystic_plus_yearly`
+- iOS SKU: `mystic-tarot-ios-001`
+
+Changing the bundle/application IDs after the first store upload is disruptive. Confirm ownership before submission.
 
 ## App Store metadata
 
@@ -22,11 +33,8 @@ Reveal the cards, notice what returns, and turn each reading into a private ritu
 **Keywords (100 characters max)**  
 tarot,daily card,journal,oracle,reflection,spiritual,arcana,mindfulness,horoscope,self care
 
-**Primary category**  
-Lifestyle
-
-**Secondary category**  
-Entertainment
+**Primary category:** Lifestyle  
+**Secondary category:** Entertainment
 
 **Privacy policy URL**  
 https://tuna777123.github.io/mystic-tarot/privacy.html
@@ -37,17 +45,7 @@ https://tuna777123.github.io/mystic-tarot/support.html
 **Marketing URL**  
 https://tuna777123.github.io/mystic-tarot/
 
-**Turkish localized metadata**
-
-See `docs/STORE_LISTING_TR.md`.
-
-**Turkish privacy policy URL**
-
-https://tuna777123.github.io/mystic-tarot/privacy-tr.html
-
-**Turkish support URL**
-
-https://tuna777123.github.io/mystic-tarot/support-tr.html
+Turkish metadata is in `docs/STORE_LISTING_TR.md`.
 
 ## Google Play metadata
 
@@ -81,109 +79,143 @@ Use Oracle Dialogue to explore what you may not be seeing, which card carries th
 
 PRIVATE BY DESIGN
 
-The current release stores your profile, journal, progress, collection, and preferences locally on your device. Export your journal or delete all Mystic data whenever you choose.
+Your journal, profile, progress, collection, and preferences stay on your device. Native subscription purchase history and entitlement status are processed by Apple or Google and RevenueCat so Mystic Plus can be verified securely.
 
 Mystic Tarot is made for personal reflection and entertainment. It does not provide medical, mental-health, legal, financial, or emergency advice.
 
 ## Screenshot sequence
 
-Use a consistent 9:16 device frame and no misleading subscription state.
+Use a consistent 9:16 device frame and only show subscription states produced by a signed sandbox or production build.
 
-1. **Your patterns are already speaking** — premium onboarding portal.
+1. **Your patterns are already speaking** — onboarding portal.
 2. **Choose the cards that call to you** — interactive card selection.
 3. **Open the seal** — cinematic Reveal Ritual.
-4. **Guidance that becomes action** — revealed card, interpretation, and aligned action.
-5. **Mystic remembers what returns** — Oracle Memory or recurring-card pattern.
+4. **Guidance that becomes action** — interpretation and aligned action.
+5. **Mystic remembers what returns** — recurring-card pattern.
 6. **Build your Inner Constellation** — Path, XP, rituals, and Arcana Vault.
-7. **A journal that stays yours** — private journal and export/delete controls.
+7. **A journal that stays yours** — local journal and privacy controls.
+8. **Go deeper with Mystic Plus** — official localized monthly/yearly products.
 
 ## App review notes
 
-Mystic Tarot is a reflection and entertainment product. It does not claim factual prediction and repeatedly states that readings are not professional advice.
+Mystic Tarot is a reflection and entertainment product. It does not claim factual prediction and states that readings are not professional advice.
 
-The current release:
+The native release:
 
-- does not require login;
+- does not require an account;
 - stores journal and progress locally;
-- does not include ads or tracking SDKs;
-- provides in-app export and deletion;
+- does not include advertising or cross-app tracking SDKs;
+- provides in-app local export and deletion;
 - exposes Privacy Policy, Terms, and Support;
-- does not process payments in the public web build.
+- uses RevenueCat to validate App Store and Google Play purchases;
+- uses anonymous RevenueCat App User IDs because no authentication identity is supplied;
+- disables automatic device-identifier collection and RevenueCat diagnostics;
+- unlocks `mystic_plus` only for active entitlements with a trusted verification result;
+- returns users to free limits after expiration, refund, or revocation.
 
-Test path:
+The public web build does not process native subscriptions.
 
-1. Complete the three onboarding screens.
-2. Open Daily Guidance.
-3. Select one card.
-4. Choose “Seal my selection.”
-5. Choose “Open the seal.”
-6. Save the reading.
-7. Open Path and Journal to inspect persistence.
-8. Open Profile → Privacy & data to test export and deletion.
+## App review test path
 
-## Privacy declarations for the current build
+1. Complete onboarding.
+2. Open Daily Guidance, select a card, open the seal, and save the reading.
+3. Open Path and Journal to inspect local persistence.
+4. Open Profile → Privacy & data to test local export and deletion.
+5. Open Mystic Plus and confirm official localized monthly/yearly prices.
+6. Purchase with a sandbox account and confirm Plus unlocks.
+7. Reinstall or use a clean test device, choose Restore, and confirm Plus returns.
+8. Expire or revoke the sandbox entitlement and confirm free limits return.
 
-The codebase contains `shared_preferences` only and keeps product data on-device. Confirm the final generated native package contains no newly added analytics, advertising, crash, authentication, AI, or payment SDK before submitting these answers.
+Provide Apple review credentials only if Apple requires a sandbox account for the review flow. The app itself has no login.
 
-**Apple App Privacy:** Data Not Collected.  
-**Google Play Data Safety:** No user data collected or shared by the app; data is not transmitted off-device.  
-**Tracking:** No.  
-**Account creation:** No.  
-**Account deletion URL:** Not applicable because no account is created. Local deletion exists in-app.
+## Privacy declarations
 
-## Native subscription catalog — reserved identifiers
+The final native package contains `shared_preferences`, `purchases_flutter`, sharing, and audio dependencies. Recheck the generated dependency graph before every submission.
 
-Do not activate these products until billing and server-side entitlement validation are connected.
+### Apple App Privacy
 
-- `mystic_plus_monthly`
-- `mystic_plus_yearly`
+At minimum for the RevenueCat configuration used by Mystic Tarot:
 
-Recommended launch test:
+- **Purchases → Purchase History:** Collected.
+- **Purpose:** App Functionality and Analytics.
+- **Linked to identity:** No, provided the app continues using RevenueCat-generated anonymous App User IDs and does not add login/contact identifiers.
+- **Used for tracking:** No.
+- **Other local journal/profile data:** Not collected by Mystic Tarot; it remains on-device.
 
-- Keep Daily Guidance free.
-- Keep three deep readings per day free.
-- Offer monthly and yearly plans first.
-- Test the seven-day trial only on yearly.
+Do not select “Data Not Collected” for the native paid build.
+
+### Google Play Data Safety
+
+At minimum:
+
+- The app collects data: **Yes**.
+- **Financial info → Purchase history:** Collected by RevenueCat.
+- Encrypted in transit: **Yes**.
+- Processed ephemerally: **No**.
+- Required or optional: **Required** for subscription functionality.
+- Purpose: **App functionality** and **Analytics**.
+- Shared: **No**, unless a non-service-provider RevenueCat integration is later enabled.
+- Advertising/tracking identifiers: **Not collected by the current app configuration**.
+
+A monitored private support channel must be configured before claiming that users can request deletion of RevenueCat records. Local in-app deletion does not erase Apple, Google, or RevenueCat transaction records.
+
+## RevenueCat production configuration
+
+Follow `docs/REVENUECAT_SETUP.md`.
+
+Required dashboard structure:
+
+1. Add the iOS and Android apps to one RevenueCat project.
+2. Connect App Store Connect credentials and Google Play service credentials.
+3. Import `mystic_plus_monthly` and `mystic_plus_yearly` from both stores.
+4. Attach all store products to entitlement `mystic_plus`.
+5. Put monthly and yearly packages in the current offering.
+6. Add each platform's public RevenueCat SDK key to the protected release build environment.
+7. Never commit RevenueCat secret keys, App Store private keys, Play service-account JSON, keystores, or passwords.
+
+## Launch offer
+
+- Daily Guidance remains free.
+- Free users receive three deep readings per day.
+- Mystic Plus unlocks unlimited deep readings, premium spreads, and unlimited Oracle Dialogue follow-ups.
+- Launch with monthly and yearly plans.
+- Offer a seven-day trial only on yearly after trial eligibility is confirmed in both stores.
+
+Prices must be selected in the store consoles and displayed from the official store response. Do not hardcode price text in screenshots or product copy.
 
 ## Launch languages
 
-Version 1 launches in English and Turkish. Both languages must remain complete
-across onboarding, readings, reveal, results, premium previews, profile, settings,
-privacy controls, and support. Other locale models remain reserved in source but
-must not appear in the production selector until their complete user paths pass
-the same release tests.
+Version 1 launches in English and Turkish. Both languages must remain complete across onboarding, readings, reveal, results, premium, profile, settings, privacy controls, terms, and support. Other locale models remain reserved until complete end-to-end release tests pass.
 
-## Account-owned actions before native submission
+## Account-owned actions before submission
 
-These actions cannot be completed from the source repository:
+These cannot be completed from the source repository alone:
 
-1. Enroll in Apple Developer and/or Google Play Console.
-2. Approve tax, banking, and paid-app agreements.
-3. Confirm the permanent bundle/application ID.
-4. Create the subscription products in the stores.
-5. Connect receipt validation and entitlement infrastructure.
-6. Create signing certificates, provisioning profiles, and Android upload key.
-7. Capture screenshots from final signed builds.
-8. Complete age-rating, content-rating, privacy, and data-safety questionnaires.
-9. Upload the signed build and submit it for review.
-
-## Recommended permanent identifiers
-
-Confirm before the first store upload because changing them later is disruptive:
-
-- iOS bundle ID: `com.tunabozcali.mystictarot`
-- Android application ID: `com.tunabozcali.mystictarot`
-- SKU: `mystic-tarot-ios-001`
+1. Enroll in Apple Developer and Google Play Console.
+2. Approve tax, banking, trader/business, and paid-app agreements.
+3. Confirm ownership of `com.tunabozcali.mystictarot` on both platforms.
+4. Create monthly/yearly subscriptions and their localized names, descriptions, prices, and trial rules.
+5. Create the RevenueCat project, connect store credentials, products, offering, and `mystic_plus` entitlement.
+6. Add public RevenueCat SDK keys to protected release secrets.
+7. Create Apple certificates/provisioning and the Android upload key; configure protected signing secrets.
+8. Establish a monitored private customer-support email or support system for billing and privacy requests.
+9. Capture screenshots from final signed builds.
+10. Complete age rating, content rating, App Privacy, Data Safety, trader, and subscription questionnaires.
+11. Run sandbox and real-device QA.
+12. Upload signed builds and submit them for review.
 
 ## Release gate
 
 A native build is eligible for submission only when:
 
-- analysis and tests pass;
-- real-device QA passes on one current iPhone and one Android device;
-- store products load localized prices;
-- purchase, pending, cancel, failure, renewal, expiration, refund, and restore states are tested;
-- entitlements are validated securely;
-- Privacy Policy matches every integrated SDK;
+- analysis and the complete automated test suite pass;
+- signed release builds are generated with protected RevenueCat public SDK keys;
+- real-device QA passes on one current iPhone and one current Android device;
+- both store products load localized prices;
+- purchase, pending, cancellation, failure, renewal, expiration, refund/revocation, and restore are tested;
+- only trusted, active `mystic_plus` entitlements unlock paid features;
+- Privacy Policy and store disclosures match every integrated SDK;
 - support and policy URLs return HTTP 200;
-- no “preview,” fake checkout, placeholder claim, or inactive control remains in the native build.
+- a private billing/privacy support channel is monitored;
+- no preview checkout, placeholder claim, fake price, or inactive control remains;
+- the uploaded package is signed with the permanent production identifiers.
