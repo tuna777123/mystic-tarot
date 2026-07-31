@@ -1,0 +1,54 @@
+name: Apply v1.5 mobile layout patch
+
+on:
+  push:
+    branches: [release/v1.5-store-trust]
+    paths:
+      - .github/workflows/apply-v1.5-mobile-layout-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/v1.5-store-trust
+
+      - name: Patch narrow-screen layout and deterministic animation tests
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app = Path('lib/src/app.dart')
+          app_text = app.read_text(encoding='utf-8')
+          old_row = "      Row(children: [Text(mysticText(widget.language, 'Today’s rituals', 'Bugünün ritüelleri'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),"
+          new_row = "      Row(children: [Expanded(child: Text(mysticText(widget.language, 'Today’s rituals', 'Bugünün ritüelleri'), style: Theme.of(context).textTheme.titleLarge)), const SizedBox(width: 12), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),"
+          if old_row not in app_text:
+              raise SystemExit('Expected ritual heading row was not found')
+          app.write_text(app_text.replace(old_row, new_row, 1), encoding='utf-8')
+
+          test = Path('test/widget_test.dart')
+          test_text = test.read_text(encoding='utf-8')
+          first_old = "    await tester.tap(find.text('ARKANA KASASI'));\n    await tester.pumpAndSettle();"
+          first_new = "    await tester.tap(find.text('ARKANA KASASI'));\n    await tester.pump();\n    await tester.pump(const Duration(milliseconds: 450));"
+          second_old = "    await tester.tap(find.text('Deli').last);\n    await tester.pumpAndSettle();"
+          second_new = "    await tester.tap(find.text('Deli').last);\n    await tester.pump();\n    await tester.pump(const Duration(milliseconds: 450));"
+          if first_old not in test_text or second_old not in test_text:
+              raise SystemExit('Expected Journey animation waits were not found')
+          test_text = test_text.replace(first_old, first_new, 1)
+          test_text = test_text.replace(second_old, second_new, 1)
+          test.write_text(test_text, encoding='utf-8')
+
+          Path('.github/workflows/apply-v1.5-mobile-layout-patch.yml').unlink()
+          PY
+
+      - name: Commit patch
+        run: |
+          git config user.name "Mystic Release Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/src/app.dart test/widget_test.dart .github/workflows/apply-v1.5-mobile-layout-patch.yml
+          git commit -m "Fix Journey mobile overflow and animation test"
+          git push origin HEAD:release/v1.5-store-trust
