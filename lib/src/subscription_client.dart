@@ -75,6 +75,11 @@ abstract interface class SubscriptionClient {
   void dispose();
 }
 
+@visibleForTesting
+bool isTrustedEntitlementVerification(VerificationResult verification) =>
+    verification == VerificationResult.verified ||
+    verification == VerificationResult.verifiedOnDevice;
+
 class RevenueCatSubscriptionClient implements SubscriptionClient {
   final Map<String, Package> _packages = {};
   final Map<String, StoreProduct> _storeProducts = {};
@@ -87,7 +92,12 @@ class RevenueCatSubscriptionClient implements SubscriptionClient {
     }
     final configured = await Purchases.isConfigured;
     if (!configured) {
-      await Purchases.configure(PurchasesConfiguration(apiKey));
+      final configuration = PurchasesConfiguration(apiKey)
+        ..entitlementVerificationMode =
+            EntitlementVerificationMode.informational
+        ..automaticDeviceIdentifierCollectionEnabled = false
+        ..diagnosticsEnabled = false;
+      await Purchases.configure(configuration);
     }
   }
 
@@ -203,8 +213,14 @@ class RevenueCatSubscriptionClient implements SubscriptionClient {
     CustomerInfo customerInfo,
     String entitlementId,
   ) {
-    final entitlement = customerInfo.entitlements.active[entitlementId];
     final appUserId = customerInfo.originalAppUserId;
+    if (!isTrustedEntitlementVerification(
+      customerInfo.entitlements.verification,
+    )) {
+      return SubscriptionEntitlement.inactive(appUserId: appUserId);
+    }
+
+    final entitlement = customerInfo.entitlements.active[entitlementId];
     if (entitlement == null || !entitlement.isActive) {
       return SubscriptionEntitlement.inactive(appUserId: appUserId);
     }
