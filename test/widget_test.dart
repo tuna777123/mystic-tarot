@@ -265,18 +265,20 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: JourneyScreen(
-          streak: 3,
-          xp: 125,
-          records: const [],
-          discoveredCards: const {'The Fool'},
-          completedRituals: const {},
-          claimedRewards: const {},
-          completedArcanaDays: const {},
-          language: MysticLanguage.turkish,
-          onOpenDestiny: () {},
-          onCompleteRitual: (_) {},
-          onClaimReward: (_) {},
+        home: Scaffold(
+          body: JourneyScreen(
+            streak: 3,
+            xp: 125,
+            records: const [],
+            discoveredCards: const {'The Fool'},
+            completedRituals: const {},
+            claimedRewards: const {},
+            completedArcanaDays: const {},
+            language: MysticLanguage.turkish,
+            onOpenDestiny: () {},
+            onCompleteRitual: (_) {},
+            onClaimReward: (_) {},
+          ),
         ),
       ),
     );
