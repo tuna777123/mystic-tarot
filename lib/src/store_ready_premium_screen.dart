@@ -77,6 +77,7 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
                     const Spacer(),
                     TextButton(
                       onPressed: kIsWeb ||
+                              !store.canRestore ||
                               store.phase == StorePurchasePhase.restoring
                           ? null
                           : store.restore,
@@ -91,47 +92,70 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
                       )),
                     ),
                   ]),
-                  const Center(
+                  Center(
                     child: Text(
-                      '✦',
-                      style: TextStyle(fontSize: 58, color: MysticColors.gold),
+                      store.isPlus ? '✓' : '✦',
+                      style: const TextStyle(
+                        fontSize: 58,
+                        color: MysticColors.gold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.source == 'daily_limit'
+                    store.isPlus
                         ? t(
-                            en: 'Your insight does not\nhave to stop here.',
-                            es: 'Tu claridad no tiene\nque terminar aquí.',
-                            fr: 'Votre réflexion ne doit\npas s’arrêter ici.',
-                            pt: 'Sua percepção não precisa\nparar aqui.',
-                            tr: 'İçgörün burada\nbitmek zorunda değil.',
-                            it: 'La tua intuizione non deve\nfermarsi qui.',
-                            de: 'Deine Erkenntnis muss\nhier nicht enden.',
+                            en: 'Mystic Plus is active.',
+                            es: 'Mystic Plus está activo.',
+                            fr: 'Mystic Plus est actif.',
+                            pt: 'O Mystic Plus está ativo.',
+                            tr: 'Mystic Plus etkin.',
+                            it: 'Mystic Plus è attivo.',
+                            de: 'Mystic Plus ist aktiv.',
                           )
-                        : t(
-                            en: 'Choose your Mystic Plus path.',
-                            es: 'Elige tu camino Mystic Plus.',
-                            fr: 'Choisissez votre parcours Mystic Plus.',
-                            pt: 'Escolha seu caminho Mystic Plus.',
-                            tr: 'Mystic Plus planını seç.',
-                            it: 'Scegli il tuo percorso Mystic Plus.',
-                            de: 'Wähle deinen Mystic-Plus-Weg.',
-                          ),
+                        : widget.source == 'daily_limit'
+                            ? t(
+                                en: 'Your insight does not\nhave to stop here.',
+                                es: 'Tu claridad no tiene\nque terminar aquí.',
+                                fr: 'Votre réflexion ne doit\npas s’arrêter ici.',
+                                pt: 'Sua percepção não precisa\nparar aqui.',
+                                tr: 'İçgörün burada\nbitmek zorunda değil.',
+                                it: 'La tua intuizione non deve\nfermarsi qui.',
+                                de: 'Deine Erkenntnis muss\nhier nicht enden.',
+                              )
+                            : t(
+                                en: 'Choose your Mystic Plus path.',
+                                es: 'Elige tu camino Mystic Plus.',
+                                fr: 'Choisissez votre parcours Mystic Plus.',
+                                pt: 'Escolha seu caminho Mystic Plus.',
+                                tr: 'Mystic Plus planını seç.',
+                                it: 'Scegli il tuo percorso Mystic Plus.',
+                                de: 'Wähle deinen Mystic-Plus-Weg.',
+                              ),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displaySmall,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    t(
-                      en: 'Official store products and localized prices appear here when App Store Connect or Google Play is configured.',
-                      es: 'Los productos y precios oficiales aparecerán aquí cuando la tienda esté configurada.',
-                      fr: 'Les produits et prix officiels apparaîtront ici après configuration de la boutique.',
-                      pt: 'Os produtos e preços oficiais aparecerão aqui após a configuração da loja.',
-                      tr: 'App Store Connect veya Google Play yapılandırıldığında resmi ürünler ve yerel fiyatlar burada görünür.',
-                      it: 'Prodotti e prezzi ufficiali appariranno qui dopo la configurazione dello store.',
-                      de: 'Offizielle Produkte und lokale Preise erscheinen hier nach der Store-Konfiguration.',
-                    ),
+                    store.isPlus
+                        ? t(
+                            en: 'Unlimited deep readings and premium paths are unlocked on this device.',
+                            es: 'Las lecturas profundas y caminos premium están desbloqueados.',
+                            fr: 'Les lectures approfondies et parcours premium sont déverrouillés.',
+                            pt: 'As leituras profundas e caminhos premium estão liberados.',
+                            tr: 'Sınırsız derin okumalar ve premium yollar bu cihazda açıldı.',
+                            it: 'Le letture approfondite e i percorsi premium sono sbloccati.',
+                            de: 'Unbegrenzte Tiefenlesungen und Premium-Pfade sind freigeschaltet.',
+                          )
+                        : t(
+                            en: 'Prices and billing terms come directly from the App Store or Google Play. Purchases are verified securely before Plus opens.',
+                            es: 'Los precios y condiciones vienen de la tienda oficial. Plus se activa solo tras una verificación segura.',
+                            fr: 'Les prix et conditions proviennent de la boutique officielle. Plus s’active après vérification sécurisée.',
+                            pt: 'Preços e condições vêm da loja oficial. O Plus abre somente após verificação segura.',
+                            tr: 'Fiyatlar ve ödeme koşulları doğrudan App Store veya Google Play’den gelir. Plus yalnızca güvenli doğrulamadan sonra açılır.',
+                            it: 'Prezzi e condizioni provengono dallo store ufficiale. Plus si attiva dopo la verifica sicura.',
+                            de: 'Preise und Bedingungen kommen direkt vom offiziellen Store. Plus wird erst nach sicherer Prüfung aktiviert.',
+                          ),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
@@ -142,20 +166,23 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
                   const SizedBox(height: 16),
                   GoldButton(
                     label: _buttonLabel(),
-                    icon: Icons.lock_open_rounded,
-                    onPressed:
-                        store.canPurchase ? () => store.buy(selectedId) : null,
+                    icon: store.isPlus
+                        ? Icons.verified_rounded
+                        : Icons.lock_open_rounded,
+                    onPressed: store.canPurchase && !store.isPlus
+                        ? () => store.buy(selectedId)
+                        : null,
                   ),
                   const SizedBox(height: 10),
                   Text(
                     t(
-                      en: 'Premium access is never activated from an unverified client receipt. Production release requires secure entitlement verification.',
-                      es: 'El acceso premium nunca se activa con un recibo sin verificar. La versión final requiere verificación segura.',
-                      fr: 'L’accès premium n’est jamais activé depuis un reçu non vérifié. Une vérification sécurisée est requise.',
-                      pt: 'O acesso premium nunca é ativado com recibo não verificado. A versão final exige verificação segura.',
-                      tr: 'Premium erişim doğrulanmamış istemci makbuzuyla asla açılmaz. Yayın sürümü güvenli hak doğrulaması gerektirir.',
-                      it: 'L’accesso premium non viene mai attivato da una ricevuta non verificata. Serve una verifica sicura.',
-                      de: 'Premium wird nie durch einen ungeprüften Client-Beleg aktiviert. Eine sichere Prüfung ist erforderlich.',
+                      en: 'Subscriptions renew automatically unless cancelled in your store account. Restore is available on this screen.',
+                      es: 'Las suscripciones se renuevan automáticamente salvo cancelación. Puedes restaurarlas aquí.',
+                      fr: 'Les abonnements se renouvellent automatiquement sauf annulation. La restauration est disponible ici.',
+                      pt: 'As assinaturas renovam automaticamente, salvo cancelamento. A restauração está disponível aqui.',
+                      tr: 'Abonelikler mağaza hesabından iptal edilmedikçe otomatik yenilenir. Satın alımları bu ekrandan geri yükleyebilirsin.',
+                      it: 'Gli abbonamenti si rinnovano automaticamente salvo annullamento. Puoi ripristinarli qui.',
+                      de: 'Abonnements verlängern sich automatisch, sofern sie nicht gekündigt werden. Wiederherstellung ist hier möglich.',
                     ),
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -168,18 +195,18 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
       );
 
   List<String> get _planIds => const [
-        MysticProductIds.monthly,
         MysticProductIds.yearly,
+        MysticProductIds.monthly,
       ];
 
   Widget _statusCard(BuildContext context) {
     final loading = store.phase == StorePurchasePhase.loading ||
         store.phase == StorePurchasePhase.restoring ||
         store.phase == StorePurchasePhase.purchasing;
-    final icon = store.phase == StorePurchasePhase.ready
-        ? Icons.verified_outlined
-        : store.phase == StorePurchasePhase.verificationRequired
-            ? Icons.security_outlined
+    final icon = store.phase == StorePurchasePhase.entitled
+        ? Icons.verified_rounded
+        : store.phase == StorePurchasePhase.ready
+            ? Icons.verified_outlined
             : Icons.storefront_outlined;
     final status = store.notice == null
         ? _defaultStatus()
@@ -224,6 +251,7 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
   Widget _productTile(BuildContext context, String id) {
     final product = store.productFor(id);
     final active = selectedId == id;
+    final purchased = store.activeProductId == id;
     final title = switch (id) {
       MysticProductIds.monthly => t(
           en: 'Monthly',
@@ -248,30 +276,36 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Semantics(
-        button: true,
-        selected: active,
+        button: !store.isPlus,
+        selected: active || purchased,
         label: title,
         child: InkWell(
-          onTap: () => setState(() => selectedId = id),
+          onTap: store.isPlus ? null : () => setState(() => selectedId = id),
           borderRadius: BorderRadius.circular(18),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: active
+              color: active || purchased
                   ? MysticColors.violet.withValues(alpha: .3)
                   : Colors.white.withValues(alpha: .04),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: active ? MysticColors.gold : Colors.white12,
-                width: active ? 2 : 1,
+                color: active || purchased
+                    ? MysticColors.gold
+                    : Colors.white12,
+                width: active || purchased ? 2 : 1,
               ),
             ),
             child: Row(children: [
               Icon(
-                active
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_off,
-                color: active ? MysticColors.gold : MysticColors.muted,
+                purchased
+                    ? Icons.verified_rounded
+                    : active
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                color: active || purchased
+                    ? MysticColors.gold
+                    : MysticColors.muted,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -314,13 +348,13 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
 
   String _defaultStatus() => switch (store.phase) {
         StorePurchasePhase.idle || StorePurchasePhase.loading => t(
-            en: 'Loading official store products…',
-            es: 'Cargando productos oficiales…',
-            fr: 'Chargement des produits officiels…',
-            pt: 'Carregando produtos oficiais…',
-            tr: 'Resmi mağaza ürünleri yükleniyor…',
-            it: 'Caricamento dei prodotti ufficiali…',
-            de: 'Offizielle Store-Produkte werden geladen…',
+            en: 'Loading secure subscription options…',
+            es: 'Cargando opciones seguras…',
+            fr: 'Chargement des abonnements sécurisés…',
+            pt: 'Carregando opções seguras…',
+            tr: 'Güvenli abonelik seçenekleri yükleniyor…',
+            it: 'Caricamento delle opzioni sicure…',
+            de: 'Sichere Abo-Optionen werden geladen…',
           ),
         StorePurchasePhase.ready => t(
             en: 'Official store products are ready.',
@@ -333,12 +367,12 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
           ),
         StorePurchasePhase.purchasing => t(
             en: 'Opening the official store checkout…',
-            es: 'Abriendo el pago de la tienda oficial…',
+            es: 'Abriendo el pago oficial…',
             fr: 'Ouverture du paiement officiel…',
-            pt: 'Abrindo o pagamento da loja oficial…',
+            pt: 'Abrindo o pagamento oficial…',
             tr: 'Resmi mağaza ödeme ekranı açılıyor…',
             it: 'Apertura del pagamento ufficiale…',
-            de: 'Der offizielle Store-Checkout wird geöffnet…',
+            de: 'Der offizielle Checkout wird geöffnet…',
           ),
         StorePurchasePhase.restoring => t(
             en: 'Restoring previous purchases…',
@@ -349,32 +383,47 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
             it: 'Ripristino degli acquisti precedenti…',
             de: 'Frühere Käufe werden wiederhergestellt…',
           ),
-        StorePurchasePhase.verificationRequired =>
-          localizedStorePurchaseNotice(
-            widget.language.appLanguage,
-            StorePurchaseNotice.verificationRequired,
+        StorePurchasePhase.entitled => t(
+            en: 'Mystic Plus is verified and active.',
+            es: 'Mystic Plus está verificado y activo.',
+            fr: 'Mystic Plus est vérifié et actif.',
+            pt: 'O Mystic Plus está verificado e ativo.',
+            tr: 'Mystic Plus doğrulandı ve etkin.',
+            it: 'Mystic Plus è verificato e attivo.',
+            de: 'Mystic Plus ist verifiziert und aktiv.',
           ),
         StorePurchasePhase.unavailable => t(
-            en: 'Store products are not available right now.',
-            es: 'Los productos no están disponibles ahora.',
-            fr: 'Les produits ne sont pas disponibles actuellement.',
-            pt: 'Os produtos não estão disponíveis agora.',
-            tr: 'Mağaza ürünleri şu anda kullanılamıyor.',
-            it: 'I prodotti non sono disponibili al momento.',
-            de: 'Store-Produkte sind derzeit nicht verfügbar.',
+            en: 'Subscription products are not available right now.',
+            es: 'Los productos de suscripción no están disponibles ahora.',
+            fr: 'Les abonnements ne sont pas disponibles actuellement.',
+            pt: 'Os produtos de assinatura não estão disponíveis agora.',
+            tr: 'Abonelik ürünleri şu anda kullanılamıyor.',
+            it: 'I prodotti in abbonamento non sono disponibili.',
+            de: 'Abo-Produkte sind derzeit nicht verfügbar.',
           ),
         StorePurchasePhase.error => t(
-            en: 'The store connection needs another try.',
+            en: 'The subscription connection needs another try.',
             es: 'Es necesario volver a intentar la conexión.',
-            fr: 'La connexion à la boutique doit être réessayée.',
-            pt: 'É preciso tentar novamente a conexão com a loja.',
-            tr: 'Mağaza bağlantısının yeniden denenmesi gerekiyor.',
-            it: 'È necessario riprovare la connessione allo store.',
-            de: 'Die Store-Verbindung muss erneut versucht werden.',
+            fr: 'La connexion d’abonnement doit être réessayée.',
+            pt: 'É preciso tentar novamente a conexão.',
+            tr: 'Abonelik bağlantısının yeniden denenmesi gerekiyor.',
+            it: 'È necessario riprovare la connessione.',
+            de: 'Die Abo-Verbindung muss erneut versucht werden.',
           ),
       };
 
   String _buttonLabel() {
+    if (store.isPlus) {
+      return t(
+        en: 'Mystic Plus active',
+        es: 'Mystic Plus activo',
+        fr: 'Mystic Plus actif',
+        pt: 'Mystic Plus ativo',
+        tr: 'Mystic Plus etkin',
+        it: 'Mystic Plus attivo',
+        de: 'Mystic Plus aktiv',
+      );
+    }
     if (store.phase == StorePurchasePhase.purchasing) {
       return t(
         en: 'Opening checkout…',
