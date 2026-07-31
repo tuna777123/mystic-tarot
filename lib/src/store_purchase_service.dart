@@ -1,9 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 
 import 'monetization.dart' show MysticProductIds;
+import 'subscription_client.dart';
+import 'subscription_config.dart';
 export 'monetization.dart' show MysticProductIds;
 
 enum StorePurchasePhase {
@@ -12,13 +11,14 @@ enum StorePurchasePhase {
   ready,
   purchasing,
   restoring,
-  verificationRequired,
+  entitled,
   unavailable,
   error,
 }
 
 enum StorePurchaseNotice {
   nativeOnly,
+  configurationMissing,
   purchaseStreamUnavailable,
   storeUnavailable,
   productsNotConfigured,
@@ -26,36 +26,59 @@ enum StorePurchaseNotice {
   checkoutUnavailable,
   restoreFailed,
   restoreCompleted,
+  restoreNothing,
   waitingForConfirmation,
-  verificationRequired,
+  purchaseCompleted,
+  alreadySubscribed,
   purchaseFailed,
   purchaseCancelled,
 }
 
 class StorePurchaseService extends ChangeNotifier {
-  StorePurchaseService({InAppPurchase? store})
-      : _store = store ?? InAppPurchase.instance;
+  StorePurchaseService({
+    SubscriptionClient? client,
+    SubscriptionEnvironment? environment,
+  })  : _client = client ?? RevenueCatSubscriptionClient(),
+        _environment = environment ?? SubscriptionEnvironment.current();
 
-  final InAppPurchase _store;
-  StreamSubscription<List<PurchaseDetails>>? _subscription;
+  final SubscriptionClient _client;
+  final SubscriptionEnvironment _environment;
+  bool _listening = false;
 
   StorePurchasePhase phase = StorePurchasePhase.idle;
-  List<ProductDetails> products = const [];
+  List<SubscriptionProduct> products = const [];
   StorePurchaseNotice? notice;
 
-  /// Diagnostic detail for development and support logs. UI surfaces should
-  /// render [notice] through localized, product-safe copy instead of exposing
-  /// raw store or plugin messages directly to the user.
+  /// Diagnostic detail for development and support logs. UI surfaces must use
+  /// localized notice copy rather than displaying this field directly.
   String? message;
 
+  bool isPlus = false;
+  String? activeProductId;
+  DateTime? expiresAt;
+  String? managementUrl;
+  String? appUserId;
+  bool isSandbox = false;
+
   bool get canPurchase =>
-      !kIsWeb && phase == StorePurchasePhase.ready && products.isNotEmpty;
+      _environment.configured &&
+      phase == StorePurchasePhase.ready &&
+      products.isNotEmpty;
+
+  bool get canRestore => _environment.configured;
 
   Future<void> initialize() async {
-    if (kIsWeb) {
+    if (!_environment.supported) {
       phase = StorePurchasePhase.unavailable;
       notice = StorePurchaseNotice.nativeOnly;
-      message = 'Store purchases are available only in native mobile builds.';
+      message = 'Subscriptions are available only in native mobile builds.';
+      notifyListeners();
+      return;
+    }
+    if (!_environment.configured) {
+      phase = StorePurchasePhase.unavailable;
+      notice = StorePurchaseNotice.configurationMissing;
+      message = 'RevenueCat public SDK key is missing for this platform.';
       notifyListeners();
       return;
     }
@@ -65,48 +88,38 @@ class StorePurchaseService extends ChangeNotifier {
     message = null;
     notifyListeners();
 
-    _subscription ??= _store.purchaseStream.listen(
-      _handlePurchases,
-      onError: (Object error) {
-        phase = StorePurchasePhase.error;
-        notice = StorePurchaseNotice.purchaseStreamUnavailable;
-        message = error.toString();
-        notifyListeners();
-      },
-    );
-
     try {
-      final available = await _store.isAvailable();
-      if (!available) {
-        phase = StorePurchasePhase.unavailable;
-        notice = StorePurchaseNotice.storeUnavailable;
-        message = 'The App Store or Google Play is currently unavailable.';
-        notifyListeners();
-        return;
+      await _client.configure(_environment.apiKey!);
+      if (!_listening) {
+        _client.listen(_environment.entitlementId, _handleEntitlementUpdate);
+        _listening = true;
       }
 
-      final response =
-          await _store.queryProductDetails(MysticProductIds.launch);
-      products = response.productDetails.toList()
+      products = await _client.loadProducts(MysticProductIds.launch);
+      products = products.toList()
         ..sort((a, b) => _rank(a.id).compareTo(_rank(b.id)));
+      final entitlement =
+          await _client.getEntitlement(_environment.entitlementId);
+      _applyEntitlement(entitlement);
 
-      final missingLaunchProducts = response.notFoundIDs
-          .where(MysticProductIds.launch.contains)
-          .toList(growable: false);
-
-      if (response.error != null) {
-        phase = StorePurchasePhase.error;
-        notice = StorePurchaseNotice.productsLoadFailed;
-        message = response.error!.message;
-      } else if (products.isEmpty || missingLaunchProducts.isNotEmpty) {
+      final foundIds = products.map((product) => product.id).toSet();
+      final missingProducts = MysticProductIds.launch.difference(foundIds);
+      if (isPlus) {
+        phase = StorePurchasePhase.entitled;
+        notice = StorePurchaseNotice.alreadySubscribed;
+      } else if (products.isEmpty || missingProducts.isNotEmpty) {
         phase = StorePurchasePhase.unavailable;
         notice = StorePurchaseNotice.productsNotConfigured;
-        message = 'Monthly and yearly subscriptions are not configured yet.';
+        message = 'RevenueCat current offering must contain monthly and yearly.';
       } else {
         phase = StorePurchasePhase.ready;
         notice = null;
-        message = null;
       }
+      notifyListeners();
+    } on SubscriptionClientException catch (error) {
+      phase = StorePurchasePhase.error;
+      notice = StorePurchaseNotice.productsLoadFailed;
+      message = '${error.code}: ${error.detail ?? ''}'.trim();
       notifyListeners();
     } catch (error) {
       phase = StorePurchasePhase.error;
@@ -116,7 +129,7 @@ class StorePurchaseService extends ChangeNotifier {
     }
   }
 
-  ProductDetails? productFor(String id) {
+  SubscriptionProduct? productFor(String id) {
     for (final product in products) {
       if (product.id == id) return product;
     }
@@ -124,8 +137,13 @@ class StorePurchaseService extends ChangeNotifier {
   }
 
   Future<void> buy(String productId) async {
-    final product = productFor(productId);
-    if (!canPurchase || product == null) return;
+    if (isPlus) {
+      phase = StorePurchasePhase.entitled;
+      notice = StorePurchaseNotice.alreadySubscribed;
+      notifyListeners();
+      return;
+    }
+    if (!canPurchase || productFor(productId) == null) return;
 
     phase = StorePurchasePhase.purchasing;
     notice = null;
@@ -133,38 +151,62 @@ class StorePurchaseService extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final opened = await _store.buyNonConsumable(
-        purchaseParam: PurchaseParam(productDetails: product),
+      final entitlement = await _client.purchase(
+        productId,
+        _environment.entitlementId,
       );
-      if (!opened) {
+      _applyEntitlement(entitlement);
+      if (isPlus) {
+        phase = StorePurchasePhase.entitled;
+        notice = StorePurchaseNotice.purchaseCompleted;
+      } else {
         phase = StorePurchasePhase.ready;
-        notice = StorePurchaseNotice.checkoutUnavailable;
-        message = 'The official store checkout did not open.';
-        notifyListeners();
+        notice = StorePurchaseNotice.waitingForConfirmation;
       }
+      notifyListeners();
+    } on SubscriptionClientException catch (error) {
+      phase = error.cancelled
+          ? StorePurchasePhase.ready
+          : StorePurchasePhase.error;
+      notice = error.cancelled
+          ? StorePurchaseNotice.purchaseCancelled
+          : StorePurchaseNotice.purchaseFailed;
+      message = '${error.code}: ${error.detail ?? ''}'.trim();
+      notifyListeners();
     } catch (error) {
       phase = StorePurchasePhase.error;
-      notice = StorePurchaseNotice.checkoutUnavailable;
+      notice = StorePurchaseNotice.purchaseFailed;
       message = error.toString();
       notifyListeners();
     }
   }
 
   Future<void> restore() async {
-    if (kIsWeb) return;
+    if (!canRestore) return;
     phase = StorePurchasePhase.restoring;
     notice = null;
     message = null;
     notifyListeners();
+
     try {
-      await _store.restorePurchases();
-      if (phase == StorePurchasePhase.restoring) {
+      final entitlement =
+          await _client.restore(_environment.entitlementId);
+      _applyEntitlement(entitlement);
+      if (isPlus) {
+        phase = StorePurchasePhase.entitled;
+        notice = StorePurchaseNotice.restoreCompleted;
+      } else {
         phase = products.isEmpty
             ? StorePurchasePhase.unavailable
             : StorePurchasePhase.ready;
-        notice = StorePurchaseNotice.restoreCompleted;
-        notifyListeners();
+        notice = StorePurchaseNotice.restoreNothing;
       }
+      notifyListeners();
+    } on SubscriptionClientException catch (error) {
+      phase = StorePurchasePhase.error;
+      notice = StorePurchaseNotice.restoreFailed;
+      message = '${error.code}: ${error.detail ?? ''}'.trim();
+      notifyListeners();
     } catch (error) {
       phase = StorePurchasePhase.error;
       notice = StorePurchaseNotice.restoreFailed;
@@ -173,47 +215,51 @@ class StorePurchaseService extends ChangeNotifier {
     }
   }
 
-  Future<void> _handlePurchases(List<PurchaseDetails> updates) async {
-    for (final purchase in updates) {
-      if (purchase.status == PurchaseStatus.pending) {
-        phase = StorePurchasePhase.purchasing;
-        notice = StorePurchaseNotice.waitingForConfirmation;
-        message = null;
-      } else if (purchase.status == PurchaseStatus.purchased ||
-          purchase.status == PurchaseStatus.restored) {
-        // Never unlock premium from a client-side receipt alone. A production
-        // verification endpoint must validate the receipt and subscription
-        // state before the app persists entitlement.
-        phase = StorePurchasePhase.verificationRequired;
-        notice = StorePurchaseNotice.verificationRequired;
-        message = null;
-      } else if (purchase.status == PurchaseStatus.error) {
-        phase = StorePurchasePhase.error;
-        notice = StorePurchaseNotice.purchaseFailed;
-        message = purchase.error?.message;
-      } else if (purchase.status == PurchaseStatus.canceled) {
-        phase = StorePurchasePhase.ready;
-        notice = StorePurchaseNotice.purchaseCancelled;
-        message = null;
-      }
+  Future<void> refreshEntitlement() async {
+    if (!_environment.configured) return;
+    try {
+      final entitlement =
+          await _client.getEntitlement(_environment.entitlementId);
+      _handleEntitlementUpdate(entitlement);
+    } catch (error) {
+      message = error.toString();
+    }
+  }
 
-      if (purchase.pendingCompletePurchase) {
-        await _store.completePurchase(purchase);
-      }
+  void _handleEntitlementUpdate(SubscriptionEntitlement entitlement) {
+    final wasPlus = isPlus;
+    _applyEntitlement(entitlement);
+    if (isPlus) {
+      phase = StorePurchasePhase.entitled;
+      if (!wasPlus) notice = StorePurchaseNotice.purchaseCompleted;
+    } else if (wasPlus) {
+      phase = products.isEmpty
+          ? StorePurchasePhase.unavailable
+          : StorePurchasePhase.ready;
+      notice = null;
     }
     notifyListeners();
   }
 
+  void _applyEntitlement(SubscriptionEntitlement entitlement) {
+    isPlus = entitlement.active;
+    activeProductId = entitlement.productId;
+    expiresAt = entitlement.expiresAt;
+    managementUrl = entitlement.managementUrl;
+    appUserId = entitlement.appUserId;
+    isSandbox = entitlement.isSandbox;
+  }
+
   static int _rank(String id) => switch (id) {
-        MysticProductIds.monthly => 0,
-        MysticProductIds.yearly => 1,
+        MysticProductIds.yearly => 0,
+        MysticProductIds.monthly => 1,
         MysticProductIds.weekly => 2,
         _ => 99,
       };
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _client.dispose();
     super.dispose();
   }
 }

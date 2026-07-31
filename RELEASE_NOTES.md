@@ -1,3 +1,20 @@
+# Version 1.6.0 — Verified Revenue
+
+Mystic Tarot now contains the production subscription foundation for Mystic Plus:
+
+- RevenueCat provides server-side store receipt validation and subscription-state tracking for Apple and Google purchases;
+- the app unlocks Plus only when the `mystic_plus` entitlement is active and its Trusted Entitlements signature is verified by RevenueCat or verified on-device;
+- failed or missing signature verification fails closed and never grants premium access;
+- monthly and yearly products use official localized store prices;
+- purchase, cancellation, pending confirmation, restore, expiration, refund, and live entitlement revocation states are handled without trusting client-side flags;
+- active subscribers receive unlimited deep readings, Compatibility, Future Timeline, Celtic Cross, and unlimited Oracle Dialogue follow-ups;
+- expired, refunded, or revoked subscriptions automatically return to the free limits;
+- device-identifier collection and RevenueCat diagnostics are disabled in the SDK configuration;
+- privacy policies, support copy, subscription terms, and store privacy declarations now disclose purchase-history processing accurately;
+- regression coverage includes purchase, restore, inactive entitlement, revocation, missing configuration, localization, and trusted-signature behavior.
+
+The native code is release-candidate ready. Revenue begins only after the store products, RevenueCat project credentials, signing identities, banking/tax agreements, sandbox tests, and store review are completed in the account-owned consoles.
+
 # Version 1.5.0 — Store Trust
 
 Mystic Tarot now keeps the complete premium and purchase-status experience safe,
@@ -16,9 +33,6 @@ localized, and release-ready:
   semantics;
 - new regression tests verify every store notice in every supported interface
   language and prevent Turkish fallback to English.
-
-Premium entitlement still requires secure server-side receipt verification
-before native subscriptions can be activated.
 
 # Version 1.4.0 — Complete Turkish Journey
 
@@ -56,7 +70,7 @@ Mystic Tarot now turns separate readings into one private, evolving story:
   handling, and public legal/support pages remain part of the release.
 
 This release does not claim deterministic predictions or remote AI. Personal
-history stays on the device unless the user explicitly exports or shares it.
+journal history stays on the device unless the user explicitly exports or shares it.
 
 # Version 1.0.0 — Public Early Access
 
@@ -71,4 +85,4 @@ Mystic Tarot opens its first complete ritual:
 - installable PWA experience with a new Mystic Tarot icon;
 - public Privacy Policy, Terms of Use, and Support pages.
 
-The public web release is free early access and does not process subscription payments.
+The public web release remains free and does not process native App Store or Google Play subscriptions.

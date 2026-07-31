@@ -21,14 +21,14 @@ void main() {
         AppLanguage.turkish,
         StorePurchaseNotice.nativeOnly,
       ),
-      'Mağaza satın alımları yalnızca iOS ve Android uygulamalarında kullanılabilir.',
+      'Abonelikler yalnızca iOS ve Android uygulamalarında kullanılabilir.',
     );
     expect(
       localizedStorePurchaseNotice(
         AppLanguage.turkish,
-        StorePurchaseNotice.verificationRequired,
+        StorePurchaseNotice.purchaseCompleted,
       ),
-      contains('güvenli hak doğrulaması'),
+      contains('Mystic Plus etkin'),
     );
     expect(
       localizedStorePurchaseNotice(
