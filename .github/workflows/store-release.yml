@@ -1,0 +1,424 @@
+name: Production Store Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Signed store package to build
+        required: true
+        default: android
+        type: choice
+        options:
+          - android
+          - ios
+          - both
+      channel:
+        description: Intended store channel
+        required: true
+        default: closed-testing
+        type: choice
+        options:
+          - internal
+          - closed-testing
+          - production
+      release_notes:
+        description: Optional operator note stored with the workflow run
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-store-release
+  cancel-in-progress: false
+
+env:
+  STORE_BUNDLE_ID: com.tunabozcali.mystictarot
+  REVENUECAT_ENTITLEMENT_ID: mystic_plus
+
+jobs:
+  source-validation:
+    name: Validate release source
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate native project shells
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
+
+      - name: Apply permanent store identifiers
+        run: dart run tool/configure_store_identifiers.dart
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate branded native icons
+        run: dart run flutter_launcher_icons
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+  android-release:
+    name: Build signed Android AAB
+    if: ${{ inputs.platform == 'android' || inputs.platform == 'both' }}
+    needs: source-validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production-stores
+    env:
+      REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+      ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Android project shell
+        run: flutter create . --platforms=android --org com.tunabozcali
+
+      - name: Apply permanent store identifiers
+        run: dart run tool/configure_store_identifiers.dart
+
+      - name: Validate protected Android release inputs
+        run: dart run tool/store_release_preflight.dart --platform=android
+
+      - name: Install Android upload key
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          encoded = ''.join(os.environ['ANDROID_UPLOAD_KEYSTORE_BASE64'].split())
+          payload = base64.b64decode(encoded, validate=True)
+          target = Path('android/app/upload-keystore.jks')
+          target.write_bytes(payload)
+          target.chmod(0o600)
+          PY
+
+          keytool -list \
+            -keystore android/app/upload-keystore.jks \
+            -storepass "$ANDROID_STORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" >/dev/null
+
+          {
+            printf 'storePassword=%s\n' "$ANDROID_STORE_PASSWORD"
+            printf 'keyPassword=%s\n' "$ANDROID_KEY_PASSWORD"
+            printf 'keyAlias=%s\n' "$ANDROID_KEY_ALIAS"
+            printf 'storeFile=%s\n' 'upload-keystore.jks'
+          } > android/key.properties
+          chmod 600 android/key.properties
+
+          dart run tool/configure_android_signing.dart
+          grep -q 'signingConfigs.getByName("release")' \
+            android/app/build.gradle.kts
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate branded native icons
+        run: dart run flutter_launcher_icons
+
+      - name: Build signed Android bundle
+        run: |
+          flutter build appbundle --release \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY" \
+            --dart-define=REVENUECAT_ENTITLEMENT_ID="$REVENUECAT_ENTITLEMENT_ID"
+
+      - name: Verify Android signature
+        run: |
+          AAB_PATH=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB_PATH"
+          jarsigner -verify -strict -certs "$AAB_PATH"
+          keytool -printcert -jarfile "$AAB_PATH" >/dev/null
+
+      - name: Create Android release manifest
+        id: android_metadata
+        run: |
+          AAB_PATH=build/app/outputs/bundle/release/app-release.aab
+          VERSION=$(awk '/^version:/ {print $2}' pubspec.yaml)
+          SAFE_VERSION=${VERSION/+/-build}
+          ARTIFACT_NAME="mystic-tarot-${SAFE_VERSION}-android-${{ inputs.channel }}"
+          CHECKSUM=$(sha256sum "$AAB_PATH" | awk '{print $1}')
+
+          mkdir -p build/release/android
+          printf '%s  %s\n' "$CHECKSUM" "$(basename "$AAB_PATH")" \
+            > build/release/android/app-release.aab.sha256
+
+          dart run tool/write_release_manifest.dart \
+            --platform=android \
+            --artifact="$AAB_PATH" \
+            --sha256="$CHECKSUM" \
+            --channel="${{ inputs.channel }}" \
+            --output=build/release/android/release-manifest.json
+
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload signed Android package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.android_metadata.outputs.artifact_name }}
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/release/android/app-release.aab.sha256
+            build/release/android/release-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove Android signing material
+        if: always()
+        run: |
+          rm -f android/key.properties
+          rm -f android/app/upload-keystore.jks
+
+  ios-release:
+    name: Build signed iOS IPA
+    if: ${{ inputs.platform == 'ios' || inputs.platform == 'both' }}
+    needs: source-validation
+    runs-on: macos-latest
+    timeout-minutes: 60
+    environment: production-stores
+    env:
+      REVENUECAT_IOS_API_KEY: ${{ secrets.REVENUECAT_IOS_API_KEY }}
+      IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+      IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate iOS project shell
+        run: flutter create . --platforms=ios --org com.tunabozcali
+
+      - name: Apply permanent store identifiers
+        run: dart run tool/configure_store_identifiers.dart
+
+      - name: Validate protected iOS release inputs
+        run: dart run tool/store_release_preflight.dart --platform=ios
+
+      - name: Install Apple signing identity
+        id: apple_signing
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          files = {
+              'distribution.p12': os.environ['IOS_DISTRIBUTION_CERTIFICATE_BASE64'],
+              'profile.mobileprovision': os.environ['IOS_PROVISIONING_PROFILE_BASE64'],
+          }
+          for name, encoded in files.items():
+              payload = base64.b64decode(''.join(encoded.split()), validate=True)
+              target = Path(os.environ['RUNNER_TEMP']) / name
+              target.write_bytes(payload)
+              target.chmod(0o600)
+          PY
+
+          KEYCHAIN_PATH="$RUNNER_TEMP/mystic-signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$RUNNER_TEMP/distribution.p12" \
+            -P "$IOS_DISTRIBUTION_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+
+          security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" \
+            > "$RUNNER_TEMP/profile.plist"
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy \
+            -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy \
+            -c 'Print :Name' "$RUNNER_TEMP/profile.plist")
+          PROFILE_TEAM=$(/usr/libexec/PlistBuddy \
+            -c 'Print :TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")
+          PROFILE_APP_ID=$(/usr/libexec/PlistBuddy \
+            -c 'Print :Entitlements:application-identifier' \
+            "$RUNNER_TEMP/profile.plist")
+
+          test "$PROFILE_TEAM" = "$IOS_TEAM_ID"
+          test "$PROFILE_APP_ID" = "$IOS_TEAM_ID.$STORE_BUNDLE_ID"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$RUNNER_TEMP/profile.mobileprovision" \
+            "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+          echo "profile_uuid=$PROFILE_UUID" >> "$GITHUB_OUTPUT"
+          echo "profile_name=$PROFILE_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate branded native icons
+        run: dart run flutter_launcher_icons
+
+      - name: Prepare Flutter iOS release
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=REVENUECAT_IOS_API_KEY="$REVENUECAT_IOS_API_KEY" \
+            --dart-define=REVENUECAT_ENTITLEMENT_ID="$REVENUECAT_ENTITLEMENT_ID"
+
+      - name: Archive signed iOS app
+        run: |
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+            PRODUCT_BUNDLE_IDENTIFIER="$STORE_BUNDLE_ID" \
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="${{ steps.apple_signing.outputs.profile_name }}" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            archive
+
+      - name: Export signed IPA
+        id: ios_export
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" \
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>destination</key>
+            <string>export</string>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>$STORE_BUNDLE_ID</key>
+              <string>${{ steps.apple_signing.outputs.profile_name }}</string>
+            </dict>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>teamID</key>
+            <string>$IOS_TEAM_ID</string>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/export \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+
+          IPA_PATH=$(find build/ios/export -maxdepth 1 -name '*.ipa' -print -quit)
+          test -n "$IPA_PATH"
+          test -s "$IPA_PATH"
+          echo "ipa_path=$IPA_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Verify iOS signature and identity
+        run: |
+          rm -rf "$RUNNER_TEMP/ipa-inspect"
+          mkdir -p "$RUNNER_TEMP/ipa-inspect"
+          unzip -q "${{ steps.ios_export.outputs.ipa_path }}" \
+            -d "$RUNNER_TEMP/ipa-inspect"
+          APP_PATH=$(find "$RUNNER_TEMP/ipa-inspect/Payload" \
+            -maxdepth 1 -name '*.app' -print -quit)
+          test -n "$APP_PATH"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+          ACTUAL_BUNDLE_ID=$(/usr/libexec/PlistBuddy \
+            -c 'Print :CFBundleIdentifier' "$APP_PATH/Info.plist")
+          test "$ACTUAL_BUNDLE_ID" = "$STORE_BUNDLE_ID"
+
+          codesign -d --entitlements :- "$APP_PATH" \
+            > "$RUNNER_TEMP/app-entitlements.plist" 2>/dev/null
+          SIGNED_APP_ID=$(/usr/libexec/PlistBuddy \
+            -c 'Print :application-identifier' \
+            "$RUNNER_TEMP/app-entitlements.plist")
+          test "$SIGNED_APP_ID" = "$IOS_TEAM_ID.$STORE_BUNDLE_ID"
+
+      - name: Create iOS release manifest
+        id: ios_metadata
+        run: |
+          IPA_PATH="${{ steps.ios_export.outputs.ipa_path }}"
+          VERSION=$(awk '/^version:/ {print $2}' pubspec.yaml)
+          SAFE_VERSION=${VERSION/+/-build}
+          ARTIFACT_NAME="mystic-tarot-${SAFE_VERSION}-ios-${{ inputs.channel }}"
+          CHECKSUM=$(shasum -a 256 "$IPA_PATH" | awk '{print $1}')
+
+          mkdir -p build/release/ios
+          printf '%s  %s\n' "$CHECKSUM" "$(basename "$IPA_PATH")" \
+            > build/release/ios/mystic-tarot.ipa.sha256
+
+          dart run tool/write_release_manifest.dart \
+            --platform=ios \
+            --artifact="$IPA_PATH" \
+            --sha256="$CHECKSUM" \
+            --channel="${{ inputs.channel }}" \
+            --output=build/release/ios/release-manifest.json
+
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload signed iOS package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.ios_metadata.outputs.artifact_name }}
+          path: |
+            ${{ steps.ios_export.outputs.ipa_path }}
+            build/release/ios/mystic-tarot.ipa.sha256
+            build/release/ios/release-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove Apple signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/mystic-signing.keychain-db" \
+            2>/dev/null || true
+          rm -f "$RUNNER_TEMP/distribution.p12"
+          rm -f "$RUNNER_TEMP/profile.mobileprovision"
+          rm -f "$RUNNER_TEMP/profile.plist"
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/${{ steps.apple_signing.outputs.profile_uuid }}.mobileprovision"
