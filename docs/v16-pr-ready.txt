@@ -1,1 +1,0 @@
-The v1.6 revenue branch is ready for pull-request validation.
