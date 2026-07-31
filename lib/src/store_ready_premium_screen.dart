@@ -5,6 +5,7 @@ import 'app_language.dart';
 import 'flagship.dart';
 import 'language_bridge.dart';
 import 'store_purchase_service.dart';
+import 'store_status_localization.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
@@ -62,102 +63,105 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: MysticBackground(
-          child: AnimatedBuilder(
-            animation: store,
-            builder: (context, _) => ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
-              children: [
-                Row(children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+          child: SafeArea(
+            child: AnimatedBuilder(
+              animation: store,
+              builder: (context, _) => ListView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                children: [
+                  Row(children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: kIsWeb ||
+                              store.phase == StorePurchasePhase.restoring
+                          ? null
+                          : store.restore,
+                      child: Text(t(
+                        en: 'Restore',
+                        es: 'Restaurar',
+                        fr: 'Restaurer',
+                        pt: 'Restaurar',
+                        tr: 'Geri yükle',
+                        it: 'Ripristina',
+                        de: 'Wiederherstellen',
+                      )),
+                    ),
+                  ]),
+                  const Center(
+                    child: Text(
+                      '✦',
+                      style: TextStyle(fontSize: 58, color: MysticColors.gold),
+                    ),
                   ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: kIsWeb ||
-                            store.phase == StorePurchasePhase.restoring
-                        ? null
-                        : store.restore,
-                    child: Text(t(
-                      en: 'Restore',
-                      es: 'Restaurar',
-                      fr: 'Restaurer',
-                      pt: 'Restaurar',
-                      tr: 'Geri yükle',
-                      it: 'Ripristina',
-                      de: 'Wiederherstellen',
-                    )),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.source == 'daily_limit'
+                        ? t(
+                            en: 'Your insight does not\nhave to stop here.',
+                            es: 'Tu claridad no tiene\nque terminar aquí.',
+                            fr: 'Votre réflexion ne doit\npas s’arrêter ici.',
+                            pt: 'Sua percepção não precisa\nparar aqui.',
+                            tr: 'İçgörün burada\nbitmek zorunda değil.',
+                            it: 'La tua intuizione non deve\nfermarsi qui.',
+                            de: 'Deine Erkenntnis muss\nhier nicht enden.',
+                          )
+                        : t(
+                            en: 'Choose your Mystic Plus path.',
+                            es: 'Elige tu camino Mystic Plus.',
+                            fr: 'Choisissez votre parcours Mystic Plus.',
+                            pt: 'Escolha seu caminho Mystic Plus.',
+                            tr: 'Mystic Plus planını seç.',
+                            it: 'Scegli il tuo percorso Mystic Plus.',
+                            de: 'Wähle deinen Mystic-Plus-Weg.',
+                          ),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
-                ]),
-                const Center(
-                  child: Text('✦',
-                      style: TextStyle(fontSize: 58, color: MysticColors.gold)),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.source == 'daily_limit'
-                      ? t(
-                          en: 'Your insight does not\nhave to stop here.',
-                          es: 'Tu claridad no tiene\nque terminar aquí.',
-                          fr: 'Votre réflexion ne doit\npas s’arrêter ici.',
-                          pt: 'Sua percepção não precisa\nparar aqui.',
-                          tr: 'İçgörün burada\nbitmek zorunda değil.',
-                          it: 'La tua intuizione non deve\nfermarsi qui.',
-                          de: 'Deine Erkenntnis muss\nhier nicht enden.',
-                        )
-                      : t(
-                          en: 'Choose your Mystic Plus path.',
-                          es: 'Elige tu camino Mystic Plus.',
-                          fr: 'Choisissez votre parcours Mystic Plus.',
-                          pt: 'Escolha seu caminho Mystic Plus.',
-                          tr: 'Mystic Plus planını seç.',
-                          it: 'Scegli il tuo percorso Mystic Plus.',
-                          de: 'Wähle deinen Mystic-Plus-Weg.',
-                        ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.displaySmall,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  t(
-                    en: 'Official store products and localized prices appear here when App Store Connect or Google Play is configured.',
-                    es: 'Los productos y precios oficiales aparecerán aquí cuando la tienda esté configurada.',
-                    fr: 'Les produits et prix officiels apparaîtront ici après configuration de la boutique.',
-                    pt: 'Os produtos e preços oficiais aparecerão aqui após a configuração da loja.',
-                    tr: 'App Store Connect veya Google Play yapılandırıldığında resmi ürünler ve yerel fiyatlar burada görünür.',
-                    it: 'Prodotti e prezzi ufficiali appariranno qui dopo la configurazione dello store.',
-                    de: 'Offizielle Produkte und lokale Preise erscheinen hier nach der Store-Konfiguration.',
+                  const SizedBox(height: 12),
+                  Text(
+                    t(
+                      en: 'Official store products and localized prices appear here when App Store Connect or Google Play is configured.',
+                      es: 'Los productos y precios oficiales aparecerán aquí cuando la tienda esté configurada.',
+                      fr: 'Les produits et prix officiels apparaîtront ici après configuration de la boutique.',
+                      pt: 'Os produtos e preços oficiais aparecerão aqui após a configuração da loja.',
+                      tr: 'App Store Connect veya Google Play yapılandırıldığında resmi ürünler ve yerel fiyatlar burada görünür.',
+                      it: 'Prodotti e prezzi ufficiali appariranno qui dopo la configurazione dello store.',
+                      de: 'Offizielle Produkte und lokale Preise erscheinen hier nach der Store-Konfiguration.',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 20),
-                _statusCard(context),
-                const SizedBox(height: 18),
-                ..._planIds.map((id) => _productTile(context, id)),
-                const SizedBox(height: 16),
-                GoldButton(
-                  label: _buttonLabel(),
-                  icon: Icons.lock_open_rounded,
-                  onPressed: store.canPurchase
-                      ? () => store.buy(selectedId)
-                      : null,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  t(
-                    en: 'Premium access is never activated from an unverified client receipt. Production release requires secure entitlement verification.',
-                    es: 'El acceso premium nunca se activa con un recibo sin verificar. La versión final requiere verificación segura.',
-                    fr: 'L’accès premium n’est jamais activé depuis un reçu non vérifié. Une vérification sécurisée est requise.',
-                    pt: 'O acesso premium nunca é ativado com recibo não verificado. A versão final exige verificação segura.',
-                    tr: 'Premium erişim doğrulanmamış istemci makbuzuyla asla açılmaz. Yayın sürümü güvenli hak doğrulaması gerektirir.',
-                    it: 'L’accesso premium non viene mai attivato da una ricevuta non verificata. Serve una verifica sicura.',
-                    de: 'Premium wird nie durch einen ungeprüften Client-Beleg aktiviert. Eine sichere Prüfung ist erforderlich.',
+                  const SizedBox(height: 20),
+                  _statusCard(context),
+                  const SizedBox(height: 18),
+                  ..._planIds.map((id) => _productTile(context, id)),
+                  const SizedBox(height: 16),
+                  GoldButton(
+                    label: _buttonLabel(),
+                    icon: Icons.lock_open_rounded,
+                    onPressed:
+                        store.canPurchase ? () => store.buy(selectedId) : null,
                   ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
+                  const SizedBox(height: 10),
+                  Text(
+                    t(
+                      en: 'Premium access is never activated from an unverified client receipt. Production release requires secure entitlement verification.',
+                      es: 'El acceso premium nunca se activa con un recibo sin verificar. La versión final requiere verificación segura.',
+                      fr: 'L’accès premium n’est jamais activé depuis un reçu non vérifié. Une vérification sécurisée est requise.',
+                      pt: 'O acesso premium nunca é ativado com recibo não verificado. A versão final exige verificação segura.',
+                      tr: 'Premium erişim doğrulanmamış istemci makbuzuyla asla açılmaz. Yayın sürümü güvenli hak doğrulaması gerektirir.',
+                      it: 'L’accesso premium non viene mai attivato da una ricevuta non verificata. Serve una verifica sicura.',
+                      de: 'Premium wird nie durch einen ungeprüften Client-Beleg aktiviert. Eine sichere Prüfung ist erforderlich.',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -177,32 +181,43 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
         : store.phase == StorePurchasePhase.verificationRequired
             ? Icons.security_outlined
             : Icons.storefront_outlined;
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .045),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: MysticColors.gold.withValues(alpha: .22)),
-      ),
-      child: Row(children: [
-        loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: MysticColors.gold,
-                ),
-              )
-            : Icon(icon, color: MysticColors.gold),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            store.message ?? _defaultStatus(),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+    final status = store.notice == null
+        ? _defaultStatus()
+        : localizedStorePurchaseNotice(
+            widget.language.appLanguage,
+            store.notice!,
+          );
+
+    return Semantics(
+      liveRegion: true,
+      label: status,
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: .045),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .22)),
         ),
-      ]),
+        child: Row(children: [
+          loading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: MysticColors.gold,
+                  ),
+                )
+              : Icon(icon, color: MysticColors.gold),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              status,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ]),
+      ),
     );
   }
 
@@ -210,90 +225,186 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen> {
     final product = store.productFor(id);
     final active = selectedId == id;
     final title = switch (id) {
-      MysticProductIds.monthly => t(en: 'Monthly', es: 'Mensual', fr: 'Mensuel', pt: 'Mensal', tr: 'Aylık', it: 'Mensile', de: 'Monatlich'),
-      _ => t(en: 'Yearly', es: 'Anual', fr: 'Annuel', pt: 'Anual', tr: 'Yıllık', it: 'Annuale', de: 'Jährlich'),
+      MysticProductIds.monthly => t(
+          en: 'Monthly',
+          es: 'Mensual',
+          fr: 'Mensuel',
+          pt: 'Mensal',
+          tr: 'Aylık',
+          it: 'Mensile',
+          de: 'Monatlich',
+        ),
+      _ => t(
+          en: 'Yearly',
+          es: 'Anual',
+          fr: 'Annuel',
+          pt: 'Anual',
+          tr: 'Yıllık',
+          it: 'Annuale',
+          de: 'Jährlich',
+        ),
     };
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: InkWell(
-        onTap: () => setState(() => selectedId = id),
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: active
-                ? MysticColors.violet.withValues(alpha: .3)
-                : Colors.white.withValues(alpha: .04),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: active ? MysticColors.gold : Colors.white12,
-              width: active ? 2 : 1,
+      child: Semantics(
+        button: true,
+        selected: active,
+        label: title,
+        child: InkWell(
+          onTap: () => setState(() => selectedId = id),
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: active
+                  ? MysticColors.violet.withValues(alpha: .3)
+                  : Colors.white.withValues(alpha: .04),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: active ? MysticColors.gold : Colors.white12,
+                width: active ? 2 : 1,
+              ),
             ),
-          ),
-          child: Row(children: [
-            Icon(
-              active ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: active ? MysticColors.gold : MysticColors.muted,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
+            child: Row(children: [
+              Icon(
+                active
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
+                color: active ? MysticColors.gold : MysticColors.muted,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
                       style: const TextStyle(
-                          fontFamily: 'Arial', fontWeight: FontWeight.w800)),
-                  if (product != null) ...[
-                    const SizedBox(height: 3),
-                    Text(product.title,
+                        fontFamily: 'Arial',
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (product != null) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        product.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            Text(
-              product?.price ?? '—',
-              style: const TextStyle(
-                fontFamily: 'Arial',
-                color: MysticColors.gold,
-                fontWeight: FontWeight.w900,
+              Text(
+                product?.price ?? '—',
+                style: const TextStyle(
+                  fontFamily: 'Arial',
+                  color: MysticColors.gold,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
       ),
     );
   }
 
-  String _defaultStatus() => kIsWeb
-      ? t(
-          en: 'Web early access cannot process payments.',
-          es: 'El acceso web anticipado no procesa pagos.',
-          fr: 'L’accès web anticipé ne traite pas les paiements.',
-          pt: 'O acesso web antecipado não processa pagamentos.',
-          tr: 'Web erken erişim ödeme işlemez.',
-          it: 'L’accesso web anticipato non gestisce pagamenti.',
-          de: 'Der Web-Frühzugang verarbeitet keine Zahlungen.',
-        )
-      : t(
-          en: 'Loading official store products…',
-          es: 'Cargando productos oficiales…',
-          fr: 'Chargement des produits officiels…',
-          pt: 'Carregando produtos oficiais…',
-          tr: 'Resmi mağaza ürünleri yükleniyor…',
-          it: 'Caricamento dei prodotti ufficiali…',
-          de: 'Offizielle Store-Produkte werden geladen…',
-        );
+  String _defaultStatus() => switch (store.phase) {
+        StorePurchasePhase.idle || StorePurchasePhase.loading => t(
+            en: 'Loading official store products…',
+            es: 'Cargando productos oficiales…',
+            fr: 'Chargement des produits officiels…',
+            pt: 'Carregando produtos oficiais…',
+            tr: 'Resmi mağaza ürünleri yükleniyor…',
+            it: 'Caricamento dei prodotti ufficiali…',
+            de: 'Offizielle Store-Produkte werden geladen…',
+          ),
+        StorePurchasePhase.ready => t(
+            en: 'Official store products are ready.',
+            es: 'Los productos oficiales están listos.',
+            fr: 'Les produits officiels sont prêts.',
+            pt: 'Os produtos oficiais estão prontos.',
+            tr: 'Resmi mağaza ürünleri hazır.',
+            it: 'I prodotti ufficiali sono pronti.',
+            de: 'Die offiziellen Store-Produkte sind bereit.',
+          ),
+        StorePurchasePhase.purchasing => t(
+            en: 'Opening the official store checkout…',
+            es: 'Abriendo el pago de la tienda oficial…',
+            fr: 'Ouverture du paiement officiel…',
+            pt: 'Abrindo o pagamento da loja oficial…',
+            tr: 'Resmi mağaza ödeme ekranı açılıyor…',
+            it: 'Apertura del pagamento ufficiale…',
+            de: 'Der offizielle Store-Checkout wird geöffnet…',
+          ),
+        StorePurchasePhase.restoring => t(
+            en: 'Restoring previous purchases…',
+            es: 'Restaurando compras anteriores…',
+            fr: 'Restauration des achats précédents…',
+            pt: 'Restaurando compras anteriores…',
+            tr: 'Önceki satın alımlar geri yükleniyor…',
+            it: 'Ripristino degli acquisti precedenti…',
+            de: 'Frühere Käufe werden wiederhergestellt…',
+          ),
+        StorePurchasePhase.verificationRequired =>
+          localizedStorePurchaseNotice(
+            widget.language.appLanguage,
+            StorePurchaseNotice.verificationRequired,
+          ),
+        StorePurchasePhase.unavailable => t(
+            en: 'Store products are not available right now.',
+            es: 'Los productos no están disponibles ahora.',
+            fr: 'Les produits ne sont pas disponibles actuellement.',
+            pt: 'Os produtos não estão disponíveis agora.',
+            tr: 'Mağaza ürünleri şu anda kullanılamıyor.',
+            it: 'I prodotti non sono disponibili al momento.',
+            de: 'Store-Produkte sind derzeit nicht verfügbar.',
+          ),
+        StorePurchasePhase.error => t(
+            en: 'The store connection needs another try.',
+            es: 'Es necesario volver a intentar la conexión.',
+            fr: 'La connexion à la boutique doit être réessayée.',
+            pt: 'É preciso tentar novamente a conexão com a loja.',
+            tr: 'Mağaza bağlantısının yeniden denenmesi gerekiyor.',
+            it: 'È necessario riprovare la connessione allo store.',
+            de: 'Die Store-Verbindung muss erneut versucht werden.',
+          ),
+      };
 
   String _buttonLabel() {
     if (store.phase == StorePurchasePhase.purchasing) {
-      return t(en: 'Opening checkout…', es: 'Abriendo pago…', fr: 'Ouverture du paiement…', pt: 'Abrindo pagamento…', tr: 'Ödeme ekranı açılıyor…', it: 'Apertura pagamento…', de: 'Checkout wird geöffnet…');
+      return t(
+        en: 'Opening checkout…',
+        es: 'Abriendo pago…',
+        fr: 'Ouverture du paiement…',
+        pt: 'Abrindo pagamento…',
+        tr: 'Ödeme ekranı açılıyor…',
+        it: 'Apertura pagamento…',
+        de: 'Checkout wird geöffnet…',
+      );
     }
     final product = store.productFor(selectedId);
     return product == null
-        ? t(en: 'Store product unavailable', es: 'Producto no disponible', fr: 'Produit indisponible', pt: 'Produto indisponível', tr: 'Mağaza ürünü hazır değil', it: 'Prodotto non disponibile', de: 'Produkt nicht verfügbar')
-        : t(en: 'Continue with ${product.price}', es: 'Continuar con ${product.price}', fr: 'Continuer avec ${product.price}', pt: 'Continuar com ${product.price}', tr: '${product.price} ile devam et', it: 'Continua con ${product.price}', de: 'Weiter mit ${product.price}');
+        ? t(
+            en: 'Store product unavailable',
+            es: 'Producto no disponible',
+            fr: 'Produit indisponible',
+            pt: 'Produto indisponível',
+            tr: 'Mağaza ürünü hazır değil',
+            it: 'Prodotto non disponibile',
+            de: 'Produkt nicht verfügbar',
+          )
+        : t(
+            en: 'Continue with ${product.price}',
+            es: 'Continuar con ${product.price}',
+            fr: 'Continuer avec ${product.price}',
+            pt: 'Continuar com ${product.price}',
+            tr: '${product.price} ile devam et',
+            it: 'Continua con ${product.price}',
+            de: 'Weiter mit ${product.price}',
+          );
   }
 }
