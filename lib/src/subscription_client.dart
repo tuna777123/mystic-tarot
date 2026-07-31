@@ -8,12 +8,20 @@ class SubscriptionProduct {
     required this.title,
     required this.description,
     required this.price,
+    this.priceValue,
+    this.currencyCode,
+    this.pricePerMonth,
+    this.subscriptionPeriod,
   });
 
   final String id;
   final String title;
   final String description;
   final String price;
+  final double? priceValue;
+  final String? currencyCode;
+  final String? pricePerMonth;
+  final String? subscriptionPeriod;
 }
 
 class SubscriptionEntitlement {
@@ -137,6 +145,10 @@ class RevenueCatSubscriptionClient implements SubscriptionClient {
             title: product.title,
             description: product.description,
             price: product.priceString,
+            priceValue: product.price,
+            currencyCode: product.currencyCode,
+            pricePerMonth: product.pricePerMonthString,
+            subscriptionPeriod: product.subscriptionPeriod,
           ),
         )
         .toList(growable: false);

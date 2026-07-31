@@ -35,7 +35,7 @@ class MysticApp extends StatefulWidget {
   State<MysticApp> createState() => _MysticAppState();
 }
 
-class _MysticAppState extends State<MysticApp> {
+class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   static const freeDeepReadingLimit = 3;
   final navigatorKey = GlobalKey<NavigatorState>();
   final subscriptionStore = StorePurchaseService();
@@ -64,6 +64,7 @@ class _MysticAppState extends State<MysticApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     subscriptionStore.addListener(_syncSubscription);
     subscriptionStore.initialize();
     MysticSoundscape.instance.load();
@@ -76,7 +77,15 @@ class _MysticAppState extends State<MysticApp> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      subscriptionStore.refreshEntitlement();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     subscriptionStore.removeListener(_syncSubscription);
     subscriptionStore.dispose();
     super.dispose();
@@ -176,6 +185,7 @@ class _MysticAppState extends State<MysticApp> {
           onPremium: () => _showPremium(source: 'living_journal'),
         ),
         ProfileScreen(
+          isPlus: isPlus,
           userName: userName,
           intention: intention,
           streak: streak,
@@ -577,21 +587,30 @@ class _MysticAppState extends State<MysticApp> {
     }
   }
 
-  void _showPremium({String source = 'organic'}) =>
+  void _showPremium({String source = 'organic'}) {
+    final storeScreen = StoreReadyPremiumScreen(
+      source: source,
+      language: language,
+      subscriptionStore: subscriptionStore,
+    );
+    if (isPlus) {
       navigatorKey.currentState!.push(
-        MaterialPageRoute(
-          builder: (_) => PremiumValueScreen(
-            source: source,
-            language: language,
-            onContinue: () => navigatorKey.currentState!.push(
-              MaterialPageRoute(
-                builder: (_) =>
-                    StoreReadyPremiumScreen(source: source, language: language),
-              ),
-            ),
+        MaterialPageRoute(builder: (_) => storeScreen),
+      );
+      return;
+    }
+    navigatorKey.currentState!.push(
+      MaterialPageRoute(
+        builder: (_) => PremiumValueScreen(
+          source: source,
+          language: language,
+          onContinue: () => navigatorKey.currentState!.push(
+            MaterialPageRoute(builder: (_) => storeScreen),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   void _previewPremiumReading(ReadingKind kind) =>
       navigatorKey.currentState!.push(
@@ -6188,6 +6207,7 @@ class _EmptyJournal extends StatelessWidget {
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
+    required this.isPlus,
     required this.userName,
     required this.intention,
     required this.streak,
@@ -6206,6 +6226,7 @@ class ProfileScreen extends StatelessWidget {
     required this.onPremium,
     super.key,
   });
+  final bool isPlus;
   final String userName;
   final String intention;
   final int streak;
@@ -6483,9 +6504,12 @@ class ProfileScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Text(
-                    '✦',
-                    style: TextStyle(fontSize: 28, color: MysticColors.gold),
+                  Text(
+                    isPlus ? '✓' : '✦',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      color: MysticColors.gold,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -6493,11 +6517,17 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          mysticText(
-                            language,
-                            'Unlock Mystic Plus',
-                            'Mystic Plus’ı aç',
-                          ),
+                          isPlus
+                              ? mysticText(
+                                  language,
+                                  'Mystic Plus active',
+                                  'Mystic Plus etkin',
+                                )
+                              : mysticText(
+                                  language,
+                                  'Unlock Mystic Plus',
+                                  'Mystic Plus’ı aç',
+                                ),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -6505,11 +6535,17 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          mysticText(
-                            language,
-                            'Go deeper with unlimited readings',
-                            'Sınırsız okumalarla daha derine in',
-                          ),
+                          isPlus
+                              ? mysticText(
+                                  language,
+                                  'View plan and manage subscription',
+                                  'Planını gör ve aboneliğini yönet',
+                                )
+                              : mysticText(
+                                  language,
+                                  'Go deeper with unlimited readings',
+                                  'Sınırsız okumalarla daha derine in',
+                                ),
                           style: const TextStyle(
                             fontFamily: 'Arial',
                             color: MysticColors.lavender,
