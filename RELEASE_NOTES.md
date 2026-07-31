@@ -1,3 +1,18 @@
+# Version 1.8.0 — Protected Store Release
+
+Mystic Tarot now has a guarded production packaging pipeline for App Store and Google Play submission builds:
+
+- a manual GitHub Actions workflow creates genuinely signed Android AAB and iOS IPA packages only inside the protected `production-stores` Environment;
+- Android upload keystores, Apple distribution certificates, provisioning profiles, passwords, and RevenueCat application keys are read only from protected secrets and deleted from the runner after use;
+- preflight validation rejects missing, malformed, cross-platform, or secret-looking RevenueCat keys before a client build can begin;
+- permanent Android and iOS identity `com.tunabozcali.mystictarot` is applied through one reusable tool shared by CI and production release jobs;
+- Android release artifacts receive cryptographic signature verification, while iOS artifacts are checked for a valid code signature, exact bundle ID, Team ID, and application entitlement;
+- each signed package includes a SHA-256 checksum and release manifest recording the source commit, version, store channel, product IDs, entitlement, artifact size, and digest;
+- new regression tests protect release identity, RevenueCat key handling, base64 signing inputs, Apple Team ID validation, version parsing, and artifact naming;
+- a complete operator runbook documents protected GitHub Environment setup, Android upload-key preparation, Apple certificate/profile preparation, and the required real-device sandbox matrix.
+
+The workflow prepares signed submission packages but intentionally does not create store accounts, products, banking agreements, RevenueCat projects, or upload releases automatically. Those account-owned launch actions remain tracked in issue #47.
+
 # Version 1.7.0 — Subscriber Experience
 
 Mystic Tarot now turns verified subscription infrastructure into a complete customer experience:
