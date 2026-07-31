@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/store_purchase_service.dart';
 import 'package:mystic_tarot/src/subscription_client.dart';
