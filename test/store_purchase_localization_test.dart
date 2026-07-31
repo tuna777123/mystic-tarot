@@ -28,7 +28,7 @@ void main() {
         AppLanguage.turkish,
         StorePurchaseNotice.purchaseCompleted,
       ),
-      contains('doğrulandı'),
+      contains('Mystic Plus etkin'),
     );
     expect(
       localizedStorePurchaseNotice(
