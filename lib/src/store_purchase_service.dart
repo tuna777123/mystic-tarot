@@ -17,6 +17,21 @@ enum StorePurchasePhase {
   error,
 }
 
+enum StorePurchaseNotice {
+  nativeOnly,
+  purchaseStreamUnavailable,
+  storeUnavailable,
+  productsNotConfigured,
+  productsLoadFailed,
+  checkoutUnavailable,
+  restoreFailed,
+  restoreCompleted,
+  waitingForConfirmation,
+  verificationRequired,
+  purchaseFailed,
+  purchaseCancelled,
+}
+
 class StorePurchaseService extends ChangeNotifier {
   StorePurchaseService({InAppPurchase? store})
       : _store = store ?? InAppPurchase.instance;
@@ -26,6 +41,11 @@ class StorePurchaseService extends ChangeNotifier {
 
   StorePurchasePhase phase = StorePurchasePhase.idle;
   List<ProductDetails> products = const [];
+  StorePurchaseNotice? notice;
+
+  /// Diagnostic detail for development and support logs. UI surfaces should
+  /// render [notice] through localized, product-safe copy instead of exposing
+  /// raw store or plugin messages directly to the user.
   String? message;
 
   bool get canPurchase =>
@@ -34,12 +54,14 @@ class StorePurchaseService extends ChangeNotifier {
   Future<void> initialize() async {
     if (kIsWeb) {
       phase = StorePurchasePhase.unavailable;
+      notice = StorePurchaseNotice.nativeOnly;
       message = 'Store purchases are available only in native mobile builds.';
       notifyListeners();
       return;
     }
 
     phase = StorePurchasePhase.loading;
+    notice = null;
     message = null;
     notifyListeners();
 
@@ -47,7 +69,8 @@ class StorePurchaseService extends ChangeNotifier {
       _handlePurchases,
       onError: (Object error) {
         phase = StorePurchasePhase.error;
-        message = 'The store purchase stream could not be reached.';
+        notice = StorePurchaseNotice.purchaseStreamUnavailable;
+        message = error.toString();
         notifyListeners();
       },
     );
@@ -56,6 +79,7 @@ class StorePurchaseService extends ChangeNotifier {
       final available = await _store.isAvailable();
       if (!available) {
         phase = StorePurchasePhase.unavailable;
+        notice = StorePurchaseNotice.storeUnavailable;
         message = 'The App Store or Google Play is currently unavailable.';
         notifyListeners();
         return;
@@ -72,17 +96,22 @@ class StorePurchaseService extends ChangeNotifier {
 
       if (response.error != null) {
         phase = StorePurchasePhase.error;
+        notice = StorePurchaseNotice.productsLoadFailed;
         message = response.error!.message;
       } else if (products.isEmpty || missingLaunchProducts.isNotEmpty) {
         phase = StorePurchasePhase.unavailable;
+        notice = StorePurchaseNotice.productsNotConfigured;
         message = 'Monthly and yearly subscriptions are not configured yet.';
       } else {
         phase = StorePurchasePhase.ready;
+        notice = null;
+        message = null;
       }
       notifyListeners();
-    } catch (_) {
+    } catch (error) {
       phase = StorePurchasePhase.error;
-      message = 'Subscription products could not be loaded.';
+      notice = StorePurchaseNotice.productsLoadFailed;
+      message = error.toString();
       notifyListeners();
     }
   }
@@ -99,16 +128,24 @@ class StorePurchaseService extends ChangeNotifier {
     if (!canPurchase || product == null) return;
 
     phase = StorePurchasePhase.purchasing;
+    notice = null;
     message = null;
     notifyListeners();
 
     try {
-      await _store.buyNonConsumable(
+      final opened = await _store.buyNonConsumable(
         purchaseParam: PurchaseParam(productDetails: product),
       );
-    } catch (_) {
+      if (!opened) {
+        phase = StorePurchasePhase.ready;
+        notice = StorePurchaseNotice.checkoutUnavailable;
+        message = 'The official store checkout did not open.';
+        notifyListeners();
+      }
+    } catch (error) {
       phase = StorePurchasePhase.error;
-      message = 'The official store checkout could not be opened.';
+      notice = StorePurchaseNotice.checkoutUnavailable;
+      message = error.toString();
       notifyListeners();
     }
   }
@@ -116,13 +153,22 @@ class StorePurchaseService extends ChangeNotifier {
   Future<void> restore() async {
     if (kIsWeb) return;
     phase = StorePurchasePhase.restoring;
+    notice = null;
     message = null;
     notifyListeners();
     try {
       await _store.restorePurchases();
-    } catch (_) {
+      if (phase == StorePurchasePhase.restoring) {
+        phase = products.isEmpty
+            ? StorePurchasePhase.unavailable
+            : StorePurchasePhase.ready;
+        notice = StorePurchaseNotice.restoreCompleted;
+        notifyListeners();
+      }
+    } catch (error) {
       phase = StorePurchasePhase.error;
-      message = 'Previous purchases could not be restored.';
+      notice = StorePurchaseNotice.restoreFailed;
+      message = error.toString();
       notifyListeners();
     }
   }
@@ -131,21 +177,24 @@ class StorePurchaseService extends ChangeNotifier {
     for (final purchase in updates) {
       if (purchase.status == PurchaseStatus.pending) {
         phase = StorePurchasePhase.purchasing;
-        message = 'Waiting for the official store confirmation.';
+        notice = StorePurchaseNotice.waitingForConfirmation;
+        message = null;
       } else if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
         // Never unlock premium from a client-side receipt alone. A production
         // verification endpoint must validate the receipt and subscription
         // state before the app persists entitlement.
         phase = StorePurchasePhase.verificationRequired;
-        message =
-            'Purchase received. Secure entitlement verification is required.';
+        notice = StorePurchaseNotice.verificationRequired;
+        message = null;
       } else if (purchase.status == PurchaseStatus.error) {
         phase = StorePurchasePhase.error;
-        message = purchase.error?.message ?? 'The purchase was not completed.';
+        notice = StorePurchaseNotice.purchaseFailed;
+        message = purchase.error?.message;
       } else if (purchase.status == PurchaseStatus.canceled) {
         phase = StorePurchasePhase.ready;
-        message = 'The purchase was cancelled.';
+        notice = StorePurchaseNotice.purchaseCancelled;
+        message = null;
       }
 
       if (purchase.pendingCompletePurchase) {
