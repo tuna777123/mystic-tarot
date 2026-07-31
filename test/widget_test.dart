@@ -265,18 +265,20 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: JourneyScreen(
-          streak: 3,
-          xp: 125,
-          records: const [],
-          discoveredCards: const {'The Fool'},
-          completedRituals: const {},
-          claimedRewards: const {},
-          completedArcanaDays: const {},
-          language: MysticLanguage.turkish,
-          onOpenDestiny: () {},
-          onCompleteRitual: (_) {},
-          onClaimReward: (_) {},
+        home: Scaffold(
+          body: JourneyScreen(
+            streak: 3,
+            xp: 125,
+            records: const [],
+            discoveredCards: const {'The Fool'},
+            completedRituals: const {},
+            claimedRewards: const {},
+            completedArcanaDays: const {},
+            language: MysticLanguage.turkish,
+            onOpenDestiny: () {},
+            onCompleteRitual: (_) {},
+            onClaimReward: (_) {},
+          ),
         ),
       ),
     );
@@ -299,7 +301,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(find.text('ARKANA KASASI'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
 
     expect(find.text('Arkana Kasan'), findsOneWidget);
     expect(find.textContaining('hâlâ gizli'), findsOneWidget);
@@ -307,7 +310,8 @@ void main() {
     expect(find.text('Your Arcana Vault'), findsNothing);
 
     await tester.tap(find.text('Deli').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
     expect(find.text('IŞIK'), findsOneWidget);
     expect(find.text('GÖLGE'), findsOneWidget);
     expect(find.text('UYUMLU EYLEM'), findsOneWidget);

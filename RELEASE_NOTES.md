@@ -1,3 +1,25 @@
+# Version 1.5.0 — Store Trust
+
+Mystic Tarot now keeps the complete premium and purchase-status experience safe,
+localized, and release-ready:
+
+- store states use structured notice codes instead of exposing raw plugin or
+  marketplace error text inside the interface;
+- purchase, cancellation, restore, checkout, product-loading, and secure
+  verification messages are localized across all seven interface language
+  models, including complete Turkish copy;
+- Restore Purchases no longer remains trapped in a loading state when the store
+  returns no purchase updates;
+- failed checkout launches return to a stable state instead of leaving the
+  purchase flow spinning;
+- premium plan controls and live store status receive improved accessibility
+  semantics;
+- new regression tests verify every store notice in every supported interface
+  language and prevent Turkish fallback to English.
+
+Premium entitlement still requires secure server-side receipt verification
+before native subscriptions can be activated.
+
 # Version 1.4.0 — Complete Turkish Journey
 
 Mystic Tarot now preserves a complete Turkish experience beyond the reading

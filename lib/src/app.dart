@@ -1748,7 +1748,7 @@ class _JourneyScreenState extends State<JourneyScreen> with SingleTickerProvider
         ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: levelProgress, minHeight: 7, backgroundColor: Colors.white10, color: MysticColors.violet)),
       ])),
       const SizedBox(height: 25),
-      Row(children: [Text(mysticText(widget.language, 'Today’s rituals', 'Bugünün ritüelleri'), style: Theme.of(context).textTheme.titleLarge), const Spacer(), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
+      Row(children: [Expanded(child: Text(mysticText(widget.language, 'Today’s rituals', 'Bugünün ritüelleri'), style: Theme.of(context).textTheme.titleLarge)), const SizedBox(width: 12), Text('${widget.completedRituals.length}/3', style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontWeight: FontWeight.bold))]),
       const SizedBox(height: 6),
       Text(mysticText(widget.language, 'Small actions turn insight into change. Each ritual grants +15 XP.', 'Küçük eylemler içgörüyü değişime dönüştürür. Her ritüel +15 XP kazandırır.'), style: Theme.of(context).textTheme.bodyMedium),
       const SizedBox(height: 12),
