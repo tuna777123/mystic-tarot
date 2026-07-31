@@ -1,3 +1,15 @@
+# Version 1.7.0 — Subscriber Experience
+
+Mystic Tarot now turns verified subscription infrastructure into a complete customer experience:
+
+- official localized store prices include a truthful yearly monthly-equivalent and calculated savings only when supported by matching-currency store data;
+- active members see their verified plan, current access-through date, sandbox state, restore control, and official store management link;
+- active members bypass the sales preview and open their verified account controls directly;
+- subscription status refreshes when the app resumes after checkout or account management;
+- the Profile tab clearly distinguishes active Mystic Plus membership from the upgrade state;
+- subscription management opens outside the app in Apple or Google’s official account surface;
+- new tests prevent invented savings and cross-currency price comparisons.
+
 # Version 1.6.0 — Verified Revenue
 
 Mystic Tarot now contains the production subscription foundation for Mystic Plus:
