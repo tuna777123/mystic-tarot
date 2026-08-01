@@ -13,8 +13,27 @@ class MysticBackground extends StatefulWidget {
   State<MysticBackground> createState() => _MysticBackgroundState();
 }
 
-class _MysticBackgroundState extends State<MysticBackground> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
+class _MysticBackgroundState extends State<MysticBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 12),
+  );
+  bool _animationsDisabled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final animationsDisabled =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    _animationsDisabled = animationsDisabled;
+    if (animationsDisabled) {
+      _controller.stop();
+      _controller.value = 0;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
 
   @override
   void dispose() {
@@ -22,24 +41,41 @@ class _MysticBackgroundState extends State<MysticBackground> with SingleTickerPr
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) => DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(-.72 + .08 * _controller.value, -.86),
-              radius: 1.55,
-              colors: const [Color(0xFF3B226B), Color(0xFF17112D), MysticColors.ink],
-              stops: const [0, .47, 1],
-            ),
+  Widget _background(double progress) => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(-.72 + .08 * progress, -.86),
+            radius: 1.55,
+            colors: const [
+              Color(0xFF3B226B),
+              Color(0xFF17112D),
+              MysticColors.ink,
+            ],
+            stops: const [0, .47, 1],
           ),
-          child: Stack(children: [
-            Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _StarlightPainter(_controller.value)))),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _StarlightPainter(progress),
+                ),
+              ),
+            ),
             SafeArea(child: widget.child),
-          ]),
+          ],
         ),
       );
+
+  @override
+  Widget build(BuildContext context) {
+    if (_animationsDisabled) return _background(0);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => _background(_controller.value),
+    );
+  }
 }
 
 class _StarlightPainter extends CustomPainter {
