@@ -87,8 +87,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('Compatibilité amoureuse'), findsOneWidget);
-    expect(find.text('APERÇU PLUS'), findsOneWidget);
+    expect(find.text('PLUS'), findsOneWidget);
     expect(find.text('PLUS PREVIEW'), findsNothing);
+    expect(find.text('Chargement…'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -136,7 +137,6 @@ void main() {
     expect(sitemap, contains('terms-fr.html'));
     expect(sitemap, contains('support-fr.html'));
   });
-
 
   test('support links follow the selected launch language', () {
     expect(
