@@ -24,7 +24,11 @@ jobs:
       - name: Rebuild and verify patch
         shell: bash
         run: |
-          cat .quality/french-v2.patch.*.b64 | tr -d '\n' | base64 --decode > /tmp/french.patch.gz
+          test "$(tr -d '\n' < .quality/french-v3.patch.01.b64 | sha256sum | cut -d' ' -f1)" = '88e97b5f883a73b12bd69a6d89cab30a9828e0b4fdc792658b3ebca0936b79dc'
+          test "$(tr -d '\n' < .quality/french-v3.patch.02.b64 | sha256sum | cut -d' ' -f1)" = '29832efb54f6b529a402555c38ebf28959ca6cdaf31b371427e1f322c006597d'
+          test "$(tr -d '\n' < .quality/french-v3.patch.03.b64 | sha256sum | cut -d' ' -f1)" = 'c64ff41e4095652d7f46773f1b04ed21c2611ffa9b2f4cdb2510f2aa73f349b9'
+          test "$(tr -d '\n' < .quality/french-v3.patch.04.b64 | sha256sum | cut -d' ' -f1)" = 'fb0db11c019839388a17478046c2d58b3dc0434e26b0ed4b06dedfedb28da1e3'
+          cat .quality/french-v3.patch.*.b64 | tr -d '\n' | base64 --decode > /tmp/french.patch.gz
           echo '05a3b0e9e12105fff058effa3b738511efd2171703d7a6d055aebd86ea2d6918  /tmp/french.patch.gz' | sha256sum --check -
           gzip --decompress --stdout /tmp/french.patch.gz > /tmp/french.patch
           echo 'ecea0a5b595f2a4670b56b3b7068069c27f9f7549af64f323aa81c6629e36a5e  /tmp/french.patch' | sha256sum --check -
