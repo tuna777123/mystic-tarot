@@ -85,7 +85,19 @@ void main() {
       expect(support, contains(target));
     }
     expect(support, contains("params.get('stay') === 'en'"));
-    expect(support, contains('support.html?stay=en'));
+
+    for (final path in <String>[
+      'web/support-tr.html',
+      'web/support-fr.html',
+      'web/support-es.html',
+      'web/support-pt-br.html',
+    ]) {
+      expect(
+        File(path).readAsStringSync(),
+        contains('support.html?stay=en'),
+        reason: path,
+      );
+    }
   });
 
   test('sitemap indexes every public trust page', () {
