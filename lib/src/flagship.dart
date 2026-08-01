@@ -145,11 +145,30 @@ class DestinyFlagshipCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 11),
-            Row(children: [
-              Text(mysticText(language, 'ENTER MY PATH', 'YOLUMA GİR'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .8)),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward, color: MysticColors.gold, size: 16),
-            ]),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    mysticText(language, 'ENTER MY PATH', 'YOLUMA GİR'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Arial',
+                      color: MysticColors.gold,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .8,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.arrow_forward,
+                  color: MysticColors.gold,
+                  size: 16,
+                ),
+              ],
+            ),
           ])),
         ]),
       ),

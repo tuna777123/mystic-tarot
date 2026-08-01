@@ -1617,12 +1617,20 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    mysticText(language, 'Choose a reading', 'Bir okuma seç'),
-                    style: Theme.of(context).textTheme.titleLarge,
+                  Expanded(
+                    child: Text(
+                      mysticText(
+                        language,
+                        'Choose a reading',
+                        'Bir okuma seç',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
+                  const SizedBox(width: 12),
                   Text(
                     '$xp XP',
                     style: const TextStyle(
@@ -1717,15 +1725,19 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      mysticText(
-                        language,
-                        'Mystic Plus readings',
-                        'Mystic Plus okumaları',
+                    Expanded(
+                      child: Text(
+                        mysticText(
+                          language,
+                          'Mystic Plus readings',
+                          'Mystic Plus okumaları',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 9,
