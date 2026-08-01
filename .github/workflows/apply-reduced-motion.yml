@@ -1,0 +1,40 @@
+name: Apply reduced-motion hardening
+
+on:
+  push:
+    branches:
+      - quality/reduced-motion
+    paths:
+      - tool/apply_reduced_motion_hardening.py
+      - .github/workflows/apply-reduced-motion.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-reduced-motion
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: quality/reduced-motion
+          fetch-depth: 0
+      - name: Apply verified product changes
+        run: python3 tool/apply_reduced_motion_hardening.py
+      - name: Remove temporary patch machinery
+        run: |
+          rm tool/apply_reduced_motion_hardening.py
+          rm .github/workflows/apply-reduced-motion.yml
+      - name: Commit reduced-motion support
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/widgets.dart test/reduced_motion_test.dart tool/apply_reduced_motion_hardening.py .github/workflows/apply-reduced-motion.yml
+          git diff --cached --check
+          git commit -m "fix: honor reduce-motion and pause decorative animation"
+          git push origin HEAD:quality/reduced-motion
