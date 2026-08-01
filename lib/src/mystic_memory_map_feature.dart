@@ -26,10 +26,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
   _MemoryTheme? selectedTheme;
   String query = '';
 
-  bool get _isTurkish => widget.language == MysticLanguage.turkish;
+  String get _languageCode => widget.language.code;
 
   String _copy(String english, String turkish) =>
-      _isTurkish ? turkish : english;
+      mysticText(widget.language, english, turkish);
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +336,7 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                           record.question.trim().isEmpty
                               ? localizedReadingKindTitle(
                                   record.kind,
-                                  turkish: _isTurkish,
+                                  languageCode: _languageCode,
                                 )
                               : record.question,
                           maxLines: 2,
@@ -426,7 +426,7 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                   record.question.trim().isEmpty
                       ? localizedReadingKindTitle(
                           record.kind,
-                          turkish: _isTurkish,
+                          languageCode: _languageCode,
                         )
                       : record.question,
                   maxLines: 2,
@@ -435,7 +435,7 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_themeLabel(_themeFor(record.kind))} · ${localizedEmotionLabel(record.emotion, turkish: _isTurkish)}',
+                  '${_themeLabel(_themeFor(record.kind))} · ${localizedEmotionLabel(record.emotion, languageCode: _languageCode)}',
                   style: const TextStyle(
                     color: MysticColors.lavender,
                     fontSize: 11,
@@ -475,12 +475,12 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
     for (final record in records) {
       final title = _normalize(record.kind.title);
       final localizedTitle = _normalize(
-        localizedReadingKindTitle(record.kind, turkish: _isTurkish),
+        localizedReadingKindTitle(record.kind, languageCode: _languageCode),
       );
       final question = _normalize(record.question);
       final emotion = _normalize(record.emotion.label);
       final localizedEmotion = _normalize(
-        localizedEmotionLabel(record.emotion, turkish: _isTurkish),
+        localizedEmotionLabel(record.emotion, languageCode: _languageCode),
       );
       final action = _normalize(record.alignedAction);
       final cards = record.cards.map((drawn) => _normalize(drawn.card.name));

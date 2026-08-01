@@ -1,4 +1,5 @@
 import 'models.dart';
+import 'tarot_localization_global.dart';
 
 const _majorArcanaTurkish = <String, String>{
   'The Fool': 'Deli',
@@ -254,8 +255,15 @@ const _minorSuitMeaningTurkish = <String, List<String>>{
   ],
 };
 
-String localizedTarotCardName(String name, {required bool turkish}) {
-  if (!turkish) return name;
+String localizedTarotCardName(
+  String name, {
+  bool turkish = false,
+  String? languageCode,
+}) {
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalTarotCardName(name, code);
+  if (global != null) return global;
+  if (code != 'TR') return name;
   final major = _majorArcanaTurkish[name];
   if (major != null) return major;
 
@@ -269,9 +277,15 @@ String localizedTarotCardName(String name, {required bool turkish}) {
 
 String localizedTarotCardMeaning(
   DrawnCard drawn, {
-  required bool turkish,
+  bool turkish = false,
+  String? languageCode,
 }) {
-  if (!turkish) return drawn.reversed ? drawn.card.shadow : drawn.card.light;
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalTarotCardMeaning(drawn, code);
+  if (global != null) return global;
+  if (code != 'TR') {
+    return drawn.reversed ? drawn.card.shadow : drawn.card.light;
+  }
 
   final major = _majorMeaningTurkish[drawn.card.name];
   if (major != null) return major[drawn.reversed ? 1 : 0];
@@ -292,9 +306,13 @@ String localizedTarotCardMeaning(
 
 String localizedTarotCardAdvice(
   DrawnCard drawn, {
-  required bool turkish,
+  bool turkish = false,
+  String? languageCode,
 }) {
-  if (!turkish) return drawn.card.advice;
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalTarotCardAdvice(drawn, code);
+  if (global != null) return global;
+  if (code != 'TR') return drawn.card.advice;
 
   final major = _majorMeaningTurkish[drawn.card.name];
   if (major != null) return major[2];
@@ -313,9 +331,13 @@ String localizedTarotCardAdvice(
 
 String localizedReadingKindTitle(
   ReadingKind kind, {
-  required bool turkish,
+  bool turkish = false,
+  String? languageCode,
 }) {
-  if (!turkish) return kind.title;
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalReadingKindTitle(kind, code);
+  if (global != null) return global;
+  if (code != 'TR') return kind.title;
   return switch (kind) {
     ReadingKind.daily => 'Günlük Rehberlik',
     ReadingKind.love => 'Aşk ve Bağ',
@@ -332,9 +354,13 @@ String localizedReadingKindTitle(
 
 String localizedReadingKindSubtitle(
   ReadingKind kind, {
-  required bool turkish,
+  bool turkish = false,
+  String? languageCode,
 }) {
-  if (!turkish) return kind.subtitle;
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalReadingKindSubtitle(kind, code);
+  if (global != null) return global;
+  if (code != 'TR') return kind.subtitle;
   return switch (kind) {
     ReadingKind.daily => 'Bugün için tek ve net bir mesaj',
     ReadingKind.love => 'Kalbinin çevresindeki enerjiyi gör',
@@ -351,9 +377,13 @@ String localizedReadingKindSubtitle(
 
 String localizedEmotionLabel(
   EmotionalState emotion, {
-  required bool turkish,
+  bool turkish = false,
+  String? languageCode,
 }) {
-  if (!turkish) return emotion.label;
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalEmotionLabel(emotion, code);
+  if (global != null) return global;
+  if (code != 'TR') return emotion.label;
   return switch (emotion) {
     EmotionalState.uncertain => 'Kararsız',
     EmotionalState.hopeful => 'Umutlu',
@@ -365,9 +395,13 @@ String localizedEmotionLabel(
 
 String localizedDeckStyleLabel(
   DeckStyle style, {
-  required bool turkish,
+  bool turkish = false,
+  String? languageCode,
 }) {
-  if (!turkish) return style.label;
+  final code = languageCode ?? (turkish ? 'TR' : 'EN');
+  final global = globalDeckStyleLabel(style, code);
+  if (global != null) return global;
+  if (code != 'TR') return style.label;
   return switch (style) {
     DeckStyle.midnight => 'Gece Örtüsü',
     DeckStyle.solarGold => 'Güneş Altını',

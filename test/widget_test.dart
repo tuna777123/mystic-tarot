@@ -206,6 +206,8 @@ void main() {
     expect(launchLanguages, const [
       MysticLanguage.english,
       MysticLanguage.turkish,
+      MysticLanguage.spanish,
+      MysticLanguage.portugueseBrazil,
     ]);
   });
 

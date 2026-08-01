@@ -1,3 +1,17 @@
+# Version 1.9.0 — Spanish & Brazilian Portuguese Launch
+
+Mystic Tarot now delivers a complete four-language launch experience in English, Turkish, neutral international Spanish, and Brazilian Portuguese:
+
+- Spanish and Brazilian Portuguese are available from onboarding and remain active across navigation, readings, Oracle Dialogue, Living Journal, Memory Map, Mystic Path, Major Arcana Journey, Arcana Vault, weekly insights, premium, account, and support surfaces;
+- all 78 tarot cards have localized names plus upright, reversed, and aligned-action guidance in both new languages;
+- every reading type, emotional state, deck name, dynamic pattern insight, recurring-card message, and personal summary uses the selected language instead of falling back to English;
+- the seven-language bridge now preserves exact language choices while French, German, and Italian remain hidden until their full catalogs are complete;
+- 447 interface messages per new language are protected by catalog completeness and dynamic-template regression tests;
+- all 78 cards, ten reading types, five emotional states, and three deck styles receive automated no-English-fallback coverage;
+- long Spanish and Brazilian Portuguese headings and calls to action now adapt safely on phone layouts without clipping or horizontal overflow.
+
+Italian, French, and German are still present in the localization foundation but are intentionally not exposed in the launch selector until their full experiences pass the same completeness standard.
+
 # Version 1.8.1 — Web Preview Hotfix
 
 Mystic Tarot now starts reliably as a full-page Flutter web application:
