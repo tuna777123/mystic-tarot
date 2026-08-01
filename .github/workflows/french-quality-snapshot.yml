@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: apply-french-quality-pr
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   apply:
