@@ -33,28 +33,34 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
-    const label =
-        'Débloquer la lecture complète de compatibilité amoureuse';
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(20),
-            child: GoldButton(
-              label: label,
-              icon: Icons.auto_awesome,
-              onPressed: () {},
+    try {
+      const label =
+          'Débloquer la lecture complète de compatibilité amoureuse';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(20),
+              child: GoldButton(
+                label: label,
+                icon: Icons.auto_awesome,
+                onPressed: () {},
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.bySemanticsLabel(label), findsOneWidget);
-    expect(find.text(label), findsOneWidget);
-    expect(tester.getSize(find.byType(GoldButton)).height, greaterThanOrEqualTo(56));
-    expect(tester.takeException(), isNull);
+      expect(find.bySemanticsLabel(label), findsOneWidget);
+      expect(find.text(label), findsOneWidget);
+      expect(
+        tester.getSize(find.byType(GoldButton)).height,
+        greaterThanOrEqualTo(56),
+      );
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
   });
 }
