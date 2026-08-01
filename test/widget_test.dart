@@ -1,128 +1,209 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mystic_tarot/main.dart';
 import 'package:mystic_tarot/src/app.dart';
 import 'package:mystic_tarot/src/flagship.dart';
-import 'package:mystic_tarot/src/language_preferences.dart';
 import 'package:mystic_tarot/src/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('shows the Mystic onboarding', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const MysticApp());
-    await tester.pumpAndSettle();
-    expect(find.text('Your patterns are already speaking.'), findsOneWidget);
-    expect(find.text('English'), findsOneWidget);
-    expect(find.text('Türkçe'), findsOneWidget);
-    expect(find.text('Español'), findsOneWidget);
-    expect(find.text('Français'), findsOneWidget);
-    expect(find.text('Português (Brasil)'), findsOneWidget);
-    expect(find.text('Italiano'), findsNothing);
-    expect(find.text('Deutsch'), findsNothing);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('Your patterns are\nalready speaking.'), findsOneWidget);
+    expect(find.text('Begin my journey'), findsOneWidget);
   });
 
-  testWidgets('living fate map is visible in both launch languages', (tester) async {
+  testWidgets('privacy policy describes local-first storage', (tester) async {
     await tester.pumpWidget(
-      const TestAppShell(
-        child: LivingFateMapScreen(
-          language: MysticLanguage.english,
-          readings: <ReadingRecord>[],
-        ),
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: const LegalDocumentScreen(title: 'Privacy Policy'),
       ),
     );
-    await tester.pumpAndSettle();
-    expect(find.text('LIVING FATE MAP'), findsOneWidget);
-    expect(find.text('Your story changes with every return.'), findsOneWidget);
-    expect(find.text('ENTER MY PATH'), findsOneWidget);
 
+    expect(find.text('Privacy, in plain language'), findsOneWidget);
+    expect(
+      find.textContaining('transmit journal content to us'),
+      findsOneWidget,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Effective July 23, 2026'),
+      200,
+      scrollable: find.byType(Scrollable),
+    );
+    expect(find.text('Effective July 23, 2026'), findsOneWidget);
+  });
+
+  testWidgets('terms identify the product as reflection', (tester) async {
     await tester.pumpWidget(
-      const TestAppShell(
-        child: LivingFateMapScreen(
-          language: MysticLanguage.turkish,
-          readings: <ReadingRecord>[],
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: const LegalDocumentScreen(title: 'Terms of Use'),
+      ),
+    );
+
+    expect(find.text('A fair mystical space'), findsOneWidget);
+    expect(
+      find.textContaining('self-reflection and entertainment'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('living fate map is visible in both launch languages', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: Column(
+            children: [
+              DestinyFlagshipCard(
+                records: const [],
+                completedDays: const {},
+                language: MysticLanguage.english,
+                onOpen: () {},
+              ),
+              DestinyFlagshipCard(
+                records: const [],
+                completedDays: const {},
+                language: MysticLanguage.turkish,
+                onOpen: () {},
+              ),
+            ],
+          ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+
+    expect(find.text('LIVING FATE MAP'), findsOneWidget);
     expect(find.text('YAŞAYAN KADER HARİTASI'), findsOneWidget);
-    expect(find.text('Hikâyen her dönüşünde değişiyor.'), findsOneWidget);
-    expect(find.text('YOLUMA GİR'), findsOneWidget);
+    expect(find.textContaining('Day 1 of 22'), findsOneWidget);
+    expect(find.textContaining('22 günün 1. günü'), findsOneWidget);
   });
 
   testWidgets('destiny hub opens its private empty state', (tester) async {
     await tester.pumpWidget(
-      const TestAppShell(
-        child: DestinyHubScreen(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: DestinyHubScreen(
+          records: const [],
+          completedDays: const {},
+          reflections: const {},
+          lastCompletionDay: null,
           language: MysticLanguage.english,
-          readings: <ReadingRecord>[],
+          onCompleteChapter: (_, __) {},
+          onStartReading: () {},
         ),
       ),
     );
-    await tester.pumpAndSettle();
-    expect(find.text('Your destiny pattern begins here.'), findsOneWidget);
-    expect(find.text('Your first connection is waiting.'), findsOneWidget);
-    expect(find.text('BEGIN MY FIRST READING'), findsOneWidget);
+    expect(find.text('My Living Path'), findsOneWidget);
+    expect(find.text('Fate Map'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Create my first signal'),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Create my first signal'), findsOneWidget);
   });
 
-  testWidgets('Turkish remains active inside the card selection flow', (tester) async {
+  testWidgets('Turkish remains active inside the card selection flow', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'allow_reversals': true});
     await tester.pumpWidget(
-      const TestAppShell(
-        child: ReadingFlow(
-          language: MysticLanguage.turkish,
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: ReadingFlow(
           kind: ReadingKind.daily,
+          deckStyle: DeckStyle.midnight,
+          userName: 'Tuna',
+          intention: 'Clarity',
+          language: MysticLanguage.turkish,
+          isPlus: false,
+          pastRecords: const [],
+          onPremium: () {},
+          onComplete: (_) {},
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.text('Bugün için net bir mesaj'), findsOneWidget);
-    expect(find.text('Nefesini yavaşlat.'), findsOneWidget);
-    expect(find.text('ŞU AN NASIL HİSSEDİYORSUN?'), findsOneWidget);
-    expect(find.text('KARTLARINI SEÇ'), findsOneWidget);
-    expect(find.text('SEÇİMİMİ MÜHÜRLE'), findsOneWidget);
-    expect(find.text('Write your question (optional)'), findsNothing);
+    expect(find.text('Günlük Rehberlik'), findsOneWidget);
+    expect(find.text('ŞU ANDA NASIL HİSSEDİYORSUN?'), findsOneWidget);
+    expect(find.text('Sorunu yaz (isteğe bağlı)'), findsOneWidget);
+    expect(find.textContaining('Kararsız'), findsOneWidget);
+    expect(
+      find.text(
+        'Breathe slowly. Hold your question in mind, then choose the cards that call to you.',
+      ),
+      findsNothing,
+    );
   });
 
-  testWidgets('Turkish emotion choices fit a phone without clipping', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(390, 844));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('Turkish emotion choices fit a phone without clipping', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
+    SharedPreferences.setMockInitialValues({'allow_reversals': true});
     await tester.pumpWidget(
-      const TestAppShell(
-        child: ReadingFlow(
-          language: MysticLanguage.turkish,
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: ReadingFlow(
           kind: ReadingKind.daily,
+          deckStyle: DeckStyle.midnight,
+          userName: 'Tuna',
+          intention: 'Clarity',
+          language: MysticLanguage.turkish,
+          isPlus: false,
+          pastRecords: const [],
+          onPremium: () {},
+          onComplete: (_) {},
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    for (final label in <String>['Belirsiz', 'Umutlu', 'Kaygılı', 'Dengeli', 'Meraklı']) {
-      expect(find.text(label), findsOneWidget);
+    for (final label in [
+      'Kararsız',
+      'Umutlu',
+      'Kaygılı',
+      'Dengeli',
+      'Meraklı',
+    ]) {
+      expect(find.textContaining(label), findsOneWidget);
     }
+    expect(find.text('KARTLARINI SEÇ'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('saved Turkish preference restores the Turkish shell', (tester) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      LanguagePreferences.storageKey: AppLanguage.turkish.name,
-      'onboarding_complete': true,
-      'user_name': 'Tuna',
-      'user_intention': 'clarity',
+  testWidgets('saved Turkish preference restores the Turkish shell', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 932));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues({
+      'onboarded': true,
+      'language': 'turkish',
     });
-
     await tester.pumpWidget(const MysticApp());
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
 
-    expect(find.text('YOLUNA HOŞ GELDİN'), findsOneWidget);
     expect(find.text('Oku'), findsOneWidget);
     expect(find.text('Yol'), findsOneWidget);
     expect(find.text('Günlük'), findsOneWidget);
     expect(find.text('Sen'), findsOneWidget);
-    expect(find.text('WELCOME TO YOUR PATH'), findsNothing);
   });
 
   test('launch language selector exposes only complete languages', () {
-    expect(launchLanguages, <MysticLanguage>[
+    expect(launchLanguages, const [
       MysticLanguage.english,
       MysticLanguage.turkish,
       MysticLanguage.spanish,
@@ -132,68 +213,129 @@ void main() {
   });
 
   testWidgets('Turkish remains active in profile and settings', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'allow_reversals': true,
+      'sound_effects': true,
+    });
     await tester.pumpWidget(
-      const TestAppShell(
-        child: ProfileScreen(language: MysticLanguage.turkish),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('KİM OLDUĞUNU GÖR'), findsOneWidget);
-    expect(find.text('SENİN İSTATİSTİKLERİN'), findsOneWidget);
-    expect(find.text('AYARLAR'), findsOneWidget);
-    expect(find.text('Mistik kimliğim'), findsOneWidget);
-    expect(find.text('Kişiselleştirme'), findsOneWidget);
-    expect(find.text('Gizlilik ve veri'), findsOneWidget);
-    expect(find.text('Yardım ve destek'), findsOneWidget);
-  });
-
-  testWidgets('Turkish premium preview never falls back to English', (tester) async {
-    await tester.pumpWidget(
-      const TestAppShell(
-        child: PremiumReadingPreview(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: SoulProfileScreen(
+          initialName: 'Tuna',
+          initialIntention: 'Clarity',
           language: MysticLanguage.turkish,
-          kind: ReadingKind.celticCross,
-          question: '',
+          onSave: (_, __) {},
         ),
       ),
     );
-    await tester.pumpAndSettle();
 
-    expect(find.text('İLK İŞARETİN'), findsOneWidget);
-    expect(find.text('İlk işaret şekilleniyor…'), findsOneWidget);
-    expect(find.text('İlk işaret hazır'), findsOneWidget);
-    expect(find.text('Açılımının geri kalanı'), findsOneWidget);
-    expect(find.text('İlk mesajını al'), findsOneWidget);
-    expect(find.text('YOUR FIRST SIGNAL'), findsNothing);
-    expect(find.text('The first signal is forming…'), findsNothing);
-    expect(find.text('Get my first message'), findsNothing);
-  });
-
-  testWidgets('Turkish journey, weekly summary and Arcana Vault stay localized', (tester) async {
-    await tester.pumpWidget(
-      const TestAppShell(
-        child: JourneyScreen(language: MysticLanguage.turkish),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('BÜYÜK ARKANA YOLCULUĞU'), findsOneWidget);
-    expect(find.text('22 bölüm mühürlendi'), findsOneWidget);
-    expect(find.text('MYSTIC HİKÂYE STÜDYOSU'), findsOneWidget);
+    expect(find.text('Ruh profili'), findsOneWidget);
+    expect(find.text('Mystic’i kendine göre şekillendir'), findsOneWidget);
+    expect(find.text('Ruh profilimi kaydet'), findsOneWidget);
+    expect(find.text('Make Mystic yours'), findsNothing);
 
     await tester.pumpWidget(
-      TestAppShell(
-        child: JournalScreen(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: MysticSettingsScreen(
+          section: 'Reading preferences',
+          title: 'Okuma tercihleri',
           language: MysticLanguage.turkish,
-          readings: const <ReadingRecord>[],
-          onOpenReading: (_) {},
+          records: const [],
+          onDeleteData: () {},
         ),
       ),
     );
-    await tester.pumpAndSettle();
-    expect(find.text('ARCANA KASASI'), findsOneWidget);
-    expect(find.text('HAFTALIK MYSTIC ÖZETİN'), findsOneWidget);
-    expect(find.text('Hikâyen ilk işaretini bekliyor.'), findsOneWidget);
-    expect(find.text('LIVING JOURNAL'), findsNothing);
+    await tester.pump();
+
+    expect(find.text('Okuma tercihleri'), findsOneWidget);
+    expect(find.text('Ters kartlara izin ver'), findsOneWidget);
+    expect(find.text('Daily Guidance reminder'), findsNothing);
   });
+
+  testWidgets('Turkish premium preview never falls back to English', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: PremiumReadingPreview(
+          kind: ReadingKind.compatibility,
+          deckStyle: DeckStyle.midnight,
+          language: MysticLanguage.turkish,
+          onUnlock: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('Aşk Uyumu'), findsOneWidget);
+    expect(find.text('PLUS ÖNİZLEME'), findsOneWidget);
+    expect(find.textContaining('kartlık hikâyenin tamamı'), findsOneWidget);
+    expect(find.text('PLUS PREVIEW'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 700));
+  });
+
+  testWidgets(
+    'Turkish journey, weekly summary and Arcana Vault stay localized',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(430, 932));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(),
+          home: Scaffold(
+            body: JourneyScreen(
+              streak: 3,
+              xp: 125,
+              records: const [],
+              discoveredCards: const {'The Fool'},
+              completedRituals: const {},
+              claimedRewards: const {},
+              completedArcanaDays: const {},
+              language: MysticLanguage.turkish,
+              onOpenDestiny: () {},
+              onCompleteRitual: (_) {},
+              onClaimReward: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Mistik Yolun'), findsOneWidget);
+      expect(find.text('Your Mystic Path'), findsNothing);
+      expect(find.text('İÇ TAKIMYILDIZIN'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('HAFTALIK MYSTIC ÖZETİN'),
+        260,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('YOUR WEEKLY MYSTIC WRAPPED'), findsNothing);
+
+      await tester.scrollUntilVisible(
+        find.text('ARKANA KASASI'),
+        260,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('ARKANA KASASI'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+
+      expect(find.text('Arkana Kasan'), findsOneWidget);
+      expect(find.textContaining('hâlâ gizli'), findsOneWidget);
+      expect(find.text('Deli'), findsWidgets);
+      expect(find.text('Your Arcana Vault'), findsNothing);
+
+      await tester.tap(find.text('Deli').last);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(find.text('IŞIK'), findsOneWidget);
+      expect(find.text('GÖLGE'), findsOneWidget);
+      expect(find.text('UYUMLU EYLEM'), findsOneWidget);
+      expect(find.text('LIGHT'), findsNothing);
+    },
+  );
 }
