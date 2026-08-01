@@ -1,0 +1,40 @@
+name: Temporary journal integrator
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out hardening branch
+        uses: actions/checkout@v4
+        with:
+          ref: hardening/journal-integrity
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply exact integration
+        run: python3 tool/integrate_app_core.py
+
+      - name: Commit integrated hardening branch
+        run: |
+          rm -f .github/workflows/app-core-integration.yml
+          rm -f tool/.app_core_integration_trigger
+          rm -f tool/integrate_app_core.py
+          git config user.name "Mystic Release Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: integrate durable journal and app hardening [core-integrated]"
+          git push origin HEAD:hardening/journal-integrity
+
+      - name: Remove temporary workflow from main
+        run: |
+          git fetch origin main
+          git switch --force-create main origin/main
+          git rm .github/workflows/temporary-journal-integrator.yml
+          git commit -m "chore: remove completed journal integrator"
+          git push origin HEAD:main
