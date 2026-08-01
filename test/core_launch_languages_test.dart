@@ -11,30 +11,32 @@ import 'package:mystic_tarot/src/tarot_localization.dart';
 void main() {
   const globalLanguages = <MysticLanguage>[
     MysticLanguage.spanish,
+    MysticLanguage.french,
     MysticLanguage.portugueseBrazil,
   ];
 
-  test('launch selector exposes the four complete languages', () {
+  test('launch selector exposes the five complete languages', () {
     expect(
       launchLanguages,
       const <MysticLanguage>[
         MysticLanguage.english,
         MysticLanguage.turkish,
         MysticLanguage.spanish,
+        MysticLanguage.french,
         MysticLanguage.portugueseBrazil,
       ],
     );
   });
 
-  test('Spanish and Brazilian Portuguese catalogs are complete', () {
-    expect(MysticTextCatalog.launchLanguageCodes, <String>{'ES', 'PT-BR'});
+  test('Spanish, French, and Brazilian Portuguese catalogs are complete', () {
+    expect(MysticTextCatalog.launchLanguageCodes, <String>{'ES', 'FR', 'PT-BR'});
     for (final code in MysticTextCatalog.launchLanguageCodes) {
-      expect(MysticTextCatalog.exactTranslationCount(code), 408);
-      expect(MysticTextCatalog.templateTranslationCount(code), 39);
+      expect(MysticTextCatalog.exactTranslationCount(code), 423);
+      expect(MysticTextCatalog.templateTranslationCount(code), 40);
       expect(
         MysticTextCatalog.exactTranslationCount(code) +
             MysticTextCatalog.templateTranslationCount(code),
-        447,
+        463,
       );
       expect(MysticTextCatalog.hasTranslation(code, 'Read'), isTrue);
       expect(
@@ -119,7 +121,7 @@ void main() {
     }
   });
 
-  test('dynamic Spanish and Portuguese copy keeps translated captures', () {
+  test('dynamic global copy keeps translated captures', () {
     expect(
       mysticText(
         MysticLanguage.spanish,
@@ -127,6 +129,14 @@ void main() {
         'MEVCUT BÖLÜM • GÜNEŞ',
       ),
       'CAPÍTULO ACTUAL • EL SOL',
+    );
+    expect(
+      mysticText(
+        MysticLanguage.french,
+        'CURRENT CHAPTER • LE SOLEIL',
+        'MEVCUT BÖLÜM • GÜNEŞ',
+      ),
+      'CHAPITRE ACTUEL • LE SOLEIL',
     );
     expect(
       mysticText(
@@ -142,6 +152,10 @@ void main() {
     (
       language: MysticLanguage.spanish,
       labels: <String>['Leer', 'Camino', 'Diario', 'Tú'],
+    ),
+    (
+      language: MysticLanguage.french,
+      labels: <String>['Tirages', 'Chemin', 'Journal', 'Vous'],
     ),
     (
       language: MysticLanguage.portugueseBrazil,

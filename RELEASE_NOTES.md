@@ -1,3 +1,15 @@
+# Version 1.10.0 — French & Quality
+
+Mystic Tarot now ships a complete five-language experience in English, Turkish, neutral international Spanish, Brazilian Portuguese, and French:
+
+- French remains active from onboarding through readings, Oracle Dialogue, Living Journal, Memory Map, Mystic Path, Major Arcana Journey, Arcana Vault, weekly insights, premium, account, settings, export, deletion, and support surfaces;
+- all 78 tarot cards have French names, upright guidance, reversed guidance, and aligned actions;
+- 423 exact interface messages and 40 dynamic templates are protected in Spanish, French, and Brazilian Portuguese;
+- long French labels are exercised on narrow phone layouts without clipping or horizontal overflow;
+- French privacy, terms, and support pages ship with the web release and the in-app support action opens the correct localized page;
+- the unused legacy paywall and its outdated weekly plan and hard-coded prices were removed so the verified monthly/yearly store catalog remains the only subscription experience;
+- public legal-page, local-first privacy, language persistence, dynamic-content, and no-English-fallback checks were expanded.
+
 # Version 1.9.0 — Spanish & Brazilian Portuguese Launch
 
 Mystic Tarot now delivers a complete four-language launch experience in English, Turkish, neutral international Spanish, and Brazilian Portuguese:
