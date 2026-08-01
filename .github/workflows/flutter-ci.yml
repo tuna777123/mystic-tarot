@@ -7,13 +7,219 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  responsive-fix:
+    if: github.event_name == 'pull_request' && github.head_ref == 'release/french-and-quality'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out French release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/french-and-quality
+
+      - name: Apply responsive multilingual layouts once
+        shell: bash
+        run: |
+          if [ ! -f .responsive-trigger ]; then
+            echo 'Responsive corrections already applied.'
+            exit 0
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_section(text, key, start_marker, end_marker, replacement):
+              key_at = text.index(key)
+              start = text.rfind(start_marker, 0, key_at)
+              end = text.index(end_marker, key_at)
+              assert start >= 0 and end > start
+              return text[:start] + replacement + text[end:]
+
+          app = Path('lib/src/app.dart')
+          text = app.read_text()
+          text = replace_section(
+              text,
+              "'CHOOSE YOUR CARDS'",
+              '        Row(\n',
+              '        const SizedBox(height: 9),',
+              """        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                mysticText(
+                  widget.language,
+                  'CHOOSE YOUR CARDS',
+                  'KARTLARINI SEÇ',
+                ),
+                maxLines: 2,
+                style: const TextStyle(
+                  fontFamily: 'Arial',
+                  color: MysticColors.gold,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.15,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                mysticText(
+                  widget.language,
+                  'Trust the first pull',
+                  'İlk çekime güven',
+                ),
+                maxLines: 2,
+                textAlign: TextAlign.end,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 10),
+              ),
+            ),
+          ],
+        ),
+""",
+          )
+          text = replace_section(
+              text,
+              "'The first signal is forming…'",
+              '              firstChild: Center(\n',
+              '              secondChild:',
+              """              firstChild: Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: MysticColors.gold,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      mysticText(
+                        widget.language,
+                        'The first signal is forming…',
+                        'İlk işaret şekilleniyor…',
+                      ),
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Arial',
+                        color: MysticColors.lavender,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+""",
+          )
+          text = replace_section(
+              text,
+              "'The rest of your spread'",
+              '            Row(\n',
+              '            const SizedBox(height: 12),',
+              """            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    mysticText(
+                      widget.language,
+                      'The rest of your spread',
+                      'Açılımının geri kalanı',
+                    ),
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    mysticText(
+                      widget.language,
+                      '${widget.kind.cardCount - 1} LOCKED',
+                      '${widget.kind.cardCount - 1} KİLİTLİ',
+                    ),
+                    maxLines: 2,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontFamily: 'Arial',
+                      color: MysticColors.gold,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+""",
+          )
+          app.write_text(text)
+
+          widgets = Path('lib/src/widgets.dart')
+          value = widgets.read_text()
+          start = value.index('  @override\n  Widget build(BuildContext context) => SizedBox(', value.index('class GoldButton'))
+          end = value.index('\n}\n\nclass TarotCardFace', start)
+          replacement = """  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            foregroundColor: MysticColors.ink,
+            backgroundColor: MysticColors.gold,
+            disabledBackgroundColor: MysticColors.gold.withValues(alpha: .25),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) Icon(icon, size: 18),
+              if (icon != null) const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );"""
+          widgets.write_text(value[:start] + replacement + value[end:])
+
+          tests = Path('test/widget_test.dart')
+          test_text = tests.read_text()
+          old = """      MysticLanguage.spanish,
+      MysticLanguage.portugueseBrazil,
+"""
+          new = """      MysticLanguage.spanish,
+      MysticLanguage.french,
+      MysticLanguage.portugueseBrazil,
+"""
+          assert old in test_text
+          tests.write_text(test_text.replace(old, new, 1))
+          PY
+          rm -f .responsive-trigger
+          rm -f .github/workflows/fix-french-responsive.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git diff --cached --check
+          git commit -m 'fix: make multilingual reading layouts responsive'
+          git push origin HEAD:release/french-and-quality
+
   test-and-build:
     runs-on: ubuntu-latest
     steps:
