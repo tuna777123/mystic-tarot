@@ -3,6 +3,8 @@ name: French Quality Snapshot
 on:
   push:
     branches: [release/french-and-quality]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
