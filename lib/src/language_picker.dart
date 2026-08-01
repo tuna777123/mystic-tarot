@@ -19,7 +19,7 @@ class AppLanguagePicker extends StatelessWidget {
   Widget build(BuildContext context) => Wrap(
         spacing: 10,
         runSpacing: 10,
-        children: AppLanguage.values
+        children: AppLanguage.launchValues
             .map(
               (language) => ChoiceChip(
                 key: ValueKey(language),
