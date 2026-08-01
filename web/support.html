@@ -7,6 +7,19 @@
   <meta name="theme-color" content="#090816">
   <title>Support — Mystic Tarot</title>
   <link rel="stylesheet" href="legal.css">
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('stay') === 'en') return;
+      const language = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+      const target = language.startsWith('tr') ? 'support-tr.html'
+        : language.startsWith('fr') ? 'support-fr.html'
+        : language.startsWith('es') ? 'support-es.html'
+        : language.startsWith('pt') ? 'support-pt-br.html'
+        : null;
+      if (target) window.location.replace(target);
+    })();
+  </script>
 </head>
 <body>
 <main>
@@ -47,8 +60,8 @@
     <p>Mystic Tarot is not a crisis or emergency service. If you or someone else may be in immediate danger, contact local emergency services.</p>
   </div>
 
-  <p class="updated">Support information updated July 31, 2026</p>
-  <nav><a href="./">Open Mystic Tarot</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a><a href="support-tr.html" lang="tr">Türkçe</a><a href="support-fr.html" lang="fr">Français</a></nav>
+  <p class="updated">Support information updated August 2, 2026</p>
+  <nav><a href="./">Open Mystic Tarot</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a><a href="support-tr.html" lang="tr">Türkçe</a><a href="support-fr.html" lang="fr">Français</a><a href="support-es.html" lang="es">Español</a><a href="support-pt-br.html" lang="pt-BR">Português (Brasil)</a></nav>
 </main>
 </body>
 </html>
