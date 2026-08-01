@@ -1,0 +1,302 @@
+name: Fix French Responsive Layouts
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fix-french-responsive-pr
+  cancel-in-progress: true
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.ref == 'release/french-and-quality'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/french-and-quality
+      - name: Apply responsive multilingual layouts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          app = Path('lib/src/app.dart')
+          text = app.read_text()
+
+          old_selection = """        Row(
+          children: [
+            Text(
+              mysticText(
+                widget.language,
+                'CHOOSE YOUR CARDS',
+                'KARTLARINI SEÇ',
+              ),
+              style: const TextStyle(
+                fontFamily: 'Arial',
+                color: MysticColors.gold,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.15,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              mysticText(
+                widget.language,
+                'Trust the first pull',
+                'İlk çekime güven',
+              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontSize: 10),
+            ),
+          ],
+        ),
+          """
+          new_selection = """        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                mysticText(
+                  widget.language,
+                  'CHOOSE YOUR CARDS',
+                  'KARTLARINI SEÇ',
+                ),
+                maxLines: 2,
+                style: const TextStyle(
+                  fontFamily: 'Arial',
+                  color: MysticColors.gold,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.15,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                mysticText(
+                  widget.language,
+                  'Trust the first pull',
+                  'İlk çekime güven',
+                ),
+                maxLines: 2,
+                textAlign: TextAlign.end,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontSize: 10),
+              ),
+            ),
+          ],
+        ),
+          """
+          assert old_selection in text
+          text = text.replace(old_selection, new_selection, 1)
+
+          old_signal = """              firstChild: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: MysticColors.gold,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      mysticText(
+                        widget.language,
+                        'The first signal is forming…',
+                        'İlk işaret şekilleniyor…',
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Arial',
+                        color: MysticColors.lavender,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          """
+          new_signal = """              firstChild: Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: MysticColors.gold,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      mysticText(
+                        widget.language,
+                        'The first signal is forming…',
+                        'İlk işaret şekilleniyor…',
+                      ),
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Arial',
+                        color: MysticColors.lavender,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          """
+          assert old_signal in text
+          text = text.replace(old_signal, new_signal, 1)
+
+          old_rest = """            Row(
+              children: [
+                Text(
+                  mysticText(
+                    widget.language,
+                    'The rest of your spread',
+                    'Açılımının geri kalanı',
+                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                Text(
+                  mysticText(
+                    widget.language,
+                    '${widget.kind.cardCount - 1} LOCKED',
+                    '${widget.kind.cardCount - 1} KİLİTLİ',
+                  ),
+                  style: const TextStyle(
+                    fontFamily: 'Arial',
+                    color: MysticColors.gold,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+              ],
+            ),
+          """
+          new_rest = """            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    mysticText(
+                      widget.language,
+                      'The rest of your spread',
+                      'Açılımının geri kalanı',
+                    ),
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    mysticText(
+                      widget.language,
+                      '${widget.kind.cardCount - 1} LOCKED',
+                      '${widget.kind.cardCount - 1} KİLİTLİ',
+                    ),
+                    maxLines: 2,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontFamily: 'Arial',
+                      color: MysticColors.gold,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .8,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          """
+          assert old_rest in text
+          app.write_text(text.replace(old_rest, new_rest, 1))
+
+          widgets = Path('lib/src/widgets.dart')
+          value = widgets.read_text()
+          old_button = """  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: FilledButton.icon(
+          onPressed: onPressed,
+          icon: icon == null ? const SizedBox.shrink() : Icon(icon, size: 18),
+          label: Text(label),
+          style: FilledButton.styleFrom(
+            foregroundColor: MysticColors.ink,
+            backgroundColor: MysticColors.gold,
+            disabledBackgroundColor: MysticColors.gold.withValues(alpha: .25),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+        ),
+      );
+          """
+          new_button = """  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            foregroundColor: MysticColors.ink,
+            backgroundColor: MysticColors.gold,
+            disabledBackgroundColor: MysticColors.gold.withValues(alpha: .25),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null) Icon(icon, size: 18),
+              if (icon != null) const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+          """
+          assert old_button in value
+          widgets.write_text(value.replace(old_button, new_button, 1))
+
+          tests = Path('test/widget_test.dart')
+          test_text = tests.read_text()
+          old_languages = """      MysticLanguage.spanish,
+      MysticLanguage.portugueseBrazil,
+          """
+          new_languages = """      MysticLanguage.spanish,
+      MysticLanguage.french,
+      MysticLanguage.portugueseBrazil,
+          """
+          assert old_languages in test_text
+          tests.write_text(test_text.replace(old_languages, new_languages, 1))
+          PY
+          rm .github/workflows/fix-french-responsive.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git diff --cached --check
+          git commit -m 'fix: make multilingual reading layouts responsive'
+          git push origin HEAD:release/french-and-quality
