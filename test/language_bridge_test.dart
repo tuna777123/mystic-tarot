@@ -4,28 +4,18 @@ import 'package:mystic_tarot/src/flagship.dart';
 import 'package:mystic_tarot/src/language_bridge.dart';
 
 void main() {
-  test('Turkish keeps Turkish legacy rendering', () {
-    expect(AppLanguage.turkish.legacyLanguage, MysticLanguage.turkish);
-  });
-
-  test('new languages use English legacy rendering during migration', () {
-    for (final language in <AppLanguage>[
-      AppLanguage.spanish,
-      AppLanguage.french,
-      AppLanguage.portugueseBrazil,
-      AppLanguage.italian,
-      AppLanguage.german,
-    ]) {
-      expect(language.legacyLanguage, MysticLanguage.english);
+  test('every app language keeps its exact legacy rendering language', () {
+    for (final language in AppLanguage.values) {
+      expect(language.legacyLanguage.appLanguage, language);
     }
   });
 
-  test('selection state preserves exact seven-language choice', () {
+  test('selection state preserves Brazilian Portuguese exactly', () {
     const initial = LanguageSelectionState(AppLanguage.english);
     final selected = initial.select(AppLanguage.portugueseBrazil);
 
     expect(selected.appLanguage, AppLanguage.portugueseBrazil);
     expect(selected.storageValue, 'pt_BR');
-    expect(selected.legacyLanguage, MysticLanguage.english);
+    expect(selected.legacyLanguage, MysticLanguage.portugueseBrazil);
   });
 }

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'models.dart';
+import 'mystic_text_catalog.dart';
 import 'tarot_data.dart';
 import 'tarot_localization.dart';
 import 'theme.dart';
@@ -26,8 +27,10 @@ enum MysticLanguage {
   final String code;
 }
 
-String mysticText(MysticLanguage language, String english, String turkish) =>
-    language == MysticLanguage.turkish ? turkish : english;
+String mysticText(MysticLanguage language, String english, String turkish) {
+  if (language == MysticLanguage.turkish) return turkish;
+  return MysticTextCatalog.translate(language.code, english);
+}
 
 class ArcanaChapter {
   const ArcanaChapter({
@@ -249,6 +252,19 @@ class _DestinyMap extends StatelessWidget {
     final focus = _dominantFocus(recent, language);
     final currentIndex = min(21, completedDays.length);
     final currentCard = tarotDeck[currentIndex];
+    final currentCardName = localizedTarotCardName(
+      currentCard.name,
+      languageCode: language.code,
+    );
+    final currentEmotion = localizedEmotionLabel(
+      emotion,
+      languageCode: language.code,
+    );
+    final currentRitual = mysticText(
+      language,
+      arcanaChapters[currentIndex].ritualEn,
+      arcanaChapters[currentIndex].ritualTr,
+    );
     final hasSignal = recent.length >= 2;
     return ListView(key: const ValueKey('map'), padding: const EdgeInsets.fromLTRB(18, 8, 18, 30), children: [
       Container(
@@ -271,7 +287,7 @@ class _DestinyMap extends StatelessWidget {
             ),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(currentCard.symbol, style: const TextStyle(fontSize: 36, color: MysticColors.ink)),
-              Text(localizedTarotCardName(currentCard.name, turkish: language == MysticLanguage.turkish), textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900)),
+              Text(localizedTarotCardName(currentCard.name, languageCode: language.code), textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.ink, fontSize: 8, fontWeight: FontWeight.w900)),
             ]),
           )),
           Positioned(left: 18, top: 17, child: Text(mysticText(language, 'YOUR LIVING SIGNALS', 'YAŞAYAN SİNYALLERİN'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.2))),
@@ -287,8 +303,8 @@ class _DestinyMap extends StatelessWidget {
       const SizedBox(height: 18),
       Text(mysticText(language, 'What your path is saying', 'Yolunun söylediği şey'), style: Theme.of(context).textTheme.titleLarge),
       const SizedBox(height: 10),
-      _signalTile(context, '◉', mysticText(language, 'RECURRING SYMBOL', 'TEKRARLAYAN SEMBOL'), recurring == null ? mysticText(language, 'No repeated card yet', 'Henüz tekrarlayan kart yok') : '${localizedTarotCardName(recurring.$1, turkish: language == MysticLanguage.turkish)} ×${recurring.$2}', MysticColors.gold),
-      _signalTile(context, emotion.symbol, mysticText(language, 'INNER WEATHER', 'İÇ HAVA'), recent.isEmpty ? mysticText(language, 'Waiting for your first reading', 'İlk okumanı bekliyor') : localizedEmotionLabel(emotion, turkish: language == MysticLanguage.turkish), MysticColors.lavender),
+      _signalTile(context, '◉', mysticText(language, 'RECURRING SYMBOL', 'TEKRARLAYAN SEMBOL'), recurring == null ? mysticText(language, 'No repeated card yet', 'Henüz tekrarlayan kart yok') : '${localizedTarotCardName(recurring.$1, languageCode: language.code)} ×${recurring.$2}', MysticColors.gold),
+      _signalTile(context, emotion.symbol, mysticText(language, 'INNER WEATHER', 'İÇ HAVA'), recent.isEmpty ? mysticText(language, 'Waiting for your first reading', 'İlk okumanı bekliyor') : localizedEmotionLabel(emotion, languageCode: language.code), MysticColors.lavender),
       _signalTile(context, '✦', mysticText(language, 'ACTIVE LIFE AREA', 'AKTİF YAŞAM ALANI'), focus, const Color(0xFF82D8D0)),
       const SizedBox(height: 8),
       Container(
@@ -299,13 +315,13 @@ class _DestinyMap extends StatelessWidget {
           border: Border.all(color: MysticColors.gold.withValues(alpha: .23)),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(mysticText(language, 'CURRENT CHAPTER • ${currentCard.name.toUpperCase()}', 'MEVCUT BÖLÜM • ${localizedTarotCardName(currentCard.name, turkish: true).toUpperCase()}'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)),
+          Text(mysticText(language, 'CURRENT CHAPTER • ${currentCardName.toUpperCase()}', 'MEVCUT BÖLÜM • ${localizedTarotCardName(currentCard.name, turkish: true).toUpperCase()}'), style: const TextStyle(fontFamily: 'Arial', color: MysticColors.gold, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .9)),
           const SizedBox(height: 9),
           Text(mysticText(language, arcanaChapters[currentIndex].focusEn, arcanaChapters[currentIndex].focusTr), style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 7),
           Text(
             hasSignal
-                ? mysticText(language, 'Your recent $focus questions have carried ${emotion.label.toLowerCase()} energy. This chapter asks you to ${arcanaChapters[currentIndex].ritualEn.toLowerCase()}', 'Son $focus soruların ${localizedEmotionLabel(emotion, turkish: true).toLowerCase()} enerjisi taşıdı. Bu bölüm senden şunu istiyor: ${arcanaChapters[currentIndex].ritualTr}')
+                ? mysticText(language, 'Your recent $focus questions have carried ${currentEmotion.toLowerCase()} energy. This chapter asks you to ${currentRitual.toLowerCase()}', 'Son $focus soruların ${localizedEmotionLabel(emotion, turkish: true).toLowerCase()} enerjisi taşıdı. Bu bölüm senden şunu istiyor: ${arcanaChapters[currentIndex].ritualTr}')
                 : mysticText(language, 'Begin with one honest reading. Mystic will connect the cards, emotions, and actions that return.', 'Dürüst bir okumayla başla. Mystic tekrar eden kartları, duyguları ve eylemleri birbirine bağlayacak.'),
             style: Theme.of(context).textTheme.bodyLarge,
           ),
@@ -504,7 +520,7 @@ class _ChapterHero extends StatelessWidget {
             const SizedBox(height: 18),
             Text(card.symbol, style: const TextStyle(fontSize: 65, color: MysticColors.gold)),
             const SizedBox(height: 12),
-            Text(localizedTarotCardName(card.name, turkish: language == MysticLanguage.turkish), style: Theme.of(context).textTheme.headlineMedium),
+            Text(localizedTarotCardName(card.name, languageCode: language.code), style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 4),
             Text(card.number, style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontWeight: FontWeight.bold)),
           ]),
@@ -592,7 +608,7 @@ class _StoryStudioScreenState extends State<StoryStudioScreen> with SingleTicker
       final image = await boundary.toImage(pixelRatio: 3);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null) throw StateError('Story image could not be encoded');
-      final cards = widget.record.cards.map((item) => localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)).join(' • ');
+      final cards = widget.record.cards.map((item) => localizedTarotCardName(item.card.name, languageCode: widget.language.code)).join(' • ');
       await SharePlus.instance.share(ShareParams(
         title: 'Mystic Tarot',
         text: '$cards\nhttps://tuna777123.github.io/mystic-tarot/',
@@ -601,7 +617,7 @@ class _StoryStudioScreenState extends State<StoryStudioScreen> with SingleTicker
         sharePositionOrigin: shareOrigin,
       ));
     } catch (_) {
-      await Clipboard.setData(ClipboardData(text: '${widget.record.cards.map((item) => localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)).join(' • ')}\n${widget.guidance}\nhttps://tuna777123.github.io/mystic-tarot/'));
+      await Clipboard.setData(ClipboardData(text: '${widget.record.cards.map((item) => localizedTarotCardName(item.card.name, languageCode: widget.language.code)).join(' • ')}\n${widget.guidance}\nhttps://tuna777123.github.io/mystic-tarot/'));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mysticText(widget.language, 'Sharing was unavailable, so your reading was copied.', 'Paylaşım kullanılamadı; okuman panoya kopyalandı.'))));
     } finally {
@@ -653,7 +669,7 @@ class _StoryCanvas extends StatelessWidget {
               const SizedBox(height: 20),
               Transform.rotate(angle: item.reversed ? pi : 0, child: Text(item.card.symbol, style: TextStyle(fontSize: record.cards.length == 1 ? 44 : 31, color: accent))),
               const SizedBox(height: 18),
-              Text(localizedTarotCardName(item.card.name, turkish: language == MysticLanguage.turkish), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 8, fontWeight: FontWeight.w800)),
+              Text(localizedTarotCardName(item.card.name, languageCode: language.code), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Arial', fontSize: 8, fontWeight: FontWeight.w800)),
             ]),
           )).toList())),
           const SizedBox(height: 18),
@@ -672,21 +688,8 @@ class _StoryCanvas extends StatelessWidget {
     );
   }
 
-  static String widgetKind(ReadingKind kind, MysticLanguage language) {
-    if (language == MysticLanguage.english) return kind.title;
-    return switch (kind) {
-      ReadingKind.daily => 'Günlük Rehberlik',
-      ReadingKind.love => 'Aşk ve Bağ',
-      ReadingKind.career => 'Kariyer Yolu',
-      ReadingKind.money => 'Para Enerjisi',
-      ReadingKind.decision => 'Karar',
-      ReadingKind.spiritual => 'Ruhsal Gelişim',
-      ReadingKind.shadow => 'Gölge Çalışması',
-      ReadingKind.compatibility => 'Aşk Uyumu',
-      ReadingKind.timeline => 'Gelecek Zaman Çizgisi',
-      ReadingKind.celticCross => 'Kelt Haçı',
-    };
-  }
+  static String widgetKind(ReadingKind kind, MysticLanguage language) =>
+      localizedReadingKindTitle(kind, languageCode: language.code);
 }
 
 class _FateMapPainter extends CustomPainter {
@@ -796,6 +799,6 @@ String _dominantFocus(
       counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   return localizedReadingKindTitle(
     kind,
-    turkish: language == MysticLanguage.turkish,
+    languageCode: language.code,
   );
 }

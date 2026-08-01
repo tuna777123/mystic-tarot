@@ -32,10 +32,10 @@ class _MysticLivingJournalFeatureState
   _JournalSection section = _JournalSection.timeline;
   String query = '';
 
-  bool get _isTurkish => widget.language == MysticLanguage.turkish;
+  String get _languageCode => widget.language.code;
 
   String _copy(String english, String turkish) =>
-      _isTurkish ? turkish : english;
+      mysticText(widget.language, english, turkish);
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +198,7 @@ class _MysticLivingJournalFeatureState
     final cards = record.cards.map((drawn) {
       final orientation =
           drawn.reversed ? _copy('reversed', 'ters') : _copy('upright', 'düz');
-      return '${localizedTarotCardName(drawn.card.name, turkish: _isTurkish)} · $orientation';
+      return '${localizedTarotCardName(drawn.card.name, languageCode: _languageCode)} · $orientation';
     }).join('\n');
 
     return Container(
@@ -234,7 +234,7 @@ class _MysticLivingJournalFeatureState
                     Text(
                       localizedReadingKindTitle(
                         record.kind,
-                        turkish: _isTurkish,
+                        languageCode: _languageCode,
                       ),
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
@@ -250,7 +250,7 @@ class _MysticLivingJournalFeatureState
                 ),
               ),
               Text(
-                '${record.emotion.symbol} ${localizedEmotionLabel(record.emotion, turkish: _isTurkish)}',
+                '${record.emotion.symbol} ${localizedEmotionLabel(record.emotion, languageCode: _languageCode)}',
                 style: const TextStyle(
                   color: MysticColors.lavender,
                   fontSize: 11,
@@ -349,7 +349,7 @@ class _MysticLivingJournalFeatureState
           title: _copy('Cards returning to you', 'Sana dönen kartlar'),
           rows: rankedCards.take(4).map((entry) {
             return _InsightRow(
-              localizedTarotCardName(entry.key, turkish: _isTurkish),
+              localizedTarotCardName(entry.key, languageCode: _languageCode),
               '${entry.value}×',
             );
           }).toList(),
@@ -529,15 +529,15 @@ class _MysticLivingJournalFeatureState
     return widget.records.where((record) {
       final searchableText = <String>[
         record.kind.title,
-        localizedReadingKindTitle(record.kind, turkish: _isTurkish),
+        localizedReadingKindTitle(record.kind, languageCode: _languageCode),
         record.question,
         record.emotion.label,
-        localizedEmotionLabel(record.emotion, turkish: _isTurkish),
+        localizedEmotionLabel(record.emotion, languageCode: _languageCode),
         record.alignedAction,
         ...record.cards.map((drawn) => drawn.card.name),
         ...record.cards.map(
           (drawn) =>
-              localizedTarotCardName(drawn.card.name, turkish: _isTurkish),
+              localizedTarotCardName(drawn.card.name, languageCode: _languageCode),
         ),
       ].join(' ').toLowerCase();
       return searchableText.contains(normalized);

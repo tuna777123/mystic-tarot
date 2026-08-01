@@ -26,6 +26,8 @@ import 'widgets.dart';
 const launchLanguages = <MysticLanguage>[
   MysticLanguage.english,
   MysticLanguage.turkish,
+  MysticLanguage.spanish,
+  MysticLanguage.portugueseBrazil,
 ];
 
 class MysticApp extends StatefulWidget {
@@ -883,7 +885,7 @@ class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog>
 
   String _cardName(String name) => localizedTarotCardName(
     name,
-    turkish: widget.language == MysticLanguage.turkish,
+    languageCode: widget.language.code,
   );
 }
 
@@ -2063,7 +2065,7 @@ class _PersonalSignal extends StatelessWidget {
         ? null
         : localizedTarotCardName(
             recurringCard.key,
-            turkish: language == MysticLanguage.turkish,
+            languageCode: language.code,
           );
     final title = hasPattern
         ? mysticText(
@@ -2085,7 +2087,7 @@ class _PersonalSignal extends StatelessWidget {
         : dominantEmotion != null && hasPattern
         ? mysticText(
             language,
-            'You have entered recent readings feeling ${dominantEmotion.key.label.toLowerCase()}. Your next reading will hold that emotional thread in view.',
+            'You have entered recent readings feeling ${_emotionLabel(dominantEmotion.key, language).toLowerCase()}. Your next reading will hold that emotional thread in view.',
             'Son okumalarına ${_emotionLabel(dominantEmotion.key, language).toLowerCase()} hissederek girdin. Sonraki okuman bu duygusal izi dikkate alacak.',
           )
         : mysticText(
@@ -3354,21 +3356,27 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   Widget _interpretation(BuildContext context, int index, DrawnCard card) {
-    final positions = widget.language == MysticLanguage.turkish
-        ? const [
-            'Seni çevreleyen enerji',
-            'Dikkat isteyen konu',
-            'Sıradaki uyumlu adım',
-          ]
-        : const [
-            'What surrounds you',
-            'What asks for attention',
-            'Your next aligned step',
-          ];
+    final positions = <String>[
+      mysticText(
+        widget.language,
+        'What surrounds you',
+        'Seni çevreleyen enerji',
+      ),
+      mysticText(
+        widget.language,
+        'What asks for attention',
+        'Dikkat isteyen konu',
+      ),
+      mysticText(
+        widget.language,
+        'Your next aligned step',
+        'Sıradaki uyumlu adım',
+      ),
+    ];
     final meaning = _localizedCardMeaning(card, widget.language);
     final cardName = localizedTarotCardName(
       card.card.name,
-      turkish: widget.language == MysticLanguage.turkish,
+      languageCode: widget.language.code,
     );
     return Padding(
       padding: const EdgeInsets.only(bottom: 22),
@@ -3439,7 +3447,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
         .map(
           (item) => localizedTarotCardName(
             item.card.name,
-            turkish: widget.language == MysticLanguage.turkish,
+            languageCode: widget.language.code,
           ),
         )
         .toList();
@@ -3451,7 +3459,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
           )
         : mysticText(
             widget.language,
-            'Your previous reading began from ${previous.emotion.label.toLowerCase()}; today you chose ${emotion.label.toLowerCase()}. Mystic is connecting the emotional shift—not just the cards.',
+            'Your previous reading began from ${localizedEmotionLabel(previous.emotion, languageCode: widget.language.code).toLowerCase()}; today you chose ${localizedEmotionLabel(emotion, languageCode: widget.language.code).toLowerCase()}. Mystic is connecting the emotional shift—not just the cards.',
             'Önceki okuman ${_emotionLabel(previous.emotion, widget.language).toLowerCase()} duygusuyla başlamıştı; bugün ${_emotionLabel(emotion, widget.language).toLowerCase()} seçtin. Mystic yalnızca kartları değil, duygusal değişimi de birbirine bağlıyor.',
           );
     return Container(
@@ -3634,7 +3642,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
   );
   String _guidance() => mysticText(
     widget.language,
-    '${drawn!.last.card.advice} Hold this beside your intention of ${widget.intention.toLowerCase()}. Let it be an invitation, not a command, and notice what changes over the next twenty-four hours.',
+    '${_localizedCardAdvice(drawn!.last, widget.language)} Hold this beside your intention of ${_localizedIntention(widget.intention, widget.language).toLowerCase()}. Let it be an invitation, not a command, and notice what changes over the next twenty-four hours.',
     '${_localizedCardAdvice(drawn!.last, widget.language)} Bunu seçtiğin niyetin yanında tut. Bir emir değil, davet olarak gör ve önümüzdeki yirmi dört saatte neyin değiştiğini fark et.',
   );
   String _alignedAction() {
@@ -3786,7 +3794,7 @@ class _RevealRitualState extends State<_RevealRitual>
         widget.question.isEmpty
             ? mysticText(
                 widget.language,
-                'Hold your ${widget.kind.title.toLowerCase()} intention in mind. Exhale once, then open the seal when you feel ready.',
+                'Hold your ${localizedReadingKindTitle(widget.kind, languageCode: widget.language.code).toLowerCase()} intention in mind. Exhale once, then open the seal when you feel ready.',
                 '${_readingKindTitle(widget.kind, widget.language)} niyetini zihninde tut. Bir kez nefes ver, hazır hissettiğinde mührü aç.',
               )
             : '“${widget.question}”',
@@ -4082,7 +4090,7 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
             Text(
               mysticText(
                 widget.language,
-                'Ask one question about the cards you just revealed. The answer will stay grounded in their symbols and your ${widget.intention.toLowerCase()} path.',
+                'Ask one question about the cards you just revealed. The answer will stay grounded in their symbols and your ${_localizedIntention(widget.intention, widget.language).toLowerCase()} path.',
                 'Az önce açtığın kartlarla ilgili bir soru sor. Cevap, kartların sembollerine ve seçtiğin yola bağlı kalacak.',
               ),
               textAlign: TextAlign.center,
@@ -4139,7 +4147,7 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
                   drawn: widget.record.cards[index],
                   displayName: localizedTarotCardName(
                     widget.record.cards[index].card.name,
-                    turkish: widget.language == MysticLanguage.turkish,
+                    languageCode: widget.language.code,
                   ),
                   reversedLabel: mysticText(
                     widget.language,
@@ -4429,51 +4437,99 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   );
 
   List<String> _suggestions() {
-    if (widget.language == MysticLanguage.turkish) {
-      switch (widget.record.kind) {
-        case ReadingKind.love:
-        case ReadingKind.compatibility:
-          return [
-            'Bu bağda görmediğim şey ne?',
-            'Hangi sınır veya gerçek dikkatimi istiyor?',
-            'Daha sağlıklı bir sonraki adım nasıl görünür?',
-          ];
-        case ReadingKind.career:
-        case ReadingKind.money:
-          return [
-            'Bu kartlardaki gerçek fırsat nerede?',
-            'Hangi riski küçümsüyorum?',
-            'Atabileceğim en küçük faydalı adım ne?',
-          ];
-        default:
-          return [
-            'Henüz görmediğim şey ne?',
-            'Şu anda en önemli kart hangisi?',
-            'Önümüzdeki 24 saate ne taşımalıyım?',
-          ];
-      }
-    }
-    switch (widget.record.kind) {
-      case ReadingKind.love:
-      case ReadingKind.compatibility:
-        return [
-          'What am I not seeing in this connection?',
-          'What boundary or truth needs my attention?',
-          'What would a healthier next step look like?',
-        ];
-      case ReadingKind.career:
-      case ReadingKind.money:
-        return [
-          'Where is the real opportunity in these cards?',
-          'What risk am I underestimating?',
-          'What is the smallest useful next move?',
-        ];
+    switch (widget.language) {
+      case MysticLanguage.turkish:
+        switch (widget.record.kind) {
+          case ReadingKind.love:
+          case ReadingKind.compatibility:
+            return const [
+              'Bu bağda görmediğim şey ne?',
+              'Hangi sınır veya gerçek dikkatimi istiyor?',
+              'Daha sağlıklı bir sonraki adım nasıl görünür?',
+            ];
+          case ReadingKind.career:
+          case ReadingKind.money:
+            return const [
+              'Bu kartlardaki gerçek fırsat nerede?',
+              'Hangi riski küçümsüyorum?',
+              'Atabileceğim en küçük faydalı adım ne?',
+            ];
+          default:
+            return const [
+              'Henüz görmediğim şey ne?',
+              'Şu anda en önemli kart hangisi?',
+              'Önümüzdeki 24 saate ne taşımalıyım?',
+            ];
+        }
+      case MysticLanguage.spanish:
+        switch (widget.record.kind) {
+          case ReadingKind.love:
+          case ReadingKind.compatibility:
+            return const [
+              '¿Qué no estoy viendo en esta conexión?',
+              '¿Qué límite o verdad necesita mi atención?',
+              '¿Cómo sería un siguiente paso más saludable?',
+            ];
+          case ReadingKind.career:
+          case ReadingKind.money:
+            return const [
+              '¿Dónde está la verdadera oportunidad en estas cartas?',
+              '¿Qué riesgo estoy subestimando?',
+              '¿Cuál es el siguiente paso útil más pequeño?',
+            ];
+          default:
+            return const [
+              '¿Qué no estoy viendo todavía?',
+              '¿Qué carta importa más en este momento?',
+              '¿Qué debería llevar conmigo durante las próximas 24 horas?',
+            ];
+        }
+      case MysticLanguage.portugueseBrazil:
+        switch (widget.record.kind) {
+          case ReadingKind.love:
+          case ReadingKind.compatibility:
+            return const [
+              'O que não estou vendo nesta conexão?',
+              'Qual limite ou verdade precisa da minha atenção?',
+              'Como seria um próximo passo mais saudável?',
+            ];
+          case ReadingKind.career:
+          case ReadingKind.money:
+            return const [
+              'Onde está a verdadeira oportunidade nestas cartas?',
+              'Que risco estou subestimando?',
+              'Qual é o menor próximo passo útil?',
+            ];
+          default:
+            return const [
+              'O que ainda não estou vendo?',
+              'Qual carta mais importa agora?',
+              'O que devo levar para as próximas 24 horas?',
+            ];
+        }
       default:
-        return [
-          'What am I not seeing yet?',
-          'Which card matters most right now?',
-          'What should I carry into the next 24 hours?',
-        ];
+        switch (widget.record.kind) {
+          case ReadingKind.love:
+          case ReadingKind.compatibility:
+            return const [
+              'What am I not seeing in this connection?',
+              'What boundary or truth needs my attention?',
+              'What would a healthier next step look like?',
+            ];
+          case ReadingKind.career:
+          case ReadingKind.money:
+            return const [
+              'Where is the real opportunity in these cards?',
+              'What risk am I underestimating?',
+              'What is the smallest useful next move?',
+            ];
+          default:
+            return const [
+              'What am I not seeing yet?',
+              'Which card matters most right now?',
+              'What should I carry into the next 24 hours?',
+            ];
+        }
     }
   }
 
@@ -4497,28 +4553,102 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     final first = widget.record.cards.first;
     final last = widget.record.cards.last;
     final firstMeaning = _localizedCardMeaning(first, widget.language);
+    final lastMeaning = _localizedCardMeaning(last, widget.language);
+    final lastAdvice = _localizedCardAdvice(last, widget.language);
+    final firstName = localizedTarotCardName(
+      first.card.name,
+      languageCode: widget.language.code,
+    );
+    final lastName = localizedTarotCardName(
+      last.card.name,
+      languageCode: widget.language.code,
+    );
+    final emotion = _emotionLabel(widget.record.emotion, widget.language);
     final lower = question.toLowerCase();
     final memory = _oracleMemory();
-    if (widget.language == MysticLanguage.turkish) {
-      if (lower.contains('gör') || lower.contains('risk')) {
-        return '${localizedTarotCardName(first.card.name, turkish: true)}, görünmeyen kısmın şu olabileceğini söylüyor: $firstMeaning ${_localizedCardAdvice(last, widget.language)} ${_emotionLabel(widget.record.emotion, widget.language)} duygusu bir ayrıntıyı diğerlerinden daha yüksek gösterebilir. Bildiklerini, korktuklarını ve umut ettiklerini ayır.$memory';
-      }
-      if (lower.contains('hangi kart') || lower.contains('önemli')) {
-        return '${localizedTarotCardName(last.card.name, turkish: true)} bu açılımın kapanış ağırlığını taşıyor. ${_localizedCardMeaning(last, widget.language)} Pratik daveti şu: ${_localizedCardAdvice(last, widget.language)} Bunun seçtiğin yolu nasıl desteklediğine dikkat et.$memory';
-      }
-      return '${localizedTarotCardName(first.card.name, turkish: true)} içine girdiğin enerjiyi, ${localizedTarotCardName(last.card.name, turkish: true)} ise verebileceğin karşılığı gösteriyor. ${_localizedCardAdvice(last, widget.language)} Sonraki adımı küçük, gözlemlenebilir ve geri döndürülebilir tut; kartlar emir vermiyor, farklı bir bakış sunuyor.$memory';
-    }
-    if (lower.contains('not seeing') ||
+    final hiddenQuestion = lower.contains('not seeing') ||
         lower.contains('underestimating') ||
         lower.contains('risk') ||
         lower.contains('görm') ||
-        lower.contains('risk')) {
-      return '${first.card.name} suggests the hidden part may be this: $firstMeaning ${last.card.advice} Your ${widget.record.emotion.label.toLowerCase()} state can make one detail feel louder than the rest, so separate what you know from what you fear or hope.$memory';
+        lower.contains('riesgo') ||
+        lower.contains('viendo') ||
+        lower.contains('ocult') ||
+        lower.contains('risco') ||
+        lower.contains('vendo');
+    final keyCardQuestion = lower.contains('which card') ||
+        lower.contains('matter') ||
+        lower.contains('hangi kart') ||
+        lower.contains('önemli') ||
+        lower.contains('qué carta') ||
+        lower.contains('importa') ||
+        lower.contains('qual carta');
+
+    switch (widget.language) {
+      case MysticLanguage.turkish:
+        if (hiddenQuestion) {
+          return '$firstName, görünmeyen kısmın şu olabileceğini söylüyor: '
+              '$firstMeaning $lastAdvice ${emotion.toLowerCase()} duygusu bir '
+              'ayrıntıyı diğerlerinden daha yüksek gösterebilir. Bildiklerini, '
+              'korktuklarını ve umut ettiklerini ayır.$memory';
+        }
+        if (keyCardQuestion) {
+          return '$lastName bu açılımın kapanış ağırlığını taşıyor. '
+              '$lastMeaning Pratik daveti şu: $lastAdvice Bunun seçtiğin yolu '
+              'nasıl desteklediğine dikkat et.$memory';
+        }
+        return '$firstName içine girdiğin enerjiyi, $lastName ise verebileceğin '
+            'karşılığı gösteriyor. $lastAdvice Sonraki adımı küçük, '
+            'gözlemlenebilir ve geri döndürülebilir tut; kartlar emir vermiyor, '
+            'farklı bir bakış sunuyor.$memory';
+      case MysticLanguage.spanish:
+        if (hiddenQuestion) {
+          return '$firstName sugiere que la parte oculta puede ser esta: '
+              '$firstMeaning $lastAdvice Tu estado ${emotion.toLowerCase()} '
+              'puede hacer que un detalle parezca más importante que los demás. '
+              'Separa lo que sabes de lo que temes o esperas.$memory';
+        }
+        if (keyCardQuestion) {
+          return '$lastName lleva el peso final de esta tirada. $lastMeaning '
+              'Su invitación práctica es: $lastAdvice Observa cómo apoya tu '
+              'camino de ${_localizedIntention(widget.intention, widget.language).toLowerCase()}.$memory';
+        }
+        return '$firstName describe la energía en la que estás entrando, mientras '
+            'que $lastName señala la respuesta que tienes disponible. $lastAdvice '
+            'Mantén el siguiente paso pequeño, observable y reversible; las '
+            'cartas ofrecen una perspectiva, no una orden.$memory';
+      case MysticLanguage.portugueseBrazil:
+        if (hiddenQuestion) {
+          return '$firstName sugere que a parte oculta pode ser esta: '
+              '$firstMeaning $lastAdvice Seu estado ${emotion.toLowerCase()} '
+              'pode fazer um detalhe parecer mais forte do que os outros. '
+              'Separe o que você sabe do que teme ou espera.$memory';
+        }
+        if (keyCardQuestion) {
+          return '$lastName carrega o peso final desta tiragem. $lastMeaning '
+              'O convite prático é: $lastAdvice Observe como isso apoia seu '
+              'caminho de ${_localizedIntention(widget.intention, widget.language).toLowerCase()}.$memory';
+        }
+        return '$firstName descreve a energia em que você está entrando, enquanto '
+            '$lastName aponta para a resposta disponível. $lastAdvice Mantenha '
+            'o próximo passo pequeno, observável e reversível; as cartas oferecem '
+            'uma perspectiva, não uma ordem.$memory';
+      default:
+        if (hiddenQuestion) {
+          return '$firstName suggests the hidden part may be this: $firstMeaning '
+              '$lastAdvice Your ${emotion.toLowerCase()} state can make one detail '
+              'feel louder than the rest, so separate what you know from what you '
+              'fear or hope.$memory';
+        }
+        if (keyCardQuestion) {
+          return '$lastName carries the closing weight of this spread. $lastMeaning '
+              'Its practical invitation is simple: $lastAdvice Notice how that '
+              'supports your ${_localizedIntention(widget.intention, widget.language).toLowerCase()} path.$memory';
+        }
+        return '$firstName describes the energy you are entering, while $lastName '
+            'points toward the response available to you. $lastAdvice Keep the '
+            'next step small, observable, and reversible; the cards are offering '
+            'a lens, not issuing a command.$memory';
     }
-    if (lower.contains('which card') || lower.contains('matter')) {
-      return '${last.card.name} carries the closing weight of this spread. ${last.reversed ? last.card.shadow : last.card.light} Its practical invitation is simple: ${last.card.advice} Notice how that supports your ${widget.intention.toLowerCase()} path.$memory';
-    }
-    return '${first.card.name} describes the energy you are entering, while ${last.card.name} points toward the response available to you. ${last.card.advice} Keep the next step small, observable, and reversible; the cards are offering a lens, not issuing a command.$memory';
   }
 
   String _oracleMemory() {
@@ -4546,11 +4676,35 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     final dominant = emotionCounts.entries.reduce(
       (a, b) => a.value >= b.value ? a : b,
     );
-    if (widget.language == MysticLanguage.turkish) {
-      return ' Hafızandaki ${recent.length} okumada ${localizedTarotCardName(recurring.key, turkish: true)} ${recurring.value} kez göründü ve baskın başlangıç duygun ${localizedEmotionLabel(dominant.key, turkish: true).toLowerCase()} oldu. Bu bir kehanet değil; üzerinde düşünmeye değer tekrar eden bir iz.';
-    }
-    return ' Across ${recent.length} remembered readings, ${recurring.key} appeared ${recurring.value} times and ${dominant.key.label.toLowerCase()} was your most common starting emotion. That is not a prediction; it is a recurring thread worth examining.';
+    final cardName = localizedTarotCardName(
+      recurring.key,
+      languageCode: widget.language.code,
+    );
+    final emotion = localizedEmotionLabel(
+      dominant.key,
+      languageCode: widget.language.code,
+    ).toLowerCase();
+    return switch (widget.language) {
+      MysticLanguage.turkish =>
+        ' Hafızandaki ${recent.length} okumada $cardName ${recurring.value} kez '
+        'göründü ve baskın başlangıç duygun $emotion oldu. Bu bir kehanet değil; '
+        'üzerinde düşünmeye değer tekrar eden bir iz.',
+      MysticLanguage.spanish =>
+        ' En ${recent.length} lecturas recordadas, $cardName apareció '
+        '${recurring.value} veces y $emotion fue tu emoción inicial más común. '
+        'No es una predicción, sino un hilo recurrente que merece atención.',
+      MysticLanguage.portugueseBrazil =>
+        ' Em ${recent.length} leituras lembradas, $cardName apareceu '
+        '${recurring.value} vezes e $emotion foi sua emoção inicial mais comum. '
+        'Isso não é uma previsão, mas um fio recorrente que merece atenção.',
+      _ =>
+        ' Across ${recent.length} remembered readings, $cardName appeared '
+        '${recurring.value} times and $emotion was your most common starting '
+        'emotion. That is not a prediction; it is a recurring thread worth '
+        'examining.',
+    };
   }
+
 }
 
 class _RitualRevealCard extends StatefulWidget {
@@ -4599,7 +4753,7 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
             drawn: showFace ? widget.card : null,
             displayName: localizedTarotCardName(
               widget.card.card.name,
-              turkish: widget.language == MysticLanguage.turkish,
+              languageCode: widget.language.code,
             ),
             reversedLabel: mysticText(widget.language, 'Reversed', 'Ters'),
             style: widget.deckStyle,
@@ -4661,28 +4815,35 @@ class _ReadingInProgress extends StatelessWidget {
 String _readingKindTitle(ReadingKind kind, MysticLanguage language) {
   return localizedReadingKindTitle(
     kind,
-    turkish: language == MysticLanguage.turkish,
+    languageCode: language.code,
   );
 }
 
 String _emotionLabel(EmotionalState emotion, MysticLanguage language) {
   return localizedEmotionLabel(
     emotion,
-    turkish: language == MysticLanguage.turkish,
+    languageCode: language.code,
   );
 }
+
+String _localizedIntention(String value, MysticLanguage language) => switch (value) {
+  'Love' => mysticText(language, 'Love', 'Aşk'),
+  'Purpose' => mysticText(language, 'Purpose', 'Amaç'),
+  'Healing' => mysticText(language, 'Healing', 'İyileşme'),
+  _ => mysticText(language, 'Clarity', 'Netlik'),
+};
 
 String _localizedCardMeaning(DrawnCard drawn, MysticLanguage language) {
   return localizedTarotCardMeaning(
     drawn,
-    turkish: language == MysticLanguage.turkish,
+    languageCode: language.code,
   );
 }
 
 String _localizedCardAdvice(DrawnCard drawn, MysticLanguage language) {
   return localizedTarotCardAdvice(
     drawn,
-    turkish: language == MysticLanguage.turkish,
+    languageCode: language.code,
   );
 }
 
@@ -5387,7 +5548,7 @@ class _ArcanaVault extends StatelessWidget {
             unlocked
                 ? localizedTarotCardName(
                     card.name,
-                    turkish: language == MysticLanguage.turkish,
+                    languageCode: language.code,
                   )
                 : mysticText(language, 'Undiscovered', 'Keşfedilmedi'),
             maxLines: 2,
@@ -5574,7 +5735,7 @@ class _ArcanaVault extends StatelessWidget {
               unlocked
                   ? localizedTarotCardName(
                       card.name,
-                      turkish: language == MysticLanguage.turkish,
+                      languageCode: language.code,
                     )
                   : mysticText(language, 'Locked', 'Kilitli'),
               maxLines: 2,
@@ -5690,7 +5851,7 @@ class _ArcanaVault extends StatelessWidget {
                 Text(
                   localizedTarotCardName(
                     card.name,
-                    turkish: language == MysticLanguage.turkish,
+                    languageCode: language.code,
                   ),
                   textAlign: TextAlign.center,
                   style: Theme.of(dialogContext).textTheme.headlineMedium,
@@ -5842,7 +6003,7 @@ class _WeeklyMirror extends StatelessWidget {
                           )
                         : mysticText(
                             language,
-                            '${emotion.label} led your week • ${recent.length} reflections',
+                            '${localizedEmotionLabel(emotion, languageCode: language.code)} led your week • ${recent.length} reflections',
                             '${localizedEmotionLabel(emotion, turkish: true)} haftana yön verdi • ${recent.length} yansıma',
                           ),
                     style: Theme.of(
@@ -5927,7 +6088,7 @@ class _WeeklyMirror extends StatelessWidget {
                       )
                     : mysticText(
                         language,
-                        '${emotion.symbol} ${emotion.label} was your dominant inner weather.',
+                        '${emotion.symbol} ${localizedEmotionLabel(emotion, languageCode: language.code)} was your dominant inner weather.',
                         '${emotion.symbol} ${localizedEmotionLabel(emotion, turkish: true)} baskın iç havan oldu.',
                       ),
                 textAlign: TextAlign.center,
@@ -5948,7 +6109,7 @@ class _WeeklyMirror extends StatelessWidget {
                         ? mysticText(language, 'No card yet', 'Henüz kart yok')
                         : localizedTarotCardName(
                             card,
-                            turkish: language == MysticLanguage.turkish,
+                            languageCode: language.code,
                           ),
                     mysticText(language, 'REPEATING CARD', 'TEKRARLAYAN KART'),
                   ),
@@ -5964,7 +6125,7 @@ class _WeeklyMirror extends StatelessWidget {
                       )
                     : mysticText(
                         language,
-                        'Your invitation: notice where ${emotion.label.toLowerCase()} energy protected you—and where it quietly chose for you.',
+                        'Your invitation: notice where ${localizedEmotionLabel(emotion, languageCode: language.code).toLowerCase()} energy protected you—and where it quietly chose for you.',
                         'Davetin: ${localizedEmotionLabel(emotion, turkish: true).toLowerCase()} enerjisinin seni nerede koruduğunu ve nerede sessizce senin yerine seçim yaptığını fark et.',
                       ),
                 textAlign: TextAlign.center,
@@ -6792,8 +6953,8 @@ class ProfileScreen extends StatelessWidget {
               Text(
                 mysticText(
                   language,
-                  'Mystic is fully available in English and Turkish for this release.',
-                  'Mystic bu sürümde Türkçe ve İngilizce olarak eksiksiz kullanılabilir.',
+                  'Mystic is fully available in English, Turkish, Spanish, and Brazilian Portuguese.',
+                  'Mystic bu sürümde İngilizce, Türkçe, İspanyolca ve Brezilya Portekizcesi olarak eksiksiz kullanılabilir.',
                 ),
                 style: Theme.of(sheetContext).textTheme.bodyMedium,
               ),
@@ -7516,7 +7677,7 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
         : widget.records
               .map(
                 (record) =>
-                    '${record.createdAt.toLocal()} — ${_readingKindTitle(record.kind, widget.language)}\n${record.cards.map((item) => '${localizedTarotCardName(item.card.name, turkish: widget.language == MysticLanguage.turkish)}${item.reversed ? t(' (Reversed)', ' (Ters)') : ''}').join(', ')}\n${t('Aligned action', 'Uyumlu eylem')}: ${record.alignedAction}',
+                    '${record.createdAt.toLocal()} — ${_readingKindTitle(record.kind, widget.language)}\n${record.cards.map((item) => '${localizedTarotCardName(item.card.name, languageCode: widget.language.code)}${item.reversed ? t(' (Reversed)', ' (Ters)') : ''}').join(', ')}\n${t('Aligned action', 'Uyumlu eylem')}: ${record.alignedAction}',
               )
               .join('\n\n');
     await Clipboard.setData(ClipboardData(text: text));
@@ -7686,7 +7847,7 @@ class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
                   drawn: revealed ? previewCard : null,
                   displayName: localizedTarotCardName(
                     previewCard.card.name,
-                    turkish: widget.language == MysticLanguage.turkish,
+                    languageCode: widget.language.code,
                   ),
                   reversedLabel: mysticText(
                     widget.language,
@@ -7765,7 +7926,7 @@ class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
                     Text(
                       localizedTarotCardName(
                         previewCard.card.name,
-                        turkish: widget.language == MysticLanguage.turkish,
+                        languageCode: widget.language.code,
                       ),
                       style: const TextStyle(
                         fontSize: 18,

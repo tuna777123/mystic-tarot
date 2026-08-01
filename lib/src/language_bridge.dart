@@ -1,20 +1,30 @@
 import 'app_language.dart';
 import 'flagship.dart';
 
-/// Compatibility bridge used while legacy screens are migrated from the
-/// original English/Turkish enum to the seven-language app model.
 extension AppLanguageLegacyBridge on AppLanguage {
-  MysticLanguage get legacyLanguage =>
-      this == AppLanguage.turkish ? MysticLanguage.turkish : MysticLanguage.english;
+  MysticLanguage get legacyLanguage => switch (this) {
+    AppLanguage.english => MysticLanguage.english,
+    AppLanguage.spanish => MysticLanguage.spanish,
+    AppLanguage.french => MysticLanguage.french,
+    AppLanguage.portugueseBrazil => MysticLanguage.portugueseBrazil,
+    AppLanguage.turkish => MysticLanguage.turkish,
+    AppLanguage.italian => MysticLanguage.italian,
+    AppLanguage.german => MysticLanguage.german,
+  };
 }
 
 extension MysticLanguageAppBridge on MysticLanguage {
-  AppLanguage get appLanguage =>
-      this == MysticLanguage.turkish ? AppLanguage.turkish : AppLanguage.english;
+  AppLanguage get appLanguage => switch (this) {
+    MysticLanguage.english => AppLanguage.english,
+    MysticLanguage.spanish => AppLanguage.spanish,
+    MysticLanguage.french => AppLanguage.french,
+    MysticLanguage.portugueseBrazil => AppLanguage.portugueseBrazil,
+    MysticLanguage.turkish => AppLanguage.turkish,
+    MysticLanguage.italian => AppLanguage.italian,
+    MysticLanguage.german => AppLanguage.german,
+  };
 }
 
-/// Returns the selected seven-language value while allowing legacy screens to
-/// keep rendering English copy until their translation catalog is migrated.
 class LanguageSelectionState {
   const LanguageSelectionState(this.appLanguage);
 
@@ -23,5 +33,6 @@ class LanguageSelectionState {
   MysticLanguage get legacyLanguage => appLanguage.legacyLanguage;
   String get storageValue => appLanguage.localeTag;
 
-  LanguageSelectionState select(AppLanguage value) => LanguageSelectionState(value);
+  LanguageSelectionState select(AppLanguage value) =>
+      LanguageSelectionState(value);
 }

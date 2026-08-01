@@ -1070,7 +1070,7 @@ class _Notice extends StatelessWidget {
 }
 
 String _copy(MysticLanguage language, String english, String turkish) {
-  return language == MysticLanguage.turkish ? turkish : english;
+  return mysticText(language, english, turkish);
 }
 
 String? _trimmedOrNull(String value) {
