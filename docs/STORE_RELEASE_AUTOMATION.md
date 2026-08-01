@@ -149,8 +149,8 @@ complete the real-device sandbox matrix in issue #47:
 - renewal, expiration, refund, and revocation;
 - offline launch with previously verified access;
 - trusted-entitlement verification failure never unlocks Plus;
-- localized English and Turkish prices, legal links, and subscription
-  management.
+- localized prices, legal links, subscription management, and narrow-screen UI
+  in English, Turkish, Spanish, French, and Brazilian Portuguese.
 
 Do not submit a package that was built without RevenueCat keys or signed with a
 debug key.
