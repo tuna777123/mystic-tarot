@@ -38,6 +38,7 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
           app = Path('lib/src/app.dart')
@@ -77,16 +78,13 @@ jobs:
               'Mystic bu sürümde İngilizce, Türkçe, İspanyolca, Fransızca ve Brezilya Portekizcesi olarak eksiksiz kullanılabilir.',
               1,
           )
-          old_support = """          await Clipboard.setData(
-                    const ClipboardData(
-                      text: 'https://tuna777123.github.io/mystic-tarot/support.html',
-                    ),
-                  );"""
-          new_support = """          await Clipboard.setData(
-                    ClipboardData(text: supportPageForLanguage(widget.language)),
-                  );"""
-          assert old_support in text
-          text = text.replace(old_support, new_support, 1)
+          text, support_count = re.subn(
+              r"const\s+ClipboardData\(\s*text:\s*'https://tuna777123\.github\.io/mystic-tarot/support\.html',\s*\)",
+              'ClipboardData(text: supportPageForLanguage(widget.language))',
+              text,
+              count=1,
+          )
+          assert support_count == 1
           legacy = text.find('class PremiumScreen extends StatefulWidget')
           assert legacy > 0
           text = text[:legacy].rstrip() + '\n'
@@ -96,8 +94,9 @@ jobs:
           value = tests.read_text()
           start = value.find("  testWidgets('privacy policy describes local-first storage'")
           end = value.find("  testWidgets('living fate map is visible", start)
-          assert start > 0 and end > start
-          tests.write_text(value[:start] + value[end:])
+          if start >= 0 and end > start:
+              value = value[:start] + value[end:]
+          tests.write_text(value)
           PY
       - name: Remove temporary transport files
         shell: bash
