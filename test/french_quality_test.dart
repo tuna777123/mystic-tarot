@@ -91,6 +91,12 @@ void main() {
     expect(find.text('PLUS PREVIEW'), findsNothing);
     expect(find.text('Chargement…'), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pump(const Duration(milliseconds: 700));
+
+    expect(find.text('Chargement…'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('French profile and settings stay readable on a phone', (tester) async {
