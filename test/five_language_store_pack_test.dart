@@ -40,6 +40,52 @@ void main() {
     }
   });
 
+  test('generic support routes every non-English launch language', () {
+    final support = File('web/support.html').readAsStringSync();
+    expect(support, contains("params.get('stay') === 'en'"));
+    for (final target in <String>[
+      'support-tr.html',
+      'support-es.html',
+      'support-fr.html',
+      'support-pt-br.html',
+    ]) {
+      expect(support, contains(target));
+    }
+  });
+
+  test('localized support pages preserve an explicit English choice', () {
+    for (final path in <String>[
+      'web/support-tr.html',
+      'web/support-es.html',
+      'web/support-fr.html',
+      'web/support-pt-br.html',
+    ]) {
+      final content = File(path).readAsStringSync();
+      expect(content, contains('support.html?stay=en'), reason: path);
+    }
+  });
+
+  test('every support page exposes the complete language navigation', () {
+    for (final path in <String>[
+      'web/support.html',
+      'web/support-tr.html',
+      'web/support-es.html',
+      'web/support-fr.html',
+      'web/support-pt-br.html',
+    ]) {
+      final content = File(path).readAsStringSync();
+      for (final target in <String>[
+        'support-tr.html',
+        'support-es.html',
+        'support-fr.html',
+        'support-pt-br.html',
+      ]) {
+        if (path.endsWith(target)) continue;
+        expect(content, contains(target), reason: '$path -> $target');
+      }
+    }
+  });
+
   test('localized store listing handoffs exist for every non-English language', () {
     for (final path in <String>[
       'docs/STORE_LISTING_TR.md',
