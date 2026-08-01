@@ -1,0 +1,44 @@
+name: Apply Localized Layout Fix
+
+on:
+  push:
+    branches: [localization/core-languages]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-localized-layout-fix
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: localization/core-languages
+          fetch-depth: 0
+
+      - name: Verify and apply responsive layout patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'c42d14b14165d9a8fbe66896c12d9d7100366f1a4dc8f888c26250c0c6f4371a  .localization/layout.patch.b64' | sha256sum --check
+          base64 --decode .localization/layout.patch.b64 > /tmp/layout.patch
+          echo '829faf6100addcec5fb3eb102accfdec44c2ef5b14411b2677a73d64f11b3c38  /tmp/layout.patch' | sha256sum --check
+          git apply --check /tmp/layout.patch
+          git apply /tmp/layout.patch
+          rm -rf .localization
+          rm -f .github/workflows/apply-localized-layout-fix.yml
+
+      - name: Commit responsive localized layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'fix: prevent localized home layout overflow'
+          git push origin HEAD:localization/core-languages
