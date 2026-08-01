@@ -1,21 +1,22 @@
 name: Integrate app core hardening
 
 on:
-  push:
-    branches: [hardening/journal-integrity]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   integrate:
-    if: ${{ !contains(github.event.head_commit.message, '[core-integrated]') }}
+    if: ${{ !contains(github.event.pull_request.head.sha, 'core-integrated') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
         uses: actions/checkout@v4
         with:
           ref: hardening/journal-integrity
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply verified source transformations
         run: |
@@ -33,11 +34,7 @@ jobs:
                   raise SystemExit(f'{label}: expected exactly one match, found {count}')
               text = text.replace(old, new, 1)
 
-          replace_once(
-              "import 'dart:convert';\n",
-              "",
-              'remove obsolete JSON import',
-          )
+          replace_once("import 'dart:convert';\n", "", 'remove obsolete JSON import')
           replace_once(
               "import 'models.dart';\n",
               "import 'models.dart';\nimport 'reading_journal_store.dart';\n",
@@ -73,14 +70,13 @@ jobs:
               "          if (separator > 0) {\n            final index = int.tryParse(encoded.substring(0, separator));\n            if (index != null) {\n              arcanaReflections[index] = encoded.substring(separator + 1);\n            }\n          }\n",
               'harden reflection parsing',
           )
-          old_legacy_loop = """        for (final encoded
+          replace_once(
+              """        for (final encoded
             in prefs.getStringList('journal_records') ?? const []) {
           final record = _decodeRecord(encoded);
           if (record != null) journal.add(record);
         }
-"""
-          replace_once(
-              old_legacy_loop,
+""",
               "        journal.addAll(journalLoad.records);\n",
               'replace legacy journal loop',
           )
@@ -89,22 +85,20 @@ jobs:
               "        ready = true;\n      });\n      if (journalLoad.migratedFromLegacy) {\n        await readingJournalStore.save(journalLoad.records);\n        await readingJournalStore.finishLegacyMigration();\n      }\n    } catch (_) {\n",
               'finish journal migration',
           )
-          old_capped_save = """        prefs.setStringList(
+          replace_once(
+              """        prefs.setStringList(
           'journal_records',
           journal.take(50).map(_encodeRecord).toList(),
         ),
-"""
-          replace_once(
-              old_capped_save,
+""",
               "",
               'remove silent fifty-record cap',
           )
-          save_marker = """      ]);
+          replace_once(
+              """      ]);
     } catch (_) {
       // The experience remains usable if local storage is temporarily unavailable.
-"""
-          replace_once(
-              save_marker,
+""",
               """      ]);
       await readingJournalStore.save(journal);
     } catch (_) {
@@ -135,13 +129,15 @@ jobs:
           path.write_text(text, encoding='utf-8')
           PY
 
-      - name: Remove one-time integration workflow
-        run: rm .github/workflows/app-core-integration.yml
+      - name: Remove temporary integration files
+        run: |
+          rm .github/workflows/app-core-integration.yml
+          rm -f tool/.app_core_integration_trigger
 
       - name: Commit integrated source
         run: |
           git config user.name "Mystic Release Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add lib/src/app.dart .github/workflows/app-core-integration.yml
+          git add -A
           git commit -m "refactor: integrate durable journal and app hardening [core-integrated]"
           git push origin HEAD:hardening/journal-integrity
