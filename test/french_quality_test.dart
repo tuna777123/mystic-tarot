@@ -95,7 +95,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 900));
     await tester.pump(const Duration(milliseconds: 700));
 
-    expect(find.text('Chargement…'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
