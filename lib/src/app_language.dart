@@ -13,6 +13,17 @@ enum AppLanguage {
   final String code;
   final String localeTag;
 
+  /// Languages whose complete product experience has passed launch QA.
+  static const List<AppLanguage> launchValues = <AppLanguage>[
+    AppLanguage.english,
+    AppLanguage.turkish,
+    AppLanguage.spanish,
+    AppLanguage.french,
+    AppLanguage.portugueseBrazil,
+  ];
+
+  bool get isLaunchReady => launchValues.contains(this);
+
   static AppLanguage fromName(String? value) {
     for (final language in values) {
       if (language.name == value) return language;

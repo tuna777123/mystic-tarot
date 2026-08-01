@@ -11,7 +11,7 @@ class LanguagePreferences {
   static AppLanguage _parse(String? value) {
     if (value == null) return AppLanguage.english;
     final normalized = value.trim().toLowerCase();
-    for (final language in AppLanguage.values) {
+    for (final language in AppLanguage.launchValues) {
       if (language.name.toLowerCase() == normalized ||
           language.localeTag.toLowerCase() == normalized) {
         return language;
@@ -23,7 +23,13 @@ class LanguagePreferences {
   static Future<AppLanguage> load() async {
     final prefs = await SharedPreferences.getInstance();
     final current = prefs.getString(storageKey);
-    if (current != null) return _parse(current);
+    if (current != null) {
+      final resolved = _parse(current);
+      if (resolved.localeTag.toLowerCase() != current.trim().toLowerCase()) {
+        await prefs.setString(storageKey, resolved.localeTag);
+      }
+      return resolved;
+    }
 
     final migrated = _parse(prefs.getString(legacyStorageKey));
     await prefs.setString(storageKey, migrated.localeTag);
@@ -32,7 +38,8 @@ class LanguagePreferences {
 
   static Future<void> save(AppLanguage language) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(storageKey, language.localeTag);
+    final safeLanguage = language.isLaunchReady ? language : AppLanguage.english;
+    await prefs.setString(storageKey, safeLanguage.localeTag);
   }
 
   static Future<void> clear() async {
