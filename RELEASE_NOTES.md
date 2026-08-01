@@ -1,3 +1,12 @@
+# Version 1.8.1 — Web Preview Hotfix
+
+Mystic Tarot now starts reliably as a full-page Flutter web application:
+
+- a custom Flutter bootstrap explicitly disables multi-view mode so the existing `runApp` entry point receives a platform view;
+- CanvasKit is loaded from the release package instead of depending on an external runtime path;
+- the web application no longer remains on an empty dark background when opened from a supported web host;
+- a regression test protects the generated Flutter tokens, full-page engine configuration, local CanvasKit path, engine initialization, and app runner call.
+
 # Version 1.8.0 — Protected Store Release
 
 Mystic Tarot now has a guarded production packaging pipeline for App Store and Google Play submission builds:
