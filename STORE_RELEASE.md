@@ -45,7 +45,12 @@ https://tuna777123.github.io/mystic-tarot/support.html
 **Marketing URL**  
 https://tuna777123.github.io/mystic-tarot/
 
-Turkish metadata is in `docs/STORE_LISTING_TR.md`.
+Localized store metadata:
+
+- Turkish: `docs/STORE_LISTING_TR.md`
+- Neutral international Spanish: `docs/STORE_LISTING_ES.md`
+- French: `docs/STORE_LISTING_FR.md`
+- Brazilian Portuguese: `docs/STORE_LISTING_PT_BR.md`
 
 ## Google Play metadata
 
@@ -85,7 +90,7 @@ Mystic Tarot is made for personal reflection and entertainment. It does not prov
 
 ## Screenshot sequence
 
-Use a consistent 9:16 device frame and only show subscription states produced by a signed sandbox or production build.
+Use a consistent 9:16 device frame and only show subscription states produced by a signed sandbox or production build. Capture a complete set for English, Turkish, Spanish, French, and Brazilian Portuguese.
 
 1. **Your patterns are already speaking** — onboarding portal.
 2. **Choose the cards that call to you** — interactive card selection.
@@ -125,6 +130,7 @@ The public web build does not process native subscriptions.
 6. Purchase with a sandbox account and confirm Plus unlocks.
 7. Reinstall or use a clean test device, choose Restore, and confirm Plus returns.
 8. Expire or revoke the sandbox entitlement and confirm free limits return.
+9. Repeat the pricing, legal-link, and narrow-screen checks in all five launch languages.
 
 Provide Apple review credentials only if Apple requires a sandbox account for the review flow. The app itself has no login.
 
@@ -185,7 +191,23 @@ Prices must be selected in the store consoles and displayed from the official st
 
 ## Launch languages
 
-Version 1 launches in English and Turkish. Both languages must remain complete across onboarding, readings, reveal, results, premium, profile, settings, privacy controls, terms, and support. Other locale models remain reserved until complete end-to-end release tests pass.
+Version 1 launches with five complete product languages:
+
+- English
+- Turkish
+- neutral international Spanish
+- French
+- Brazilian Portuguese
+
+All five must remain complete across onboarding, navigation, readings, card content, reveal, results, Oracle Dialogue, Living Journal, Memory Map, Mystic Path, Arcana Vault, premium, profile, settings, export, deletion, privacy, terms, support, store metadata, screenshots, and purchase/restore QA. German and Italian remain hidden until complete end-to-end localization and release testing pass.
+
+Localized legal pages:
+
+- English: `privacy.html`, `terms.html`, `support.html`
+- Turkish: `privacy-tr.html`, `terms-tr.html`, `support-tr.html`
+- Spanish: `privacy-es.html`, `terms-es.html`, `support-es.html`
+- French: `privacy-fr.html`, `terms-fr.html`, `support-fr.html`
+- Brazilian Portuguese: `privacy-pt-br.html`, `terms-pt-br.html`, `support-pt-br.html`
 
 ## Account-owned actions before submission
 
@@ -194,12 +216,12 @@ These cannot be completed from the source repository alone:
 1. Enroll in Apple Developer and Google Play Console.
 2. Approve tax, banking, trader/business, and paid-app agreements.
 3. Confirm ownership of `com.tunabozcali.mystictarot` on both platforms.
-4. Create monthly/yearly subscriptions and their localized names, descriptions, prices, and trial rules.
+4. Create monthly/yearly subscriptions and their names, descriptions, prices, and trial rules in all five launch languages.
 5. Create the RevenueCat project, connect store credentials, products, offering, and `mystic_plus` entitlement.
 6. Add public RevenueCat SDK keys to protected release secrets.
 7. Create Apple certificates/provisioning and the Android upload key; configure protected signing secrets.
 8. Establish a monitored private customer-support email or support system for billing and privacy requests.
-9. Capture screenshots from final signed builds.
+9. Capture localized screenshots from final signed builds.
 10. Complete age rating, content rating, App Privacy, Data Safety, trader, and subscription questionnaires.
 11. Run sandbox and real-device QA.
 12. Upload signed builds and submit them for review.
@@ -211,11 +233,11 @@ A native build is eligible for submission only when:
 - analysis and the complete automated test suite pass;
 - signed release builds are generated with protected RevenueCat public SDK keys;
 - real-device QA passes on one current iPhone and one current Android device;
-- both store products load localized prices;
+- both store products load localized prices in all five launch languages;
 - purchase, pending, cancellation, failure, renewal, expiration, refund/revocation, and restore are tested;
 - only trusted, active `mystic_plus` entitlements unlock paid features;
 - Privacy Policy and store disclosures match every integrated SDK;
-- support and policy URLs return HTTP 200;
+- every localized privacy, terms, support, and marketing URL returns HTTP 200;
 - a private billing/privacy support channel is monitored;
 - no preview checkout, placeholder claim, fake price, or inactive control remains;
 - the uploaded package is signed with the permanent production identifiers.
