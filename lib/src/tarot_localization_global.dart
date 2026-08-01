@@ -50,6 +50,31 @@ const _majorNamesPortuguese = <String, String>{
   'The World': 'O Mundo',
 };
 
+const _majorNamesFrench = <String, String>{
+  'The Fool': 'Le Mat',
+  'The Magician': 'Le Bateleur',
+  'The High Priestess': 'La Papesse',
+  'The Empress': 'L’Impératrice',
+  'The Emperor': 'L’Empereur',
+  'The Hierophant': 'Le Pape',
+  'The Lovers': 'L’Amoureux',
+  'The Chariot': 'Le Chariot',
+  'Strength': 'La Force',
+  'The Hermit': 'L’Ermite',
+  'Wheel of Fortune': 'La Roue de Fortune',
+  'Justice': 'La Justice',
+  'The Hanged Man': 'Le Pendu',
+  'Death': 'L’Arcane sans nom',
+  'Temperance': 'Tempérance',
+  'The Devil': 'Le Diable',
+  'The Tower': 'La Maison-Dieu',
+  'The Star': 'L’Étoile',
+  'The Moon': 'La Lune',
+  'The Sun': 'Le Soleil',
+  'Judgement': 'Le Jugement',
+  'The World': 'Le Monde',
+};
+
 const _rankSpanish = <String, String>{
   'Ace': 'As', 'Two': 'Dos', 'Three': 'Tres', 'Four': 'Cuatro',
   'Five': 'Cinco', 'Six': 'Seis', 'Seven': 'Siete', 'Eight': 'Ocho',
@@ -62,11 +87,35 @@ const _rankPortuguese = <String, String>{
   'Nine': 'Nove', 'Ten': 'Dez', 'Page': 'Pajem', 'Knight': 'Cavaleiro',
   'Queen': 'Rainha', 'King': 'Rei',
 };
+const _rankFrench = <String, String>{
+  'Ace': 'As',
+  'Two': 'Deux',
+  'Three': 'Trois',
+  'Four': 'Quatre',
+  'Five': 'Cinq',
+  'Six': 'Six',
+  'Seven': 'Sept',
+  'Eight': 'Huit',
+  'Nine': 'Neuf',
+  'Ten': 'Dix',
+  'Page': 'Valet',
+  'Knight': 'Cavalier',
+  'Queen': 'Reine',
+  'King': 'Roi',
+};
+
 const _suitSpanish = <String, String>{
   'Wands': 'Bastos', 'Cups': 'Copas', 'Swords': 'Espadas', 'Pentacles': 'Oros',
 };
 const _suitPortuguese = <String, String>{
   'Wands': 'Paus', 'Cups': 'Copas', 'Swords': 'Espadas', 'Pentacles': 'Ouros',
+};
+
+const _suitFrench = <String, String>{
+  'Wands': 'Bâtons',
+  'Cups': 'Coupes',
+  'Swords': 'Épées',
+  'Pentacles': 'Deniers',
 };
 
 const _majorMeaningSpanish = <String, List<String>>{
@@ -295,6 +344,119 @@ const _majorMeaningPortuguese = <String, List<String>>{
   ],
 };
 
+const _majorMeaningFrench = <String, List<String>>{
+  'The Fool': [
+    'Un nouveau départ vous invite à avancer avec confiance, curiosité et liberté intérieure.',
+    'L’élan vers l’inconnu peut devenir imprudence ou fuite si vous refusez de regarder les risques.',
+    'Faites le premier pas, tout en vérifiant honnêtement où vous posez les pieds.',
+  ],
+  'The Magician': [
+    'Vous possédez déjà les ressources nécessaires pour transformer une intention en action concrète.',
+    'La dispersion, le doute ou le besoin d’impressionner peuvent affaiblir votre pouvoir d’agir.',
+    'Choisissez un résultat précis et dirigez votre énergie vers lui.',
+  ],
+  'The High Priestess': [
+    'La réponse silencieuse sous le bruit mérite davantage votre confiance que la pression extérieure.',
+    'Vous pourriez ignorer votre intuition parce que son message vous dérange ou reste difficile à expliquer.',
+    'Faites une pause et écoutez ce que votre corps sait déjà.',
+  ],
+  'The Empress': [
+    'La croissance vient par le soin, le plaisir, la patience et une créativité bien nourrie.',
+    'À force de donner, vous risquez de laisser vos propres besoins sans attention.',
+    'Créez les conditions dans lesquelles vous et votre désir pouvez vous épanouir.',
+  ],
+  'The Emperor': [
+    'Une structure claire et des limites fiables peuvent transformer votre intention en progrès durable.',
+    'Le contrôle peut prendre la place de la confiance, de la souplesse ou d’un leadership véritable.',
+    'Construisez un cadre solide sans en faire une prison.',
+  ],
+  'The Hierophant': [
+    'Un enseignement, un rituel ou une communauté de confiance peut donner du sens à ce moment.',
+    'Suivre la tradition sans la questionner peut étouffer votre propre sagesse.',
+    'Apprenez la tradition, puis choisissez consciemment ce qui mérite de continuer.',
+  ],
+  'The Lovers': [
+    'L’harmonie naît lorsque vos valeurs, votre désir et votre choix avancent dans la même direction.',
+    'L’attirance seule ne peut pas résoudre un conflit de valeurs ou de limites.',
+    'Choisissez ce qui vous permet de rester lié sans vous abandonner.',
+  ],
+  'The Chariot': [
+    'Une volonté concentrée peut vous conduire à travers les forces opposées et l’incertitude.',
+    'La vitesse sans direction émotionnelle peut produire une victoire vide.',
+    'Nommez votre destination avant d’accélérer.',
+  ],
+  'Strength': [
+    'Le courage calme et la stabilité émotionnelle sont plus puissants que la contrainte.',
+    'Une peur refoulée peut se déguiser en assurance ou en besoin de domination.',
+    'Accueillez l’émotion difficile avec patience plutôt qu’avec force.',
+  ],
+  'The Hermit': [
+    'La solitude choisie peut rendre visible la clarté que le bruit avait cachée.',
+    'Le retrait peut aussi vous protéger d’une conversation ou d’une proximité nécessaires.',
+    'Éloignez-vous assez pour vous entendre, puis revenez avec votre propre lumière.',
+  ],
+  'Wheel of Fortune': [
+    'Un cycle tourne et votre souplesse vous aidera à reconnaître la nouvelle ouverture.',
+    'Vouloir figer ce qui change peut vous empêcher de voir l’occasion présente.',
+    'Libérez une attente appartenant à hier et coopérez avec le mouvement actuel.',
+  ],
+  'Justice': [
+    'L’honnêteté, la responsabilité et une décision proportionnée peuvent rétablir l’équilibre.',
+    'Le besoin d’avoir raison peut vous empêcher de reconnaître votre propre part.',
+    'Prenez la décision que vous respecteriez même sans approbation extérieure.',
+  ],
+  'The Hanged Man': [
+    'Une pause consciente révèle un angle que davantage d’efforts ne pourraient pas montrer.',
+    'L’attente peut être devenue évitement, sacrifice inutile ou attachement à l’immobilité.',
+    'Cessez de forcer le mouvement et regardez la situation depuis l’angle opposé.',
+  ],
+  'Death': [
+    'Une fin libère de l’espace pour une manière de vivre plus vraie.',
+    'Vous accrocher à une forme achevée peut retarder le renouveau nécessaire.',
+    'Laissez partir l’identité ou l’habitude qui ne peut plus vous porter.',
+  ],
+  'Temperance': [
+    'L’intégration patiente crée un équilibre durable que les extrêmes ne peuvent offrir.',
+    'L’impatience peut vous faire osciller entre tout et rien.',
+    'Faites le prochain ajustement assez petit pour pouvoir le maintenir.',
+  ],
+  'The Devil': [
+    'Voir clairement un attachement ou une habitude est déjà le début de la liberté.',
+    'Un désir familier, une peur ou un marché caché peut choisir à votre place.',
+    'Nommez le coût réel de ce schéma et reprenez aujourd’hui une décision.',
+  ],
+  'The Tower': [
+    'Lorsqu’une structure fragile tombe, la vérité devient enfin visible.',
+    'Résister à un changement déjà commencé peut augmenter inutilement la tension.',
+    'Protégez ce qui est vrai et laissez tomber ce qui ne tenait que par l’apparence.',
+  ],
+  'The Star': [
+    'L’espoir revient par l’honnêteté, le renouvellement et une perspective plus vaste.',
+    'La déception peut rendre la confiance en l’avenir dangereuse ou naïve à vos yeux.',
+    'Posez un petit acte d’espoir sans exiger de résultat immédiat.',
+  ],
+  'The Moon': [
+    'Les rêves, les émotions et l’intuition portent une information que la raison n’a pas encore organisée.',
+    'La peur peut remplir les zones inconnues avec des scénarios convaincants mais incertains.',
+    'Attendez davantage de lumière avant de traiter l’incertitude comme un fait.',
+  ],
+  'The Sun': [
+    'La vitalité, la clarté et une joie sincère sont disponibles sans complication inutile.',
+    'La pression d’avoir l’air positif peut cacher un besoin réel ou une fatigue.',
+    'Laissez la joie être simple et partagez-la sans la mettre en scène.',
+  ],
+  'Judgement': [
+    'Un appel plus profond vous demande de répondre avec honnêteté et maturité.',
+    'Une ancienne honte peut vous maintenir fidèle à une version trop petite de vous-même.',
+    'Répondez à la personne que vous devenez, pas seulement à celle que vous avez été.',
+  ],
+  'The World': [
+    'L’accomplissement apporte intégrité, confiance et une vision plus large.',
+    'Une boucle encore ouverte peut empêcher la fin de devenir pleinement réelle.',
+    'Honorez ce qui est terminé avant d’ouvrir le prochain cycle.',
+  ],
+};
+
 const _minorRankSpanish = <String, List<String>>{
   'Ace': ['Aparece una semilla de potencial puro y un comienzo todavía sin forma.', 'El impulso de empezar está bloqueado por la duda, la prisa o un objetivo equivocado.', 'Convierte el potencial en un comienzo pequeño y concreto.'],
   'Two': ['Hace falta equilibrar dos energías y elegir una dirección consciente.', 'Posponer la decisión o sostener dos opciones opuestas está dividiendo tu energía.', 'Observa el coste de cada opción y elige la que esté alineada con tus valores.'],
@@ -329,6 +491,79 @@ const _minorRankPortuguese = <String, List<String>>{
   'King': ['Experiência, responsabilidade e capacidade de orientar estão prontas para liderar.', 'Rigidez, controle baseado no ego ou achar que já sabe tudo podem esconder a verdadeira maestria.', 'Use seu poder para oferecer uma direção confiável, não para impor.'],
 };
 
+const _minorRankFrench = <String, List<String>>{
+  'Ace': [
+    'Un commencement pur et un potentiel encore sans forme apparaissent.',
+    'L’envie de commencer existe, mais l’énergie peut être bloquée par le doute ou la précipitation.',
+    'Transformez ce potentiel en un premier geste simple et concret.',
+  ],
+  'Two': [
+    'Deux possibilités demandent un équilibre conscient et un choix de direction.',
+    'Reporter la décision ou maintenir deux options opposées divise votre énergie.',
+    'Regardez le coût de chaque voie et choisissez celle qui respecte vos valeurs.',
+  ],
+  'Three': [
+    'La coopération, l’expansion et les premiers résultats rendent le mouvement visible.',
+    'Un manque de coordination ou le désir d’aller trop vite peut fragiliser la progression.',
+    'Partagez clairement votre intention et construisez la prochaine étape avec les bons alliés.',
+  ],
+  'Four': [
+    'La stabilité, le repos ou une base sûre permettent de consolider ce qui existe.',
+    'La sécurité peut être devenue rigidité, stagnation ou peur de perdre le contrôle.',
+    'Protégez l’essentiel sans fermer la porte au mouvement.',
+  ],
+  'Five': [
+    'Une tension, une perte ou un conflit révèle ce qui doit être réorganisé.',
+    'Se concentrer uniquement sur ce qui manque peut masquer les ressources encore disponibles.',
+    'Reconnaissez la difficulté, puis regardez ce qui peut encore être réparé ou utilisé.',
+  ],
+  'Six': [
+    'Le rééquilibrage, le soutien et le passage vers une situation plus harmonieuse deviennent possibles.',
+    'Un échange inégal ou une dépendance à l’approbation peut fausser la relation.',
+    'Acceptez l’aide et vérifiez que donner et recevoir restent justes.',
+  ],
+  'Seven': [
+    'Vous traversez une épreuve de patience, d’évaluation et de conviction.',
+    'Le doute, la défensive ou la volonté de forcer les résultats peuvent troubler votre jugement.',
+    'Évaluez ce qui répond réellement avant de poursuivre.',
+  ],
+  'Eight': [
+    'La concentration, la répétition et le développement d’une compétence peuvent accélérer votre progression.',
+    'La précipitation, le perfectionnisme ou l’automatisme peuvent vider l’action de son sens.',
+    'Renforcez une compétence par une répétition consciente.',
+  ],
+  'Nine': [
+    'L’endurance, la confiance et les limites personnelles se renforcent près de l’achèvement.',
+    'La fatigue, le doute ou le fait de tout porter seul rendent la dernière étape plus lourde.',
+    'Protégez vos limites et gardez assez d’énergie pour terminer.',
+  ],
+  'Ten': [
+    'Le poids, le résultat et la récompense d’un cycle sont maintenant visibles.',
+    'La réussite peut avoir apporté surcharge, responsabilité excessive ou une charge à déposer.',
+    'Reconnaissez ce qui est accompli et laissez ce que vous n’avez plus à porter.',
+  ],
+  'Page': [
+    'Un message curieux, une occasion d’apprendre ou une perspective nouvelle se présente.',
+    'L’inexpérience, la curiosité dispersée ou les paroles sans action peuvent limiter la croissance.',
+    'Gardez un esprit de débutant et testez l’apprentissage par une petite expérience.',
+  ],
+  'Knight': [
+    'L’engagement se transforme rapidement en action et crée un puissant élan.',
+    'La hâte, la vision unique ou l’oubli des conséquences peuvent provoquer des difficultés.',
+    'Avancez, mais vérifiez que votre vitesse reste alignée avec votre intention.',
+  ],
+  'Queen': [
+    'Une autorité intérieure mûre, l’intuition et la réceptivité peuvent soutenir cette situation.',
+    'Donner jusqu’à vous oublier ou utiliser l’émotion pour contrôler peut rompre l’équilibre.',
+    'Incarnez d’abord en vous la qualité dont vous avez besoin.',
+  ],
+  'King': [
+    'L’expérience, la responsabilité et la capacité de guider sont prêtes à prendre la direction.',
+    'La rigidité, l’ego ou la certitude de tout savoir peuvent cacher la véritable maîtrise.',
+    'Utilisez votre pouvoir pour offrir une direction fiable, pas pour imposer.',
+  ],
+};
+
 const _minorSuitSpanish = <String, List<String>>{
   'Wands': ['Esta energía actúa en la motivación, la creatividad, el valor y la iniciativa.', 'Dirige tu fuego hacia algo significativo sin abandonar otras necesidades por entusiasmo.'],
   'Cups': ['Esta energía actúa en las emociones, las relaciones, la intimidad y la conexión intuitiva.', 'Reconoce con sinceridad lo que sientes sin tratar la emoción como la única verdad.'],
@@ -343,9 +578,29 @@ const _minorSuitPortuguese = <String, List<String>>{
   'Pentacles': ['Esta energia atua em dinheiro, trabalho, corpo, segurança e valor duradouro.', 'Construa hoje algo estável com um passo mensurável e sustentável.'],
 };
 
+const _minorSuitFrench = <String, List<String>>{
+  'Wands': [
+    'Cette énergie agit dans la motivation, la créativité, le courage et l’initiative.',
+    'Dirigez votre feu vers quelque chose de significatif sans négliger vos autres besoins.',
+  ],
+  'Cups': [
+    'Cette énergie agit dans les émotions, les relations, l’intimité et la connexion intuitive.',
+    'Reconnaissez sincèrement ce que vous ressentez sans traiter l’émotion comme l’unique vérité.',
+  ],
+  'Swords': [
+    'Cette énergie agit dans les pensées, la communication, la vérité et les décisions.',
+    'Ne choisissez pas la phrase la plus tranchante, mais celle qui apporte réellement de la clarté.',
+  ],
+  'Pentacles': [
+    'Cette énergie agit dans l’argent, le travail, le corps, la sécurité et la valeur durable.',
+    'Construisez aujourd’hui quelque chose de stable par une étape mesurable et soutenable.',
+  ],
+};
+
 String? globalTarotCardName(String name, String languageCode) {
   final major = switch (languageCode) {
     'ES' => _majorNamesSpanish[name],
+    'FR' => _majorNamesFrench[name],
     'PT-BR' => _majorNamesPortuguese[name],
     _ => null,
   };
@@ -354,11 +609,13 @@ String? globalTarotCardName(String name, String languageCode) {
   if (parts.length != 2) return null;
   final rank = switch (languageCode) {
     'ES' => _rankSpanish[parts.first],
+    'FR' => _rankFrench[parts.first],
     'PT-BR' => _rankPortuguese[parts.first],
     _ => null,
   };
   final suit = switch (languageCode) {
     'ES' => _suitSpanish[parts.last],
+    'FR' => _suitFrench[parts.last],
     'PT-BR' => _suitPortuguese[parts.last],
     _ => null,
   };
@@ -369,6 +626,7 @@ String? globalTarotCardName(String name, String languageCode) {
 String? globalTarotCardMeaning(DrawnCard drawn, String languageCode) {
   final major = switch (languageCode) {
     'ES' => _majorMeaningSpanish[drawn.card.name],
+    'FR' => _majorMeaningFrench[drawn.card.name],
     'PT-BR' => _majorMeaningPortuguese[drawn.card.name],
     _ => null,
   };
@@ -377,11 +635,13 @@ String? globalTarotCardMeaning(DrawnCard drawn, String languageCode) {
   if (parts.length != 2) return null;
   final rank = switch (languageCode) {
     'ES' => _minorRankSpanish[parts.first],
+    'FR' => _minorRankFrench[parts.first],
     'PT-BR' => _minorRankPortuguese[parts.first],
     _ => null,
   };
   final suit = switch (languageCode) {
     'ES' => _minorSuitSpanish[parts.last],
+    'FR' => _minorSuitFrench[parts.last],
     'PT-BR' => _minorSuitPortuguese[parts.last],
     _ => null,
   };
@@ -392,6 +652,7 @@ String? globalTarotCardMeaning(DrawnCard drawn, String languageCode) {
 String? globalTarotCardAdvice(DrawnCard drawn, String languageCode) {
   final major = switch (languageCode) {
     'ES' => _majorMeaningSpanish[drawn.card.name],
+    'FR' => _majorMeaningFrench[drawn.card.name],
     'PT-BR' => _majorMeaningPortuguese[drawn.card.name],
     _ => null,
   };
@@ -400,11 +661,13 @@ String? globalTarotCardAdvice(DrawnCard drawn, String languageCode) {
   if (parts.length != 2) return null;
   final rank = switch (languageCode) {
     'ES' => _minorRankSpanish[parts.first],
+    'FR' => _minorRankFrench[parts.first],
     'PT-BR' => _minorRankPortuguese[parts.first],
     _ => null,
   };
   final suit = switch (languageCode) {
     'ES' => _minorSuitSpanish[parts.last],
+    'FR' => _minorSuitFrench[parts.last],
     'PT-BR' => _minorSuitPortuguese[parts.last],
     _ => null,
   };
@@ -425,6 +688,20 @@ String? globalReadingKindTitle(ReadingKind kind, String languageCode) {
       ReadingKind.compatibility => 'Compatibilidad Amorosa',
       ReadingKind.timeline => 'Línea de Tiempo Futura',
       ReadingKind.celticCross => 'Cruz Celta',
+    };
+  }
+  if (languageCode == 'FR') {
+    return switch (kind) {
+      ReadingKind.daily => 'Guide du jour',
+      ReadingKind.love => 'Amour et lien',
+      ReadingKind.career => 'Chemin professionnel',
+      ReadingKind.money => 'Énergie financière',
+      ReadingKind.decision => 'Décision',
+      ReadingKind.spiritual => 'Évolution spirituelle',
+      ReadingKind.shadow => 'Travail de l’ombre',
+      ReadingKind.compatibility => 'Compatibilité amoureuse',
+      ReadingKind.timeline => 'Chronologie future',
+      ReadingKind.celticCross => 'Croix celtique',
     };
   }
   if (languageCode == 'PT-BR') {
@@ -459,6 +736,20 @@ String? globalReadingKindSubtitle(ReadingKind kind, String languageCode) {
       ReadingKind.celticCross => 'Una lectura profunda y completa de diez cartas',
     };
   }
+  if (languageCode == 'FR') {
+    return switch (kind) {
+      ReadingKind.daily => 'Un message clair pour aujourd’hui',
+      ReadingKind.love => 'Observez l’énergie autour de votre cœur',
+      ReadingKind.career => 'Clarifiez votre prochaine étape professionnelle',
+      ReadingKind.money => 'Comprenez votre direction financière',
+      ReadingKind.decision => 'Découvrez ce que chaque chemin peut contenir',
+      ReadingKind.spiritual => 'Écoutez ce dont votre monde intérieur a besoin',
+      ReadingKind.shadow => 'Rencontrez ce qui demande à guérir',
+      ReadingKind.compatibility => 'Lisez la dynamique entre deux cœurs',
+      ReadingKind.timeline => 'Passé, présent et trois chapitres possibles',
+      ReadingKind.celticCross => 'Un tirage approfondi complet de dix cartes',
+    };
+  }
   if (languageCode == 'PT-BR') {
     return switch (kind) {
       ReadingKind.daily => 'Uma mensagem clara para hoje',
@@ -486,6 +777,15 @@ String? globalEmotionLabel(EmotionalState emotion, String languageCode) {
       EmotionalState.curious => 'Curioso',
     };
   }
+  if (languageCode == 'FR') {
+    return switch (emotion) {
+      EmotionalState.uncertain => 'Incertain',
+      EmotionalState.hopeful => 'Plein d’espoir',
+      EmotionalState.anxious => 'Anxieux',
+      EmotionalState.grounded => 'Ancré',
+      EmotionalState.curious => 'Curieux',
+    };
+  }
   if (languageCode == 'PT-BR') {
     return switch (emotion) {
       EmotionalState.uncertain => 'Incerto',
@@ -504,6 +804,13 @@ String? globalDeckStyleLabel(DeckStyle style, String languageCode) {
       DeckStyle.midnight => 'Velo de Medianoche',
       DeckStyle.solarGold => 'Oro Solar',
       DeckStyle.bloodMoon => 'Luna de Sangre',
+    };
+  }
+  if (languageCode == 'FR') {
+    return switch (style) {
+      DeckStyle.midnight => 'Voile de Minuit',
+      DeckStyle.solarGold => 'Or solaire',
+      DeckStyle.bloodMoon => 'Lune de sang',
     };
   }
   if (languageCode == 'PT-BR') {

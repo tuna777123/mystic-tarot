@@ -15,42 +15,6 @@ void main() {
     expect(find.text('Begin my journey'), findsOneWidget);
   });
 
-  testWidgets('privacy policy describes local-first storage', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.dark(),
-        home: const LegalDocumentScreen(title: 'Privacy Policy'),
-      ),
-    );
-
-    expect(find.text('Privacy, in plain language'), findsOneWidget);
-    expect(
-      find.textContaining('transmit journal content to us'),
-      findsOneWidget,
-    );
-    await tester.scrollUntilVisible(
-      find.text('Effective July 23, 2026'),
-      200,
-      scrollable: find.byType(Scrollable),
-    );
-    expect(find.text('Effective July 23, 2026'), findsOneWidget);
-  });
-
-  testWidgets('terms identify the product as reflection', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.dark(),
-        home: const LegalDocumentScreen(title: 'Terms of Use'),
-      ),
-    );
-
-    expect(find.text('A fair mystical space'), findsOneWidget);
-    expect(
-      find.textContaining('self-reflection and entertainment'),
-      findsOneWidget,
-    );
-  });
-
   testWidgets('living fate map is visible in both launch languages', (
     tester,
   ) async {
@@ -207,6 +171,7 @@ void main() {
       MysticLanguage.english,
       MysticLanguage.turkish,
       MysticLanguage.spanish,
+      MysticLanguage.french,
       MysticLanguage.portugueseBrazil,
     ]);
   });

@@ -19,6 +19,7 @@ void main() {
     expect(mysticText(MysticLanguage.english, 'Read', 'Oku'), 'Read');
     expect(mysticText(MysticLanguage.turkish, 'Read', 'Oku'), 'Oku');
     expect(mysticText(MysticLanguage.spanish, 'Read', 'Oku'), 'Leer');
+    expect(mysticText(MysticLanguage.french, 'Read', 'Oku'), 'Tirages');
     expect(
       mysticText(MysticLanguage.portugueseBrazil, 'Read', 'Oku'),
       'Ler',
@@ -27,7 +28,6 @@ void main() {
 
   test('languages not yet launched continue to fall back safely', () {
     for (final language in <MysticLanguage>[
-      MysticLanguage.french,
       MysticLanguage.italian,
       MysticLanguage.german,
     ]) {
