@@ -72,18 +72,42 @@ class GoldButton extends StatelessWidget {
   final IconData? icon;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: FilledButton.icon(
-          onPressed: onPressed,
-          icon: icon == null ? const SizedBox.shrink() : Icon(icon, size: 18),
-          label: Text(label),
-          style: FilledButton.styleFrom(
-            foregroundColor: MysticColors.ink,
-            backgroundColor: MysticColors.gold,
-            disabledBackgroundColor: MysticColors.gold.withValues(alpha: .25),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        enabled: onPressed != null,
+        label: label,
+        onTap: onPressed,
+        child: ExcludeSemantics(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onPressed,
+                icon: icon == null
+                    ? const SizedBox.shrink()
+                    : Icon(icon, size: 18),
+                label: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+                style: FilledButton.styleFrom(
+                  foregroundColor: MysticColors.ink,
+                  backgroundColor: MysticColors.gold,
+                  disabledBackgroundColor:
+                      MysticColors.gold.withValues(alpha: .25),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       );

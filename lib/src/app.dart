@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -7768,15 +7769,22 @@ class PremiumReadingPreview extends StatefulWidget {
 class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
   bool revealed = false;
   late final DrawnCard previewCard;
+  Timer? _revealTimer;
 
   @override
   void initState() {
     super.initState();
     final seed = DateTime.now().day + widget.kind.index * 13;
     previewCard = DrawnCard(tarotDeck[seed % tarotDeck.length], seed.isOdd);
-    Future<void>.delayed(const Duration(milliseconds: 850), () {
+    _revealTimer = Timer(const Duration(milliseconds: 850), () {
       if (mounted) setState(() => revealed = true);
     });
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
   }
 
   @override
