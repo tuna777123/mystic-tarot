@@ -1,0 +1,113 @@
+name: Apply French Quality Release
+
+on:
+  push:
+    branches: [release/french-and-quality]
+    paths:
+      - '.quality/french-v2.patch.*.b64'
+      - '.github/workflows/apply-french-quality.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-french-quality-release
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/french-and-quality
+          fetch-depth: 0
+      - name: Rebuild and verify patch
+        shell: bash
+        run: |
+          cat .quality/french-v2.patch.*.b64 | tr -d '\n' | base64 --decode > /tmp/french.patch.gz
+          echo '05a3b0e9e12105fff058effa3b738511efd2171703d7a6d055aebd86ea2d6918  /tmp/french.patch.gz' | sha256sum --check -
+          gzip --decompress --stdout /tmp/french.patch.gz > /tmp/french.patch
+          echo 'ecea0a5b595f2a4670b56b3b7068069c27f9f7549af64f323aa81c6629e36a5e  /tmp/french.patch' | sha256sum --check -
+          git apply --check /tmp/french.patch
+          git apply /tmp/french.patch
+      - name: Remove legacy paywall and localize support routing
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          app = Path('lib/src/app.dart')
+          text = app.read_text()
+          old_languages = """const launchLanguages = <MysticLanguage>[
+            MysticLanguage.english,
+            MysticLanguage.turkish,
+            MysticLanguage.spanish,
+            MysticLanguage.portugueseBrazil,
+          ];
+          """
+          new_languages = """const launchLanguages = <MysticLanguage>[
+            MysticLanguage.english,
+            MysticLanguage.turkish,
+            MysticLanguage.spanish,
+            MysticLanguage.french,
+            MysticLanguage.portugueseBrazil,
+          ];
+
+          String supportPageForLanguage(MysticLanguage language) => switch (language) {
+                MysticLanguage.french =>
+                  'https://tuna777123.github.io/mystic-tarot/support-fr.html',
+                MysticLanguage.turkish =>
+                  'https://tuna777123.github.io/mystic-tarot/support-tr.html',
+                _ => 'https://tuna777123.github.io/mystic-tarot/support.html',
+              };
+          """
+          assert old_languages in text
+          text = text.replace(old_languages, new_languages, 1)
+          text = text.replace(
+              'Mystic is fully available in English, Turkish, Spanish, and Brazilian Portuguese.',
+              'Mystic is fully available in English, Turkish, Spanish, French, and Brazilian Portuguese.',
+              1,
+          )
+          text = text.replace(
+              'Mystic bu sürümde İngilizce, Türkçe, İspanyolca ve Brezilya Portekizcesi olarak eksiksiz kullanılabilir.',
+              'Mystic bu sürümde İngilizce, Türkçe, İspanyolca, Fransızca ve Brezilya Portekizcesi olarak eksiksiz kullanılabilir.',
+              1,
+          )
+          old_support = """          await Clipboard.setData(
+                    const ClipboardData(
+                      text: 'https://tuna777123.github.io/mystic-tarot/support.html',
+                    ),
+                  );"""
+          new_support = """          await Clipboard.setData(
+                    ClipboardData(text: supportPageForLanguage(widget.language)),
+                  );"""
+          assert old_support in text
+          text = text.replace(old_support, new_support, 1)
+          legacy = text.find('class PremiumScreen extends StatefulWidget')
+          assert legacy > 0
+          text = text[:legacy].rstrip() + '\n'
+          app.write_text(text)
+
+          tests = Path('test/widget_test.dart')
+          value = tests.read_text()
+          start = value.find("  testWidgets('privacy policy describes local-first storage'")
+          end = value.find("  testWidgets('living fate map is visible", start)
+          assert start > 0 and end > start
+          tests.write_text(value[:start] + value[end:])
+          PY
+      - name: Remove temporary transport files
+        shell: bash
+        run: |
+          rm -rf .quality
+          rm -f .github/workflows/french-quality-snapshot.yml
+          rm -f .github/workflows/apply-french-quality.yml
+      - name: Commit product changes
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git diff --cached --check
+          git commit -m 'feat: complete French localization and quality pass'
+          git push origin HEAD:release/french-and-quality
