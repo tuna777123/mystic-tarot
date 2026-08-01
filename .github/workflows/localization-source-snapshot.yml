@@ -1,0 +1,25 @@
+name: Localization Source Snapshot
+
+on:
+  push:
+    branches: [localization/core-languages]
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: localization-source-snapshot
+          path: |
+            lib
+            test
+            web
+            pubspec.yaml
+            RELEASE_NOTES.md
+          if-no-files-found: error
+          retention-days: 1
