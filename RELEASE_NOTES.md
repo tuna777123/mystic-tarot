@@ -7,7 +7,8 @@ Mystic Tarot now delivers a complete four-language launch experience in English,
 - every reading type, emotional state, deck name, dynamic pattern insight, recurring-card message, and personal summary uses the selected language instead of falling back to English;
 - the seven-language bridge now preserves exact language choices while French, German, and Italian remain hidden until their full catalogs are complete;
 - 447 interface messages per new language are protected by catalog completeness and dynamic-template regression tests;
-- all 78 cards, ten reading types, five emotional states, and three deck styles receive automated no-English-fallback coverage.
+- all 78 cards, ten reading types, five emotional states, and three deck styles receive automated no-English-fallback coverage;
+- long Spanish and Brazilian Portuguese headings and calls to action now adapt safely on phone layouts without clipping or horizontal overflow.
 
 Italian, French, and German are still present in the localization foundation but are intentionally not exposed in the launch selector until their full experiences pass the same completeness standard.
 
