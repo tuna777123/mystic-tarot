@@ -8,8 +8,11 @@ import 'mystic_text_catalog_full.dart' as full;
 class MysticTextCatalog {
   MysticTextCatalog._();
 
-  static const Set<String> launchLanguageCodes =
-      full.MysticTextCatalog.launchLanguageCodes;
+  static const Set<String> launchLanguageCodes = <String>{
+    'ES',
+    'FR',
+    'PT-BR',
+  };
 
   static bool hasTranslation(String languageCode, String english) =>
       full.MysticTextCatalog.hasTranslation(languageCode, english);
