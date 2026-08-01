@@ -12,16 +12,21 @@ void main() {
         ),
       );
 
+  Finder mysticAnimation() => find.descendant(
+        of: find.byType(MysticBackground),
+        matching: find.byType(AnimatedBuilder),
+      );
+
   testWidgets('Mystic background honors the reduce-motion preference', (
     tester,
   ) async {
     await tester.pumpWidget(app(disableAnimations: true));
 
-    expect(find.byType(AnimatedBuilder), findsNothing);
+    expect(mysticAnimation(), findsNothing);
     expect(find.text('Mystic'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 13));
-    expect(find.byType(AnimatedBuilder), findsNothing);
+    expect(mysticAnimation(), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -29,15 +34,15 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(app(disableAnimations: false));
-    expect(find.byType(AnimatedBuilder), findsOneWidget);
+    expect(mysticAnimation(), findsOneWidget);
 
     await tester.pumpWidget(app(disableAnimations: true));
     await tester.pump();
-    expect(find.byType(AnimatedBuilder), findsNothing);
+    expect(mysticAnimation(), findsNothing);
 
     await tester.pumpWidget(app(disableAnimations: false));
     await tester.pump();
-    expect(find.byType(AnimatedBuilder), findsOneWidget);
+    expect(mysticAnimation(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
