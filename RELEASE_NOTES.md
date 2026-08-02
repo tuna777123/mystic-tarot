@@ -1,3 +1,35 @@
+# Mystic Tarot 1.13.0 — Activation & Ritual Retention
+
+This release turns the first session into a complete value moment and gives users a private, controllable reason to return.
+
+## First-session activation
+
+- Onboarding now ends by opening the first real Daily Guidance ritual instead of leaving a new user on the Home screen.
+- The final action clearly promises the next step: reveal the first card.
+- The existing reflective and safety language remains intact; no purchase prompt interrupts the first ritual.
+
+## Daily ritual retention
+
+- After the first saved Daily Guidance reading, Mystic offers one optional daily local reminder.
+- Permission is requested only after the user chooses a time; it is never forced during onboarding.
+- Users can enable, disable, or change the reminder time from Your Space.
+- Reminder text is localized in English, Turkish, Spanish, French, and Brazilian Portuguese.
+- Scheduling uses an inexact daily local notification and does not request exact-alarm access.
+- No question, journal note, Mirror reflection, advertising identifier, or tracking profile is included in a notification or uploaded.
+
+## Organic sharing
+
+- Saved readings now expose a visible private Story Card action.
+- The existing Story Studio continues to export only the selected cards and reflective headline; private questions and journal notes remain excluded.
+
+## Release integrity
+
+- Version `1.13.0+19`.
+- Generated Android shells receive boot-safe scheduled-notification configuration through a verified, idempotent tool step.
+- Web remains fully usable and explains that native reminders are available on iOS and Android.
+
+---
+
 # Mystic Tarot 1.12.0 — Revenue Intelligence
 
 Mystic Plus now sells an accumulating personal outcome instead of only removing limits.

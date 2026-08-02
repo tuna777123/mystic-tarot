@@ -59,16 +59,16 @@ tarot, journal, reflection, mindfulness, cards, self discovery, mood journal, pe
 
 Turn tarot readings into a private reflection practice. Draw cards, journal what you notice, and follow meaningful themes through Mystic Journeys.
 
-## Release notes — version 1.0.0
+## Release notes — version 1.13.0
 
-Welcome to Mystic Tarot.
-
-- Explore cinematic tarot readings
-- Save private reflections and journal entries
-- Create Mystic Journeys around meaningful life themes
-- Track moods, tags, activity, and reflection patterns
-- Use the app in English or Turkish
-- Recover Journey data from the last safe local backup when needed
+- Onboarding now opens the first real Daily Guidance ritual
+- Optional daily local reminder with a user-selected time
+- Notification permission is requested only after the user chooses a reminder
+- Visible private Story Card action after saving a reading
+- Seven-day on-device Mystic Intelligence report and personalized free preview
+- Five-language 24-hour Mystic Mirror follow-up
+- Complete local journal history with resilient backup recovery
+- Full English, Turkish, Spanish, French, and Brazilian Portuguese experience
 
 ## Content-rating guidance
 

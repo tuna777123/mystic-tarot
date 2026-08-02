@@ -8,7 +8,10 @@ void main() {
     final app = File('lib/src/app.dart').readAsStringSync();
     final releaseNotes = File('RELEASE_NOTES.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.12.0+18'));
+    expect(
+      RegExp(r'version: 1\.(?:1[2-9]|[2-9]\d)\.\d+\+\d+').hasMatch(pubspec),
+      isTrue,
+    );
     expect(app, contains("import 'mystic_plus_intelligence_screen.dart';"));
     expect(app, contains('MysticPlusIntelligenceScreen('));
     expect(app, contains('MysticIntelligenceTeaser('));
@@ -42,7 +45,11 @@ void main() {
     ];
     for (final path in listings) {
       final content = File(path).readAsStringSync();
-      expect(content, contains('1.12.0'), reason: path);
+      expect(
+        RegExp(r'1\.(?:1[2-9]|[2-9]\d)\.\d+').hasMatch(content),
+        isTrue,
+        reason: path,
+      );
       expect(content.toLowerCase(), contains('intelligence'), reason: path);
       expect(content, isNot(contains('## Sürüm notları — 1.11.0')), reason: path);
       expect(content, isNot(contains('## Notas de la versión — 1.11.0')), reason: path);

@@ -73,7 +73,11 @@ A Orientação Diária e o Mystic Mirror básico de 24 horas continuam gratuitos
 
 Mystic Tarot foi criado para reflexão pessoal e entretenimento. Ele não oferece orientação médica, psicológica, jurídica, financeira ou de emergência.
 
-## Notas da versão — 1.12.0
+## Notas da versão — 1.13.0
+
+- O onboarding agora abre diretamente o primeiro ritual real de Orientação Diária
+- Lembrete diário local opcional no horário escolhido pelo usuário
+- Ação visível para criar um card privado para stories após salvar uma leitura
 
 - Relatório pessoal Mystic Intelligence de 7 dias calculado no dispositivo
 - Mystic Mirror de 24 horas em cinco idiomas para registrar o que realmente mudou
