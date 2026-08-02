@@ -13,6 +13,7 @@ Mystic Plus now sells an accumulating personal outcome instead of only removing 
 ## Conversion and trust
 
 - Every Plus entry point now opens the personalized intelligence hub before the official store plans.
+- A personalized home card shows report readiness and a real recurring-symbol preview, making the accumulating value discoverable before a paywall interruption.
 - Existing members can revisit their full report from the Plus entry point and then manage the verified subscription.
 - The official checkout still uses localized App Store or Google Play prices and trusted RevenueCat entitlement verification.
 - The report reads only the versioned local Journal and Mystic Mirror stores; no private journal text is uploaded.

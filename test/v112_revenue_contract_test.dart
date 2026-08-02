@@ -11,6 +11,8 @@ void main() {
     expect(pubspec, contains('version: 1.12.0+18'));
     expect(app, contains("import 'mystic_plus_intelligence_screen.dart';"));
     expect(app, contains('MysticPlusIntelligenceScreen('));
+    expect(app, contains('MysticIntelligenceTeaser('));
+    expect(app, contains('onOpen: onPremium'));
     expect(app, contains('isPlus: isPlus'));
     expect(app, isNot(contains('PremiumValueScreen(')));
     expect(
