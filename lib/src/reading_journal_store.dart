@@ -277,7 +277,9 @@ class ReadingJournalStore {
     final nextPayload = ReadingJournalCodec.encode(records);
     final currentPayload = preferences.getString(primaryKey);
 
-    if (currentPayload != null && currentPayload.trim().isNotEmpty) {
+    if (currentPayload != null &&
+        currentPayload.trim().isNotEmpty &&
+        _isTrustworthyPayload(currentPayload)) {
       final backupSaved =
           await preferences.setString(backupKey, currentPayload);
       if (!backupSaved) {
@@ -288,6 +290,15 @@ class ReadingJournalStore {
     final primarySaved = await preferences.setString(primaryKey, nextPayload);
     if (!primarySaved) {
       throw StateError('Could not save the reading journal.');
+    }
+  }
+
+  bool _isTrustworthyPayload(String payload) {
+    try {
+      final report = ReadingJournalCodec.decode(payload);
+      return report.records.isNotEmpty || report.rejectedItems == 0;
+    } catch (_) {
+      return false;
     }
   }
 

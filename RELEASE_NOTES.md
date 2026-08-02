@@ -1,3 +1,34 @@
+# Mystic Tarot 1.11.0 — Mirror & Trust
+
+This release turns Mystic’s core promise into a complete, durable product loop.
+
+## What is new
+
+- Mystic Mirror is now a real 24-hour follow-up: record what changed, how you feel now, and an optional private reflection.
+- Due Mirror check-ins surface in the Journal and on an accessible five-language navigation badge, including while the app remains open.
+- Every card can explain the spread position, upright/reversed lens, traditional symbolic basis, practical bridge, and personal context used in the interpretation.
+- Journal search tolerates Turkish characters and French, Spanish, and Portuguese accents.
+- The full private export includes questions, cards, actions, Mirror outcomes, emotional transitions, and reflection notes; sharing remains user-initiated with a clipboard fallback.
+
+## Trust and resilience
+
+- The complete journal is stored without the previous 50-reading cap.
+- Journal and Mirror data keep last-known-good local backups and recover from unreadable or partially damaged snapshots.
+- Only validated primary snapshots may replace a good backup.
+- Recovery and legacy migration are disclosed in the selected launch language instead of silently hiding damaged entries.
+- Mirror save failures remain retryable and never close the sheet as if the data were saved.
+- Reduced-motion support, timer disposal, localized support routing, and narrow-screen accessibility remain enforced.
+
+## Launch languages
+
+English, Turkish, neutral international Spanish, French, and Brazilian Portuguese remain complete across the release experience.
+
+## Validation target
+
+Flutter analysis, the complete automated test suite, web release, and Android App Bundle must all pass before this release candidate can merge.
+
+---
+
 # Version 1.10.0 — French & Quality
 
 Mystic Tarot now ships a complete five-language experience in English, Turkish, neutral international Spanish, Brazilian Portuguese, and French:

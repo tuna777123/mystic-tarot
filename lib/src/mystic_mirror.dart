@@ -124,7 +124,12 @@ class MysticMirrorStore {
       );
 
     final currentPrimary = preferences.getStringList(storageKey);
-    if (currentPrimary != null && currentPrimary.isNotEmpty) {
+    final primaryIsFullyValid = currentPrimary != null &&
+        currentPrimary.isNotEmpty &&
+        currentPrimary.every(
+          (encoded) => MysticMirrorReflection.tryDecode(encoded) != null,
+        );
+    if (primaryIsFullyValid) {
       final backupSaved =
           await preferences.setStringList(backupKey, currentPrimary);
       if (!backupSaved) {
