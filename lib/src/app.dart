@@ -19,6 +19,9 @@ import 'mystic_mirror_due.dart';
 import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
 import 'reading_position.dart';
+import 'ritual_reminder.dart';
+import 'ritual_reminder_screen.dart';
+import 'ritual_reminder_service.dart';
 import 'mystic_plus_intelligence_screen.dart';
 import 'mystic_intelligence_teaser.dart';
 import 'mystic_identity_screen.dart';
@@ -65,6 +68,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   final subscriptionStore = StorePurchaseService();
   final readingJournalStore = ReadingJournalStore();
   final mirrorStore = MysticMirrorStore();
+  final ritualReminderStore = RitualReminderStore();
+  final ritualReminderService = RitualReminderService.instance;
   Timer? _mirrorDueTimer;
   int mirrorDueCount = 0;
   String? journalRecoveryMessage;
@@ -342,6 +347,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           pastRecords: journal,
           onPremium: () => _showPremium(source: 'oracle_dialogue'),
           onComplete: (record) {
+            final shouldOfferRitualReminder =
+                journal.isEmpty && record.kind == ReadingKind.daily;
             final newlyDiscovered = record.cards
                 .map((item) => item.card)
                 .where((card) => !discoveredCards.contains(card.name))
@@ -363,7 +370,17 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
             if (newlyDiscovered.isNotEmpty) {
               Future<void>.delayed(
                 const Duration(milliseconds: 280),
-                () => _showCardDiscovery(newlyDiscovered),
+                () async {
+                  await _showCardDiscovery(newlyDiscovered);
+                  if (shouldOfferRitualReminder) {
+                    await _maybeOfferRitualReminder();
+                  }
+                },
+              );
+            } else if (shouldOfferRitualReminder) {
+              Future<void>.delayed(
+                const Duration(milliseconds: 450),
+                _maybeOfferRitualReminder,
               );
             }
           },
@@ -372,10 +389,10 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     );
   }
 
-  void _showCardDiscovery(List<TarotCardData> cards) {
+  Future<void> _showCardDiscovery(List<TarotCardData> cards) async {
     final context = navigatorKey.currentContext;
     if (context == null || !mounted) return;
-    showGeneralDialog<void>(
+    await showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
       barrierLabel: mysticText(language, 'Close discovery', 'Keşfi kapat'),
@@ -417,6 +434,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   void _selectLanguage(MysticLanguage value) {
     setState(() => language = value);
     _saveProgress();
+    _rescheduleRitualReminder(value);
   }
 
   void _openDestinyHub() {
@@ -463,6 +481,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   }
 
   Future<void> _deleteAllData() async {
+    await ritualReminderService.cancel();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     if (!mounted) return;
@@ -504,6 +523,9 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       language = selectedLanguage;
     });
     await _saveProgress();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startReading(ReadingKind.daily);
+    });
   }
 
   Future<void> _loadProgress() async {
@@ -579,6 +601,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
         await readingJournalStore.finishLegacyMigration();
       }
       _scheduleNextMirrorDue(mirrorReflections, now);
+      await _restoreRitualReminder();
       if (journalRecoveryMessage != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _showJournalRecoveryMessage();
@@ -662,6 +685,125 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       if (item.name == name) return item;
     }
     return MysticLanguage.english;
+  }
+
+  Future<void> _restoreRitualReminder() async {
+    final settings = await ritualReminderStore.load();
+    if (!settings.enabled) return;
+    final restored = settings.copyWith(languageCode: language.code);
+    await ritualReminderStore.save(restored);
+    await ritualReminderService.scheduleDaily(
+      settings: restored,
+      language: language,
+    );
+  }
+
+  Future<void> _rescheduleRitualReminder(MysticLanguage selected) async {
+    final settings = await ritualReminderStore.load();
+    if (!settings.enabled) return;
+    final updated = settings.copyWith(languageCode: selected.code);
+    await ritualReminderStore.save(updated);
+    await ritualReminderService.scheduleDaily(
+      settings: updated,
+      language: selected,
+    );
+  }
+
+  Future<void> _maybeOfferRitualReminder() async {
+    final settings = await ritualReminderStore.load();
+    if (!mounted || settings.promptCompleted) return;
+    final context = navigatorKey.currentState?.overlay?.context;
+    if (context == null || !context.mounted) return;
+    final choice = await showRitualReminderOfferSheet(
+      context: context,
+      language: language,
+    );
+    if (!mounted || !context.mounted) return;
+    if (choice == null) {
+      await ritualReminderStore.save(
+        settings.copyWith(
+          enabled: false,
+          promptCompleted: true,
+          languageCode: language.code,
+        ),
+      );
+      return;
+    }
+
+    final permission = await ritualReminderService.requestPermission();
+    if (!mounted || !context.mounted) return;
+    if (permission != RitualReminderPermissionResult.granted) {
+      await ritualReminderStore.save(
+        settings.copyWith(
+          enabled: false,
+          promptCompleted: true,
+          languageCode: language.code,
+        ),
+      );
+      if (!mounted || !context.mounted) return;
+      final message = switch (permission) {
+        RitualReminderPermissionResult.denied => localized(
+            language.appLanguage,
+            english:
+                'Notifications remain off. You can enable the ritual later in Your space.',
+            turkish:
+                'Bildirimler kapalı kaldı. Ritüeli daha sonra Senin alanın bölümünden açabilirsin.',
+            spanish:
+                'Las notificaciones siguen desactivadas. Puedes activar el ritual más tarde en Tu espacio.',
+            french:
+                'Les notifications restent désactivées. Vous pourrez activer le rituel plus tard dans Votre espace.',
+            portugueseBrazil:
+                'As notificações continuam desativadas. Você pode ativar o ritual depois em Seu espaço.',
+          ),
+        _ => localized(
+            language.appLanguage,
+            english:
+                'Daily reminders are available in the iOS and Android apps.',
+            turkish:
+                'Günlük hatırlatıcılar iOS ve Android uygulamalarında kullanılabilir.',
+            spanish:
+                'Los recordatorios diarios están disponibles en las apps de iOS y Android.',
+            french:
+                'Les rappels quotidiens sont disponibles dans les apps iOS et Android.',
+            portugueseBrazil:
+                'Os lembretes diários estão disponíveis nos apps para iOS e Android.',
+          ),
+      };
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+
+    final updated = settings.copyWith(
+      enabled: true,
+      hour: choice.time.hour,
+      minute: choice.time.minute,
+      promptCompleted: true,
+      languageCode: language.code,
+    );
+    final scheduled = await ritualReminderService.scheduleDaily(
+      settings: updated,
+      language: language,
+    );
+    if (!scheduled) return;
+    await ritualReminderStore.save(updated);
+    if (!mounted || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          localized(
+            language.appLanguage,
+            english: 'Daily ritual set for ${updated.formattedTime}.',
+            turkish: 'Günlük ritüel ${updated.formattedTime} için ayarlandı.',
+            spanish:
+                'Ritual diario programado para las ${updated.formattedTime}.',
+            french:
+                'Rituel quotidien programmé à ${updated.formattedTime}.',
+            portugueseBrazil:
+                'Ritual diário agendado para ${updated.formattedTime}.',
+          ),
+        ),
+      ),
+    );
   }
 
   void _showPremium({String source = 'organic'}) {
@@ -1059,11 +1201,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       de: 'Meine Absicht festlegen',
                     )
                   : _copy(
-                      en: 'Enter Mystic',
-                      es: 'Entrar en Mystic',
-                      fr: 'Entrer dans Mystic',
-                      pt: 'Entrar no Mystic',
-                      tr: 'Mystic’e gir',
+                      en: 'Reveal my first card',
+                      es: 'Revelar mi primera carta',
+                      fr: 'Révéler ma première carte',
+                      pt: 'Revelar minha primeira carta',
+                      tr: 'İlk kartımı aç',
                       it: 'Entra in Mystic',
                       de: 'Mystic betreten',
                     ),
@@ -3424,6 +3566,25 @@ class _ReadingFlowState extends State<ReadingFlow> {
                           widget.onComplete(record);
                           setState(() => saved = true);
                         },
+                ),
+              if (revealComplete && saved) const SizedBox(height: 10),
+              if (revealComplete && saved)
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _openStoryStudio(record),
+                    icon: const Icon(Icons.ios_share_outlined),
+                    label: Text(
+                      localized(
+                        widget.language.appLanguage,
+                        english: 'Create a private story card',
+                        turkish: 'Özel hikâye kartı oluştur',
+                        spanish: 'Crear una tarjeta privada para historias',
+                        french: 'Créer une carte privée pour story',
+                        portugueseBrazil: 'Criar um card privado para stories',
+                      ),
+                    ),
+                  ),
                 ),
               if (revealComplete) const SizedBox(height: 10),
               if (revealComplete)
@@ -6536,6 +6697,17 @@ class ProfileScreen extends StatelessWidget {
     ];
     final settings = <(String, String)>[
       (
+        'Daily ritual',
+        localized(
+          language.appLanguage,
+          english: 'Daily ritual reminder',
+          turkish: 'Günlük ritüel hatırlatıcısı',
+          spanish: 'Recordatorio del ritual diario',
+          french: 'Rappel du rituel quotidien',
+          portugueseBrazil: 'Lembrete do ritual diário',
+        ),
+      ),
+      (
         'Reading preferences',
         mysticText(language, 'Reading preferences', 'Okuma tercihleri'),
       ),
@@ -7521,6 +7693,9 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
   );
 
   List<Widget> _content(BuildContext context) {
+    if (widget.section == 'Daily ritual') {
+      return [RitualReminderSettingsPanel(language: widget.language)];
+    }
     if (widget.section == 'Reading preferences') {
       return [
         _intro(

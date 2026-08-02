@@ -38,6 +38,9 @@ jobs:
       - name: Set permanent store identifiers
         run: dart run tool/configure_store_identifiers.dart
 
+      - name: Configure daily ritual notifications
+        run: dart run tool/configure_ritual_notifications.dart
+
       - name: Validate protected signing configurator
         run: |
           cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts

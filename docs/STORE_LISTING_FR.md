@@ -73,7 +73,11 @@ La Guidance Quotidienne et le Mystic Mirror de base sur 24 heures restent gratui
 
 Mystic Tarot est destiné à la réflexion personnelle et au divertissement. Il ne fournit aucun avis médical, psychologique, juridique, financier ou d’urgence.
 
-## Notes de version — 1.12.0
+## Notes de version — 1.13.0
+
+- L’onboarding ouvre directement le premier véritable rituel de Guidance Quotidienne
+- Rappel quotidien local facultatif à l’heure choisie par l’utilisateur
+- Action visible pour créer une carte privée de story après l’enregistrement d’un tirage
 
 - Rapport personnel Mystic Intelligence sur 7 jours calculé sur l’appareil
 - Mystic Mirror sur 24 heures en cinq langues pour noter ce qui a réellement changé

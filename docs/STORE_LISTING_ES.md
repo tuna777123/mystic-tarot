@@ -73,7 +73,11 @@ La Guía Diaria y el Mystic Mirror básico de 24 horas permanecen gratuitos. Mys
 
 Mystic Tarot está diseñado para la reflexión personal y el entretenimiento. No ofrece asesoramiento médico, psicológico, legal, financiero ni de emergencia.
 
-## Notas de la versión — 1.12.0
+## Notas de la versión — 1.13.0
+
+- El onboarding abre directamente el primer ritual real de Guía Diaria
+- Recordatorio diario local opcional a la hora elegida por el usuario
+- Acción visible para crear una tarjeta privada para historias después de guardar una lectura
 
 - Informe personal Mystic Intelligence de 7 días calculado en el dispositivo
 - Mystic Mirror de 24 horas en cinco idiomas para registrar qué cambió realmente
