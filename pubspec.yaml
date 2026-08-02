@@ -1,7 +1,7 @@
 name: mystic_tarot
 description: A private, multilingual, local-first premium tarot, journaling, and spiritual companion app.
 publish_to: none
-version: 1.14.0+20
+version: 1.15.0+21
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -9,39 +9,33 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^6.8.1
-  flutter_local_notifications: ^19.5.0
-  flutter_timezone: ^5.1.0
-  purchases_flutter: ^10.5.0
-  share_plus: ^12.0.2
   shared_preferences: ^2.5.3
+  url_launcher: ^6.3.1
+  share_plus: ^12.0.2
+  in_app_purchase: ^3.2.3
+  flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
-  url_launcher: ^6.3.2
-
-dependency_overrides:
-  # jni 1.0.1 currently fails during Android Gradle evaluation because its
-  # Kotlin extension is not available in this project's generated shell.
-  # Keep the last known-good release until the upstream package is corrected.
-  jni: 1.0.0
+  purchases_flutter: ^9.12.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.4
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
+  image: ^4.5.4
+
+dependency_overrides:
+  jni: 1.0.0
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/audio/
+    - assets/
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/store/app-icon-1024.jpg
-  adaptive_icon_background: "#090816"
-  adaptive_icon_foreground: assets/store/app-icon-1024.jpg
-  adaptive_icon_foreground_inset: 18
-  min_sdk_android: 24
+  image_path: assets/mystic_tarot_app_icon.png
+  adaptive_icon_background: "#120D1D"
+  adaptive_icon_foreground: assets/mystic_tarot_app_icon_foreground.png
   remove_alpha_ios: true
-  background_color_ios: "#090816"
