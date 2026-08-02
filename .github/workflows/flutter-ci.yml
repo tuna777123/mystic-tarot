@@ -22,7 +22,10 @@ jobs:
           fetch-depth: 0
 
       - name: Materialize final v1.13 source
-        run: python tool/integrate_v113_bootstrap.py
+        run: |
+          wc -c tool/.v113_payload.part*
+          sha256sum tool/.v113_payload.part*
+          python tool/integrate_v113_bootstrap.py
 
       - name: Commit clean product tree
         run: |
