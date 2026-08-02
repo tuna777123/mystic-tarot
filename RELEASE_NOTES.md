@@ -1,3 +1,30 @@
+# Mystic Tarot 1.14.0 — Daily Practice & Reliable Return
+
+This release turns the Daily Soul Quest into a complete, honest product loop and keeps daily state correct while the app remains open.
+
+## Actionable daily ritual
+
+- The previously passive “one ritual” step now opens a real private micro-practice.
+- Users can complete a guided 24-second grounding breath, write one honest intention, or name a gratitude anchor.
+- Intention and gratitude text exists only inside the open sheet and is never persisted; Mystic stores only the selected practice identifier.
+- Completing the ritual immediately updates the Daily Soul Quest and reveals when the Soul Chest is ready.
+- All practice choices, privacy language, breathing phases, writing prompts, and calls to action ship in English, Turkish, Spanish, French, and Brazilian Portuguese.
+
+## Reliable daily boundaries
+
+- Daily rituals, deep-reading allowances, quest claims, and stale streak displays refresh automatically after local midnight.
+- The refresh runs when the app resumes and through a scheduled local day-boundary timer while the app remains open.
+- A valid yesterday streak remains visible until today’s practice; a genuinely broken streak no longer appears active.
+- Daily state rules are deterministic and covered independently from the interface.
+
+## Release integrity
+
+- Version `1.14.0+20`.
+- Private writing is not added to SharedPreferences, notifications, exports, analytics, or purchase services.
+- Narrow-phone layout and guided-practice completion are protected by automated widget tests.
+
+---
+
 # Mystic Tarot 1.13.0 — Activation & Ritual Retention
 
 This release turns the first session into a complete value moment and gives users a private, controllable reason to return.
