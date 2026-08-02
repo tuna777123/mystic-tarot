@@ -56,11 +56,6 @@ String supportPageForLanguage(MysticLanguage language) => switch (language) {
         'https://tuna777123.github.io/mystic-tarot/support-tr.html',
       MysticLanguage.spanish =>
         'https://tuna777123.github.io/mystic-tarot/support-es.html',
-      MysticLanguage.french =>
-        ' Dans les ${recent.length} tirages mémorisés, $cardName est apparue '
-        '${recurring.value} fois et $emotion était votre émotion de départ la '
-        'plus fréquente. Ce n’est pas une prédiction, mais un fil récurrent qui '
-        'mérite votre attention.',
       MysticLanguage.portugueseBrazil =>
         'https://tuna777123.github.io/mystic-tarot/support-pt-br.html',
       _ => 'https://tuna777123.github.io/mystic-tarot/support.html',
@@ -5126,22 +5121,6 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
               '¿Qué debería llevar conmigo durante las próximas 24 horas?',
             ];
         }
-      case MysticLanguage.french:
-        if (hiddenQuestion) {
-          return '$firstName suggère que la partie cachée peut être celle-ci : '
-              '$firstMeaning $lastAdvice Votre état ${emotion.toLowerCase()} '
-              'peut donner trop de poids à un détail. Séparez ce que vous savez '
-              'de ce que vous craignez ou espérez.$memory';
-        }
-        if (keyCardQuestion) {
-          return '$lastName porte le poids final de ce tirage. $lastMeaning '
-              'Son invitation pratique est simple : $lastAdvice Observez comment '
-              'cela soutient votre chemin de ${_localizedIntention(widget.intention, widget.language).toLowerCase()}.$memory';
-        }
-        return '$firstName décrit l’énergie dans laquelle vous entrez, tandis que '
-            '$lastName indique la réponse qui vous est disponible. $lastAdvice '
-            'Gardez la prochaine étape petite, observable et réversible ; les '
-            'cartes proposent une perspective, pas un ordre.$memory';
       case MysticLanguage.portugueseBrazil:
         switch (widget.record.kind) {
           case ReadingKind.love:
@@ -5290,6 +5269,22 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
             'que $lastName señala la respuesta que tienes disponible. $lastAdvice '
             'Mantén el siguiente paso pequeño, observable y reversible; las '
             'cartas ofrecen una perspectiva, no una orden.$memory';
+      case MysticLanguage.french:
+        if (hiddenQuestion) {
+          return '$firstName suggère que la partie cachée peut être celle-ci : '
+              '$firstMeaning $lastAdvice Votre état ${emotion.toLowerCase()} '
+              'peut donner trop de poids à un détail. Séparez ce que vous savez '
+              'de ce que vous craignez ou espérez.$memory';
+        }
+        if (keyCardQuestion) {
+          return '$lastName porte le poids final de ce tirage. $lastMeaning '
+              'Son invitation pratique est simple : $lastAdvice Observez comment '
+              'cela soutient votre chemin de ${_localizedIntention(widget.intention, widget.language).toLowerCase()}.$memory';
+        }
+        return '$firstName décrit l’énergie dans laquelle vous entrez, tandis que '
+            '$lastName indique la réponse qui vous est disponible. $lastAdvice '
+            'Gardez la prochaine étape petite, observable et réversible ; les '
+            'cartes proposent une perspective, pas un ordre.$memory';
       case MysticLanguage.portugueseBrazil:
         if (hiddenQuestion) {
           return '$firstName sugere que a parte oculta pode ser esta: '
@@ -5379,6 +5374,11 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
         ' En ${recent.length} lecturas recordadas, $cardName apareció '
         '${recurring.value} veces y $emotion fue tu emoción inicial más común. '
         'No es una predicción, sino un hilo recurrente que merece atención.',
+      MysticLanguage.french =>
+        ' Dans les ${recent.length} tirages mémorisés, $cardName est apparue '
+        '${recurring.value} fois et $emotion était votre émotion de départ la '
+        'plus fréquente. Ce n’est pas une prédiction, mais un fil récurrent qui '
+        'mérite votre attention.',
       MysticLanguage.portugueseBrazil =>
         ' Em ${recent.length} leituras lembradas, $cardName apareceu '
         '${recurring.value} vezes e $emotion foi sua emoção inicial mais comum. '
