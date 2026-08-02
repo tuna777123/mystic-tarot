@@ -11,7 +11,7 @@ void main() {
 
   test('explanation exposes every input used to frame a reading', () {
     final explanation = buildReadingExplanation(
-      kind: ReadingKind.daily,
+      kind: ReadingKind.love,
       card: upright,
       positionIndex: 1,
       emotion: EmotionalState.curious,
@@ -19,7 +19,7 @@ void main() {
       language: MysticLanguage.english,
     );
 
-    expect(explanation.positionLabel, contains('What asks for attention'));
+    expect(explanation.positionLabel, contains('What shapes the connection'));
     expect(explanation.orientationLabel, contains('upright'));
     expect(explanation.symbolicBasis, isNotEmpty);
     expect(explanation.practicalBridge, isNotEmpty);
@@ -72,7 +72,7 @@ void main() {
     }
   });
 
-  test('positions beyond the first three remain explicit', () {
+  test('positions beyond the spread remain explicit', () {
     final explanation = buildReadingExplanation(
       kind: ReadingKind.daily,
       card: upright,
