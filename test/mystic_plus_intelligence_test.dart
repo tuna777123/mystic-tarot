@@ -261,11 +261,26 @@ void main() {
     expect(find.text('ACTIVE'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -900));
-    await tester.pump(const Duration(milliseconds: 250));
-
+    final list = find.byType(ListView);
+    await tester.dragUntilVisible(
+      find.text('REALITY LOOP'),
+      list,
+      const Offset(0, -220),
+    );
     expect(find.text('REALITY LOOP'), findsOneWidget);
+
+    await tester.dragUntilVisible(
+      find.text('EMOTIONAL DIRECTION'),
+      list,
+      const Offset(0, -220),
+    );
     expect(find.text('EMOTIONAL DIRECTION'), findsOneWidget);
+
+    await tester.dragUntilVisible(
+      find.text('NEXT GROUNDED PRACTICE'),
+      list,
+      const Offset(0, -220),
+    );
     expect(find.text('NEXT GROUNDED PRACTICE'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
