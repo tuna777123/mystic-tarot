@@ -23,15 +23,19 @@ void main() {
     expect(app, contains('Ce n’est pas une prédiction'));
   });
 
-  test('release notes describe language integrity without AI claims', () {
-    expect(notes, startsWith('# Mystic Tarot 1.17.0 — Oracle Language Integrity'));
-    expect(notes, contains('French Oracle responses'));
-    expect(notes, contains('accent-tolerant'));
-    expect(notes, isNot(contains('remote AI')));
+  test('release notes describe grounded language integrity', () {
+    final release = notes.split('\n---\n').first;
+    expect(release, startsWith('# Mystic Tarot 1.17.0 — Oracle Language Integrity'));
+    expect(release, contains('French Oracle responses'));
+    expect(release, contains('accent-tolerant'));
+    expect(release, contains('perspective, not certainty or commands'));
+    expect(release, isNot(contains('remote AI')));
   });
 
   test('temporary v1.17 integration files are absent from release tree', () {
     expect(File('tool/apply_v117.py').existsSync(), isFalse);
     expect(File('.github/workflows/apply-v117.yml').existsSync(), isFalse);
+    expect(File('tool/repair_v117.py').existsSync(), isFalse);
+    expect(File('.github/workflows/repair-v117.yml').existsSync(), isFalse);
   });
 }
