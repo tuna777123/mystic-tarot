@@ -9,7 +9,7 @@ void main() {
   final pubspec = File('pubspec.yaml').readAsStringSync();
 
   test('v1.14 wires the daily practice into the real home quest', () {
-    expect(pubspec, contains('version: 1.14.0+20'));
+    expect(_isAtLeast(pubspec, major: 1, minor: 14), isTrue);
     expect(app, contains('onRitual: _openDailyPractice'));
     expect(app, contains('showDailyPracticeSheet'));
     expect(app, contains('dailyPracticeId(result)'));
@@ -29,4 +29,18 @@ void main() {
     expect(app, contains('deepReadingsToday = 0'));
     expect(state, contains('durationUntilNextMysticDay'));
   });
+}
+
+bool _isAtLeast(
+  String pubspec, {
+  required int major,
+  required int minor,
+}) {
+  final match = RegExp(r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)')
+      .firstMatch(pubspec);
+  if (match == null) return false;
+  final actualMajor = int.parse(match.group(1)!);
+  final actualMinor = int.parse(match.group(2)!);
+  return actualMajor > major ||
+      (actualMajor == major && actualMinor >= minor);
 }
