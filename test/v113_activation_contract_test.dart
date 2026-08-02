@@ -10,7 +10,7 @@ void main() {
       File('lib/src/ritual_reminder_service_native.dart').readAsStringSync();
 
   test('v1.13 activation remains protected in later releases', () {
-    expect(pubspec, contains('version: 1.14.0+20'));
+    expect(_isAtLeast(pubspec, major: 1, minor: 13), isTrue);
     expect(app, contains("en: 'Reveal my first card'"));
     expect(app, contains('_startReading(ReadingKind.daily)'));
   });
@@ -41,4 +41,18 @@ void main() {
     expect(workflow, isNot(contains('Upload temporary source snapshot')));
     expect(workflow, isNot(contains('mystic-tarot-source')));
   });
+}
+
+bool _isAtLeast(
+  String pubspec, {
+  required int major,
+  required int minor,
+}) {
+  final match = RegExp(r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)')
+      .firstMatch(pubspec);
+  if (match == null) return false;
+  final actualMajor = int.parse(match.group(1)!);
+  final actualMinor = int.parse(match.group(2)!);
+  return actualMajor > major ||
+      (actualMajor == major && actualMinor >= minor);
 }
