@@ -38,8 +38,7 @@ class MysticPlusIntelligenceSnapshot {
 
   bool get hasEnoughHistory => readingCount >= 3;
 
-  int get readingsUntilReady =>
-      readingCount >= 3 ? 0 : 3 - readingCount;
+  int get readingsUntilReady => readingCount >= 3 ? 0 : 3 - readingCount;
 
   double get mirrorCompletionRate => mirrorEligibleCount == 0
       ? 0
@@ -65,7 +64,7 @@ abstract final class MysticPlusIntelligence {
     required DateTime generatedAt,
     Duration window = const Duration(days: 7),
   }) {
-    if (window <= Duration.zero) {
+    if (window.inMicroseconds <= 0) {
       throw ArgumentError.value(window, 'window', 'must be positive');
     }
 
@@ -122,7 +121,7 @@ abstract final class MysticPlusIntelligence {
       }
     }
 
-    final topCard = _topEntry(cardCounts, (value) => value);
+    final topCard = _topEntry(cardCounts, (_) => 0);
     final topKind = _topEntry(kindCounts, (value) => value.index);
     final topEmotion = _topEntry(emotionCounts, (value) => value.index);
 
