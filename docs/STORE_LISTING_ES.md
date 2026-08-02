@@ -11,7 +11,7 @@ Mystic Tarot: Ritual Diario
 Tarot, diario y patrones
 
 **Texto promocional**  
-Revela las cartas, observa lo que se repite y convierte cada lectura en un ritual privado que adquiere más significado con el tiempo.
+Revela las cartas, comprende por qué aparece cada interpretación y registra qué cambió realmente 24 horas después.
 
 **Palabras clave (máximo 100 caracteres)**  
 tarot,carta diaria,diario,oráculo,reflexión,arcano,ritual,bienestar,autoconocimiento
@@ -37,53 +37,60 @@ https://tuna777123.github.io/mystic-tarot/
 Mystic Tarot: Ritual Diario
 
 **Descripción breve (máximo 80 caracteres)**  
-Lecturas privadas, memoria de patrones, diario y rituales de tarot.
+Tarot explicable, Mystic Mirror de 24 horas y diario privado.
 
 **Descripción completa**
 
 Tus patrones ya están hablando.
 
-Mystic Tarot convierte una lectura de cartas en una práctica diaria y privada. Elige las cartas que te llamen, abre el sello y recibe una guía centrada en la reflexión, basada en el simbolismo tradicional del tarot.
+Mystic Tarot convierte una lectura de cartas en una práctica diaria y privada. Elige las cartas que te llamen, abre el sello y recibe una guía centrada en la reflexión, inspirada en el simbolismo tradicional del tarot.
 
-VUELVE PARA RECIBIR GUÍA DIARIA
+COMPRENDE LA INTERPRETACIÓN
 
-Empieza cada día con una carta clara, una acción práctica y Mystic Mirror, una reflexión de 24 horas que te pregunta qué cambió realmente.
+En cada carta puedes ver su posición dentro de la tirada, cómo influye que aparezca al derecho o invertida, la base simbólica tradicional y el paso práctico propuesto. Mystic muestra qué emoción e intención utilizó como contexto y no presenta las interpretaciones como pruebas, diagnósticos, certezas ni puntuaciones predictivas.
+
+VUELVE A LA REALIDAD DESPUÉS DE 24 HORAS
+
+Cuando Mystic Mirror esté listo, registra qué cambió realmente, cómo te sientes ahora y una nota privada opcional. Así puedes comparar la guía con lo ocurrido y construir un historial basado en tu propia experiencia.
 
 OBSERVA LO QUE SE REPITE
 
-Mystic recuerda las cartas recurrentes, los cambios emocionales y las lecturas anteriores guardadas en tu dispositivo. Así puedes comparar patrones en lugar de perder cada lectura como una interpretación aislada.
+Mystic compara cartas recurrentes, transiciones emocionales, lecturas anteriores y revisiones de Mirror guardadas en tu dispositivo. La búsqueda del diario tolera diferencias de acentos para que tus recuerdos sigan siendo fáciles de encontrar.
 
 EXPLORA LOS 78 ARCANOS
 
 Despierta todas las cartas, desbloquea mazos visuales, construye tu Constelación Interior, gana XP, completa rituales y reúne logros a lo largo de tu Camino Mystic.
 
-HAZ UNA MEJOR PREGUNTA DE SEGUIMIENTO
-
-Usa el Diálogo del Oráculo para explorar lo que quizá aún no estás viendo, qué carta tiene más peso o qué debes llevar contigo durante las próximas 24 horas.
-
 PRIVACIDAD DESDE EL DISEÑO
 
-Tu diario, perfil, progreso, colección y preferencias permanecen en tu dispositivo. El historial de compra y el estado de la suscripción nativa son procesados por Apple o Google y RevenueCat para verificar Mystic Plus de forma segura.
+Tus preguntas, lecturas, notas de Mirror, perfil, progreso y preferencias permanecen en tu dispositivo. El historial completo del diario se guarda localmente con una copia de seguridad del último estado válido. Puedes exportar tu historial privado únicamente cuando tú inicias la acción o eliminar todos los datos de Mystic.
+
+El historial de compra y el estado de la suscripción nativa son procesados por Apple o Google y RevenueCat para verificar Mystic Plus de forma segura.
+
+PROFUNDIZA CON MYSTIC PLUS
+
+La Guía Diaria y el Mystic Mirror básico de 24 horas permanecen gratuitos. Mystic Plus desbloquea lecturas profundas ilimitadas, tiradas premium y preguntas de seguimiento ilimitadas en el Diálogo del Oráculo. La tienda muestra el precio localizado, el periodo, la elegibilidad para pruebas y las condiciones de renovación antes de comprar.
 
 Mystic Tarot está diseñado para la reflexión personal y el entretenimiento. No ofrece asesoramiento médico, psicológico, legal, financiero ni de emergencia.
 
-## Notas de la versión — 1.10.1
+## Notas de la versión — 1.11.0
 
+- Mystic Mirror de 24 horas en cinco idiomas para registrar qué cambió realmente
+- Interpretaciones transparentes con posición, orientación, base simbólica y contexto
+- Insignia accesible en el Diario para revisiones de Mirror pendientes
+- Historial completo, local y con copia de seguridad sin límite de 50 lecturas
+- Recuperación segura de registros dañados o parcialmente corruptos
+- Búsqueda del diario tolerante a diferencias de acentos
+- Exportación privada con preguntas, acciones, transiciones emocionales y notas de Mirror
 - Experiencia completa en inglés, turco, español, francés y portugués de Brasil
-- Los 78 arcanos localizados de principio a fin
-- Selección cinematográfica de cartas y ritual de revelación
-- Diario Vivo, Mapa de Memoria y búsqueda de patrones
-- Camino Mystic, Bóveda Arcana y viaje de los Arcanos Mayores
-- Exportación y eliminación local de datos
-- Suscripciones Mystic Plus verificadas mediante la tienda
 
 ## Títulos para capturas en español
 
 1. **Tus patrones ya están hablando**
 2. **Elige las cartas que te llamen**
 3. **Abre el sello**
-4. **Convierte la guía en acción**
-5. **Mystic recuerda lo que regresa**
-6. **Construye tu Constelación Interior**
+4. **Comprende por qué aparece esta interpretación**
+5. **¿Qué cambió realmente después de 24 horas?**
+6. **Mystic recuerda lo que regresa**
 7. **Un diario que sigue siendo tuyo**
 8. **Profundiza con Mystic Plus**
