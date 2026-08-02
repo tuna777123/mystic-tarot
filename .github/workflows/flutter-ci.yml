@@ -1,15 +1,15 @@
 name: Integrate Mystic Tarot v1.13
 
 on:
-  push:
-    branches: [feature/v1.13-activation-retention]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
 
 concurrency:
-  group: integrate-v113
-  cancel-in-progress: false
+  group: integrate-v113-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   integrate:
@@ -18,7 +18,7 @@ jobs:
       - name: Check out feature branch
         uses: actions/checkout@v4
         with:
-          ref: feature/v1.13-activation-retention
+          ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: Materialize final v1.13 source
@@ -31,4 +31,4 @@ jobs:
           git add -A
           git diff --cached --check
           git commit -m "feat: ship v1.13 activation and ritual retention"
-          git push origin HEAD:feature/v1.13-activation-retention
+          git push origin HEAD:${{ github.head_ref }}
