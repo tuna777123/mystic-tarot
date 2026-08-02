@@ -1,97 +1,34 @@
-name: Flutter CI
+name: Integrate Mystic Tarot v1.13
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: [feature/v1.13-activation-retention]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: flutter-ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: integrate-v113
+  cancel-in-progress: false
 
 jobs:
-  test-and-build:
+  integrate:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Check out feature branch
         uses: actions/checkout@v4
-
-      - name: Upload temporary source snapshot
-        uses: actions/upload-artifact@v4
         with:
-          name: mystic-tarot-source
-          path: |
-            lib
-            test
-            tool
-            web
-            docs
-            pubspec.yaml
-            pubspec.lock
-            README.md
-            RELEASE_NOTES.md
-            STORE_RELEASE.md
-            .github/workflows/flutter-ci.yml
-          if-no-files-found: error
-          retention-days: 1
+          ref: feature/v1.13-activation-retention
+          fetch-depth: 0
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+      - name: Materialize final v1.13 source
+        run: python tool/integrate_v113_bootstrap.py
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Generate platform shells
-        run: flutter create . --platforms=android,ios --org com.tunabozcali
-
-      - name: Set permanent store identifiers
-        run: dart run tool/configure_store_identifiers.dart
-
-      - name: Validate protected signing configurator
+      - name: Commit clean product tree
         run: |
-          cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts
-          dart run tool/configure_android_signing.dart
-          grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
-          mv /tmp/mystic-build.gradle.kts android/app/build.gradle.kts
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate branded native icons
-        run: dart run flutter_launcher_icons
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Test
-        run: flutter test
-
-      - name: Build web release
-        run: flutter build web --release
-
-      - name: Build Android release bundle
-        run: flutter build appbundle --release
-
-      - name: Upload web release
-        uses: actions/upload-artifact@v4
-        with:
-          name: mystic-tarot-web
-          path: build/web
-          if-no-files-found: error
-
-      - name: Upload Android bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: mystic-tarot-android-aab
-          path: build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error
+          git config user.name "mystic-release-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "feat: ship v1.13 activation and ritual retention"
+          git push origin HEAD:feature/v1.13-activation-retention
