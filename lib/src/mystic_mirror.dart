@@ -76,16 +76,15 @@ class MysticMirrorStore {
       : _providedPreferences = preferences;
 
   static const storageKey = 'mystic_mirror_reflections_v1';
+  static const backupKey = 'mystic_mirror_reflections_v1_backup';
   final SharedPreferences? _providedPreferences;
 
   Future<SharedPreferences> _preferences() async =>
       _providedPreferences ?? SharedPreferences.getInstance();
 
-  Future<Map<String, MysticMirrorReflection>> load() async {
-    final preferences = await _preferences();
+  Map<String, MysticMirrorReflection> _decode(Iterable<String> encodedItems) {
     final result = <String, MysticMirrorReflection>{};
-    for (final encoded
-        in preferences.getStringList(storageKey) ?? const <String>[]) {
+    for (final encoded in encodedItems) {
       final reflection = MysticMirrorReflection.tryDecode(encoded);
       if (reflection == null) continue;
       final existing = result[reflection.recordId];
@@ -94,7 +93,25 @@ class MysticMirrorStore {
         result[reflection.recordId] = reflection;
       }
     }
-    return Map<String, MysticMirrorReflection>.unmodifiable(result);
+    return result;
+  }
+
+  Future<Map<String, MysticMirrorReflection>> load() async {
+    final preferences = await _preferences();
+    final primary = preferences.getStringList(storageKey);
+    if (primary != null) {
+      final decoded = _decode(primary);
+      if (primary.isEmpty || decoded.isNotEmpty) {
+        return Map<String, MysticMirrorReflection>.unmodifiable(decoded);
+      }
+    }
+
+    final backup = preferences.getStringList(backupKey);
+    if (backup != null) {
+      return Map<String, MysticMirrorReflection>.unmodifiable(_decode(backup));
+    }
+
+    return const <String, MysticMirrorReflection>{};
   }
 
   Future<void> save(MysticMirrorReflection reflection) async {
@@ -102,16 +119,33 @@ class MysticMirrorStore {
     final current = Map<String, MysticMirrorReflection>.from(await load());
     current[reflection.recordId] = reflection;
     final ordered = current.values.toList()
-      ..sort((first, second) =>
-          second.completedAt.compareTo(first.completedAt));
-    await preferences.setStringList(
+      ..sort(
+        (first, second) => second.completedAt.compareTo(first.completedAt),
+      );
+
+    final currentPrimary = preferences.getStringList(storageKey);
+    if (currentPrimary != null && currentPrimary.isNotEmpty) {
+      final backupSaved =
+          await preferences.setStringList(backupKey, currentPrimary);
+      if (!backupSaved) {
+        throw StateError('Could not preserve the previous Mirror snapshot.');
+      }
+    }
+
+    final primarySaved = await preferences.setStringList(
       storageKey,
       ordered.map((item) => item.encode()).toList(growable: false),
     );
+    if (!primarySaved) {
+      throw StateError('Could not save the Mystic Mirror reflection.');
+    }
   }
 
   Future<void> clear() async {
     final preferences = await _preferences();
-    await preferences.remove(storageKey);
+    await Future.wait(<Future<bool>>[
+      preferences.remove(storageKey),
+      preferences.remove(backupKey),
+    ]);
   }
 }

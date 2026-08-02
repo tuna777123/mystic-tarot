@@ -24,6 +24,20 @@ ReadingRecord testRecord(DateTime createdAt) => ReadingRecord(
       alignedAction: 'Take one small reversible step.',
     );
 
+MysticMirrorReflection reflection({
+  required String id,
+  required DateTime completedAt,
+  String note = '',
+  MysticMirrorOutcome outcome = MysticMirrorOutcome.shifted,
+}) =>
+    MysticMirrorReflection(
+      recordId: id,
+      outcome: outcome,
+      emotion: EmotionalState.grounded,
+      note: note,
+      completedAt: completedAt,
+    );
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -67,15 +81,14 @@ void main() {
   });
 
   test('reflection codec round-trips and limits oversized notes', () {
-    final reflection = MysticMirrorReflection(
-      recordId: 'record-1',
+    final item = reflection(
+      id: 'record-1',
       outcome: MysticMirrorOutcome.partlyShifted,
-      emotion: EmotionalState.grounded,
       note: 'x' * 700,
       completedAt: DateTime.utc(2026, 8, 2, 12),
     );
 
-    final decoded = MysticMirrorReflection.tryDecode(reflection.encode());
+    final decoded = MysticMirrorReflection.tryDecode(item.encode());
 
     expect(decoded, isNotNull);
     expect(decoded!.recordId, 'record-1');
@@ -86,17 +99,14 @@ void main() {
   });
 
   test('store skips corrupt values and keeps the newest duplicate', () async {
-    final older = MysticMirrorReflection(
-      recordId: 'same-record',
+    final older = reflection(
+      id: 'same-record',
       outcome: MysticMirrorOutcome.unchanged,
-      emotion: EmotionalState.uncertain,
       note: 'Older',
       completedAt: DateTime.utc(2026, 8, 2, 10),
     );
-    final newer = MysticMirrorReflection(
-      recordId: 'same-record',
-      outcome: MysticMirrorOutcome.shifted,
-      emotion: EmotionalState.hopeful,
+    final newer = reflection(
+      id: 'same-record',
       note: 'Newer',
       completedAt: DateTime.utc(2026, 8, 2, 11),
     );
@@ -117,17 +127,13 @@ void main() {
 
   test('saving one reflection preserves existing reflections', () async {
     final store = MysticMirrorStore();
-    final first = MysticMirrorReflection(
-      recordId: 'first',
+    final first = reflection(
+      id: 'first',
       outcome: MysticMirrorOutcome.unclear,
-      emotion: EmotionalState.curious,
-      note: '',
       completedAt: DateTime.utc(2026, 8, 2, 9),
     );
-    final second = MysticMirrorReflection(
-      recordId: 'second',
-      outcome: MysticMirrorOutcome.shifted,
-      emotion: EmotionalState.grounded,
+    final second = reflection(
+      id: 'second',
       note: 'A real change.',
       completedAt: DateTime.utc(2026, 8, 2, 10),
     );
@@ -138,6 +144,60 @@ void main() {
 
     expect(loaded.keys, containsAll(<String>['first', 'second']));
     expect(loaded['second']!.note, 'A real change.');
+  });
+
+  test('saving a new snapshot preserves the previous primary as backup',
+      () async {
+    final store = MysticMirrorStore();
+    final first = reflection(
+      id: 'first',
+      note: 'First snapshot',
+      completedAt: DateTime.utc(2026, 8, 2, 9),
+    );
+    final second = reflection(
+      id: 'second',
+      note: 'Second snapshot',
+      completedAt: DateTime.utc(2026, 8, 2, 10),
+    );
+
+    await store.save(first);
+    await store.save(second);
+    final preferences = await SharedPreferences.getInstance();
+    final backup = preferences.getStringList(MysticMirrorStore.backupKey)!;
+
+    expect(backup, hasLength(1));
+    expect(MysticMirrorReflection.tryDecode(backup.single)!.recordId, 'first');
+  });
+
+  test('store recovers from backup when primary contains no valid records',
+      () async {
+    final recovered = reflection(
+      id: 'recovered',
+      note: 'Last known good',
+      completedAt: DateTime.utc(2026, 8, 2, 8),
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      MysticMirrorStore.storageKey: <String>['{broken'],
+      MysticMirrorStore.backupKey: <String>[recovered.encode()],
+    });
+
+    final loaded = await MysticMirrorStore().load();
+
+    expect(loaded, hasLength(1));
+    expect(loaded['recovered']!.note, 'Last known good');
+  });
+
+  test('clear removes both primary and backup snapshots', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      MysticMirrorStore.storageKey: <String>['primary'],
+      MysticMirrorStore.backupKey: <String>['backup'],
+    });
+
+    await MysticMirrorStore().clear();
+    final preferences = await SharedPreferences.getInstance();
+
+    expect(preferences.containsKey(MysticMirrorStore.storageKey), isFalse);
+    expect(preferences.containsKey(MysticMirrorStore.backupKey), isFalse);
   });
 
   testWidgets('due Mirror prompt is localized in all five launch languages', (
