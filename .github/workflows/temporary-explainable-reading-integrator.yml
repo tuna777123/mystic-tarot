@@ -1,0 +1,38 @@
+name: Temporary explainable reading integrator
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/explainable-readings
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply exact source integration
+        run: python3 tool/integrate_explainable_readings.py
+
+      - name: Commit integrated feature branch
+        run: |
+          rm tool/integrate_explainable_readings.py
+          git config user.name "Mystic Release Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: integrate transparent reading explanations"
+          git push origin HEAD:feature/explainable-readings
+
+      - name: Remove temporary workflow from main
+        run: |
+          git fetch origin main
+          git switch --force-create main origin/main
+          git rm .github/workflows/temporary-explainable-reading-integrator.yml
+          git commit -m "chore: remove completed explanation integrator"
+          git push origin HEAD:main
