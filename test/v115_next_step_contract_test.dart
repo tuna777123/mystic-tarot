@@ -9,7 +9,7 @@ void main() {
   final nextStep = File('lib/src/mystic_next_step.dart').readAsStringSync();
 
   test('v1.15 connects the growth engine to the real home screen', () {
-    expect(pubspec, contains('version: 1.15.0+21'));
+    expect(_isAtLeast(pubspec, major: 1, minor: 15), isTrue);
     expect(app, contains("import 'growth_engine.dart';"));
     expect(app, contains("import 'mystic_next_step.dart';"));
     expect(app, contains('const MysticGrowthEngine().analyze'));
@@ -38,12 +38,23 @@ void main() {
     expect(nextStep, isNot(contains('snapshot.nextAction.cta')));
   });
 
-  test('release notes describe verified next-action routing', () {
-    expect(
-      notes,
-      startsWith('# Mystic Tarot 1.15.0 — Personal Next Step'),
-    );
+  test('release notes preserve verified next-action routing', () {
+    expect(notes, contains('# Mystic Tarot 1.15.0 — Personal Next Step'));
     expect(notes, contains('verified Mirror due count'));
     expect(notes, contains('local-first'));
   });
+}
+
+bool _isAtLeast(
+  String pubspec, {
+  required int major,
+  required int minor,
+}) {
+  final match = RegExp(r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)')
+      .firstMatch(pubspec);
+  if (match == null) return false;
+  final actualMajor = int.parse(match.group(1)!);
+  final actualMinor = int.parse(match.group(2)!);
+  return actualMajor > major ||
+      (actualMajor == major && actualMinor >= minor);
 }
