@@ -7794,6 +7794,7 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
 
   Future<void> _exportJournal() async {
     final mirrors = await MysticMirrorStore().load();
+    if (!mounted) return;
     final text = buildMysticJournalExport(
       records: widget.records,
       mirrors: mirrors,
