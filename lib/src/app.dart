@@ -21,6 +21,7 @@ import 'mystic_mirror.dart';
 import 'mystic_mirror_due.dart';
 import 'mystic_next_step.dart';
 import 'oracle_conversation.dart';
+import 'oracle_language.dart';
 import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
 import 'reading_position.dart';
@@ -55,6 +56,11 @@ String supportPageForLanguage(MysticLanguage language) => switch (language) {
         'https://tuna777123.github.io/mystic-tarot/support-tr.html',
       MysticLanguage.spanish =>
         'https://tuna777123.github.io/mystic-tarot/support-es.html',
+      MysticLanguage.french =>
+        ' Dans les ${recent.length} tirages mémorisés, $cardName est apparue '
+        '${recurring.value} fois et $emotion était votre émotion de départ la '
+        'plus fréquente. Ce n’est pas une prédiction, mais un fil récurrent qui '
+        'mérite votre attention.',
       MysticLanguage.portugueseBrazil =>
         'https://tuna777123.github.io/mystic-tarot/support-pt-br.html',
       _ => 'https://tuna777123.github.io/mystic-tarot/support.html',
@@ -5120,6 +5126,22 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
               '¿Qué debería llevar conmigo durante las próximas 24 horas?',
             ];
         }
+      case MysticLanguage.french:
+        if (hiddenQuestion) {
+          return '$firstName suggère que la partie cachée peut être celle-ci : '
+              '$firstMeaning $lastAdvice Votre état ${emotion.toLowerCase()} '
+              'peut donner trop de poids à un détail. Séparez ce que vous savez '
+              'de ce que vous craignez ou espérez.$memory';
+        }
+        if (keyCardQuestion) {
+          return '$lastName porte le poids final de ce tirage. $lastMeaning '
+              'Son invitation pratique est simple : $lastAdvice Observez comment '
+              'cela soutient votre chemin de ${_localizedIntention(widget.intention, widget.language).toLowerCase()}.$memory';
+        }
+        return '$firstName décrit l’énergie dans laquelle vous entrez, tandis que '
+            '$lastName indique la réponse qui vous est disponible. $lastAdvice '
+            'Gardez la prochaine étape petite, observable et réversible ; les '
+            'cartes proposent une perspective, pas un ordre.$memory';
       case MysticLanguage.portugueseBrazil:
         switch (widget.record.kind) {
           case ReadingKind.love:
@@ -5230,24 +5252,10 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
       languageCode: widget.language.code,
     );
     final emotion = _emotionLabel(widget.record.emotion, widget.language);
-    final lower = question.toLowerCase();
     final memory = '${_oracleMemory()}${_oracleConversationThread()}';
-    final hiddenQuestion = lower.contains('not seeing') ||
-        lower.contains('underestimating') ||
-        lower.contains('risk') ||
-        lower.contains('görm') ||
-        lower.contains('riesgo') ||
-        lower.contains('viendo') ||
-        lower.contains('ocult') ||
-        lower.contains('risco') ||
-        lower.contains('vendo');
-    final keyCardQuestion = lower.contains('which card') ||
-        lower.contains('matter') ||
-        lower.contains('hangi kart') ||
-        lower.contains('önemli') ||
-        lower.contains('qué carta') ||
-        lower.contains('importa') ||
-        lower.contains('qual carta');
+    final intent = detectOracleQuestionIntent(question, widget.language);
+    final hiddenQuestion = intent == OracleQuestionIntent.hidden;
+    final keyCardQuestion = intent == OracleQuestionIntent.keyCard;
 
     switch (widget.language) {
       case MysticLanguage.turkish:
