@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mystic_tarot/src/flagship.dart';
 import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/mystic_mirror.dart';
 import 'package:mystic_tarot/src/mystic_mirror_due.dart';
@@ -62,5 +63,36 @@ void main() {
     expect(compactMirrorDueLabel(99), '99');
     expect(compactMirrorDueLabel(100), '99+');
     expect(compactMirrorDueLabel(248), '99+');
+  });
+
+  test('badge semantics are localized across all launch languages', () {
+    const expected = <MysticLanguage, String>{
+      MysticLanguage.english: '3 Mystic Mirror check-ins are ready',
+      MysticLanguage.turkish: '3 Mystic Ayna kontrolü hazır',
+      MysticLanguage.spanish: '3 revisiones de Mystic Mirror listas',
+      MysticLanguage.french: '3 bilans Mystic Mirror sont prêts',
+      MysticLanguage.portugueseBrazil:
+          '3 check-ins do Mystic Mirror estão prontos',
+    };
+
+    for (final entry in expected.entries) {
+      expect(
+        localizedMirrorDueSemantics(3, entry.key),
+        entry.value,
+        reason: entry.key.name,
+      );
+    }
+  });
+
+  test('zero-state semantics never announce a false pending task', () {
+    for (final language in <MysticLanguage>[
+      MysticLanguage.english,
+      MysticLanguage.turkish,
+      MysticLanguage.spanish,
+      MysticLanguage.french,
+      MysticLanguage.portugueseBrazil,
+    ]) {
+      expect(localizedMirrorDueSemantics(0, language), isNot(contains('1')));
+    }
   });
 }
