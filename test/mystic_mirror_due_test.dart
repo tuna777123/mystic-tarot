@@ -57,6 +57,56 @@ void main() {
     );
   });
 
+  test('next due time ignores completed and already-due readings', () {
+    final now = DateTime.utc(2026, 8, 3, 12);
+    final alreadyDue = recordAt(now.subtract(const Duration(hours: 30)));
+    final next = recordAt(now.subtract(const Duration(hours: 23)));
+    final later = recordAt(now.subtract(const Duration(hours: 20)));
+    final completedSoon = recordAt(now.subtract(const Duration(hours: 23, minutes: 30)));
+    final reflection = MysticMirrorReflection(
+      recordId: mysticMirrorRecordId(completedSoon),
+      outcome: MysticMirrorOutcome.unchanged,
+      emotion: EmotionalState.uncertain,
+      note: '',
+      completedAt: now,
+    );
+
+    expect(
+      nextMysticMirrorDueAt(
+        records: <ReadingRecord>[alreadyDue, later, completedSoon, next],
+        reflections: <String, MysticMirrorReflection>{
+          reflection.recordId: reflection,
+        },
+        now: now,
+      ),
+      next.mirrorCheckInAt,
+    );
+    expect(
+      durationUntilNextMysticMirror(
+        records: <ReadingRecord>[alreadyDue, later, completedSoon, next],
+        reflections: <String, MysticMirrorReflection>{
+          reflection.recordId: reflection,
+        },
+        now: now,
+      ),
+      const Duration(hours: 1),
+    );
+  });
+
+  test('no future incomplete reading produces no timer duration', () {
+    final now = DateTime.utc(2026, 8, 3, 12);
+    expect(
+      durationUntilNextMysticMirror(
+        records: <ReadingRecord>[
+          recordAt(now.subtract(const Duration(days: 2))),
+        ],
+        reflections: const <String, MysticMirrorReflection>{},
+        now: now,
+      ),
+      isNull,
+    );
+  });
+
   test('badge label stays compact above two digits', () {
     expect(compactMirrorDueLabel(0), '0');
     expect(compactMirrorDueLabel(9), '9');
