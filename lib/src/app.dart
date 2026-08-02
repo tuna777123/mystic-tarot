@@ -713,12 +713,12 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     final settings = await ritualReminderStore.load();
     if (!mounted || settings.promptCompleted) return;
     final context = navigatorKey.currentState?.overlay?.context;
-    if (context == null) return;
+    if (context == null || !context.mounted) return;
     final choice = await showRitualReminderOfferSheet(
       context: context,
       language: language,
     );
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
     if (choice == null) {
       await ritualReminderStore.save(
         settings.copyWith(
@@ -731,7 +731,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     }
 
     final permission = await ritualReminderService.requestPermission();
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
     if (permission != RitualReminderPermissionResult.granted) {
       await ritualReminderStore.save(
         settings.copyWith(
@@ -740,6 +740,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           languageCode: language.code,
         ),
       );
+      if (!mounted || !context.mounted) return;
       final message = switch (permission) {
         RitualReminderPermissionResult.denied => localized(
             language.appLanguage,
@@ -785,7 +786,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     );
     if (!scheduled) return;
     await ritualReminderStore.save(updated);
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
