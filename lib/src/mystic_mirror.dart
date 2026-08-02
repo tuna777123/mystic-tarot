@@ -71,6 +71,18 @@ bool mysticMirrorIsDue(
       !now.isBefore(record.mirrorCheckInAt);
 }
 
+class _MirrorDecodeReport {
+  const _MirrorDecodeReport({
+    required this.reflections,
+    required this.rejectedItems,
+    required this.sourceItems,
+  });
+
+  final Map<String, MysticMirrorReflection> reflections;
+  final int rejectedItems;
+  final int sourceItems;
+}
+
 class MysticMirrorStore {
   MysticMirrorStore({SharedPreferences? preferences})
       : _providedPreferences = preferences;
@@ -82,33 +94,68 @@ class MysticMirrorStore {
   Future<SharedPreferences> _preferences() async =>
       _providedPreferences ?? SharedPreferences.getInstance();
 
-  Map<String, MysticMirrorReflection> _decode(Iterable<String> encodedItems) {
+  _MirrorDecodeReport _decode(Iterable<String> encodedItems) {
+    final source = encodedItems.toList(growable: false);
     final result = <String, MysticMirrorReflection>{};
-    for (final encoded in encodedItems) {
+    var rejected = 0;
+    for (final encoded in source) {
       final reflection = MysticMirrorReflection.tryDecode(encoded);
-      if (reflection == null) continue;
+      if (reflection == null) {
+        rejected++;
+        continue;
+      }
       final existing = result[reflection.recordId];
       if (existing == null ||
           reflection.completedAt.isAfter(existing.completedAt)) {
         result[reflection.recordId] = reflection;
       }
     }
-    return result;
+    return _MirrorDecodeReport(
+      reflections: result,
+      rejectedItems: rejected,
+      sourceItems: source.length,
+    );
+  }
+
+  Map<String, MysticMirrorReflection> _merge(
+    Map<String, MysticMirrorReflection> primary,
+    Map<String, MysticMirrorReflection> backup,
+  ) {
+    final merged = <String, MysticMirrorReflection>{...backup};
+    for (final entry in primary.entries) {
+      final existing = merged[entry.key];
+      if (existing == null ||
+          entry.value.completedAt.isAfter(existing.completedAt) ||
+          entry.value.completedAt.isAtSameMomentAs(existing.completedAt)) {
+        merged[entry.key] = entry.value;
+      }
+    }
+    return merged;
   }
 
   Future<Map<String, MysticMirrorReflection>> load() async {
     final preferences = await _preferences();
-    final primary = preferences.getStringList(storageKey);
-    if (primary != null) {
-      final decoded = _decode(primary);
-      if (primary.isEmpty || decoded.isNotEmpty) {
-        return Map<String, MysticMirrorReflection>.unmodifiable(decoded);
-      }
+    final primaryItems = preferences.getStringList(storageKey);
+    final backupItems = preferences.getStringList(backupKey);
+    final primary = primaryItems == null ? null : _decode(primaryItems);
+    final backup = backupItems == null ? null : _decode(backupItems);
+
+    if (primary != null && primary.sourceItems == 0) {
+      return const <String, MysticMirrorReflection>{};
     }
 
-    final backup = preferences.getStringList(backupKey);
+    if (primary != null && primary.reflections.isNotEmpty) {
+      final recovered = primary.rejectedItems > 0 && backup != null;
+      final result = recovered
+          ? _merge(primary.reflections, backup.reflections)
+          : primary.reflections;
+      return Map<String, MysticMirrorReflection>.unmodifiable(result);
+    }
+
     if (backup != null) {
-      return Map<String, MysticMirrorReflection>.unmodifiable(_decode(backup));
+      return Map<String, MysticMirrorReflection>.unmodifiable(
+        backup.reflections,
+      );
     }
 
     return const <String, MysticMirrorReflection>{};
