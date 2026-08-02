@@ -9,8 +9,8 @@ void main() {
   final nativeService =
       File('lib/src/ritual_reminder_service_native.dart').readAsStringSync();
 
-  test('v1.13 turns onboarding into the first real value moment', () {
-    expect(pubspec, contains('version: 1.13.0+19'));
+  test('v1.13 activation remains protected in later releases', () {
+    expect(pubspec, contains('version: 1.14.0+20'));
     expect(app, contains("en: 'Reveal my first card'"));
     expect(app, contains('_startReading(ReadingKind.daily)'));
   });

@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'app_language.dart';
+import 'daily_practice.dart';
+import 'daily_state.dart';
 import 'flagship.dart';
 import 'identity_engine.dart';
 import 'language_bridge.dart';
@@ -71,6 +73,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   final ritualReminderStore = RitualReminderStore();
   final ritualReminderService = RitualReminderService.instance;
   Timer? _mirrorDueTimer;
+  Timer? _dayBoundaryTimer;
+  String _activeDayKey = mysticDayKey(DateTime.now());
   int mirrorDueCount = 0;
   String? journalRecoveryMessage;
   bool isPlus = false;
@@ -115,6 +119,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       subscriptionStore.refreshEntitlement();
       _refreshMirrorDueState();
+      _refreshDailyState();
+      _scheduleDayBoundary();
     }
   }
 
@@ -122,6 +128,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _mirrorDueTimer?.cancel();
+    _dayBoundaryTimer?.cancel();
     subscriptionStore.removeListener(_syncSubscription);
     subscriptionStore.dispose();
     super.dispose();
@@ -199,6 +206,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
               : max(0, freeDeepReadingLimit - deepReadingsToday),
           onReading: _startReading,
           onClaimDailyQuest: _claimDailyQuest,
+          onRitual: _openDailyPractice,
           onPremiumSpread: isPlus ? _startReading : _previewPremiumReading,
           onPremium: _showPremium,
           onOpenDestiny: _openDestinyHub,
@@ -325,6 +333,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   }
 
   void _startReading(ReadingKind kind) {
+    _refreshDailyState();
     if (!isPlus && _premiumReadingKinds.contains(kind)) {
       _showPremium(source: 'premium_spread');
       return;
@@ -410,7 +419,45 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _openDailyPractice() async {
+    _refreshDailyState();
+    if (completedRituals.isNotEmpty) return;
+    final context = navigatorKey.currentState?.overlay?.context;
+    if (context == null || !context.mounted) return;
+    final result = await showDailyPracticeSheet(
+      context: context,
+      language: language,
+    );
+    if (!mounted || !context.mounted || result == null) return;
+    setState(() => completedRituals.add(dailyPracticeId(result)));
+    await _saveProgress();
+    if (!mounted || !context.mounted) return;
+    final today = _dayKey(DateTime.now());
+    final readToday = journal.any(
+      (record) =>
+          record.kind == ReadingKind.daily &&
+          _dayKey(record.createdAt) == today,
+    );
+    if (readToday) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localized(
+              language.appLanguage,
+              english: 'Ritual complete. Your Soul Chest is ready.',
+              spanish: 'Ritual completado. Tu Cofre del Alma está listo.',
+              french: 'Rituel terminé. Votre Coffre de l’Âme est prêt.',
+              portugueseBrazil: 'Ritual concluído. Seu Baú da Alma está pronto.',
+              turkish: 'Ritüel tamamlandı. Ruh Sandığın açılmaya hazır.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   void _claimDailyQuest() {
+    _refreshDailyState();
     final today = _dayKey(DateTime.now());
     final readToday = journal.any(
       (record) =>
@@ -551,6 +598,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
         lastActiveDay = prefs.getString('last_active_day');
         dailyQuestClaimedDay = prefs.getString('daily_quest_claimed_day');
         deepReadingsDay = savedReadingDay;
+        _activeDayKey = today;
         deepReadingsToday = savedReadingDay == today
             ? prefs.getInt('deep_readings_today') ?? 0
             : 0;
@@ -602,6 +650,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       }
       _scheduleNextMirrorDue(mirrorReflections, now);
       await _restoreRitualReminder();
+      _scheduleDayBoundary();
       if (journalRecoveryMessage != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _showJournalRecoveryMessage();
@@ -638,7 +687,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
               .map((entry) => '${entry.key}:${entry.value}')
               .toList(),
         ),
-        prefs.setString('ritual_day', _dayKey(DateTime.now())),
+        prefs.setString('ritual_day', _activeDayKey),
         prefs.setString(
           'deep_readings_day',
           deepReadingsDay ?? _dayKey(DateTime.now()),
@@ -659,6 +708,48 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     } catch (_) {
       // The experience remains usable if local storage is temporarily unavailable.
     }
+  }
+
+  void _refreshDailyState() {
+    if (!mounted || !ready) return;
+    final now = DateTime.now();
+    final refresh = evaluateMysticDailyRefresh(
+      now: now,
+      activeDay: _activeDayKey,
+      deepReadingsDay: deepReadingsDay,
+      dailyQuestClaimedDay: dailyQuestClaimedDay,
+      lastActiveDay: lastActiveDay,
+      streak: streak,
+    );
+    final changed = refresh.dayChanged ||
+        refresh.resetDeepReadings ||
+        refresh.clearQuestClaim ||
+        refresh.visibleStreak != streak;
+    if (changed) {
+      setState(() {
+        if (refresh.dayChanged) {
+          _activeDayKey = refresh.today;
+          completedRituals.clear();
+        }
+        if (refresh.resetDeepReadings) {
+          deepReadingsDay = refresh.today;
+          deepReadingsToday = 0;
+        }
+        if (refresh.clearQuestClaim) dailyQuestClaimedDay = null;
+        streak = refresh.visibleStreak;
+      });
+      unawaited(_saveProgress());
+    }
+    _scheduleDayBoundary();
+  }
+
+  void _scheduleDayBoundary() {
+    if (!mounted || !ready) return;
+    _dayBoundaryTimer?.cancel();
+    _dayBoundaryTimer = Timer(
+      durationUntilNextMysticDay(DateTime.now()),
+      _refreshDailyState,
+    );
   }
 
   void _updateStreak() {
@@ -1704,6 +1795,7 @@ class HomeScreen extends StatelessWidget {
     required this.freeReadingsLeft,
     required this.onReading,
     required this.onClaimDailyQuest,
+    required this.onRitual,
     required this.onPremiumSpread,
     required this.onPremium,
     required this.onOpenDestiny,
@@ -1724,6 +1816,7 @@ class HomeScreen extends StatelessWidget {
   final int freeReadingsLeft;
   final ValueChanged<ReadingKind> onReading;
   final VoidCallback onClaimDailyQuest;
+  final VoidCallback onRitual;
   final ValueChanged<ReadingKind> onPremiumSpread;
   final VoidCallback onPremium;
   final VoidCallback onOpenDestiny;
@@ -1818,6 +1911,7 @@ class HomeScreen extends StatelessWidget {
                 claimed: dailyQuestClaimed,
                 language: language,
                 onClaim: onClaimDailyQuest,
+                onRitual: onRitual,
               ),
               const SizedBox(height: 12),
               _MoonBriefing(language: language),
@@ -2722,12 +2816,14 @@ class _DailyQuest extends StatelessWidget {
     required this.claimed,
     required this.language,
     required this.onClaim,
+    required this.onRitual,
   });
   final bool readingDone;
   final bool ritualDone;
   final bool claimed;
   final MysticLanguage language;
   final VoidCallback onClaim;
+  final VoidCallback onRitual;
 
   @override
   Widget build(BuildContext context) {
@@ -2861,6 +2957,17 @@ class _DailyQuest extends StatelessWidget {
               color: MysticColors.gold,
             ),
           ),
+          if (!ritualDone) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onRitual,
+                icon: const Icon(Icons.self_improvement_rounded),
+                label: Text(dailyPracticeCta(language)),
+              ),
+            ),
+          ],
         ],
       ),
     );
