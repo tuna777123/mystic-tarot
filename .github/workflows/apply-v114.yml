@@ -1,0 +1,39 @@
+name: Apply Mystic Tarot v1.14
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-v114-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  apply-v114:
+    if: github.head_ref == 'feature/v1.14-daily-practice'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Apply verified product integration
+        run: python tool/apply_v114.py
+
+      - name: Commit integrated product files
+        run: |
+          git config user.name "mystic-release-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/src/app.dart RELEASE_NOTES.md
+          if git diff --cached --quiet; then
+            echo "v1.14 integration already applied."
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "feat: ship actionable daily practice and reliable day boundaries"
+          git push origin HEAD:${{ github.head_ref }}
