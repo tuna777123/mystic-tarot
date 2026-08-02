@@ -73,8 +73,9 @@ Günlük Rehberlik ve temel 24 saatlik Mystic Ayna ücretsiz kalır. Mystic Plus
 
 Mystic Tarot kişisel düşünme ve eğlence amacıyla geliştirilmiştir. Tıbbi, ruh sağlığı, hukuki, mali veya acil durum tavsiyesi sunmaz.
 
-## Sürüm notları — 1.11.0
+## Sürüm notları — 1.12.0
 
+- Cihazda hesaplanan kişisel 7 günlük Mystic Intelligence raporu
 - Gerçekte neyin değiştiğini kaydeden beş dilli 24 saatlik Mystic Ayna
 - Açılım konumu, düz/ters yön, sembolik temel ve bağlamı açıklayan şeffaf yorumlar
 - Bekleyen Ayna kontrolleri için erişilebilir Günlük rozeti

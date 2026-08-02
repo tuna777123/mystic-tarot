@@ -183,7 +183,7 @@ Required dashboard structure:
 
 - Daily Guidance remains free.
 - Free users receive three deep readings per day.
-- Mystic Plus unlocks unlimited deep readings, premium spreads, and unlimited Oracle Dialogue follow-ups.
+- Mystic Plus unlocks a private seven-day intelligence report, unlimited deep readings, premium spreads, and unlimited Oracle Dialogue follow-ups.
 - Launch with monthly and yearly plans.
 - Offer a seven-day trial only on yearly after trial eligibility is confirmed in both stores.
 

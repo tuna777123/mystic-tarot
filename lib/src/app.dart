@@ -19,7 +19,7 @@ import 'mystic_mirror_due.dart';
 import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
 import 'reading_position.dart';
-import 'premium_value_screen.dart';
+import 'mystic_plus_intelligence_screen.dart';
 import 'mystic_identity_screen.dart';
 import 'mystic_journey_feature.dart';
 import 'mystic_living_journal_feature.dart';
@@ -669,17 +669,12 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       language: language,
       subscriptionStore: subscriptionStore,
     );
-    if (isPlus) {
-      navigatorKey.currentState!.push(
-        MaterialPageRoute(builder: (_) => storeScreen),
-      );
-      return;
-    }
     navigatorKey.currentState!.push(
       MaterialPageRoute(
-        builder: (_) => PremiumValueScreen(
+        builder: (_) => MysticPlusIntelligenceScreen(
           source: source,
           language: language,
+          isPlus: isPlus,
           onContinue: () => navigatorKey.currentState!.push(
             MaterialPageRoute(builder: (_) => storeScreen),
           ),

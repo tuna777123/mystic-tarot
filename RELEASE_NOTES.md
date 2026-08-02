@@ -1,3 +1,28 @@
+# Mystic Tarot 1.12.0 — Revenue Intelligence
+
+Mystic Plus now sells an accumulating personal outcome instead of only removing limits.
+
+## New premium value
+
+- A private seven-day Mystic Intelligence report calculated entirely on the device.
+- Free users receive a personalized preview built from their own saved readings before seeing plans.
+- Plus members unlock recurring-card evidence, dominant reading focus, Mirror completion and shift rates, emotional direction, and a transparent next-practice prompt.
+- The report becomes meaningful after three saved readings and refreshes from the latest seven-day window.
+- All insight copy is descriptive and explicitly avoids prediction, diagnosis, or certainty claims.
+
+## Conversion and trust
+
+- Every Plus entry point now opens the personalized intelligence hub before the official store plans.
+- Existing members can revisit their full report from the Plus entry point and then manage the verified subscription.
+- The official checkout still uses localized App Store or Google Play prices and trusted RevenueCat entitlement verification.
+- The report reads only the versioned local Journal and Mystic Mirror stores; no private journal text is uploaded.
+
+## Launch languages
+
+English, Turkish, neutral international Spanish, French, and Brazilian Portuguese ship with the complete report and purchase journey.
+
+---
+
 # Mystic Tarot 1.11.0 — Mirror & Trust
 
 This release turns Mystic’s core promise into a complete, durable product loop.
