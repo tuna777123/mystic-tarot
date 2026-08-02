@@ -147,10 +147,10 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           child: Text(
                             'MYSTIC INTELLIGENCE',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: MysticColors.gold,
                               fontSize: 9,
                               fontWeight: FontWeight.w900,
