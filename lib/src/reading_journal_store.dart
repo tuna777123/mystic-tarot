@@ -140,10 +140,14 @@ class ReadingJournalCodec {
         final name = rawCard['name'];
         final reversed = rawCard['reversed'];
         if (name is! String || reversed is! bool) return null;
-        final card = tarotDeck.cast<TarotCardData?>().firstWhere(
-              (candidate) => candidate?.name == name,
-              orElse: () => null,
-            );
+
+        TarotCardData? card;
+        for (final candidate in tarotDeck) {
+          if (candidate.name == name) {
+            card = candidate;
+            break;
+          }
+        }
         if (card == null) return null;
         cards.add(DrawnCard(card, reversed));
       }
@@ -184,35 +188,54 @@ class ReadingJournalStore {
     Iterable<String> legacyRecords = const <String>[],
   }) async {
     final preferences = await _preferences();
-    final primary = preferences.getString(primaryKey);
-    final backup = preferences.getString(backupKey);
+    final primaryPayload = preferences.getString(primaryKey);
+    final backupPayload = preferences.getString(backupKey);
 
-    if (primary != null && primary.trim().isNotEmpty) {
+    ReadingJournalDecodeReport? primary;
+    ReadingJournalDecodeReport? backup;
+
+    if (primaryPayload != null && primaryPayload.trim().isNotEmpty) {
       try {
-        final report = ReadingJournalCodec.decode(primary);
-        return ReadingJournalLoadResult(
-          records: report.records,
-          recoveredFromBackup: false,
-          migratedFromLegacy: false,
-          rejectedItems: report.rejectedItems,
-        );
+        primary = ReadingJournalCodec.decode(primaryPayload);
       } catch (_) {
-        // Fall through to the last-known-good snapshot.
+        primary = null;
+      }
+    }
+    if (backupPayload != null && backupPayload.trim().isNotEmpty) {
+      try {
+        backup = ReadingJournalCodec.decode(backupPayload);
+      } catch (_) {
+        backup = null;
       }
     }
 
-    if (backup != null && backup.trim().isNotEmpty) {
-      try {
-        final report = ReadingJournalCodec.decode(backup);
+    if (primary != null) {
+      final primaryIsTrustworthy =
+          primary.records.isNotEmpty || primary.rejectedItems == 0;
+      if (primaryIsTrustworthy) {
+        final recovered = primary.rejectedItems > 0 && backup != null;
+        final records = recovered
+            ? _mergePrimaryAndBackup(primary.records, backup.records)
+            : primary.records;
         return ReadingJournalLoadResult(
-          records: report.records,
-          recoveredFromBackup: true,
+          records: records,
+          recoveredFromBackup: recovered,
           migratedFromLegacy: false,
-          rejectedItems: report.rejectedItems,
+          rejectedItems:
+              primary.rejectedItems + (recovered ? backup.rejectedItems : 0),
         );
-      } catch (_) {
-        // Fall through to the legacy migration path.
       }
+    }
+
+    if (backup != null &&
+        (backup.records.isNotEmpty || backup.rejectedItems == 0)) {
+      return ReadingJournalLoadResult(
+        records: backup.records,
+        recoveredFromBackup: true,
+        migratedFromLegacy: false,
+        rejectedItems:
+            (primary?.rejectedItems ?? 0) + backup.rejectedItems,
+      );
     }
 
     final legacy = legacyRecords.isEmpty
@@ -234,6 +257,19 @@ class ReadingJournalStore {
       migratedFromLegacy: false,
       rejectedItems: 0,
     );
+  }
+
+  List<ReadingRecord> _mergePrimaryAndBackup(
+    Iterable<ReadingRecord> primary,
+    Iterable<ReadingRecord> backup,
+  ) {
+    final result = <ReadingRecord>[];
+    final seen = <String>{};
+    for (final record in <ReadingRecord>[...primary, ...backup]) {
+      if (seen.add(readingJournalRecordId(record))) result.add(record);
+    }
+    result.sort((first, second) => second.createdAt.compareTo(first.createdAt));
+    return List<ReadingRecord>.unmodifiable(result);
   }
 
   Future<void> save(Iterable<ReadingRecord> records) async {
