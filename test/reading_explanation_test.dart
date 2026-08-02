@@ -11,6 +11,7 @@ void main() {
 
   test('explanation exposes every input used to frame a reading', () {
     final explanation = buildReadingExplanation(
+      kind: ReadingKind.daily,
       card: upright,
       positionIndex: 1,
       emotion: EmotionalState.curious,
@@ -30,6 +31,7 @@ void main() {
 
   test('reversed cards disclose how orientation changes the lens', () {
     final explanation = buildReadingExplanation(
+      kind: ReadingKind.daily,
       card: reversed,
       positionIndex: 0,
       emotion: EmotionalState.uncertain,
@@ -52,6 +54,7 @@ void main() {
 
     for (final entry in titles.entries) {
       final explanation = buildReadingExplanation(
+        kind: ReadingKind.daily,
         card: upright,
         positionIndex: 2,
         emotion: EmotionalState.hopeful,
@@ -71,6 +74,7 @@ void main() {
 
   test('positions beyond the first three remain explicit', () {
     final explanation = buildReadingExplanation(
+      kind: ReadingKind.daily,
       card: upright,
       positionIndex: 7,
       emotion: EmotionalState.grounded,
@@ -90,6 +94,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     final explanation = buildReadingExplanation(
+      kind: ReadingKind.daily,
       card: reversed,
       positionIndex: 2,
       emotion: EmotionalState.anxious,

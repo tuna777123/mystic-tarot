@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'flagship.dart';
 import 'models.dart';
+import 'reading_position.dart';
 import 'tarot_localization.dart';
 import 'theme.dart';
 
@@ -26,6 +27,7 @@ class ReadingExplanation {
 }
 
 ReadingExplanation buildReadingExplanation({
+  required ReadingKind kind,
   required DrawnCard card,
   required int positionIndex,
   required EmotionalState emotion,
@@ -53,38 +55,11 @@ ReadingExplanation buildReadingExplanation({
         _ => en,
       };
 
-  final positions = <String>[
-    copy(
-      en: 'What surrounds you',
-      tr: 'Seni çevreleyen enerji',
-      es: 'Lo que te rodea',
-      fr: 'Ce qui vous entoure',
-      pt: 'O que está ao seu redor',
-    ),
-    copy(
-      en: 'What asks for attention',
-      tr: 'Dikkat isteyen konu',
-      es: 'Lo que necesita atención',
-      fr: 'Ce qui demande votre attention',
-      pt: 'O que pede atenção',
-    ),
-    copy(
-      en: 'Your next aligned step',
-      tr: 'Sıradaki uyumlu adım',
-      es: 'Tu siguiente paso alineado',
-      fr: 'Votre prochaine étape alignée',
-      pt: 'Seu próximo passo alinhado',
-    ),
-  ];
-  final position = positionIndex < positions.length
-      ? positions[positionIndex]
-      : copy(
-          en: 'Supporting message ${positionIndex + 1}',
-          tr: 'Destekleyici mesaj ${positionIndex + 1}',
-          es: 'Mensaje de apoyo ${positionIndex + 1}',
-          fr: 'Message complémentaire ${positionIndex + 1}',
-          pt: 'Mensagem de apoio ${positionIndex + 1}',
-        );
+  final position = localizedReadingPosition(
+    kind: kind,
+    index: positionIndex,
+    language: language,
+  );
 
   final orientation = card.reversed
       ? copy(
