@@ -19,7 +19,7 @@ void main() {
   test('French Oracle answers and memory never fall through to English', () {
     expect(app, contains('case MysticLanguage.french:'));
     expect(app, contains('les cartes proposent une perspective'));
-    expect(app, contains('Dans les \$\{recent.length\} tirages mémorisés'));
+    expect(app, contains(r'Dans les ${recent.length} tirages mémorisés'));
     expect(app, contains('Ce n’est pas une prédiction'));
   });
 
