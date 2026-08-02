@@ -88,6 +88,8 @@ void main() {
     await tester.pump();
     expect(tester.widget<FilledButton>(completeButton).onPressed, isNotNull);
 
+    await tester.ensureVisible(completeButton);
+    await tester.pump();
     await tester.tap(completeButton);
     await tester.pumpAndSettle();
     expect(completed, DailyPracticeKind.intention);
@@ -116,11 +118,23 @@ void main() {
 
     await tester.tap(find.text('Open breath'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('start-breath-practice')));
+
+    final startButton = find.byKey(const ValueKey('start-breath-practice'));
+    await tester.ensureVisible(startButton);
+    await tester.pump();
+    await tester.tap(startButton);
+    await tester.pump();
     await tester.pump(const Duration(seconds: 24));
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Complete this ritual'));
+    final completeButton = find.widgetWithText(
+      FilledButton,
+      'Complete this ritual',
+    );
+    await tester.ensureVisible(completeButton);
+    await tester.pump();
+    expect(tester.widget<FilledButton>(completeButton).onPressed, isNotNull);
+    await tester.tap(completeButton);
     await tester.pumpAndSettle();
     expect(completed, DailyPracticeKind.breath);
   });
