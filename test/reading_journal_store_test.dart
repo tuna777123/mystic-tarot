@@ -16,6 +16,20 @@ ReadingRecord recordAt(DateTime createdAt, {String question = 'Question'}) =>
       alignedAction: 'Take one small step.',
     );
 
+Map<String, dynamic> damagedPayload({
+  required ReadingRecord validRecord,
+  int damagedItems = 1,
+}) {
+  final payload = jsonDecode(
+    ReadingJournalCodec.encode(<ReadingRecord>[validRecord]),
+  ) as Map<String, dynamic>;
+  final records = payload['records'] as List<dynamic>;
+  for (var index = 0; index < damagedItems; index++) {
+    records.add(<String, Object>{'kind': 'daily', 'cards': 'broken'});
+  }
+  return payload;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -43,15 +57,13 @@ void main() {
   });
 
   test('codec rejects one damaged record without losing valid history', () {
-    final valid = jsonDecode(
-      ReadingJournalCodec.encode(<ReadingRecord>[
-        recordAt(DateTime.utc(2026, 8, 2, 12)),
-      ]),
-    ) as Map<String, dynamic>;
-    final records = valid['records'] as List<dynamic>;
-    records.add(<String, Object>{'kind': 'daily', 'cards': 'broken'});
-
-    final report = ReadingJournalCodec.decode(jsonEncode(valid));
+    final report = ReadingJournalCodec.decode(
+      jsonEncode(
+        damagedPayload(
+          validRecord: recordAt(DateTime.utc(2026, 8, 2, 12)),
+        ),
+      ),
+    );
 
     expect(report.records, hasLength(1));
     expect(report.rejectedItems, 1);
@@ -78,7 +90,7 @@ void main() {
     expect((await store.load()).records.single.question, 'Second');
   });
 
-  test('store recovers from backup when primary payload is corrupted', () async {
+  test('store recovers from backup when primary payload is unreadable', () async {
     final older = ReadingJournalCodec.encode(<ReadingRecord>[
       recordAt(DateTime.utc(2026, 8, 1, 10), question: 'Recovered'),
     ]);
@@ -91,6 +103,78 @@ void main() {
 
     expect(result.recoveredFromBackup, isTrue);
     expect(result.records.single.question, 'Recovered');
+  });
+
+  test('store recovers from backup when every primary record is damaged',
+      () async {
+    final damaged = <String, Object>{
+      'schemaVersion': ReadingJournalCodec.schemaVersion,
+      'records': <Map<String, Object>>[
+        <String, Object>{'kind': 'daily', 'cards': 'broken'},
+      ],
+    };
+    final backup = ReadingJournalCodec.encode(<ReadingRecord>[
+      recordAt(DateTime.utc(2026, 8, 1, 10), question: 'Recovered all'),
+    ]);
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      ReadingJournalStore.primaryKey: jsonEncode(damaged),
+      ReadingJournalStore.backupKey: backup,
+    });
+
+    final result = await ReadingJournalStore().load();
+
+    expect(result.recoveredFromBackup, isTrue);
+    expect(result.records.single.question, 'Recovered all');
+    expect(result.rejectedItems, 1);
+  });
+
+  test('partial primary corruption is repaired with missing backup history',
+      () async {
+    final newest = recordAt(
+      DateTime.utc(2026, 8, 3, 10),
+      question: 'Newest primary',
+    );
+    final older = recordAt(
+      DateTime.utc(2026, 8, 1, 10),
+      question: 'Older backup',
+    );
+    final primary = jsonEncode(
+      damagedPayload(validRecord: newest, damagedItems: 1),
+    );
+    final backup = ReadingJournalCodec.encode(<ReadingRecord>[older]);
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      ReadingJournalStore.primaryKey: primary,
+      ReadingJournalStore.backupKey: backup,
+    });
+
+    final result = await ReadingJournalStore().load();
+
+    expect(result.recoveredFromBackup, isTrue);
+    expect(
+      result.records.map((record) => record.question),
+      <String>['Newest primary', 'Older backup'],
+    );
+    expect(result.rejectedItems, 1);
+  });
+
+  test('primary records win when the backup contains the same identity',
+      () async {
+    final createdAt = DateTime.utc(2026, 8, 2, 12);
+    final primaryRecord = recordAt(createdAt, question: 'Primary version');
+    final backupRecord = recordAt(createdAt, question: 'Backup version');
+    final primary = jsonEncode(
+      damagedPayload(validRecord: primaryRecord, damagedItems: 1),
+    );
+    final backup = ReadingJournalCodec.encode(<ReadingRecord>[backupRecord]);
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      ReadingJournalStore.primaryKey: primary,
+      ReadingJournalStore.backupKey: backup,
+    });
+
+    final result = await ReadingJournalStore().load();
+
+    expect(result.records, hasLength(1));
+    expect(result.records.single.question, 'Primary version');
   });
 
   test('legacy string-list records migrate while corrupt items are skipped',
