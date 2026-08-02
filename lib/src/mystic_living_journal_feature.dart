@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'flagship.dart';
 import 'models.dart';
 import 'mystic_memory_map_feature.dart';
+import 'mystic_mirror.dart';
 import 'tarot_localization.dart';
 import 'theme.dart';
 
@@ -29,13 +30,66 @@ class MysticLivingJournalFeature extends StatefulWidget {
 
 class _MysticLivingJournalFeatureState
     extends State<MysticLivingJournalFeature> {
+  final MysticMirrorStore _mirrorStore = MysticMirrorStore();
   _JournalSection section = _JournalSection.timeline;
+  Map<String, MysticMirrorReflection> mirrors =
+      const <String, MysticMirrorReflection>{};
   String query = '';
+  bool mirrorsLoading = true;
 
   String get _languageCode => widget.language.code;
 
+  Set<String> get _completedMirrorIds => mirrors.keys.toSet();
+
+  List<ReadingRecord> get _dueRecords {
+    final now = DateTime.now();
+    return widget.records
+        .where(
+          (record) => mysticMirrorIsDue(
+            record,
+            now,
+            completedRecordIds: _completedMirrorIds,
+          ),
+        )
+        .toList()
+      ..sort(
+        (first, second) =>
+            first.mirrorCheckInAt.compareTo(second.mirrorCheckInAt),
+      );
+  }
+
   String _copy(String english, String turkish) =>
       mysticText(widget.language, english, turkish);
+
+  String _mirrorCopy({
+    required String en,
+    required String tr,
+    required String es,
+    required String fr,
+    required String pt,
+  }) =>
+      switch (widget.language) {
+        MysticLanguage.turkish => tr,
+        MysticLanguage.spanish => es,
+        MysticLanguage.french => fr,
+        MysticLanguage.portugueseBrazil => pt,
+        _ => en,
+      };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMirrors();
+  }
+
+  Future<void> _loadMirrors() async {
+    final loaded = await _mirrorStore.load();
+    if (!mounted) return;
+    setState(() {
+      mirrors = loaded;
+      mirrorsLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +116,7 @@ class _MysticLivingJournalFeatureState
   }
 
   Widget _buildHeader(BuildContext context) {
+    final dueCount = mirrorsLoading ? 0 : _dueRecords.length;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
       child: Row(
@@ -87,34 +142,68 @@ class _MysticLivingJournalFeatureState
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  _copy(
-                    'See what returns, what shifts, and what asks for attention.',
-                    'Tekrar edenleri, değişenleri ve dikkat isteyenleri gör.',
-                  ),
+                  dueCount > 0
+                      ? _mirrorCopy(
+                          en: '$dueCount Mystic Mirror check-in${dueCount == 1 ? '' : 's'} ready.',
+                          tr: '$dueCount Mystic Ayna kontrolü hazır.',
+                          es: '$dueCount revisión de Mystic Mirror lista.',
+                          fr: '$dueCount bilan Mystic Mirror est prêt.',
+                          pt: '$dueCount check-in do Mystic Mirror está pronto.',
+                        )
+                      : _copy(
+                          'See what returns, what shifts, and what asks for attention.',
+                          'Tekrar edenleri, değişenleri ve dikkat isteyenleri gör.',
+                        ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: MysticColors.mist,
+                        color: dueCount > 0
+                            ? MysticColors.gold
+                            : MysticColors.mist,
                       ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            decoration: BoxDecoration(
-              color: MysticColors.violet.withValues(alpha: .24),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: MysticColors.lavender.withValues(alpha: .24),
+          Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                decoration: BoxDecoration(
+                  color: MysticColors.violet.withValues(alpha: .24),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: MysticColors.lavender.withValues(alpha: .24),
+                  ),
+                ),
+                child: Text(
+                  widget.records.length.toString(),
+                  style: const TextStyle(
+                    color: MysticColors.gold,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              widget.records.length.toString(),
-              style: const TextStyle(
-                color: MysticColors.gold,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+              if (dueCount > 0) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: MysticColors.gold,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$dueCount DUE',
+                    style: const TextStyle(
+                      color: MysticColors.ink,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
@@ -163,6 +252,7 @@ class _MysticLivingJournalFeatureState
         _JournalSection.timeline => _buildTimeline(
             widget.records,
             key: const ValueKey<String>('timeline'),
+            showDueBanner: true,
           ),
         _JournalSection.insights => _buildInsights(),
         _JournalSection.map => MysticMemoryMapFeature(
@@ -178,23 +268,130 @@ class _MysticLivingJournalFeatureState
   Widget _buildTimeline(
     List<ReadingRecord> records, {
     required Key key,
+    bool showDueBanner = false,
   }) {
     if (records.isEmpty) {
       return _buildEmptyState(key: key);
     }
 
+    final children = <Widget>[
+      if (showDueBanner && !mirrorsLoading && _dueRecords.isNotEmpty)
+        _buildDueBanner(_dueRecords),
+      ...records.map((record) => _buildRecordCard(context, record)),
+    ];
+
     return ListView.separated(
       key: key,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
-      itemCount: records.length,
+      itemCount: children.length,
       separatorBuilder: (context, index) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        return _buildRecordCard(context, records[index]);
-      },
+      itemBuilder: (context, index) => children[index],
+    );
+  }
+
+  Widget _buildDueBanner(List<ReadingRecord> dueRecords) {
+    final first = dueRecords.first;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6B4A91), Color(0xFF241832)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .5)),
+        boxShadow: [
+          BoxShadow(
+            color: MysticColors.violet.withValues(alpha: .18),
+            blurRadius: 24,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.timelapse_rounded, color: MysticColors.gold),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  _mirrorCopy(
+                    en: 'MYSTIC MIRROR IS READY',
+                    tr: 'MYSTIC AYNA HAZIR',
+                    es: 'MYSTIC MIRROR ESTÁ LISTO',
+                    fr: 'MYSTIC MIRROR EST PRÊT',
+                    pt: 'MYSTIC MIRROR ESTÁ PRONTO',
+                  ),
+                  style: const TextStyle(
+                    color: MysticColors.gold,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+              Text(
+                '${dueRecords.length}',
+                style: const TextStyle(
+                  color: MysticColors.gold,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 11),
+          Text(
+            _mirrorCopy(
+              en: 'Twenty-four hours passed. What actually changed?',
+              tr: 'Yirmi dört saat geçti. Gerçekte ne değişti?',
+              es: 'Pasaron veinticuatro horas. ¿Qué cambió de verdad?',
+              fr: 'Vingt-quatre heures ont passé. Qu’est-ce qui a vraiment changé ?',
+              pt: 'Vinte e quatro horas se passaram. O que realmente mudou?',
+            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            _mirrorCopy(
+              en: 'Compare your action with reality. Your answer becomes evidence in your private pattern history.',
+              tr: 'Eylemini gerçekle karşılaştır. Cevabın özel örüntü geçmişinde kanıta dönüşür.',
+              es: 'Compara tu acción con la realidad. Tu respuesta se convierte en evidencia dentro de tu historial privado de patrones.',
+              fr: 'Comparez votre action à la réalité. Votre réponse devient une preuve dans votre historique privé de schémas.',
+              pt: 'Compare sua ação com a realidade. Sua resposta vira evidência no seu histórico privado de padrões.',
+            ),
+            style: const TextStyle(color: MysticColors.mist, height: 1.4),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => _openMirrorCheckIn(first),
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: Text(
+                _mirrorCopy(
+                  en: 'Complete oldest check-in',
+                  tr: 'En eski kontrolü tamamla',
+                  es: 'Completar la revisión más antigua',
+                  fr: 'Compléter le bilan le plus ancien',
+                  pt: 'Concluir o check-in mais antigo',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildRecordCard(BuildContext context, ReadingRecord record) {
+    final recordId = mysticMirrorRecordId(record);
+    final mirror = mirrors[recordId];
+    final due = !mirrorsLoading &&
+        mysticMirrorIsDue(
+          record,
+          DateTime.now(),
+          completedRecordIds: _completedMirrorIds,
+        );
     final cards = record.cards.map((drawn) {
       final orientation =
           drawn.reversed ? _copy('reversed', 'ters') : _copy('upright', 'düz');
@@ -206,7 +403,11 @@ class _MysticLivingJournalFeatureState
       decoration: BoxDecoration(
         color: const Color(0xFF151120),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+        border: Border.all(
+          color: due
+              ? MysticColors.gold.withValues(alpha: .45)
+              : Colors.white.withValues(alpha: .08),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,9 +489,365 @@ class _MysticLivingJournalFeatureState
               style: const TextStyle(color: MysticColors.mist),
             ),
           ],
+          const SizedBox(height: 14),
+          if (mirror != null) _buildCompletedMirror(record, mirror),
+          if (mirror == null && due) _buildDueMirrorAction(record),
+          if (mirror == null && !due && !mirrorsLoading)
+            _buildWaitingMirror(record),
         ],
       ),
     );
+  }
+
+  Widget _buildCompletedMirror(
+    ReadingRecord record,
+    MysticMirrorReflection mirror,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: MysticColors.gold.withValues(alpha: .08),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                size: 17,
+                color: MysticColors.gold,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _mirrorCopy(
+                    en: '24H MIRROR COMPLETED',
+                    tr: '24 SAATLİK AYNA TAMAMLANDI',
+                    es: 'MIRROR DE 24 H COMPLETADO',
+                    fr: 'MIROIR 24 H TERMINÉ',
+                    pt: 'MIRROR DE 24 H CONCLUÍDO',
+                  ),
+                  style: const TextStyle(
+                    color: MysticColors.gold,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              Text(
+                mirror.emotion.symbol,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${_outcomeLabel(mirror.outcome)} • ${localizedEmotionLabel(mirror.emotion, languageCode: _languageCode)}',
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          if (mirror.note.trim().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              mirror.note,
+              style: const TextStyle(color: MysticColors.mist, height: 1.4),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDueMirrorAction(ReadingRecord record) {
+    return InkWell(
+      onTap: () => _openMirrorCheckIn(record),
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF5A3E7B), Color(0xFF271A35)],
+          ),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .4)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.timelapse_rounded, color: MysticColors.gold),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _mirrorCopy(
+                      en: 'What actually changed?',
+                      tr: 'Gerçekte ne değişti?',
+                      es: '¿Qué cambió de verdad?',
+                      fr: 'Qu’est-ce qui a vraiment changé ?',
+                      pt: 'O que realmente mudou?',
+                    ),
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _mirrorCopy(
+                      en: 'Complete your 24-hour check-in',
+                      tr: '24 saatlik kontrolünü tamamla',
+                      es: 'Completa tu revisión de 24 horas',
+                      fr: 'Complétez votre bilan après 24 heures',
+                      pt: 'Conclua seu check-in de 24 horas',
+                    ),
+                    style: const TextStyle(
+                      color: MysticColors.lavender,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_rounded, color: MysticColors.gold),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWaitingMirror(ReadingRecord record) {
+    final minutes = record.mirrorCheckInAt.difference(DateTime.now()).inMinutes;
+    final hours = (minutes / 60).ceil().clamp(1, 24);
+    return Row(
+      children: [
+        const Icon(
+          Icons.schedule_rounded,
+          size: 16,
+          color: MysticColors.muted,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            _mirrorCopy(
+              en: 'Mystic Mirror opens in about $hours h',
+              tr: 'Mystic Ayna yaklaşık $hours saat sonra açılır',
+              es: 'Mystic Mirror se abre en unas $hours h',
+              fr: 'Mystic Mirror s’ouvre dans environ $hours h',
+              pt: 'Mystic Mirror abre em cerca de $hours h',
+            ),
+            style: const TextStyle(color: MysticColors.muted, fontSize: 11),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openMirrorCheckIn(ReadingRecord record) async {
+    MysticMirrorOutcome? outcome;
+    var emotion = record.emotion;
+    final noteController = TextEditingController();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF171321),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            20 + MediaQuery.viewInsetsOf(sheetContext).bottom,
+          ),
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _mirrorCopy(
+                      en: 'Mystic Mirror',
+                      tr: 'Mystic Ayna',
+                      es: 'Mystic Mirror',
+                      fr: 'Mystic Mirror',
+                      pt: 'Mystic Mirror',
+                    ),
+                    style: Theme.of(sheetContext).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _mirrorCopy(
+                      en: 'Look back without forcing a positive result. Honest evidence is more useful than a perfect story.',
+                      tr: 'Olumlu bir sonuç çıkarmaya çalışma. Dürüst kanıt, kusursuz bir hikâyeden daha değerlidir.',
+                      es: 'Mira atrás sin forzar un resultado positivo. La evidencia honesta es más útil que una historia perfecta.',
+                      fr: 'Regardez en arrière sans forcer un résultat positif. Une preuve honnête vaut mieux qu’une histoire parfaite.',
+                      pt: 'Olhe para trás sem forçar um resultado positivo. Evidência honesta vale mais que uma história perfeita.',
+                    ),
+                    style: const TextStyle(color: MysticColors.mist, height: 1.45),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _mirrorCopy(
+                      en: 'WHAT HAPPENED?',
+                      tr: 'NE OLDU?',
+                      es: '¿QUÉ PASÓ?',
+                      fr: 'QUE S’EST-IL PASSÉ ?',
+                      pt: 'O QUE ACONTECEU?',
+                    ),
+                    style: const TextStyle(
+                      color: MysticColors.gold,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: MysticMirrorOutcome.values
+                        .map(
+                          (item) => ChoiceChip(
+                            label: Text(_outcomeLabel(item)),
+                            selected: outcome == item,
+                            onSelected: (_) {
+                              setSheetState(() => outcome = item);
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    _mirrorCopy(
+                      en: 'HOW DO YOU FEEL NOW?',
+                      tr: 'ŞİMDİ NASIL HİSSEDİYORSUN?',
+                      es: '¿CÓMO TE SIENTES AHORA?',
+                      fr: 'COMMENT VOUS SENTEZ-VOUS MAINTENANT ?',
+                      pt: 'COMO VOCÊ SE SENTE AGORA?',
+                    ),
+                    style: const TextStyle(
+                      color: MysticColors.gold,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    children: EmotionalState.values
+                        .map(
+                          (item) => ChoiceChip(
+                            label: Text(
+                              '${item.symbol} ${localizedEmotionLabel(item, languageCode: _languageCode)}',
+                            ),
+                            selected: emotion == item,
+                            onSelected: (_) {
+                              setSheetState(() => emotion = item);
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: noteController,
+                    maxLength: 500,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: _mirrorCopy(
+                        en: 'What changed, or what stayed the same? (optional)',
+                        tr: 'Ne değişti veya ne aynı kaldı? (isteğe bağlı)',
+                        es: '¿Qué cambió o qué siguió igual? (opcional)',
+                        fr: 'Qu’est-ce qui a changé ou est resté identique ? (facultatif)',
+                        pt: 'O que mudou ou continuou igual? (opcional)',
+                      ),
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: outcome == null
+                          ? null
+                          : () async {
+                              final reflection = MysticMirrorReflection(
+                                recordId: mysticMirrorRecordId(record),
+                                outcome: outcome!,
+                                emotion: emotion,
+                                note: noteController.text.trim(),
+                                completedAt: DateTime.now().toUtc(),
+                              );
+                              await _mirrorStore.save(reflection);
+                              if (!mounted) return;
+                              setState(() {
+                                mirrors = <String, MysticMirrorReflection>{
+                                  ...mirrors,
+                                  reflection.recordId: reflection,
+                                };
+                              });
+                              if (sheetContext.mounted) {
+                                Navigator.pop(sheetContext);
+                              }
+                            },
+                      icon: const Icon(Icons.check_rounded),
+                      label: Text(
+                        _mirrorCopy(
+                          en: 'Save honest reflection',
+                          tr: 'Dürüst yansımayı kaydet',
+                          es: 'Guardar reflexión honesta',
+                          fr: 'Enregistrer la réflexion honnête',
+                          pt: 'Salvar reflexão honesta',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _mirrorCopy(
+                      en: 'Stored privately on this device. This is reflection, not a prediction score.',
+                      tr: 'Bu cihazda özel olarak saklanır. Bu bir düşünme kaydıdır, kehanet puanı değildir.',
+                      es: 'Se guarda de forma privada en este dispositivo. Es una reflexión, no una puntuación de predicción.',
+                      fr: 'Enregistré en privé sur cet appareil. Il s’agit d’une réflexion, pas d’un score de prédiction.',
+                      pt: 'Armazenado de forma privada neste dispositivo. É uma reflexão, não uma pontuação de previsão.',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: MysticColors.muted,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    noteController.dispose();
   }
 
   Widget _buildInsights() {
@@ -322,6 +879,28 @@ class _MysticLivingJournalFeatureState
     final recentCount = widget.records.where((record) {
       return DateTime.now().difference(record.createdAt).inDays <= 30;
     }).length;
+    final completedMirrors = mirrors.values.toList();
+    final movementCount = completedMirrors.where((mirror) {
+      return mirror.outcome == MysticMirrorOutcome.shifted ||
+          mirror.outcome == MysticMirrorOutcome.partlyShifted;
+    }).length;
+    final movementRate = completedMirrors.isEmpty
+        ? 0
+        : ((movementCount / completedMirrors.length) * 100).round();
+    final transitionCounts = <String, int>{};
+    for (final record in widget.records) {
+      final mirror = mirrors[mysticMirrorRecordId(record)];
+      if (mirror == null) continue;
+      final transition =
+          '${localizedEmotionLabel(record.emotion, languageCode: _languageCode)} → ${localizedEmotionLabel(mirror.emotion, languageCode: _languageCode)}';
+      transitionCounts.update(
+        transition,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    final rankedTransitions = transitionCounts.entries.toList()
+      ..sort((first, second) => second.value.compareTo(first.value));
 
     return ListView(
       key: const ValueKey<String>('insights'),
@@ -340,6 +919,36 @@ class _MysticLivingJournalFeatureState
               child: _buildMetric(
                 _copy('Last 30 days', 'Son 30 gün'),
                 recentCount.toString(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _buildMetric(
+                _mirrorCopy(
+                  en: 'Mirror check-ins',
+                  tr: 'Ayna kontrolleri',
+                  es: 'Revisiones Mirror',
+                  fr: 'Bilans Mirror',
+                  pt: 'Check-ins Mirror',
+                ),
+                completedMirrors.length.toString(),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildMetric(
+                _mirrorCopy(
+                  en: 'Movement noticed',
+                  tr: 'Hareket fark edildi',
+                  es: 'Cambio observado',
+                  fr: 'Mouvement observé',
+                  pt: 'Mudança percebida',
+                ),
+                completedMirrors.isEmpty ? '—' : '$movementRate%',
               ),
             ),
           ],
@@ -363,6 +972,20 @@ class _MysticLivingJournalFeatureState
               '${entry.value}×',
             );
           }).toList(),
+        ),
+        const SizedBox(height: 12),
+        _buildPatternCard(
+          title: _mirrorCopy(
+            en: 'How your emotional state shifted',
+            tr: 'Duygun nasıl değişti',
+            es: 'Cómo cambió tu estado emocional',
+            fr: 'Comment votre état émotionnel a évolué',
+            pt: 'Como seu estado emocional mudou',
+          ),
+          rows: rankedTransitions
+              .take(4)
+              .map((entry) => _InsightRow(entry.key, '${entry.value}×'))
+              .toList(),
         ),
         const SizedBox(height: 12),
         _buildPremiumCard(),
@@ -392,6 +1015,8 @@ class _MysticLivingJournalFeatureState
           const SizedBox(height: 4),
           Text(
             label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: MysticColors.mist, fontSize: 12),
           ),
         ],
@@ -476,8 +1101,8 @@ class _MysticLivingJournalFeatureState
           const SizedBox(height: 7),
           Text(
             _copy(
-              'Reveal emotional cycles, repeating themes, yearly reviews, and deeper memory connections.',
-              'Duygusal döngüleri, tekrar eden temaları, yıllık özetleri ve derin hafıza bağlantılarını gör.',
+              'Reveal longer emotional cycles, yearly reviews, and deeper memory connections. Your basic 24-hour Mirror always remains available.',
+              'Uzun duygusal döngüleri, yıllık özetleri ve derin hafıza bağlantılarını gör. Temel 24 saatlik Ayna her zaman kullanılabilir kalır.',
             ),
             style: const TextStyle(color: MysticColors.mist),
           ),
@@ -527,6 +1152,7 @@ class _MysticLivingJournalFeatureState
 
     final normalized = query.toLowerCase();
     return widget.records.where((record) {
+      final mirror = mirrors[mysticMirrorRecordId(record)];
       final searchableText = <String>[
         record.kind.title,
         localizedReadingKindTitle(record.kind, languageCode: _languageCode),
@@ -534,15 +1160,52 @@ class _MysticLivingJournalFeatureState
         record.emotion.label,
         localizedEmotionLabel(record.emotion, languageCode: _languageCode),
         record.alignedAction,
+        if (mirror != null) mirror.note,
+        if (mirror != null) _outcomeLabel(mirror.outcome),
+        if (mirror != null)
+          localizedEmotionLabel(mirror.emotion, languageCode: _languageCode),
         ...record.cards.map((drawn) => drawn.card.name),
         ...record.cards.map(
-          (drawn) =>
-              localizedTarotCardName(drawn.card.name, languageCode: _languageCode),
+          (drawn) => localizedTarotCardName(
+            drawn.card.name,
+            languageCode: _languageCode,
+          ),
         ),
       ].join(' ').toLowerCase();
       return searchableText.contains(normalized);
     }).toList();
   }
+
+  String _outcomeLabel(MysticMirrorOutcome outcome) => switch (outcome) {
+        MysticMirrorOutcome.shifted => _mirrorCopy(
+            en: 'Something shifted',
+            tr: 'Bir şey değişti',
+            es: 'Algo cambió',
+            fr: 'Quelque chose a changé',
+            pt: 'Algo mudou',
+          ),
+        MysticMirrorOutcome.partlyShifted => _mirrorCopy(
+            en: 'Partly changed',
+            tr: 'Kısmen değişti',
+            es: 'Cambió en parte',
+            fr: 'Partiellement changé',
+            pt: 'Mudou em parte',
+          ),
+        MysticMirrorOutcome.unchanged => _mirrorCopy(
+            en: 'Nothing changed yet',
+            tr: 'Henüz değişmedi',
+            es: 'Aún no cambió',
+            fr: 'Rien n’a encore changé',
+            pt: 'Ainda não mudou',
+          ),
+        MysticMirrorOutcome.unclear => _mirrorCopy(
+            en: 'Still unclear',
+            tr: 'Hâlâ belirsiz',
+            es: 'Sigue sin estar claro',
+            fr: 'Toujours incertain',
+            pt: 'Ainda não está claro',
+          ),
+      };
 
   String _emotionLabel(EmotionalState emotion) => switch (emotion) {
         EmotionalState.anxious => _copy('Anxious', 'Kaygılı'),
@@ -569,7 +1232,9 @@ class _MysticLivingJournalFeatureState
                 gradient: const LinearGradient(
                   colors: [Color(0xFF6D4DB3), Color(0xFF271A42)],
                 ),
-                border: Border.all(color: MysticColors.gold.withValues(alpha: .45)),
+                border: Border.all(
+                  color: MysticColors.gold.withValues(alpha: .45),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: MysticColors.violet.withValues(alpha: .32),
@@ -605,26 +1270,46 @@ class _MysticLivingJournalFeatureState
                   colors: [Color(0xFF251B3D), Color(0xFF15111F)],
                 ),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: MysticColors.lavender.withValues(alpha: .22)),
+                border: Border.all(
+                  color: MysticColors.lavender.withValues(alpha: .22),
+                ),
               ),
               child: Column(
                 children: [
                   _emptyPreviewRow(
                     Icons.timeline_rounded,
                     _copy('Your reading timeline', 'Okuma zaman çizgin'),
-                    _copy('Every saved reading, in context', 'Her kayıtlı okuma, kendi bağlamında'),
+                    _copy(
+                      'Every saved reading, in context',
+                      'Her kayıtlı okuma, kendi bağlamında',
+                    ),
                   ),
                   const Divider(height: 22, color: Colors.white10),
                   _emptyPreviewRow(
-                    Icons.auto_graph_rounded,
-                    _copy('Recurring patterns', 'Tekrar eden örüntüler'),
-                    _copy('Cards and emotions that return', 'Geri dönen kartlar ve duygular'),
+                    Icons.timelapse_rounded,
+                    _mirrorCopy(
+                      en: '24-hour reality check',
+                      tr: '24 saatlik gerçeklik kontrolü',
+                      es: 'Comprobación de realidad a las 24 horas',
+                      fr: 'Vérification de réalité après 24 heures',
+                      pt: 'Verificação de realidade após 24 horas',
+                    ),
+                    _mirrorCopy(
+                      en: 'Compare guidance with what happened',
+                      tr: 'Rehberliği yaşananlarla karşılaştır',
+                      es: 'Compara la guía con lo que ocurrió',
+                      fr: 'Comparez la guidance à ce qui s’est passé',
+                      pt: 'Compare a orientação com o que aconteceu',
+                    ),
                   ),
                   const Divider(height: 22, color: Colors.white10),
                   _emptyPreviewRow(
                     Icons.hub_outlined,
                     _copy('Private memory map', 'Özel hafıza haritası'),
-                    _copy('Connections only you can see', 'Yalnızca senin görebileceğin bağlar'),
+                    _copy(
+                      'Connections only you can see',
+                      'Yalnızca senin görebileceğin bağlar',
+                    ),
                   ),
                 ],
               ),
@@ -636,7 +1321,9 @@ class _MysticLivingJournalFeatureState
                 child: FilledButton.icon(
                   onPressed: widget.onStartReading,
                   icon: const Icon(Icons.auto_awesome_rounded),
-                  label: Text(_copy('Create my first memory', 'İlk anımı oluştur')),
+                  label: Text(
+                    _copy('Create my first memory', 'İlk anımı oluştur'),
+                  ),
                 ),
               ),
             ],
@@ -663,13 +1350,29 @@ class _MysticLivingJournalFeatureState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(body, style: const TextStyle(color: MysticColors.muted, fontSize: 11)),
+                Text(
+                  body,
+                  style: const TextStyle(
+                    color: MysticColors.muted,
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
-          const Icon(Icons.lock_outline_rounded, size: 16, color: MysticColors.lavender),
+          const Icon(
+            Icons.lock_outline_rounded,
+            size: 16,
+            color: MysticColors.lavender,
+          ),
         ],
       );
 
