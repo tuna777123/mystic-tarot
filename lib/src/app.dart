@@ -12,6 +12,7 @@ import 'identity_engine.dart';
 import 'language_bridge.dart';
 import 'models.dart';
 import 'premium_value_screen.dart';
+import 'reading_explanation.dart';
 import 'mystic_identity_screen.dart';
 import 'mystic_journey_feature.dart';
 import 'mystic_living_journal_feature.dart';
@@ -3423,6 +3424,16 @@ class _ReadingFlowState extends State<ReadingFlow> {
           ),
           const SizedBox(height: 8),
           Text(meaning, style: Theme.of(context).textTheme.bodyLarge),
+          const SizedBox(height: 8),
+          ReadingExplanationPanel(
+            explanation: buildReadingExplanation(
+              card: card,
+              positionIndex: index,
+              emotion: emotion,
+              intention: widget.intention,
+              language: widget.language,
+            ),
+          ),
         ],
       ),
     );

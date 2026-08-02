@@ -102,15 +102,17 @@ ReadingExplanation buildReadingExplanation({
           pt: '$cardName está na posição normal, então Mystic parte de sua expressão direta, disponível ou externa.',
         );
 
-  final cleanIntention = intention.trim().isEmpty
-      ? copy(
-          en: 'your chosen path',
-          tr: 'seçtiğin yol',
-          es: 'tu camino elegido',
-          fr: 'votre chemin choisi',
-          pt: 'seu caminho escolhido',
-        )
-      : intention.trim();
+  final cleanIntention = _localizedExplanationIntention(
+    intention,
+    language,
+    fallback: copy(
+      en: 'your chosen path',
+      tr: 'seçtiğin yol',
+      es: 'tu camino elegido',
+      fr: 'votre chemin choisi',
+      pt: 'seu caminho escolhido',
+    ),
+  );
 
   return ReadingExplanation(
     title: copy(
@@ -157,6 +159,35 @@ ReadingExplanation buildReadingExplanation({
       pt: 'Esta é uma explicação simbólica transparente, não uma prova, diagnóstico, certeza ou pontuação de previsão.',
     ),
   );
+}
+
+String _localizedExplanationIntention(
+  String intention,
+  MysticLanguage language, {
+  required String fallback,
+}) {
+  final normalized = intention.trim();
+  if (normalized.isEmpty) return fallback;
+
+  return switch ((language, normalized)) {
+    (MysticLanguage.turkish, 'Love') => 'Aşk',
+    (MysticLanguage.turkish, 'Purpose') => 'Amaç',
+    (MysticLanguage.turkish, 'Healing') => 'İyileşme',
+    (MysticLanguage.turkish, 'Clarity') => 'Netlik',
+    (MysticLanguage.spanish, 'Love') => 'Amor',
+    (MysticLanguage.spanish, 'Purpose') => 'Propósito',
+    (MysticLanguage.spanish, 'Healing') => 'Sanación',
+    (MysticLanguage.spanish, 'Clarity') => 'Claridad',
+    (MysticLanguage.french, 'Love') => 'Amour',
+    (MysticLanguage.french, 'Purpose') => 'Mission',
+    (MysticLanguage.french, 'Healing') => 'Guérison',
+    (MysticLanguage.french, 'Clarity') => 'Clarté',
+    (MysticLanguage.portugueseBrazil, 'Love') => 'Amor',
+    (MysticLanguage.portugueseBrazil, 'Purpose') => 'Propósito',
+    (MysticLanguage.portugueseBrazil, 'Healing') => 'Cura',
+    (MysticLanguage.portugueseBrazil, 'Clarity') => 'Clareza',
+    _ => normalized,
+  };
 }
 
 class ReadingExplanationPanel extends StatelessWidget {
