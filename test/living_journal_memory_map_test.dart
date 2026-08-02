@@ -11,6 +11,7 @@ void main() {
           records: const [],
           language: MysticLanguage.english,
           onPremium: () {},
+          onOpenOracle: (_) async {},
         ),
       ),
     );

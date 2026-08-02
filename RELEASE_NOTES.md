@@ -1,3 +1,31 @@
+# Mystic Tarot 1.16.0 — Private Oracle Memory
+
+This release makes the Oracle Dialogue promise real: follow-up questions and answers are now saved privately, linked to the original reading, recoverable after local corruption, and available from the Living Journal.
+
+## A conversation that remembers
+
+- Every completed Oracle exchange is saved on this device and attached to the exact reading that produced it.
+- Returning to a reading restores its complete Oracle thread instead of opening an empty conversation.
+- Free users keep one saved answer per reading and can revisit it; Mystic Plus can continue the same private thread with additional questions.
+- Later questions receive a small continuity signal from the previous saved turn without presenting the response as certainty.
+- Save failure is disclosed immediately; Mystic never claims that an unsaved answer is stored.
+
+## Living Journal and complete export
+
+- Every Journal reading now exposes an Oracle action with its verified saved-exchange count.
+- The action opens the same reading-linked dialogue and refreshes when the user returns.
+- Private journal exports now include every saved Oracle question and answer beside the correct reading and Mystic Mirror evidence.
+- Deleting all Mystic data explicitly includes Oracle conversations.
+
+## Trust and resilience
+
+- Oracle memory uses versioned local storage with a previous-snapshot backup and partial-corruption recovery.
+- No Oracle question or answer is uploaded, added to analytics, or shared with advertisers.
+- Complete English, Turkish, Spanish, French, and Brazilian Portuguese memory and recovery copy.
+- Version `1.16.0+22`.
+
+---
+
 # Mystic Tarot 1.15.0 — Personal Next Step
 
 This release connects Mystic’s existing local growth engine to the real Home experience so each user sees one honest, actionable next step instead of a generic wall of features.

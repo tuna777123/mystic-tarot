@@ -20,6 +20,7 @@ import 'models.dart';
 import 'mystic_mirror.dart';
 import 'mystic_mirror_due.dart';
 import 'mystic_next_step.dart';
+import 'oracle_conversation.dart';
 import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
 import 'reading_position.dart';
@@ -231,6 +232,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
             _startReading(ReadingKind.daily);
           },
           onPremium: () => _showPremium(source: 'living_journal'),
+          onOpenOracle: _openSavedOracle,
           onMirrorChanged: _refreshMirrorDueState,
         ),
         ProfileScreen(
@@ -397,6 +399,23 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
               );
             }
           },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSavedOracle(ReadingRecord record) async {
+    await navigatorKey.currentState!.push(
+      MaterialPageRoute(
+        builder: (_) => OracleDialogueScreen(
+          record: record,
+          pastRecords: journal,
+          userName: userName,
+          intention: intention,
+          language: language,
+          isPlus: isPlus,
+          onQuestionUsed: () {},
+          onPremium: () => _showPremium(source: 'oracle_dialogue'),
         ),
       ),
     );
@@ -4434,9 +4453,35 @@ class OracleDialogueScreen extends StatefulWidget {
 
 class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   final controller = TextEditingController();
+  final conversationStore = OracleConversationStore();
+  List<OracleConversationTurn> turns = <OracleConversationTurn>[];
   String? askedQuestion;
   String? answer;
+  String? saveError;
+  String? lastSavedTurnId;
   bool thinking = false;
+  bool historyLoading = true;
+
+  List<OracleConversationTurn> get _historyTurns => lastSavedTurnId == null
+      ? turns
+      : turns
+          .where((turn) => turn.turnId != lastSavedTurnId)
+          .toList(growable: false);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversation();
+  }
+
+  Future<void> _loadConversation() async {
+    final loaded = await conversationStore.loadForRecord(widget.record);
+    if (!mounted) return;
+    setState(() {
+      turns = loaded;
+      historyLoading = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -4570,7 +4615,28 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
               ),
             ),
             const SizedBox(height: 22),
-            if (askedQuestion == null) ...[
+            if (historyLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: MysticColors.gold,
+                  ),
+                ),
+              ),
+            if (!historyLoading && _historyTurns.isNotEmpty) ...[
+              _buildSavedHistory(context),
+              const SizedBox(height: 18),
+            ],
+            if (!historyLoading &&
+                askedQuestion == null &&
+                !widget.isPlus &&
+                turns.isNotEmpty)
+              _buildLockedHistoryCard(context),
+            if (!historyLoading &&
+                askedQuestion == null &&
+                (widget.isPlus || turns.isEmpty)) ...[
               Text(
                 mysticText(
                   widget.language,
@@ -4701,6 +4767,17 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
                 ),
               if (answer != null)
                 _messageBubble(context, answer!, fromOracle: true),
+              if (saveError != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  saveError!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFFFFB3BC),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
               if (answer != null) const SizedBox(height: 18),
               if (answer != null && !widget.isPlus)
                 Container(
@@ -4796,8 +4873,157 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     setState(() {
       askedQuestion = null;
       answer = null;
+      saveError = null;
+      lastSavedTurnId = null;
       thinking = false;
     });
+  }
+
+  Widget _buildSavedHistory(BuildContext context) {
+    final history = _historyTurns;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .04),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: MysticColors.lavender.withValues(alpha: .18),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.memory_rounded, color: MysticColors.gold),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  _oracleCopy(
+                    en: 'SAVED ORACLE MEMORY',
+                    tr: 'KAYITLI ORACLE HAFIZASI',
+                    es: 'MEMORIA GUARDADA DEL ORÁCULO',
+                    fr: 'MÉMOIRE ENREGISTRÉE DE L’ORACLE',
+                    pt: 'MEMÓRIA SALVA DO ORÁCULO',
+                  ),
+                  style: const TextStyle(
+                    color: MysticColors.gold,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              Text(
+                '${history.length}',
+                style: const TextStyle(
+                  color: MysticColors.gold,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _oracleCopy(
+              en: 'Stored only on this device and linked to this reading.',
+              tr: 'Yalnızca bu cihazda saklanır ve bu okumaya bağlıdır.',
+              es: 'Se guarda solo en este dispositivo y está vinculada a esta lectura.',
+              fr: 'Stockée uniquement sur cet appareil et liée à ce tirage.',
+              pt: 'Armazenada somente neste dispositivo e ligada a esta leitura.',
+            ),
+            style: const TextStyle(
+              color: MysticColors.muted,
+              fontSize: 10,
+            ),
+          ),
+          for (final turn in history) ...[
+            const SizedBox(height: 14),
+            Text(
+              _formatOracleTime(turn.createdAt),
+              style: const TextStyle(
+                color: MysticColors.muted,
+                fontSize: 9,
+              ),
+            ),
+            const SizedBox(height: 6),
+            _messageBubble(context, turn.question, fromOracle: false),
+            const SizedBox(height: 8),
+            _messageBubble(context, turn.answer, fromOracle: true),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLockedHistoryCard(BuildContext context) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [Color(0xFF493269), Color(0xFF20162D)],
+      ),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: MysticColors.gold.withValues(alpha: .3)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          _oracleCopy(
+            en: 'Your free answer is saved',
+            tr: 'Ücretsiz cevabın kaydedildi',
+            es: 'Tu respuesta gratuita está guardada',
+            fr: 'Votre réponse gratuite est enregistrée',
+            pt: 'Sua resposta gratuita foi salva',
+          ),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          _oracleCopy(
+            en: 'You can revisit it here at any time. Mystic Plus continues the same private conversation.',
+            tr: 'Buraya istediğin zaman dönebilirsin. Mystic Plus aynı özel konuşmayı sürdürür.',
+            es: 'Puedes volver aquí cuando quieras. Mystic Plus continúa la misma conversación privada.',
+            fr: 'Vous pouvez la relire ici à tout moment. Mystic Plus poursuit la même conversation privée.',
+            pt: 'Você pode voltar aqui quando quiser. O Mystic Plus continua a mesma conversa privada.',
+          ),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 14),
+        GoldButton(
+          label: _oracleCopy(
+            en: 'Continue with Mystic Plus',
+            tr: 'Mystic Plus ile devam et',
+            es: 'Continuar con Mystic Plus',
+            fr: 'Continuer avec Mystic Plus',
+            pt: 'Continuar com Mystic Plus',
+          ),
+          icon: Icons.lock_open_rounded,
+          onPressed: widget.onPremium,
+        ),
+      ],
+    ),
+  );
+
+  String _oracleCopy({
+    required String en,
+    required String tr,
+    required String es,
+    required String fr,
+    required String pt,
+  }) => switch (widget.language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
+
+  String _formatOracleTime(DateTime value) {
+    final local = value.toLocal();
+    String two(int number) => number.toString().padLeft(2, '0');
+    return '${local.year}-${two(local.month)}-${two(local.day)} ${two(local.hour)}:${two(local.minute)}';
   }
 
   Widget _messageBubble(
@@ -4944,18 +5170,48 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   }
 
   Future<void> _ask(String question) async {
-    if (askedQuestion != null || question.trim().isEmpty) return;
+    final cleanQuestion = question.trim();
+    if (askedQuestion != null || cleanQuestion.isEmpty || historyLoading) return;
+    if (!widget.isPlus && turns.isNotEmpty) return;
     FocusScope.of(context).unfocus();
     widget.onQuestionUsed();
     setState(() {
-      askedQuestion = question.trim();
+      askedQuestion = cleanQuestion;
       thinking = true;
+      saveError = null;
     });
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     if (!mounted) return;
+    final response = _composeAnswer(cleanQuestion);
+    final turn = OracleConversationTurn.create(
+      record: widget.record,
+      question: cleanQuestion,
+      answer: response,
+    );
+    var saved = false;
+    try {
+      await conversationStore.saveTurn(turn);
+      saved = true;
+    } catch (_) {
+      saved = false;
+    }
+    if (!mounted) return;
     setState(() {
       thinking = false;
-      answer = _composeAnswer(question);
+      answer = response;
+      if (saved) {
+        turns = <OracleConversationTurn>[...turns, turn]
+          ..sort((first, second) => first.createdAt.compareTo(second.createdAt));
+        lastSavedTurnId = turn.turnId;
+      } else {
+        saveError = _oracleCopy(
+          en: 'The answer is visible, but this device could not save it. Copy it before leaving.',
+          tr: 'Cevap görünür durumda ancak bu cihaz kaydedemedi. Çıkmadan önce kopyala.',
+          es: 'La respuesta está visible, pero el dispositivo no pudo guardarla. Cópiala antes de salir.',
+          fr: 'La réponse est visible, mais l’appareil n’a pas pu l’enregistrer. Copiez-la avant de quitter.',
+          pt: 'A resposta está visível, mas o dispositivo não conseguiu salvá-la. Copie antes de sair.',
+        );
+      }
     });
   }
 
@@ -4975,7 +5231,7 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     );
     final emotion = _emotionLabel(widget.record.emotion, widget.language);
     final lower = question.toLowerCase();
-    final memory = _oracleMemory();
+    final memory = '${_oracleMemory()}${_oracleConversationThread()}';
     final hiddenQuestion = lower.contains('not seeing') ||
         lower.contains('underestimating') ||
         lower.contains('risk') ||
@@ -5059,6 +5315,18 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
             'next step small, observable, and reversible; the cards are offering '
             'a lens, not issuing a command.$memory';
     }
+  }
+
+  String _oracleConversationThread() {
+    if (turns.isEmpty) return '';
+    final previous = turns.last;
+    return _oracleCopy(
+      en: ' Your previous question in this reading was “${previous.question}”. Keep the new answer consistent with that thread without treating it as certainty.',
+      tr: ' Bu okumadaki önceki sorun “${previous.question}” idi. Yeni cevabı kesinlik gibi sunmadan bu çizgiyle tutarlı tut.',
+      es: ' Tu pregunta anterior en esta lectura fue “${previous.question}”. Mantén la nueva respuesta coherente con ese hilo sin presentarla como certeza.',
+      fr: ' Votre question précédente pour ce tirage était « ${previous.question} ». Gardez la nouvelle réponse cohérente avec ce fil sans la présenter comme une certitude.',
+      pt: ' Sua pergunta anterior nesta leitura foi “${previous.question}”. Mantenha a nova resposta coerente com esse fio sem tratá-la como certeza.',
+    );
   }
 
   String _oracleMemory() {
@@ -8135,10 +8403,12 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
 
   Future<void> _exportJournal() async {
     final mirrors = await MysticMirrorStore().load();
+    final oracleConversations = await OracleConversationStore().loadGrouped();
     if (!mounted) return;
     final text = buildMysticJournalExport(
       records: widget.records,
       mirrors: mirrors,
+      oracleConversations: oracleConversations,
       language: widget.language,
     );
     final renderObject = context.findRenderObject();
@@ -8215,8 +8485,8 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
             ),
             content: Text(
               t(
-                'This cannot be undone. Your journal, card collection, streak, XP, and preferences will be removed from this device.',
-                'Bu işlem geri alınamaz. Günlüğün, kart koleksiyonun, serin, XP’n ve tercihlerin bu cihazdan kaldırılır.',
+                'This cannot be undone. Your journal, Oracle conversations, card collection, streak, XP, and preferences will be removed from this device.',
+                'Bu işlem geri alınamaz. Günlüğün, Oracle konuşmaların, kart koleksiyonun, serin, XP’n ve tercihlerin bu cihazdan kaldırılır.',
               ),
             ),
             actions: [

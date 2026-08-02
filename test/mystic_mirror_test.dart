@@ -298,6 +298,7 @@ void main() {
             records: <ReadingRecord>[oldRecord],
             language: entry.key,
             onPremium: () {},
+            onOpenOracle: (_) async {},
           ),
         ),
       );
