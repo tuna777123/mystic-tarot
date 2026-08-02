@@ -4,6 +4,7 @@ import 'flagship.dart';
 import 'models.dart';
 import 'mystic_memory_map_feature.dart';
 import 'mystic_mirror.dart';
+import 'mystic_search.dart';
 import 'tarot_localization.dart';
 import 'theme.dart';
 
@@ -15,6 +16,7 @@ class MysticLivingJournalFeature extends StatefulWidget {
     required this.language,
     required this.onPremium,
     this.onStartReading,
+    this.onMirrorChanged,
     super.key,
   });
 
@@ -22,6 +24,7 @@ class MysticLivingJournalFeature extends StatefulWidget {
   final MysticLanguage language;
   final VoidCallback onPremium;
   final VoidCallback? onStartReading;
+  final VoidCallback? onMirrorChanged;
 
   @override
   State<MysticLivingJournalFeature> createState() =>
@@ -648,6 +651,7 @@ class _MysticLivingJournalFeatureState
   Future<void> _openMirrorCheckIn(ReadingRecord record) async {
     MysticMirrorOutcome? outcome;
     var emotion = record.emotion;
+    var saving = false;
     final noteController = TextEditingController();
 
     await showModalBottomSheet<void>(
@@ -790,9 +794,10 @@ class _MysticLivingJournalFeatureState
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
-                      onPressed: outcome == null
+                      onPressed: outcome == null || saving
                           ? null
                           : () async {
+                              setSheetState(() => saving = true);
                               final reflection = MysticMirrorReflection(
                                 recordId: mysticMirrorRecordId(record),
                                 outcome: outcome!,
@@ -800,27 +805,55 @@ class _MysticLivingJournalFeatureState
                                 note: noteController.text.trim(),
                                 completedAt: DateTime.now().toUtc(),
                               );
-                              await _mirrorStore.save(reflection);
-                              if (!mounted) return;
-                              setState(() {
-                                mirrors = <String, MysticMirrorReflection>{
-                                  ...mirrors,
-                                  reflection.recordId: reflection,
-                                };
-                              });
-                              if (sheetContext.mounted) {
-                                Navigator.pop(sheetContext);
+                              try {
+                                await _mirrorStore.save(reflection);
+                                if (!mounted) return;
+                                setState(() {
+                                  mirrors = <String, MysticMirrorReflection>{
+                                    ...mirrors,
+                                    reflection.recordId: reflection,
+                                  };
+                                });
+                                widget.onMirrorChanged?.call();
+                                if (sheetContext.mounted) {
+                                  Navigator.pop(sheetContext);
+                                }
+                              } catch (_) {
+                                if (sheetContext.mounted) {
+                                  setSheetState(() => saving = false);
+                                  ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        _mirrorCopy(
+                                          en: 'The reflection could not be saved. Nothing was changed; please try again.',
+                                          tr: 'Yansıma kaydedilemedi. Hiçbir şey değiştirilmedi; lütfen tekrar dene.',
+                                          es: 'No se pudo guardar la reflexión. No se cambió nada; inténtalo de nuevo.',
+                                          fr: 'La réflexion n’a pas pu être enregistrée. Rien n’a été modifié ; réessayez.',
+                                          pt: 'Não foi possível salvar a reflexão. Nada foi alterado; tente novamente.',
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
                               }
                             },
                       icon: const Icon(Icons.check_rounded),
                       label: Text(
-                        _mirrorCopy(
-                          en: 'Save honest reflection',
-                          tr: 'Dürüst yansımayı kaydet',
-                          es: 'Guardar reflexión honesta',
-                          fr: 'Enregistrer la réflexion honnête',
-                          pt: 'Salvar reflexão honesta',
-                        ),
+                        saving
+                            ? _mirrorCopy(
+                                en: 'Saving…',
+                                tr: 'Kaydediliyor…',
+                                es: 'Guardando…',
+                                fr: 'Enregistrement…',
+                                pt: 'Salvando…',
+                              )
+                            : _mirrorCopy(
+                                en: 'Save honest reflection',
+                                tr: 'Dürüst yansımayı kaydet',
+                                es: 'Guardar reflexión honesta',
+                                fr: 'Enregistrer la réflexion honnête',
+                                pt: 'Salvar reflexão honesta',
+                              ),
                       ),
                     ),
                   ),
@@ -1150,29 +1183,30 @@ class _MysticLivingJournalFeatureState
   List<ReadingRecord> get _filteredRecords {
     if (query.isEmpty) return widget.records;
 
-    final normalized = query.toLowerCase();
     return widget.records.where((record) {
       final mirror = mirrors[mysticMirrorRecordId(record)];
-      final searchableText = <String>[
-        record.kind.title,
-        localizedReadingKindTitle(record.kind, languageCode: _languageCode),
-        record.question,
-        record.emotion.label,
-        localizedEmotionLabel(record.emotion, languageCode: _languageCode),
-        record.alignedAction,
-        if (mirror != null) mirror.note,
-        if (mirror != null) _outcomeLabel(mirror.outcome),
-        if (mirror != null)
-          localizedEmotionLabel(mirror.emotion, languageCode: _languageCode),
-        ...record.cards.map((drawn) => drawn.card.name),
-        ...record.cards.map(
-          (drawn) => localizedTarotCardName(
-            drawn.card.name,
-            languageCode: _languageCode,
+      return mysticSearchMatches(
+        query: query,
+        values: <String>[
+          record.kind.title,
+          localizedReadingKindTitle(record.kind, languageCode: _languageCode),
+          record.question,
+          record.emotion.label,
+          localizedEmotionLabel(record.emotion, languageCode: _languageCode),
+          record.alignedAction,
+          if (mirror != null) mirror.note,
+          if (mirror != null) _outcomeLabel(mirror.outcome),
+          if (mirror != null)
+            localizedEmotionLabel(mirror.emotion, languageCode: _languageCode),
+          ...record.cards.map((drawn) => drawn.card.name),
+          ...record.cards.map(
+            (drawn) => localizedTarotCardName(
+              drawn.card.name,
+              languageCode: _languageCode,
+            ),
           ),
-        ),
-      ].join(' ').toLowerCase();
-      return searchableText.contains(normalized);
+        ],
+      );
     }).toList();
   }
 

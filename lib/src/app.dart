@@ -3,14 +3,22 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'app_language.dart';
 import 'flagship.dart';
 import 'identity_engine.dart';
 import 'language_bridge.dart';
+import 'journal_export.dart';
+import 'journal_recovery_notice.dart';
 import 'models.dart';
+import 'mystic_mirror.dart';
+import 'mystic_mirror_due.dart';
+import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
+import 'reading_position.dart';
 import 'premium_value_screen.dart';
 import 'mystic_identity_screen.dart';
 import 'mystic_journey_feature.dart';
@@ -55,6 +63,10 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   final navigatorKey = GlobalKey<NavigatorState>();
   final subscriptionStore = StorePurchaseService();
   final readingJournalStore = ReadingJournalStore();
+  final mirrorStore = MysticMirrorStore();
+  Timer? _mirrorDueTimer;
+  int mirrorDueCount = 0;
+  String? journalRecoveryMessage;
   bool isPlus = false;
   bool ready = false;
   bool onboarded = false;
@@ -96,12 +108,14 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       subscriptionStore.refreshEntitlement();
+      _refreshMirrorDueState();
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _mirrorDueTimer?.cancel();
     subscriptionStore.removeListener(_syncSubscription);
     subscriptionStore.dispose();
     super.dispose();
@@ -199,6 +213,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
             _startReading(ReadingKind.daily);
           },
           onPremium: () => _showPremium(source: 'living_journal'),
+          onMirrorChanged: _refreshMirrorDueState,
         ),
         ProfileScreen(
           isPlus: isPlus,
@@ -238,8 +253,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           label: mysticText(language, 'Path', 'Yol'),
         ),
         NavigationDestination(
-          icon: const Icon(Icons.menu_book_outlined),
-          selectedIcon: const Icon(Icons.menu_book),
+          icon: _journalNavigationIcon(Icons.menu_book_outlined),
+          selectedIcon: _journalNavigationIcon(Icons.menu_book),
           label: mysticText(language, 'Journal', 'Günlük'),
         ),
         NavigationDestination(
@@ -250,6 +265,58 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       ],
     ),
   );
+
+  Widget _journalNavigationIcon(IconData icon) {
+    final baseIcon = Icon(icon);
+    if (mirrorDueCount <= 0) return baseIcon;
+    return Semantics(
+      label: localizedMirrorDueSemantics(mirrorDueCount, language),
+      child: Badge(
+        label: Text(compactMirrorDueLabel(mirrorDueCount)),
+        child: ExcludeSemantics(child: baseIcon),
+      ),
+    );
+  }
+
+  Future<void> _refreshMirrorDueState() async {
+    final reflections = await mirrorStore.load();
+    if (!mounted) return;
+    final now = DateTime.now();
+    setState(() {
+      mirrorDueCount = countDueMysticMirrors(
+        records: journal,
+        reflections: reflections,
+        now: now,
+      );
+    });
+    _scheduleNextMirrorDue(reflections, now);
+  }
+
+  void _scheduleNextMirrorDue(
+    Map<String, MysticMirrorReflection> reflections,
+    DateTime now,
+  ) {
+    _mirrorDueTimer?.cancel();
+    final wait = durationUntilNextMysticMirror(
+      records: journal,
+      reflections: reflections,
+      now: now,
+    );
+    if (wait == null) return;
+    _mirrorDueTimer = Timer(wait + const Duration(seconds: 1), () {
+      _refreshMirrorDueState();
+    });
+  }
+
+  void _showJournalRecoveryMessage() {
+    final message = journalRecoveryMessage;
+    final context = navigatorKey.currentContext;
+    if (message == null || context == null || !mounted) return;
+    journalRecoveryMessage = null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   void _startReading(ReadingKind kind) {
     if (!isPlus && _premiumReadingKinds.contains(kind)) {
@@ -291,6 +358,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
               _updateStreak();
             });
             _saveProgress();
+            _refreshMirrorDueState();
             if (newlyDiscovered.isNotEmpty) {
               Future<void>.delayed(
                 const Duration(milliseconds: 280),
@@ -403,6 +471,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       streak = 0;
       xp = 0;
       deepReadingsToday = 0;
+      mirrorDueCount = 0;
+      _mirrorDueTimer?.cancel();
       deckStyle = DeckStyle.midnight;
       userName = '';
       intention = 'Clarity';
@@ -442,7 +512,10 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
         legacyRecords:
             prefs.getStringList(ReadingJournalStore.legacyKey) ?? const <String>[],
       );
-      final today = _dayKey(DateTime.now());
+      final mirrorReflections = await mirrorStore.load();
+      final savedLanguage = _languageFromName(prefs.getString('language'));
+      final now = DateTime.now();
+      final today = _dayKey(now);
       final ritualDay = prefs.getString('ritual_day');
       final savedReadingDay = prefs.getString('deep_readings_day');
       if (!mounted) return;
@@ -459,7 +532,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
             ? prefs.getInt('deep_readings_today') ?? 0
             : 0;
         deckStyle = _deckStyleFromName(prefs.getString('deck_style'));
-        language = _languageFromName(prefs.getString('language'));
+        language = savedLanguage;
         discoveredCards.addAll(
           prefs.getStringList('discovered_cards') ?? const [],
         );
@@ -485,6 +558,15 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           }
         }
         journal.addAll(journalLoad.records);
+        mirrorDueCount = countDueMysticMirrors(
+          records: journalLoad.records,
+          reflections: mirrorReflections,
+          now: now,
+        );
+        journalRecoveryMessage = localizedJournalRecoveryNotice(
+          journalLoad,
+          savedLanguage,
+        );
         if (ritualDay == today)
           completedRituals.addAll(
             prefs.getStringList('completed_rituals') ?? const [],
@@ -494,6 +576,12 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       if (journalLoad.migratedFromLegacy) {
         await readingJournalStore.save(journalLoad.records);
         await readingJournalStore.finishLegacyMigration();
+      }
+      _scheduleNextMirrorDue(mirrorReflections, now);
+      if (journalRecoveryMessage != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showJournalRecoveryMessage();
+        });
       }
     } catch (_) {
       if (mounted) setState(() => ready = true);
@@ -3354,23 +3442,11 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   Widget _interpretation(BuildContext context, int index, DrawnCard card) {
-    final positions = <String>[
-      mysticText(
-        widget.language,
-        'What surrounds you',
-        'Seni çevreleyen enerji',
-      ),
-      mysticText(
-        widget.language,
-        'What asks for attention',
-        'Dikkat isteyen konu',
-      ),
-      mysticText(
-        widget.language,
-        'Your next aligned step',
-        'Sıradaki uyumlu adım',
-      ),
-    ];
+    final position = localizedReadingPosition(
+      kind: widget.kind,
+      index: index,
+      language: widget.language,
+    );
     final meaning = _localizedCardMeaning(card, widget.language);
     final cardName = localizedTarotCardName(
       card.card.name,
@@ -3382,9 +3458,7 @@ class _ReadingFlowState extends State<ReadingFlow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            index < positions.length
-                ? positions[index].toUpperCase()
-                : mysticText(widget.language, 'MESSAGE', 'MESAJ'),
+            position.toUpperCase(),
             style: const TextStyle(
               fontFamily: 'Arial',
               color: MysticColors.lavender,
@@ -3400,6 +3474,17 @@ class _ReadingFlowState extends State<ReadingFlow> {
           ),
           const SizedBox(height: 8),
           Text(meaning, style: Theme.of(context).textTheme.bodyLarge),
+          const SizedBox(height: 8),
+          ReadingExplanationPanel(
+            explanation: buildReadingExplanation(
+              kind: widget.kind,
+              card: card,
+              positionIndex: index,
+              emotion: emotion,
+              intention: widget.intention,
+              language: widget.language,
+            ),
+          ),
         ],
       ),
     );
@@ -7512,9 +7597,12 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
           ),
           title: Text(t('Export my journal', 'Günlüğümü dışa aktar')),
           subtitle: Text(
-            t(
-              '${widget.records.length} saved readings',
-              '${widget.records.length} kayıtlı okuma',
+            localizedProfileCopy(
+              en: '${widget.records.length} readings; includes private questions and Mirror notes',
+              tr: '${widget.records.length} okuma; özel soruları ve Ayna notlarını içerir',
+              es: '${widget.records.length} lecturas; incluye preguntas privadas y notas de Mirror',
+              fr: '${widget.records.length} tirages ; inclut les questions privées et notes Mirror',
+              pt: '${widget.records.length} leituras; inclui perguntas privadas e notas do Mirror',
             ),
           ),
           trailing: const Icon(Icons.chevron_right),
@@ -7582,17 +7670,35 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
       ),
       const SizedBox(height: 10),
       GoldButton(
-        label: t('Copy support link', 'Destek bağlantısını kopyala'),
+        label: localizedProfileCopy(
+          en: 'Open support',
+          tr: 'Desteği aç',
+          es: 'Abrir soporte',
+          fr: 'Ouvrir l’assistance',
+          pt: 'Abrir suporte',
+        ),
         icon: Icons.support_agent,
         onPressed: () async {
-          await Clipboard.setData(
-            ClipboardData(text: supportPageForLanguage(widget.language)),
-          );
+          final supportLink = supportPageForLanguage(widget.language);
+          var opened = false;
+          try {
+            opened = await launchUrl(Uri.parse(supportLink));
+          } catch (_) {
+            opened = false;
+          }
+          if (opened || !context.mounted) return;
+          await Clipboard.setData(ClipboardData(text: supportLink));
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                t('Support link copied.', 'Destek bağlantısı kopyalandı.'),
+                localizedProfileCopy(
+                  en: 'Support could not open, so the link was copied.',
+                  tr: 'Destek açılamadı; bağlantı kopyalandı.',
+                  es: 'No se pudo abrir el soporte; se copió el enlace.',
+                  fr: 'Impossible d’ouvrir l’assistance ; le lien a été copié.',
+                  pt: 'Não foi possível abrir o suporte; o link foi copiado.',
+                ),
               ),
             ),
           );
@@ -7603,6 +7709,21 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
 
   String t(String english, String turkish) =>
       mysticText(widget.language, english, turkish);
+
+  String localizedProfileCopy({
+    required String en,
+    required String tr,
+    required String es,
+    required String fr,
+    required String pt,
+  }) =>
+      switch (widget.language) {
+        MysticLanguage.turkish => tr,
+        MysticLanguage.spanish => es,
+        MysticLanguage.french => fr,
+        MysticLanguage.portugueseBrazil => pt,
+        _ => en,
+      };
 
   Widget _intro(BuildContext context, String title, String body) => Padding(
     padding: const EdgeInsets.only(bottom: 18),
@@ -7672,29 +7793,75 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
   );
 
   Future<void> _exportJournal() async {
-    final text = widget.records.isEmpty
-        ? t(
-            'Mystic Tarot Journal\n\nNo saved readings yet.',
-            'Mystic Tarot Günlüğü\n\nHenüz kayıtlı okuma yok.',
-          )
-        : widget.records
-              .map(
-                (record) =>
-                    '${record.createdAt.toLocal()} — ${_readingKindTitle(record.kind, widget.language)}\n${record.cards.map((item) => '${localizedTarotCardName(item.card.name, languageCode: widget.language.code)}${item.reversed ? t(' (Reversed)', ' (Ters)') : ''}').join(', ')}\n${t('Aligned action', 'Uyumlu eylem')}: ${record.alignedAction}',
-              )
-              .join('\n\n');
-    await Clipboard.setData(ClipboardData(text: text));
-    if (mounted)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            t(
-              'Your journal was copied for export.',
-              'Günlüğün dışa aktarmak için kopyalandı.',
-            ),
+    final mirrors = await MysticMirrorStore().load();
+    if (!mounted) return;
+    final text = buildMysticJournalExport(
+      records: widget.records,
+      mirrors: mirrors,
+      language: widget.language,
+    );
+    final renderObject = context.findRenderObject();
+    final origin = renderObject is RenderBox
+        ? renderObject.localToGlobal(Offset.zero) & renderObject.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
+
+    try {
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          text: text,
+          title: localizedProfileCopy(
+            en: 'Mystic Tarot private journal export',
+            tr: 'Mystic Tarot özel günlük dışa aktarımı',
+            es: 'Exportación del diario privado de Mystic Tarot',
+            fr: 'Export du journal privé Mystic Tarot',
+            pt: 'Exportação do diário privado do Mystic Tarot',
           ),
+          subject: localizedProfileCopy(
+            en: 'My private Mystic Tarot journal',
+            tr: 'Özel Mystic Tarot günlüğüm',
+            es: 'Mi diario privado de Mystic Tarot',
+            fr: 'Mon journal privé Mystic Tarot',
+            pt: 'Meu diário privado do Mystic Tarot',
+          ),
+          sharePositionOrigin: origin,
         ),
       );
+      if (!mounted || result.status == ShareResultStatus.dismissed) return;
+      if (result.status == ShareResultStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              localizedProfileCopy(
+                en: 'Your private journal was shared.',
+                tr: 'Özel günlüğün paylaşıldı.',
+                es: 'Tu diario privado se compartió.',
+                fr: 'Votre journal privé a été partagé.',
+                pt: 'Seu diário privado foi compartilhado.',
+              ),
+            ),
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      // A clipboard fallback remains available when the platform share sheet fails.
+    }
+
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          localizedProfileCopy(
+            en: 'Sharing was unavailable. Your journal was copied instead.',
+            tr: 'Paylaşım kullanılamadı. Günlüğün bunun yerine kopyalandı.',
+            es: 'No se pudo compartir. El diario se copió en su lugar.',
+            fr: 'Le partage était indisponible. Le journal a été copié.',
+            pt: 'O compartilhamento não estava disponível. O diário foi copiado.',
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmDelete() async {
