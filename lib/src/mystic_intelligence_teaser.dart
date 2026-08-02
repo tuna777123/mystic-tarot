@@ -150,6 +150,8 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                         const Expanded(
                           child: Text(
                             'MYSTIC INTELLIGENCE',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: MysticColors.gold,
                               fontSize: 9,
@@ -158,6 +160,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -179,6 +182,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                                     tr: 'HAZIR',
                                   )
                                 : '${recent.length}/3',
+                            maxLines: 1,
                             style: TextStyle(
                               color: ready
                                   ? MysticColors.ink
@@ -256,27 +260,32 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                     ),
                     const SizedBox(height: 9),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          ready
-                              ? t(
-                                  en: 'Open report',
-                                  es: 'Abrir informe',
-                                  fr: 'Ouvrir le rapport',
-                                  pt: 'Abrir relatório',
-                                  tr: 'Raporu aç',
-                                )
-                              : t(
-                                  en: 'See progress',
-                                  es: 'Ver progreso',
-                                  fr: 'Voir la progression',
-                                  pt: 'Ver progresso',
-                                  tr: 'İlerlemeyi gör',
-                                ),
-                          style: const TextStyle(
-                            color: MysticColors.gold,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
+                        Flexible(
+                          child: Text(
+                            ready
+                                ? t(
+                                    en: 'Open report',
+                                    es: 'Abrir informe',
+                                    fr: 'Ouvrir le rapport',
+                                    pt: 'Abrir relatório',
+                                    tr: 'Raporu aç',
+                                  )
+                                : t(
+                                    en: 'See progress',
+                                    es: 'Ver progreso',
+                                    fr: 'Voir la progression',
+                                    pt: 'Ver progresso',
+                                    tr: 'İlerlemeyi gör',
+                                  ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: MysticColors.gold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 5),
