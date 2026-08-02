@@ -1,0 +1,39 @@
+name: Apply Mystic Tarot v1.16
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-v116-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  apply-v116:
+    if: github.head_ref == 'feature/v1.16-oracle-memory'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Apply verified product integration
+        run: python tool/apply_v116.py
+
+      - name: Commit integrated product files
+        run: |
+          git config user.name "mystic-release-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/src/app.dart lib/src/mystic_living_journal_feature.dart lib/src/journal_export.dart pubspec.yaml RELEASE_NOTES.md
+          if git diff --cached --quiet; then
+            echo "v1.16 integration already applied."
+            exit 0
+          fi
+          git diff --cached --check
+          git commit -m "feat: persist private Oracle conversations"
+          git push origin HEAD:${{ github.head_ref }}
