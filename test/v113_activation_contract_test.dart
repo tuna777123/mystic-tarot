@@ -19,9 +19,15 @@ void main() {
     expect(app, contains('_maybeOfferRitualReminder'));
     expect(app, contains('journal.isEmpty'));
     expect(app, contains('record.kind == ReadingKind.daily'));
-    expect(nativeService, contains('inexactAllowWhileIdle'));
+    expect(
+      nativeService,
+      contains('AndroidScheduleMode.inexactAllowWhileIdle'),
+    );
     expect(nativeService, contains('DateTimeComponents.time'));
-    expect(nativeService, isNot(contains('exactAllowWhileIdle')));
+    expect(
+      nativeService,
+      isNot(contains('AndroidScheduleMode.exactAllowWhileIdle')),
+    );
     expect(nativeService, isNot(contains('journal')));
   });
 
