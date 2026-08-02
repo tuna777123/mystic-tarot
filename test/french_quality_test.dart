@@ -143,19 +143,22 @@ void main() {
     expect(sitemap, contains('support-fr.html'));
   });
 
-  test('support links follow the selected launch language', () {
-    expect(
-      supportPageForLanguage(MysticLanguage.french),
-      endsWith('/support-fr.html'),
-    );
-    expect(
-      supportPageForLanguage(MysticLanguage.turkish),
-      endsWith('/support-tr.html'),
-    );
-    expect(
-      supportPageForLanguage(MysticLanguage.spanish),
-      endsWith('/support.html'),
-    );
+  test('support links follow every selected launch language', () {
+    const expectations = <MysticLanguage, String>{
+      MysticLanguage.english: '/support.html',
+      MysticLanguage.turkish: '/support-tr.html',
+      MysticLanguage.spanish: '/support-es.html',
+      MysticLanguage.french: '/support-fr.html',
+      MysticLanguage.portugueseBrazil: '/support-pt-br.html',
+    };
+
+    for (final entry in expectations.entries) {
+      expect(
+        supportPageForLanguage(entry.key),
+        endsWith(entry.value),
+        reason: entry.key.name,
+      );
+    }
   });
 
   test('all public legal pages keep local-first and safety language', () {

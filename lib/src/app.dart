@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'flagship.dart';
 import 'identity_engine.dart';
 import 'language_bridge.dart';
 import 'models.dart';
+import 'reading_journal_store.dart';
 import 'premium_value_screen.dart';
 import 'mystic_identity_screen.dart';
 import 'mystic_journey_feature.dart';
@@ -36,6 +36,10 @@ String supportPageForLanguage(MysticLanguage language) => switch (language) {
         'https://tuna777123.github.io/mystic-tarot/support-fr.html',
       MysticLanguage.turkish =>
         'https://tuna777123.github.io/mystic-tarot/support-tr.html',
+      MysticLanguage.spanish =>
+        'https://tuna777123.github.io/mystic-tarot/support-es.html',
+      MysticLanguage.portugueseBrazil =>
+        'https://tuna777123.github.io/mystic-tarot/support-pt-br.html',
       _ => 'https://tuna777123.github.io/mystic-tarot/support.html',
     };
 
@@ -50,6 +54,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   static const freeDeepReadingLimit = 3;
   final navigatorKey = GlobalKey<NavigatorState>();
   final subscriptionStore = StorePurchaseService();
+  final readingJournalStore = ReadingJournalStore();
   bool isPlus = false;
   bool ready = false;
   bool onboarded = false;
@@ -433,6 +438,10 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   Future<void> _loadProgress() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      final journalLoad = await readingJournalStore.load(
+        legacyRecords:
+            prefs.getStringList(ReadingJournalStore.legacyKey) ?? const <String>[],
+      );
       final today = _dayKey(DateTime.now());
       final ritualDay = prefs.getString('ritual_day');
       final savedReadingDay = prefs.getString('deep_readings_day');
@@ -455,32 +464,37 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           prefs.getStringList('discovered_cards') ?? const [],
         );
         claimedRewards.addAll(
-          (prefs.getStringList('claimed_rewards') ?? const []).map(int.parse),
+          (prefs.getStringList('claimed_rewards') ?? const [])
+              .map(int.tryParse)
+              .whereType<int>(),
         );
         completedArcanaDays.addAll(
-          (prefs.getStringList('completed_arcana_days') ?? const []).map(
-            int.parse,
-          ),
+          (prefs.getStringList('completed_arcana_days') ?? const [])
+              .map(int.tryParse)
+              .whereType<int>(),
         );
         lastArcanaCompletionDay = prefs.getString('last_arcana_completion_day');
         for (final encoded
             in prefs.getStringList('arcana_reflections') ?? const []) {
           final separator = encoded.indexOf(':');
-          if (separator > 0)
-            arcanaReflections[int.parse(encoded.substring(0, separator))] =
-                encoded.substring(separator + 1);
+          if (separator > 0) {
+            final index = int.tryParse(encoded.substring(0, separator));
+            if (index != null) {
+              arcanaReflections[index] = encoded.substring(separator + 1);
+            }
+          }
         }
-        for (final encoded
-            in prefs.getStringList('journal_records') ?? const []) {
-          final record = _decodeRecord(encoded);
-          if (record != null) journal.add(record);
-        }
+        journal.addAll(journalLoad.records);
         if (ritualDay == today)
           completedRituals.addAll(
             prefs.getStringList('completed_rituals') ?? const [],
           );
         ready = true;
       });
+      if (journalLoad.migratedFromLegacy) {
+        await readingJournalStore.save(journalLoad.records);
+        await readingJournalStore.finishLegacyMigration();
+      }
     } catch (_) {
       if (mounted) setState(() => ready = true);
     }
@@ -512,10 +526,6 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
               .map((entry) => '${entry.key}:${entry.value}')
               .toList(),
         ),
-        prefs.setStringList(
-          'journal_records',
-          journal.take(50).map(_encodeRecord).toList(),
-        ),
         prefs.setString('ritual_day', _dayKey(DateTime.now())),
         prefs.setString(
           'deep_readings_day',
@@ -533,6 +543,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
         if (lastActiveDay != null)
           prefs.setString('last_active_day', lastActiveDay!),
       ]);
+      await readingJournalStore.save(journal);
     } catch (_) {
       // The experience remains usable if local storage is temporarily unavailable.
     }
@@ -562,40 +573,6 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       if (item.name == name) return item;
     }
     return MysticLanguage.english;
-  }
-
-  String _encodeRecord(ReadingRecord record) => jsonEncode({
-    'kind': record.kind.name,
-    'question': record.question,
-    'cards': record.cards
-        .map((item) => {'name': item.card.name, 'reversed': item.reversed})
-        .toList(),
-    'createdAt': record.createdAt.toIso8601String(),
-    'emotion': record.emotion.name,
-    'action': record.alignedAction,
-  });
-
-  ReadingRecord? _decodeRecord(String encoded) {
-    try {
-      final data = jsonDecode(encoded) as Map<String, dynamic>;
-      final cards = (data['cards'] as List<dynamic>).map((item) {
-        final map = item as Map<String, dynamic>;
-        final card = tarotDeck.firstWhere(
-          (candidate) => candidate.name == map['name'],
-        );
-        return DrawnCard(card, map['reversed'] as bool);
-      }).toList();
-      return ReadingRecord(
-        kind: ReadingKind.values.byName(data['kind'] as String),
-        question: data['question'] as String,
-        cards: cards,
-        createdAt: DateTime.parse(data['createdAt'] as String),
-        emotion: EmotionalState.values.byName(data['emotion'] as String),
-        alignedAction: data['action'] as String,
-      );
-    } catch (_) {
-      return null;
-    }
   }
 
   void _showPremium({String source = 'organic'}) {
@@ -4746,13 +4723,20 @@ class _RitualRevealCard extends StatefulWidget {
 
 class _RitualRevealCardState extends State<_RitualRevealCard> {
   bool faceUp = false;
+  Timer? _revealTimer;
 
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(widget.delay, () {
+    _revealTimer = Timer(widget.delay, () {
       if (mounted) setState(() => faceUp = true);
     });
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
   }
 
   @override
