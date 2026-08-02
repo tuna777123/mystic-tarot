@@ -34,6 +34,12 @@ bool mysticSearchMatches({
 }) {
   final normalizedQuery = normalizeMysticSearch(query);
   if (normalizedQuery.isEmpty) return true;
+
   final haystack = normalizeMysticSearch(values.join(' '));
-  return haystack.contains(normalizedQuery);
+  final queryTerms = normalizedQuery.split(' ');
+
+  // Search terms may be separated by natural stop words in the saved text.
+  // Requiring every normalized term preserves multi-word intent without
+  // forcing the words to be adjacent or in a specific order.
+  return queryTerms.every(haystack.contains);
 }
