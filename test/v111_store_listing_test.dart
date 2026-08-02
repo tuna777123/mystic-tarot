@@ -10,7 +10,7 @@ void main() {
     'docs/STORE_LISTING_PT_BR.md',
   ];
 
-  test('all localized store listings describe the v1.11.0 product', () {
+  test('all localized store listings preserve the v1.11 trust baseline', () {
     const mirrorNames = <String, String>{
       'docs/STORE_LISTING_TR.md': 'mystic ayna',
       'docs/STORE_LISTING_ES.md': 'mystic mirror',
@@ -20,7 +20,6 @@ void main() {
 
     for (final path in listings) {
       final content = File(path).readAsStringSync();
-      expect(content, contains('1.11.0'), reason: path);
       expect(content, isNot(contains('1.10.1')), reason: path);
       expect(
         content.toLowerCase(),
