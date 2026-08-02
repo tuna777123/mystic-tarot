@@ -194,7 +194,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('ÖNİZLEME'), findsOneWidget);
     expect(find.text('Tam raporun kilidini aç'), findsOneWidget);
@@ -249,7 +250,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('ACTIVE'), findsOneWidget);
     expect(find.text('REALITY LOOP'), findsOneWidget);
