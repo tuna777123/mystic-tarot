@@ -26,6 +26,7 @@ jobs:
           wc -c tool/.v113_payload.part*
           sha256sum tool/.v113_payload.part*
           python tool/integrate_v113_bootstrap.py
+          git checkout HEAD -- .github/workflows/flutter-ci.yml
 
       - name: Commit clean product tree
         run: |
