@@ -3,8 +3,6 @@ import 'package:mystic_tarot/src/flagship.dart';
 import 'package:mystic_tarot/src/journal_recovery_notice.dart';
 import 'package:mystic_tarot/src/reading_journal_store.dart';
 
-const emptyRecords = <Never>[];
-
 ReadingJournalLoadResult result({
   bool recovered = false,
   bool migrated = false,
@@ -20,10 +18,7 @@ ReadingJournalLoadResult result({
 void main() {
   test('clean load produces no distracting notice', () {
     expect(
-      localizedJournalRecoveryNotice(
-        result(),
-        MysticLanguage.english,
-      ),
+      localizedJournalRecoveryNotice(result(), MysticLanguage.english),
       isNull,
     );
   });
