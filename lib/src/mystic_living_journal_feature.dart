@@ -5,6 +5,8 @@ import 'models.dart';
 import 'mystic_memory_map_feature.dart';
 import 'mystic_mirror.dart';
 import 'mystic_search.dart';
+import 'oracle_conversation.dart';
+import 'oracle_memory_action.dart';
 import 'tarot_localization.dart';
 import 'theme.dart';
 
@@ -15,6 +17,7 @@ class MysticLivingJournalFeature extends StatefulWidget {
     required this.records,
     required this.language,
     required this.onPremium,
+    required this.onOpenOracle,
     this.onStartReading,
     this.onMirrorChanged,
     super.key,
@@ -23,6 +26,7 @@ class MysticLivingJournalFeature extends StatefulWidget {
   final List<ReadingRecord> records;
   final MysticLanguage language;
   final VoidCallback onPremium;
+  final Future<void> Function(ReadingRecord record) onOpenOracle;
   final VoidCallback? onStartReading;
   final VoidCallback? onMirrorChanged;
 
@@ -34,11 +38,14 @@ class MysticLivingJournalFeature extends StatefulWidget {
 class _MysticLivingJournalFeatureState
     extends State<MysticLivingJournalFeature> {
   final MysticMirrorStore _mirrorStore = MysticMirrorStore();
+  final OracleConversationStore _oracleStore = OracleConversationStore();
   _JournalSection section = _JournalSection.timeline;
   Map<String, MysticMirrorReflection> mirrors =
       const <String, MysticMirrorReflection>{};
   String query = '';
   bool mirrorsLoading = true;
+  bool oracleLoading = true;
+  Map<String, int> oracleTurnCounts = const <String, int>{};
 
   String get _languageCode => widget.language.code;
 
@@ -83,6 +90,7 @@ class _MysticLivingJournalFeatureState
   void initState() {
     super.initState();
     _loadMirrors();
+    _loadOracleMemory();
   }
 
   Future<void> _loadMirrors() async {
@@ -92,6 +100,23 @@ class _MysticLivingJournalFeatureState
       mirrors = loaded;
       mirrorsLoading = false;
     });
+  }
+
+  Future<void> _loadOracleMemory() async {
+    final grouped = await _oracleStore.loadGrouped();
+    if (!mounted) return;
+    setState(() {
+      oracleTurnCounts = grouped.map(
+        (recordId, turns) => MapEntry(recordId, turns.length),
+      );
+      oracleLoading = false;
+    });
+  }
+
+  Future<void> _openOracle(ReadingRecord record) async {
+    await widget.onOpenOracle(record);
+    if (!mounted) return;
+    await _loadOracleMemory();
   }
 
   @override
@@ -497,6 +522,15 @@ class _MysticLivingJournalFeatureState
           if (mirror == null && due) _buildDueMirrorAction(record),
           if (mirror == null && !due && !mirrorsLoading)
             _buildWaitingMirror(record),
+          if (!oracleLoading) ...[
+            const SizedBox(height: 12),
+            OracleMemoryAction(
+              turnCount:
+                  oracleTurnCounts[oracleConversationRecordId(record)] ?? 0,
+              language: widget.language,
+              onTap: () => _openOracle(record),
+            ),
+          ],
         ],
       ),
     );

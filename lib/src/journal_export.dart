@@ -1,11 +1,14 @@
 import 'flagship.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
+import 'oracle_conversation.dart';
 import 'tarot_localization.dart';
 
 String buildMysticJournalExport({
   required Iterable<ReadingRecord> records,
   required Map<String, MysticMirrorReflection> mirrors,
+  Map<String, List<OracleConversationTurn>> oracleConversations =
+      const <String, List<OracleConversationTurn>>{},
   required MysticLanguage language,
 }) {
   String copy({
@@ -53,6 +56,9 @@ String buildMysticJournalExport({
   for (var index = 0; index < recordList.length; index++) {
     final record = recordList[index];
     final mirror = mirrors[mysticMirrorRecordId(record)];
+    final oracleTurns =
+        oracleConversations[oracleConversationRecordId(record)] ??
+            const <OracleConversationTurn>[];
     final lines = <String>[
       '${index + 1}. ${localizedReadingKindTitle(record.kind, languageCode: language.code)}',
       '${copy(en: 'Date', tr: 'Tarih', es: 'Fecha', fr: 'Date', pt: 'Data')}: ${_formatExportDate(record.createdAt)}',
@@ -112,6 +118,32 @@ String buildMysticJournalExport({
       if (mirror.note.trim().isNotEmpty) {
         lines.add(
           '${copy(en: 'Reflection note', tr: 'Yansıma notu', es: 'Nota de reflexión', fr: 'Note de réflexion', pt: 'Nota de reflexão')}: ${mirror.note.trim()}',
+        );
+      }
+    }
+
+    if (oracleTurns.isNotEmpty) {
+      lines.add('');
+      lines.add(
+        copy(
+          en: 'Oracle Dialogue — saved on this device',
+          tr: 'Oracle Diyaloğu — bu cihazda kayıtlı',
+          es: 'Diálogo del Oráculo — guardado en este dispositivo',
+          fr: 'Dialogue de l’Oracle — enregistré sur cet appareil',
+          pt: 'Diálogo do Oráculo — salvo neste dispositivo',
+        ),
+      );
+      for (var turnIndex = 0; turnIndex < oracleTurns.length; turnIndex++) {
+        final turn = oracleTurns[turnIndex];
+        lines.add('');
+        lines.add(
+          '${turnIndex + 1}. ${copy(en: 'Question', tr: 'Soru', es: 'Pregunta', fr: 'Question', pt: 'Pergunta')}: ${turn.question}',
+        );
+        lines.add(
+          '${copy(en: 'Oracle answer', tr: 'Oracle cevabı', es: 'Respuesta del Oráculo', fr: 'Réponse de l’Oracle', pt: 'Resposta do Oráculo')}: ${turn.answer}',
+        );
+        lines.add(
+          '${copy(en: 'Saved', tr: 'Kaydedilme', es: 'Guardado', fr: 'Enregistré', pt: 'Salvo')}: ${_formatExportDate(turn.createdAt)}',
         );
       }
     }
