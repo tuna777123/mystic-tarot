@@ -1,0 +1,35 @@
+name: Integrate v1.12 Revenue Intelligence
+
+on:
+  push:
+    branches:
+      - release/v1.12.0-revenue-intelligence
+    paths:
+      - tool/integrate_v112_revenue.py
+      - .github/workflows/integrate-v112-revenue.yml
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/v1.12.0-revenue-intelligence
+          fetch-depth: 0
+
+      - name: Apply guarded integration
+        run: python3 tool/integrate_v112_revenue.py
+
+      - name: Commit integrated release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "release: integrate v1.12 revenue intelligence"
+          git push origin HEAD:release/v1.12.0-revenue-intelligence
