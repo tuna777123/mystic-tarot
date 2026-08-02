@@ -17,7 +17,7 @@ void main() {
     expect(app, contains('loadForRecord(widget.record)'));
     expect(app, contains('saveTurn(turn)'));
     expect(app, contains('turns.isNotEmpty'));
-    expect(store, contains("oracle_conversations_v1"));
+    expect(store, contains('oracle_conversations_v1'));
     expect(store, contains('backupKey'));
   });
 
