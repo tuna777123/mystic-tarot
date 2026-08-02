@@ -199,6 +199,11 @@ void main() {
 
     expect(find.text('ÖNİZLEME'), findsOneWidget);
     expect(find.text('Tam raporun kilidini aç'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -650));
+    await tester.pump(const Duration(milliseconds: 250));
+
     expect(find.byIcon(Icons.lock_outline), findsWidgets);
     expect(tester.takeException(), isNull);
   });
@@ -254,6 +259,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('ACTIVE'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -900));
+    await tester.pump(const Duration(milliseconds: 250));
+
     expect(find.text('REALITY LOOP'), findsOneWidget);
     expect(find.text('EMOTIONAL DIRECTION'), findsOneWidget);
     expect(find.text('NEXT GROUNDED PRACTICE'), findsOneWidget);
