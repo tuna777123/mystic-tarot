@@ -187,6 +187,82 @@ void main() {
     expect(loaded['recovered']!.note, 'Last known good');
   });
 
+  test('partial primary corruption restores missing backup reflections',
+      () async {
+    final primary = reflection(
+      id: 'primary',
+      note: 'Still valid',
+      completedAt: DateTime.utc(2026, 8, 3, 10),
+    );
+    final backup = reflection(
+      id: 'backup',
+      note: 'Recovered from backup',
+      completedAt: DateTime.utc(2026, 8, 2, 10),
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      MysticMirrorStore.storageKey: <String>[primary.encode(), '{broken'],
+      MysticMirrorStore.backupKey: <String>[backup.encode()],
+    });
+
+    final loaded = await MysticMirrorStore().load();
+
+    expect(loaded.keys, containsAll(<String>['primary', 'backup']));
+    expect(loaded['backup']!.note, 'Recovered from backup');
+  });
+
+  test('newer primary reflection wins over an older backup duplicate',
+      () async {
+    final primary = reflection(
+      id: 'same',
+      note: 'New primary',
+      completedAt: DateTime.utc(2026, 8, 3, 10),
+    );
+    final backup = reflection(
+      id: 'same',
+      note: 'Old backup',
+      completedAt: DateTime.utc(2026, 8, 2, 10),
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      MysticMirrorStore.storageKey: <String>[primary.encode(), '{broken'],
+      MysticMirrorStore.backupKey: <String>[backup.encode()],
+    });
+
+    final loaded = await MysticMirrorStore().load();
+
+    expect(loaded, hasLength(1));
+    expect(loaded['same']!.note, 'New primary');
+  });
+
+  test('saving after corrupt primary never overwrites a good backup',
+      () async {
+    final backup = reflection(
+      id: 'backup',
+      note: 'Keep me',
+      completedAt: DateTime.utc(2026, 8, 2, 10),
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      MysticMirrorStore.storageKey: <String>['{broken'],
+      MysticMirrorStore.backupKey: <String>[backup.encode()],
+    });
+
+    await MysticMirrorStore().save(
+      reflection(
+        id: 'new',
+        note: 'New reflection',
+        completedAt: DateTime.utc(2026, 8, 3, 10),
+      ),
+    );
+    final preferences = await SharedPreferences.getInstance();
+    final backupItems =
+        preferences.getStringList(MysticMirrorStore.backupKey)!;
+
+    expect(backupItems, hasLength(1));
+    expect(
+      MysticMirrorReflection.tryDecode(backupItems.single)!.note,
+      'Keep me',
+    );
+  });
+
   test('clear removes both primary and backup snapshots', () async {
     SharedPreferences.setMockInitialValues(<String, Object>{
       MysticMirrorStore.storageKey: <String>['primary'],
