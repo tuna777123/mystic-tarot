@@ -553,6 +553,18 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen>
         child: Column(
           children: [
             _benefit(
+              Icons.insights_outlined,
+              t(
+                en: 'A fresh private intelligence report every seven days',
+                es: 'Un nuevo informe privado de inteligencia cada siete días',
+                fr: 'Un nouveau rapport privé d’intelligence tous les sept jours',
+                pt: 'Um novo relatório privado de inteligência a cada sete dias',
+                tr: 'Her yedi günde yenilenen özel intelligence raporu',
+                it: 'Un nuovo report privato ogni sette giorni',
+                de: 'Ein neuer privater Intelligence-Bericht alle sieben Tage',
+              ),
+            ),
+            _benefit(
               Icons.all_inclusive,
               t(
                 en: 'Unlimited deep readings',
