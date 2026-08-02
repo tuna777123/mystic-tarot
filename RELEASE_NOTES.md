@@ -1,3 +1,29 @@
+# Mystic Tarot 1.15.0 — Personal Next Step
+
+This release connects Mystic’s existing local growth engine to the real Home experience so each user sees one honest, actionable next step instead of a generic wall of features.
+
+## One clear next step
+
+- Home now calculates a private growth snapshot from local reading history, streak, completed Arcana chapters, free-reading allowance, and the verified Mirror due count.
+- The card prioritizes first activation, the real Daily Guidance, due Mirror follow-up, the next Arcana chapter, visible patterns, and deeper reading discovery in that order.
+- A non-daily spread completed today never falsely satisfies the Daily Guidance step.
+- Old readings never reappear as Mirror tasks unless the backed local Mirror store reports that they are genuinely due.
+- Every action routes to an existing destination: Daily Guidance, Living Journal, Living Fate, reading library, or Mystic Plus.
+
+## Localized continuity
+
+- The card explains why the suggested action matters and reflects whether the user is beginning, active today, returning the next day, continuing a streak, or resuming after time away.
+- Complete English, Turkish, Spanish, French, and Brazilian Portuguese copy ships for every action, growth stage, return state, and CTA.
+- Long French and Portuguese actions remain usable on narrow phones.
+
+## Privacy and release integrity
+
+- Personalization remains local-first and deterministic; no new account, cloud profile, analytics payload, or private text storage is introduced.
+- Version `1.15.0+21`.
+- Engine priorities, localization, action routing, and narrow-phone rendering are protected by automated tests.
+
+---
+
 # Mystic Tarot 1.14.0 — Daily Practice & Reliable Return
 
 This release turns the Daily Soul Quest into a complete, honest product loop and keeps daily state correct while the app remains open.

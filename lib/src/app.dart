@@ -11,6 +11,7 @@ import 'app_language.dart';
 import 'daily_practice.dart';
 import 'daily_state.dart';
 import 'flagship.dart';
+import 'growth_engine.dart';
 import 'identity_engine.dart';
 import 'language_bridge.dart';
 import 'journal_export.dart';
@@ -18,6 +19,7 @@ import 'journal_recovery_notice.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
 import 'mystic_mirror_due.dart';
+import 'mystic_next_step.dart';
 import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
 import 'reading_position.dart';
@@ -204,12 +206,14 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           freeReadingsLeft: isPlus
               ? -1
               : max(0, freeDeepReadingLimit - deepReadingsToday),
+          mirrorDueCount: mirrorDueCount,
           onReading: _startReading,
           onClaimDailyQuest: _claimDailyQuest,
           onRitual: _openDailyPractice,
           onPremiumSpread: isPlus ? _startReading : _previewPremiumReading,
           onPremium: _showPremium,
           onOpenDestiny: _openDestinyHub,
+          onOpenJournal: () => setState(() => tab = 2),
         ),
         MysticJourneysFeature(
           language: language,
@@ -1793,12 +1797,14 @@ class HomeScreen extends StatelessWidget {
     required this.dailyQuestClaimed,
     required this.deckStyle,
     required this.freeReadingsLeft,
+    required this.mirrorDueCount,
     required this.onReading,
     required this.onClaimDailyQuest,
     required this.onRitual,
     required this.onPremiumSpread,
     required this.onPremium,
     required this.onOpenDestiny,
+    required this.onOpenJournal,
     super.key,
   });
   final bool isPlus;
@@ -1814,15 +1820,25 @@ class HomeScreen extends StatelessWidget {
   final bool dailyQuestClaimed;
   final DeckStyle deckStyle;
   final int freeReadingsLeft;
+  final int mirrorDueCount;
   final ValueChanged<ReadingKind> onReading;
   final VoidCallback onClaimDailyQuest;
   final VoidCallback onRitual;
   final ValueChanged<ReadingKind> onPremiumSpread;
   final VoidCallback onPremium;
   final VoidCallback onOpenDestiny;
+  final VoidCallback onOpenJournal;
 
   @override
-  Widget build(BuildContext context) => MysticBackground(
+  Widget build(BuildContext context) {
+    final growthSnapshot = const MysticGrowthEngine().analyze(
+      records: records,
+      streak: streak,
+      completedArcanaDays: completedArcanaDays.length,
+      freeReadingsLeft: freeReadingsLeft,
+      mirrorDueCount: mirrorDueCount,
+    );
+    return MysticBackground(
     child: CustomScrollView(
       slivers: [
         SliverPadding(
@@ -1898,6 +1914,19 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 18),
+              MysticNextStepCard(
+                snapshot: growthSnapshot,
+                language: language,
+                streak: streak,
+                mirrorDueCount: mirrorDueCount,
+                completedArcanaDays: completedArcanaDays.length,
+                freeReadingsLeft: freeReadingsLeft,
+                onTap: () => _runNextAction(
+                  context,
+                  growthSnapshot.nextAction.type,
+                ),
+              ),
+              const SizedBox(height: 14),
               _DailyCard(
                 streak: streak,
                 deckStyle: deckStyle,
@@ -2124,6 +2153,33 @@ class HomeScreen extends StatelessWidget {
       ],
     ),
   );
+  }
+
+  void _runNextAction(
+    BuildContext context,
+    MysticNextActionType type,
+  ) {
+    switch (type) {
+      case MysticNextActionType.firstReading:
+      case MysticNextActionType.dailyReading:
+        onReading(ReadingKind.daily);
+        return;
+      case MysticNextActionType.mirrorCheckIn:
+      case MysticNextActionType.reviewPattern:
+        onOpenJournal();
+        return;
+      case MysticNextActionType.continueJourney:
+        onOpenDestiny();
+        return;
+      case MysticNextActionType.explorePremiumSpread:
+        if (freeReadingsLeft == 0) {
+          onPremium();
+        } else {
+          _showAllReadings(context);
+        }
+        return;
+    }
+  }
 
   String _greeting() {
     final hour = DateTime.now().hour;

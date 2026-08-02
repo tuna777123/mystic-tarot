@@ -5,12 +5,13 @@ import 'package:mystic_tarot/src/tarot_data.dart';
 
 ReadingRecord record({
   required DateTime createdAt,
+  ReadingKind kind = ReadingKind.daily,
   EmotionalState emotion = EmotionalState.curious,
   String cardName = 'The Fool',
 }) {
   final card = tarotDeck.firstWhere((item) => item.name == cardName);
   return ReadingRecord(
-    kind: ReadingKind.daily,
+    kind: kind,
     question: 'What should I notice?',
     cards: [DrawnCard(card, false)],
     createdAt: createdAt,
@@ -34,6 +35,7 @@ void main() {
 
     expect(result.stage, MysticGrowthStage.newUser);
     expect(result.nextAction.type, MysticNextActionType.firstReading);
+    expect(result.returnState, MysticReturnState.firstVisit);
     expect(result.premiumValueScore, 0);
   });
 
@@ -50,11 +52,74 @@ void main() {
     expect(result.nextAction.priority, 95);
   });
 
+  test('a non-daily reading today never completes the daily return', () {
+    final result = engine.analyze(
+      records: [record(createdAt: now, kind: ReadingKind.love)],
+      streak: 2,
+      completedArcanaDays: 1,
+      freeReadingsLeft: 2,
+      mirrorDueCount: 3,
+      now: now,
+    );
+
+    expect(result.nextAction.type, MysticNextActionType.dailyReading);
+  });
+
+  test('verified due Mirrors outrank journey and pattern suggestions', () {
+    final records = [
+      record(createdAt: now),
+      record(
+        createdAt: now.subtract(const Duration(days: 2)),
+        cardName: 'The Star',
+      ),
+      record(
+        createdAt: now.subtract(const Duration(days: 3)),
+        cardName: 'The Star',
+      ),
+    ];
+
+    final result = engine.analyze(
+      records: records,
+      streak: 4,
+      completedArcanaDays: 1,
+      freeReadingsLeft: 2,
+      mirrorDueCount: 2,
+      now: now,
+    );
+
+    expect(result.nextAction.type, MysticNextActionType.mirrorCheckIn);
+    expect(result.nextAction.priority, 90);
+  });
+
+  test('old readings do not resurface as Mirror tasks without due evidence', () {
+    final records = [
+      record(createdAt: now),
+      record(createdAt: now.subtract(const Duration(days: 2))),
+    ];
+
+    final result = engine.analyze(
+      records: records,
+      streak: 2,
+      completedArcanaDays: 0,
+      freeReadingsLeft: 2,
+      mirrorDueCount: 0,
+      now: now,
+    );
+
+    expect(result.nextAction.type, MysticNextActionType.continueJourney);
+  });
+
   test('repeating cards create a visible pattern and higher value score', () {
     final records = [
       record(createdAt: now, cardName: 'The Star'),
-      record(createdAt: now.subtract(const Duration(days: 1)), cardName: 'The Star'),
-      record(createdAt: now.subtract(const Duration(days: 2)), emotion: EmotionalState.hopeful),
+      record(
+        createdAt: now.subtract(const Duration(days: 1)),
+        cardName: 'The Star',
+      ),
+      record(
+        createdAt: now.subtract(const Duration(days: 2)),
+        emotion: EmotionalState.hopeful,
+      ),
     ];
 
     final result = engine.analyze(
