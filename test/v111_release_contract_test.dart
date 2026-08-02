@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('v1.11.0 release identity is consistent', () {
+  test('v1.11 trust baseline remains documented after later releases', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final releaseNotes = File('RELEASE_NOTES.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.11.0+17'));
-    expect(releaseNotes, startsWith('# Mystic Tarot 1.11.0 — Mirror & Trust'));
+    expect(pubspec, isNot(contains('version: 1.10.')));
+    expect(
+      releaseNotes,
+      contains('# Mystic Tarot 1.11.0 — Mirror & Trust'),
+    );
   });
 
   test('release app wires every flagship trust feature', () {
@@ -53,7 +56,7 @@ void main() {
     );
   });
 
-  test('all new feature modules and tests ship in the release tree', () {
+  test('all v1.11 trust modules and tests remain in the release tree', () {
     for (final path in <String>[
       'lib/src/journal_export.dart',
       'lib/src/mystic_mirror_due.dart',
