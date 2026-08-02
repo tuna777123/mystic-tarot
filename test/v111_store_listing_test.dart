@@ -11,11 +11,22 @@ void main() {
   ];
 
   test('all localized store listings describe the v1.11.0 product', () {
+    const mirrorNames = <String, String>{
+      'docs/STORE_LISTING_TR.md': 'mystic ayna',
+      'docs/STORE_LISTING_ES.md': 'mystic mirror',
+      'docs/STORE_LISTING_FR.md': 'mystic mirror',
+      'docs/STORE_LISTING_PT_BR.md': 'mystic mirror',
+    };
+
     for (final path in listings) {
       final content = File(path).readAsStringSync();
       expect(content, contains('1.11.0'), reason: path);
       expect(content, isNot(contains('1.10.1')), reason: path);
-      expect(content.toLowerCase(), contains('mystic mirror'), reason: path);
+      expect(
+        content.toLowerCase(),
+        contains(mirrorNames[path]),
+        reason: path,
+      );
     }
   });
 
