@@ -1,7 +1,7 @@
 name: mystic_tarot
 description: A private, multilingual, local-first premium tarot, journaling, and spiritual companion app.
 publish_to: none
-version: 1.18.0+24
+version: 1.19.0+25
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   audioplayers: ^6.8.1
+  cryptography: ^2.9.0
   flutter_local_notifications: ^19.5.0
   flutter_timezone: ^5.1.0
   purchases_flutter: ^10.5.0

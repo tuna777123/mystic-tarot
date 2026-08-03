@@ -13,7 +13,12 @@ void main() {
         File('lib/src/private_journal_transfer_screen.dart').readAsStringSync();
     final notes = File('RELEASE_NOTES.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.18.0+24'));
+    final version = RegExp(
+      r'version: 1\.(\d+)\.0\+(\d+)',
+    ).firstMatch(pubspec);
+    expect(version, isNotNull);
+    expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(18));
+    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(24));
     expect(app, contains("import 'private_journal_transfer_screen.dart';"));
     expect(app, contains('onJournalRestored: _applyRestoredJournal'));
     expect(app, contains('PrivateJournalTransferScreen('));
@@ -24,8 +29,9 @@ void main() {
     expect(service, contains('ReadingJournalStore.backupKey'));
     expect(service, contains('MysticMirrorStore.backupKey'));
     expect(service, contains('OracleConversationStore.backupKey'));
+    expect(service, contains('JournalTransferCodec.decode(code)'));
     expect(screen, contains('Merge private history?'));
-    expect(screen, contains('Mystic does not upload it'));
+    expect(screen, contains('never saves or uploads it'));
     expect(screen, contains('ShareResultStatus.success'));
     expect(screen, contains('Clipboard.setData'));
     expect(screen, contains('MysticLanguage.french'));

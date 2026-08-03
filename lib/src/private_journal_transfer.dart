@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'journal_transfer.dart';
+import 'journal_transfer_protection.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
 import 'oracle_conversation.dart';
@@ -18,6 +19,7 @@ class PrivateJournalTransferPreview {
     required this.changedReflections,
     required this.addedOracleTurns,
     required this.rejectedItems,
+    this.wasProtected = false,
   });
 
   final List<ReadingRecord> mergedRecords;
@@ -30,6 +32,7 @@ class PrivateJournalTransferPreview {
   final int changedReflections;
   final int addedOracleTurns;
   final int rejectedItems;
+  final bool wasProtected;
 
   int get totalChanges => addedReadings + changedReflections + addedOracleTurns;
 }
@@ -47,7 +50,10 @@ class PrivateJournalTransferService {
   Future<SharedPreferences> _preferences() async =>
       _providedPreferences ?? SharedPreferences.getInstance();
 
-  Future<String> createCode(Iterable<ReadingRecord> records) async {
+  Future<String> createCode(
+    Iterable<ReadingRecord> records, {
+    String? passphrase,
+  }) async {
     final orderedRecords = _orderedRecords(records);
     if (orderedRecords.isEmpty) {
       throw StateError('A private transfer needs at least one saved reading.');
@@ -58,18 +64,25 @@ class PrivateJournalTransferService {
         .where((item) => recordIds.contains(item.recordId));
     final oracleTurns = (await _oracleStore.loadAll())
         .where((item) => recordIds.contains(item.recordId));
-    return JournalTransferCodec.encode(
+    final clearCode = JournalTransferCodec.encode(
       records: orderedRecords,
       reflections: reflections,
       oracleTurns: oracleTurns,
+    );
+    if (passphrase == null || passphrase.isEmpty) return clearCode;
+    return JournalTransferProtection.protect(
+      clearText: clearCode,
+      passphrase: passphrase,
     );
   }
 
   Future<PrivateJournalTransferPreview> preview({
     required String code,
     required Iterable<ReadingRecord> currentRecords,
+    String? passphrase,
   }) async {
-    final imported = JournalTransferCodec.decode(code);
+    final wasProtected = JournalTransferProtection.isProtectedCode(code);
+    final imported = await _decode(code, passphrase: passphrase);
     final current = _orderedRecords(currentRecords);
     final currentReflections = await _mirrorStore.load();
     final currentOracle = await _oracleStore.loadAll();
@@ -120,16 +133,19 @@ class PrivateJournalTransferService {
       changedReflections: changedReflections,
       addedOracleTurns: addedOracle,
       rejectedItems: imported.rejectedItems,
+      wasProtected: wasProtected,
     );
   }
 
   Future<PrivateJournalTransferPreview> commit({
     required String code,
     required Iterable<ReadingRecord> currentRecords,
+    String? passphrase,
   }) async {
     final preview = await this.preview(
       code: code,
       currentRecords: currentRecords,
+      passphrase: passphrase,
     );
     if (preview.totalChanges == 0) return preview;
 
@@ -201,6 +217,20 @@ class PrivateJournalTransferService {
       await _rollback(preferences, snapshot);
       throw StateError('Private journal restore could not be committed: $error');
     }
+  }
+
+  Future<JournalTransferResult> _decode(
+    String code, {
+    String? passphrase,
+  }) async {
+    if (!JournalTransferProtection.isProtectedCode(code)) {
+      return JournalTransferCodec.decode(code);
+    }
+    final clearCode = await JournalTransferProtection.unlock(
+      protectedCode: code,
+      passphrase: passphrase ?? '',
+    );
+    return JournalTransferCodec.decode(clearCode);
   }
 
   List<ReadingRecord> _mergeRecords(
