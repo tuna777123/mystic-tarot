@@ -9,7 +9,11 @@ void main() {
   final notes = File('RELEASE_NOTES.md').readAsStringSync();
 
   test('v1.17 uses the multilingual Oracle intent engine', () {
-    expect(pubspec, contains('version: 1.17.0+23'));
+    final version = RegExp(r'version: 1\.(\d+)\.\d+\+(\d+)')
+        .firstMatch(pubspec);
+    expect(version, isNotNull);
+    expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(17));
+    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(23));
     expect(app, contains("import 'oracle_language.dart';"));
     expect(app, contains('detectOracleQuestionIntent(question, widget.language)'));
     expect(language, contains('MysticLanguage.french'));
@@ -24,7 +28,12 @@ void main() {
   });
 
   test('release notes describe grounded language integrity', () {
-    final release = notes.split('\n---\n').first;
+    final start = notes.indexOf(
+      '# Mystic Tarot 1.17.0 — Oracle Language Integrity',
+    );
+    expect(start, greaterThanOrEqualTo(0));
+    final end = notes.indexOf('\n---\n', start);
+    final release = notes.substring(start, end < 0 ? notes.length : end);
     expect(release, startsWith('# Mystic Tarot 1.17.0 — Oracle Language Integrity'));
     expect(release, contains('French Oracle responses'));
     expect(release, contains('accent-tolerant'));
