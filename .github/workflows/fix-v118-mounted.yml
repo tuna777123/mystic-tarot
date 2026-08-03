@@ -1,0 +1,33 @@
+name: Fix v1.18 mounted guard
+
+on:
+  push:
+    branches:
+      - release/v1.18.0-private-journal-transfer
+    paths:
+      - tool/fix_v118_mounted.py
+      - .github/workflows/fix-v118-mounted.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/v1.18.0-private-journal-transfer
+          fetch-depth: 0
+
+      - name: Add lifecycle guard
+        run: python3 tool/fix_v118_mounted.py
+
+      - name: Commit clean release tree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(v1.18): guard share context after async work"
+          git push origin HEAD:release/v1.18.0-private-journal-transfer
