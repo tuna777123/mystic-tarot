@@ -56,7 +56,16 @@ void main() {
       scrollable: scrollable,
     );
     await tester.tap(find.text('Validate transfer'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    for (var attempt = 0;
+        attempt < 20 &&
+            find
+                .textContaining('not a valid or supported')
+                .evaluate()
+                .isEmpty;
+        attempt++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
 
     expect(
       find.textContaining('not a valid or supported'),
