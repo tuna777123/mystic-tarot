@@ -44,14 +44,17 @@ class JournalTransferCodec {
   }
 
   static JournalTransferResult decode(String value) {
-    final trimmed = value.trim();
-    final lines = trimmed.split(RegExp(r'\s+'));
-    if (lines.length != 2 || lines.first != marker) {
+    final parts = value.trim().split(RegExp(r'\s+'));
+    if (parts.length < 2 || parts.first != marker) {
       throw const FormatException('Not a Mystic Tarot journal transfer code.');
+    }
+    final encodedEnvelope = parts.skip(1).join();
+    if (encodedEnvelope.isEmpty) {
+      throw const FormatException('Journal transfer code is incomplete.');
     }
 
     final envelopeText = utf8.decode(
-      base64Url.decode(base64Url.normalize(lines[1])),
+      base64Url.decode(base64Url.normalize(encodedEnvelope)),
     );
     final envelope = jsonDecode(envelopeText);
     if (envelope is! Map<String, dynamic> ||
@@ -69,9 +72,7 @@ class JournalTransferCodec {
       throw const FormatException('Journal transfer contains no valid readings.');
     }
 
-    final validRecordIds = journal.records
-        .map(readingJournalRecordId)
-        .toSet();
+    final validRecordIds = journal.records.map(readingJournalRecordId).toSet();
     final reflections = <String, MysticMirrorReflection>{};
     final oracleTurns = <String, OracleConversationTurn>{};
     var rejected = journal.rejectedItems;
@@ -117,7 +118,8 @@ class JournalTransferCodec {
       ..sort((first, second) => first.createdAt.compareTo(second.createdAt));
     return JournalTransferResult(
       records: journal.records,
-      reflections: Map<String, MysticMirrorReflection>.unmodifiable(reflections),
+      reflections:
+          Map<String, MysticMirrorReflection>.unmodifiable(reflections),
       oracleTurns: List<OracleConversationTurn>.unmodifiable(orderedTurns),
       rejectedItems: rejected,
     );
