@@ -1,0 +1,35 @@
+name: v1.18 product integration
+
+on:
+  push:
+    branches:
+      - feature/v1.18-private-journal-transfer
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v1.18-private-journal-transfer
+          fetch-depth: 0
+
+      - name: Apply private transfer product integration
+        run: python3 tool/v118_integrate.py
+
+      - name: Commit clean product result
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No integration changes were produced."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(v1.18): complete private journal transfer"
+          git push origin HEAD:feature/v1.18-private-journal-transfer
