@@ -1,3 +1,27 @@
+# Mystic Tarot 1.17.0 — Oracle Language Integrity
+
+This release closes the last major language break inside Oracle Dialogue so every launch language receives a complete, grounded response instead of a translated shell around an English answer.
+
+## Complete French Oracle
+
+- French Oracle responses now have native hidden-risk, key-card, and general guidance branches.
+- French recurring-card memory and conversation continuity remain French from question to answer.
+- The safety framing remains intact: cards offer a perspective, not certainty or commands.
+
+## Better multilingual intent detection
+
+- Hidden-risk and key-card questions are detected independently in English, Turkish, Spanish, French, and Brazilian Portuguese.
+- Matching is accent-tolerant and punctuation-tolerant, so natural questions such as “Quelle carte…” and “Neyi gözden kaçırıyorum?” route correctly.
+- Ordinary follow-ups remain general instead of being forced into the wrong response template.
+
+## Release integrity
+
+- Version `1.17.0+23`.
+- No cloud profile, analytics payload, advertising identifier, store operation, or account mutation is introduced.
+- The complete language behavior is protected by deterministic unit and release-contract tests.
+
+---
+
 # Mystic Tarot 1.16.0 — Private Oracle Memory
 
 This release makes the Oracle Dialogue promise real: follow-up questions and answers are now saved privately, linked to the original reading, recoverable after local corruption, and available from the Living Journal.

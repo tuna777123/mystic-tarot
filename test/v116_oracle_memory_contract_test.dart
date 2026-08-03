@@ -12,7 +12,7 @@ void main() {
   final pubspec = File('pubspec.yaml').readAsStringSync();
 
   test('v1.16 persists and restores reading-linked Oracle dialogue', () {
-    expect(pubspec, contains('version: 1.16.0+22'));
+    expect(_isAtLeast(pubspec, major: 1, minor: 16), isTrue);
     expect(app, contains('OracleConversationStore'));
     expect(app, contains('loadForRecord(widget.record)'));
     expect(app, contains('saveTurn(turn)'));
@@ -37,8 +37,8 @@ void main() {
     expect(app, contains('Oracle konuşmaların'));
   });
 
-  test('release notes make no cloud or certainty claim', () {
-    expect(notes, startsWith('# Mystic Tarot 1.16.0 — Private Oracle Memory'));
+  test('release notes retain the v1.16 trust contract', () {
+    expect(notes, contains('# Mystic Tarot 1.16.0 — Private Oracle Memory'));
     expect(notes, contains('No Oracle question or answer is uploaded'));
     expect(notes, contains('without presenting the response as certainty'));
     expect(notes, isNot(contains('AI prediction')));
@@ -48,4 +48,18 @@ void main() {
     expect(File('tool/apply_v116.py').existsSync(), isFalse);
     expect(File('.github/workflows/apply-v116.yml').existsSync(), isFalse);
   });
+}
+
+bool _isAtLeast(
+  String pubspec, {
+  required int major,
+  required int minor,
+}) {
+  final match = RegExp(r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)')
+      .firstMatch(pubspec);
+  if (match == null) return false;
+  final actualMajor = int.parse(match.group(1)!);
+  final actualMinor = int.parse(match.group(2)!);
+  return actualMajor > major ||
+      (actualMajor == major && actualMinor >= minor);
 }
