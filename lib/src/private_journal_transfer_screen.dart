@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'app_language.dart';
+import 'flagship.dart';
 import 'models.dart';
 import 'private_journal_transfer.dart';
 import 'theme.dart';
