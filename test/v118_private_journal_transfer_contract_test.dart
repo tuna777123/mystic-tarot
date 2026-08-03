@@ -19,12 +19,15 @@ void main() {
     expect(app, contains('PrivateJournalTransferScreen('));
     expect(codec, contains("'mirror':"));
     expect(codec, contains("'oracle':"));
+    expect(codec, contains('parts.skip(1).join()'));
     expect(service, contains('Future<void> _rollback('));
     expect(service, contains('ReadingJournalStore.backupKey'));
     expect(service, contains('MysticMirrorStore.backupKey'));
     expect(service, contains('OracleConversationStore.backupKey'));
     expect(screen, contains('Merge private history?'));
     expect(screen, contains('Mystic does not upload it'));
+    expect(screen, contains('ShareResultStatus.success'));
+    expect(screen, contains('Clipboard.setData'));
     expect(screen, contains('MysticLanguage.french'));
     expect(screen, contains('MysticLanguage.portugueseBrazil'));
     expect(notes, startsWith('# Mystic Tarot 1.18.0'));
@@ -32,5 +35,7 @@ void main() {
     expect(screen, isNot(contains('dart:io')));
     expect(File('.github/workflows/v118-integrate.yml').existsSync(), isFalse);
     expect(File('tool/v118_integrate.py').existsSync(), isFalse);
+    expect(File('.github/workflows/v118-finalize.yml').existsSync(), isFalse);
+    expect(File('tool/v118_finalize.py').existsSync(), isFalse);
   });
 }
