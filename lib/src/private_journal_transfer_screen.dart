@@ -367,6 +367,7 @@ class _PrivateJournalTransferScreenState
     String? code;
     try {
       code = await _service.createCode(widget.records);
+      if (!mounted) return;
       final renderObject = context.findRenderObject();
       final origin = renderObject is RenderBox
           ? renderObject.localToGlobal(Offset.zero) & renderObject.size
