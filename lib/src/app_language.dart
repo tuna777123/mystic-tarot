@@ -1,5 +1,3 @@
-export 'flagship.dart' show MysticLanguage;
-
 enum AppLanguage {
   english('English', 'EN', 'en'),
   spanish('Español', 'ES', 'es'),
