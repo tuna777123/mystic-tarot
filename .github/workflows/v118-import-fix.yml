@@ -1,0 +1,26 @@
+name: v1.18 isolated import fix
+
+on:
+  push:
+    branches:
+      - release/v1.18.0-private-journal-transfer-fix
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release/v1.18.0-private-journal-transfer-fix
+          fetch-depth: 0
+      - run: python3 tool/v118_import_fix.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(v1.18): use direct language imports"
+          git push origin HEAD:release/v1.18.0-private-journal-transfer-fix
