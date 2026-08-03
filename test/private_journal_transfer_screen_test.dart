@@ -43,7 +43,18 @@ void main() {
     );
     expect(tester.takeException(), isNull);
 
+    final scrollable = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(
+      find.byType(TextField),
+      220,
+      scrollable: scrollable,
+    );
     await tester.enterText(find.byType(TextField), 'not-a-transfer');
+    await tester.scrollUntilVisible(
+      find.text('Validate transfer'),
+      120,
+      scrollable: scrollable,
+    );
     await tester.tap(find.text('Validate transfer'));
     await tester.pumpAndSettle();
 
