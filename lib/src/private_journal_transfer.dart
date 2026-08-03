@@ -37,12 +37,10 @@ class PrivateJournalTransferPreview {
 class PrivateJournalTransferService {
   PrivateJournalTransferService({SharedPreferences? preferences})
       : _providedPreferences = preferences,
-        _journalStore = ReadingJournalStore(preferences: preferences),
         _mirrorStore = MysticMirrorStore(preferences: preferences),
         _oracleStore = OracleConversationStore(preferences: preferences);
 
   final SharedPreferences? _providedPreferences;
-  final ReadingJournalStore _journalStore;
   final MysticMirrorStore _mirrorStore;
   final OracleConversationStore _oracleStore;
 

@@ -5,6 +5,7 @@ import 'package:mystic_tarot/src/journal_transfer.dart';
 import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/mystic_mirror.dart';
 import 'package:mystic_tarot/src/oracle_conversation.dart';
+import 'package:mystic_tarot/src/reading_journal_store.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 
 ReadingRecord _record(String question, DateTime createdAt) => ReadingRecord(
@@ -18,12 +19,15 @@ ReadingRecord _record(String question, DateTime createdAt) => ReadingRecord(
 
 void main() {
   test('private transfer round-trips readings, Mirror, and Oracle history', () {
-    final record = _record('What deserves my attention?', DateTime.utc(2026, 8, 4, 8));
+    final record = _record(
+      'What deserves my attention?',
+      DateTime.utc(2026, 8, 4, 8),
+    );
     final recordId = readingJournalRecordId(record);
     final reflection = MysticMirrorReflection(
       recordId: recordId,
       outcome: MysticMirrorOutcome.shifted,
-      emotion: EmotionalState.calm,
+      emotion: EmotionalState.grounded,
       note: 'The next step became clearer.',
       completedAt: DateTime.utc(2026, 8, 5, 8),
     );
@@ -43,7 +47,10 @@ void main() {
 
     expect(code, startsWith('${JournalTransferCodec.marker}\n'));
     expect(restored.records.single.question, 'What deserves my attention?');
-    expect(restored.reflections.single.note, 'The next step became clearer.');
+    expect(
+      restored.reflections.values.single.note,
+      'The next step became clearer.',
+    );
     expect(restored.oracleTurns.single.question, 'Which card matters most?');
     expect(restored.rejectedItems, 0);
   });

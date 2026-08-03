@@ -40,7 +40,7 @@ void main() {
     final reflection = MysticMirrorReflection(
       recordId: readingJournalRecordId(imported),
       outcome: MysticMirrorOutcome.shifted,
-      emotion: EmotionalState.calm,
+      emotion: EmotionalState.grounded,
       note: 'The imported reflection.',
       completedAt: DateTime.utc(2026, 8, 5, 8),
     );
@@ -70,8 +70,10 @@ void main() {
       currentRecords: <ReadingRecord>[current],
     );
 
-    expect(result.mergedRecords.map((item) => item.question),
-        <String>['Bring from old device', 'Keep local']);
+    expect(
+      result.mergedRecords.map((item) => item.question),
+      <String>['Bring from old device', 'Keep local'],
+    );
     expect(
       (await ReadingJournalStore(preferences: preferences).load())
           .records
@@ -133,8 +135,7 @@ void main() {
     final current = _record('Untouched', DateTime.utc(2026, 8, 4, 8));
     await ReadingJournalStore(preferences: preferences)
         .save(<ReadingRecord>[current]);
-    final before =
-        preferences.getString(ReadingJournalStore.primaryKey);
+    final before = preferences.getString(ReadingJournalStore.primaryKey);
     final service = PrivateJournalTransferService(preferences: preferences);
 
     await expectLater(
