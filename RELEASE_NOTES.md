@@ -1,3 +1,32 @@
+# Mystic Tarot 1.18.0 — Private Journal Transfer
+
+Mystic Tarot can now move a complete reflection history between devices without creating an account or uploading private content.
+
+## Complete private history
+
+- A versioned private transfer code includes saved readings, Mystic Mirror reflections, and Oracle conversations.
+- Human-readable journal export remains available separately.
+- Transfer codes are created and restored only on the user’s devices; Mystic does not upload them.
+- The interface clearly warns that anyone who receives a transfer code can read the private content inside it.
+
+## Safe merge and recovery
+
+- Every code is validated before the app shows exactly what would change.
+- Existing local readings are preserved and duplicate records or Oracle turns are never added.
+- A newer Mirror reflection may replace an older reflection for the same reading.
+- Unsupported, foreign, damaged, and orphaned items are rejected or safely ignored.
+- Restore writes keep previous journal, Mirror, and Oracle snapshots and perform compensating rollback if any local write fails.
+- The in-memory journal changes only after the complete local transaction succeeds.
+
+## Product integrity
+
+- Complete English, Turkish, Spanish, French, and Brazilian Portuguese transfer experience.
+- Narrow-phone validation and deterministic codec, merge, duplicate, and invalid-input coverage.
+- Version `1.18.0+24`.
+- No account, cloud journal, analytics payload, advertising identifier, purchase mutation, or store operation is introduced.
+
+---
+
 # Mystic Tarot 1.17.0 — Oracle Language Integrity
 
 This release closes the last major language break inside Oracle Dialogue so every launch language receives a complete, grounded response instead of a translated shell around an English answer.
