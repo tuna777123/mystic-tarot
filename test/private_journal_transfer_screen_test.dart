@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mystic_tarot/src/app_language.dart';
+import 'package:mystic_tarot/src/flagship.dart';
 import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/private_journal_transfer_screen.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
