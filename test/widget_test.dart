@@ -206,6 +206,7 @@ void main() {
           title: 'Okuma tercihleri',
           language: MysticLanguage.turkish,
           records: const [],
+          onJournalRestored: (_) {},
           onDeleteData: () {},
         ),
       ),
