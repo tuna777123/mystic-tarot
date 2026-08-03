@@ -16,6 +16,7 @@ import 'identity_engine.dart';
 import 'language_bridge.dart';
 import 'journal_export.dart';
 import 'journal_recovery_notice.dart';
+import 'private_journal_transfer_screen.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
 import 'mystic_mirror_due.dart';
@@ -252,6 +253,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
           onSelectLanguage: _selectLanguage,
           onSelectDeckStyle: _selectDeckStyle,
           onUpdateProfile: _updateProfile,
+          onJournalRestored: _applyRestoredJournal,
           onDeleteData: _deleteAllData,
           onPremium: _showPremium,
         ),
@@ -549,6 +551,21 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       intention = selectedIntention;
     });
     _saveProgress();
+  }
+
+  void _applyRestoredJournal(List<ReadingRecord> restored) {
+    if (!mounted) return;
+    setState(() {
+      journal
+        ..clear()
+        ..addAll(restored);
+      discoveredCards.addAll(
+        restored.expand(
+          (record) => record.cards.map((item) => item.card.name),
+        ),
+      );
+    });
+    unawaited(_refreshMirrorDueState());
   }
 
   Future<void> _deleteAllData() async {
@@ -7076,6 +7093,7 @@ class ProfileScreen extends StatelessWidget {
     required this.onSelectLanguage,
     required this.onSelectDeckStyle,
     required this.onUpdateProfile,
+    required this.onJournalRestored,
     required this.onDeleteData,
     required this.onPremium,
     super.key,
@@ -7095,6 +7113,7 @@ class ProfileScreen extends StatelessWidget {
   final ValueChanged<MysticLanguage> onSelectLanguage;
   final ValueChanged<DeckStyle> onSelectDeckStyle;
   final void Function(String name, String intention) onUpdateProfile;
+  final ValueChanged<List<ReadingRecord>> onJournalRestored;
   final VoidCallback onDeleteData;
   final VoidCallback onPremium;
 
@@ -7475,6 +7494,7 @@ class ProfileScreen extends StatelessWidget {
                     title: item.$2,
                     language: language,
                     records: records,
+                    onJournalRestored: onJournalRestored,
                     onDeleteData: onDeleteData,
                   ),
                 ),
@@ -8091,6 +8111,7 @@ class MysticSettingsScreen extends StatefulWidget {
     required this.title,
     required this.language,
     required this.records,
+    required this.onJournalRestored,
     required this.onDeleteData,
     super.key,
   });
@@ -8098,6 +8119,7 @@ class MysticSettingsScreen extends StatefulWidget {
   final String title;
   final MysticLanguage language;
   final List<ReadingRecord> records;
+  final ValueChanged<List<ReadingRecord>> onJournalRestored;
   final VoidCallback onDeleteData;
 
   @override
@@ -8224,6 +8246,43 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: _exportJournal,
+        ),
+        const Divider(),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(
+            Icons.sync_alt,
+            color: MysticColors.lavender,
+          ),
+          title: Text(
+            localizedProfileCopy(
+              en: 'Transfer private journal',
+              tr: 'Özel günlüğü taşı',
+              es: 'Transferir diario privado',
+              fr: 'Transférer le journal privé',
+              pt: 'Transferir diário privado',
+            ),
+          ),
+          subtitle: Text(
+            localizedProfileCopy(
+              en: 'Move readings, Mirror reflections, and Oracle conversations between devices',
+              tr: 'Okumaları, Mirror yansımalarını ve Oracle konuşmalarını cihazlar arasında taşı',
+              es: 'Mueve lecturas, reflexiones Mirror y conversaciones Oracle entre dispositivos',
+              fr: 'Transférez tirages, réflexions Mirror et conversations Oracle entre appareils',
+              pt: 'Mova leituras, reflexões Mirror e conversas Oracle entre dispositivos',
+            ),
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PrivateJournalTransferScreen(
+                records: widget.records,
+                language: widget.language,
+                onRestored: widget.onJournalRestored,
+              ),
+            ),
+          ),
         ),
         const Divider(),
         ListTile(
