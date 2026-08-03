@@ -55,6 +55,22 @@ void main() {
     expect(restored.rejectedItems, 0);
   });
 
+  test('long transfer codes tolerate safe line wrapping', () {
+    final record = _record('Wrapped signal', DateTime.utc(2026, 8, 4, 8));
+    final code = JournalTransferCodec.encode(records: <ReadingRecord>[record]);
+    final parts = code.split('\n');
+    final encoded = parts.last;
+    final wrapped = <String>[
+      JournalTransferCodec.marker,
+      for (var index = 0; index < encoded.length; index += 37)
+        encoded.substring(index, (index + 37).clamp(0, encoded.length)),
+    ].join('\n');
+
+    final restored = JournalTransferCodec.decode(wrapped);
+
+    expect(restored.records.single.question, 'Wrapped signal');
+  });
+
   test('plain text, foreign markers, and empty journals are rejected', () {
     expect(
       () => JournalTransferCodec.decode('ordinary journal text'),
