@@ -17,10 +17,12 @@ void main() {
     ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.20.md').readAsStringSync();
 
-    final version = RegExp(r'version: 1\.(\d+)\.0\+(\d+)').firstMatch(pubspec);
+    final version = RegExp(
+      r'version: 1\.(\d+)\.(\d+)\+(\d+)',
+    ).firstMatch(pubspec);
     expect(version, isNotNull);
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(20));
-    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(26));
+    expect(int.parse(version.group(3)!), greaterThanOrEqualTo(26));
     expect(pubspec, contains('flutter_secure_storage: ^10.3.1'));
     expect(pubspec, contains('local_auth: ^3.0.2'));
     expect(main, contains("import 'src/app_lock_gate.dart';"));
