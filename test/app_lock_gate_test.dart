@@ -1,3 +1,4 @@
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/app_lock.dart';
@@ -8,7 +9,7 @@ void main() {
 
   testWidgets('offers setup and unlocks the child after creating a PIN',
       (tester) async {
-    final service = AppLockService(store: MemoryAppLockStore());
+    final service = testAppLockService(MemoryAppLockStore());
 
     await tester.pumpWidget(
       AppLockGate(
@@ -38,7 +39,7 @@ void main() {
 
   testWidgets('enabled lock hides the app until the correct PIN is entered',
       (tester) async {
-    final service = AppLockService(store: MemoryAppLockStore());
+    final service = testAppLockService(MemoryAppLockStore());
     await service.enableWithPin('135790');
 
     await tester.pumpWidget(
@@ -64,7 +65,7 @@ void main() {
 
   testWidgets('successful biometrics unlocks without exposing the PIN',
       (tester) async {
-    final service = AppLockService(store: MemoryAppLockStore());
+    final service = testAppLockService(MemoryAppLockStore());
     await service.enableWithPin('112233');
     await service.setBiometricsEnabled(true);
 
@@ -83,6 +84,21 @@ void main() {
     expect(find.text('PRIVATE APP'), findsOneWidget);
     expect((await service.loadState()).failedAttempts, 0);
   });
+}
+
+AppLockService testAppLockService(MemoryAppLockStore store) => AppLockService(
+      store: store,
+      keyDeriver: fastKeyDeriver,
+    );
+
+Future<SecretKey> fastKeyDeriver(String pin, List<int> salt) async {
+  final pinBytes = pin.codeUnits;
+  return SecretKeyData(List<int>.generate(
+    32,
+    (index) =>
+        (pinBytes[index % pinBytes.length] + salt[index % salt.length] + index) &
+        0xff,
+  ));
 }
 
 Future<void> _pumpUntilFound(
