@@ -7,15 +7,15 @@ void main() {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final app = File('lib/src/app.dart').readAsStringSync();
     final codec = File('lib/src/journal_transfer.dart').readAsStringSync();
-    final service =
-        File('lib/src/private_journal_transfer.dart').readAsStringSync();
-    final screen =
-        File('lib/src/private_journal_transfer_screen.dart').readAsStringSync();
+    final service = File(
+      'lib/src/private_journal_transfer.dart',
+    ).readAsStringSync();
+    final screen = File(
+      'lib/src/private_journal_transfer_screen.dart',
+    ).readAsStringSync();
     final notes = File('RELEASE_NOTES.md').readAsStringSync();
 
-    final version = RegExp(
-      r'version: 1\.(\d+)\.0\+(\d+)',
-    ).firstMatch(pubspec);
+    final version = RegExp(r'version: 1\.(\d+)\.0\+(\d+)').firstMatch(pubspec);
     expect(version, isNotNull);
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(18));
     expect(int.parse(version.group(2)!), greaterThanOrEqualTo(24));
@@ -36,7 +36,7 @@ void main() {
     expect(screen, contains('Clipboard.setData'));
     expect(screen, contains('MysticLanguage.french'));
     expect(screen, contains('MysticLanguage.portugueseBrazil'));
-    expect(notes, startsWith('# Mystic Tarot 1.18.0'));
+    expect(notes, contains('# Mystic Tarot 1.18.0'));
     expect(screen, isNot(contains('package:http')));
     expect(screen, isNot(contains('dart:io')));
     expect(File('.github/workflows/v118-integrate.yml').existsSync(), isFalse);

@@ -16,6 +16,7 @@ import 'identity_engine.dart';
 import 'language_bridge.dart';
 import 'journal_export.dart';
 import 'journal_recovery_notice.dart';
+import 'launch_differentiation.dart';
 import 'private_journal_transfer_screen.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
@@ -26,6 +27,7 @@ import 'oracle_language.dart';
 import 'reading_explanation.dart';
 import 'reading_journal_store.dart';
 import 'reading_position.dart';
+import 'reading_synthesis.dart';
 import 'ritual_reminder.dart';
 import 'ritual_reminder_screen.dart';
 import 'ritual_reminder_service.dart';
@@ -51,16 +53,16 @@ const launchLanguages = <MysticLanguage>[
 ];
 
 String supportPageForLanguage(MysticLanguage language) => switch (language) {
-      MysticLanguage.french =>
-        'https://tuna777123.github.io/mystic-tarot/support-fr.html',
-      MysticLanguage.turkish =>
-        'https://tuna777123.github.io/mystic-tarot/support-tr.html',
-      MysticLanguage.spanish =>
-        'https://tuna777123.github.io/mystic-tarot/support-es.html',
-      MysticLanguage.portugueseBrazil =>
-        'https://tuna777123.github.io/mystic-tarot/support-pt-br.html',
-      _ => 'https://tuna777123.github.io/mystic-tarot/support.html',
-    };
+  MysticLanguage.french =>
+    'https://tuna777123.github.io/mystic-tarot/support-fr.html',
+  MysticLanguage.turkish =>
+    'https://tuna777123.github.io/mystic-tarot/support-tr.html',
+  MysticLanguage.spanish =>
+    'https://tuna777123.github.io/mystic-tarot/support-es.html',
+  MysticLanguage.portugueseBrazil =>
+    'https://tuna777123.github.io/mystic-tarot/support-pt-br.html',
+  _ => 'https://tuna777123.github.io/mystic-tarot/support.html',
+};
 
 class MysticApp extends StatefulWidget {
   const MysticApp({super.key});
@@ -336,9 +338,9 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     final context = navigatorKey.currentContext;
     if (message == null || context == null || !mounted) return;
     journalRecoveryMessage = null;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _startReading(ReadingKind kind) {
@@ -386,15 +388,12 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
             _saveProgress();
             _refreshMirrorDueState();
             if (newlyDiscovered.isNotEmpty) {
-              Future<void>.delayed(
-                const Duration(milliseconds: 280),
-                () async {
-                  await _showCardDiscovery(newlyDiscovered);
-                  if (shouldOfferRitualReminder) {
-                    await _maybeOfferRitualReminder();
-                  }
-                },
-              );
+              Future<void>.delayed(const Duration(milliseconds: 280), () async {
+                await _showCardDiscovery(newlyDiscovered);
+                if (shouldOfferRitualReminder) {
+                  await _maybeOfferRitualReminder();
+                }
+              });
             } else if (shouldOfferRitualReminder) {
               Future<void>.delayed(
                 const Duration(milliseconds: 450),
@@ -473,7 +472,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
               english: 'Ritual complete. Your Soul Chest is ready.',
               spanish: 'Ritual completado. Tu Cofre del Alma está listo.',
               french: 'Rituel terminé. Votre Coffre de l’Âme est prêt.',
-              portugueseBrazil: 'Ritual concluído. Seu Baú da Alma está pronto.',
+              portugueseBrazil:
+                  'Ritual concluído. Seu Baú da Alma está pronto.',
               turkish: 'Ritüel tamamlandı. Ruh Sandığın açılmaya hazır.',
             ),
           ),
@@ -560,9 +560,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
         ..clear()
         ..addAll(restored);
       discoveredCards.addAll(
-        restored.expand(
-          (record) => record.cards.map((item) => item.card.name),
-        ),
+        restored.expand((record) => record.cards.map((item) => item.card.name)),
       );
     });
     unawaited(_refreshMirrorDueState());
@@ -621,7 +619,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       final prefs = await SharedPreferences.getInstance();
       final journalLoad = await readingJournalStore.load(
         legacyRecords:
-            prefs.getStringList(ReadingJournalStore.legacyKey) ?? const <String>[],
+            prefs.getStringList(ReadingJournalStore.legacyKey) ??
+            const <String>[],
       );
       final mirrorReflections = await mirrorStore.load();
       final savedLanguage = _languageFromName(prefs.getString('language'));
@@ -762,7 +761,8 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       lastActiveDay: lastActiveDay,
       streak: streak,
     );
-    final changed = refresh.dayChanged ||
+    final changed =
+        refresh.dayChanged ||
         refresh.resetDeepReadings ||
         refresh.clearQuestClaim ||
         refresh.visibleStreak != streak;
@@ -875,33 +875,34 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
       if (!mounted || !context.mounted) return;
       final message = switch (permission) {
         RitualReminderPermissionResult.denied => localized(
-            language.appLanguage,
-            english:
-                'Notifications remain off. You can enable the ritual later in Your space.',
-            turkish:
-                'Bildirimler kapalı kaldı. Ritüeli daha sonra Senin alanın bölümünden açabilirsin.',
-            spanish:
-                'Las notificaciones siguen desactivadas. Puedes activar el ritual más tarde en Tu espacio.',
-            french:
-                'Les notifications restent désactivées. Vous pourrez activer le rituel plus tard dans Votre espace.',
-            portugueseBrazil:
-                'As notificações continuam desativadas. Você pode ativar o ritual depois em Seu espaço.',
-          ),
+          language.appLanguage,
+          english:
+              'Notifications remain off. You can enable the ritual later in Your space.',
+          turkish:
+              'Bildirimler kapalı kaldı. Ritüeli daha sonra Senin alanın bölümünden açabilirsin.',
+          spanish:
+              'Las notificaciones siguen desactivadas. Puedes activar el ritual más tarde en Tu espacio.',
+          french:
+              'Les notifications restent désactivées. Vous pourrez activer le rituel plus tard dans Votre espace.',
+          portugueseBrazil:
+              'As notificações continuam desativadas. Você pode ativar o ritual depois em Seu espaço.',
+        ),
         _ => localized(
-            language.appLanguage,
-            english:
-                'Daily reminders are available in the iOS and Android apps.',
-            turkish:
-                'Günlük hatırlatıcılar iOS ve Android uygulamalarında kullanılabilir.',
-            spanish:
-                'Los recordatorios diarios están disponibles en las apps de iOS y Android.',
-            french:
-                'Les rappels quotidiens sont disponibles dans les apps iOS et Android.',
-            portugueseBrazil:
-                'Os lembretes diários estão disponíveis nos apps para iOS e Android.',
-          ),
+          language.appLanguage,
+          english: 'Daily reminders are available in the iOS and Android apps.',
+          turkish:
+              'Günlük hatırlatıcılar iOS ve Android uygulamalarında kullanılabilir.',
+          spanish:
+              'Los recordatorios diarios están disponibles en las apps de iOS y Android.',
+          french:
+              'Les rappels quotidiens sont disponibles dans les apps iOS et Android.',
+          portugueseBrazil:
+              'Os lembretes diários estão disponíveis nos apps para iOS e Android.',
+        ),
       };
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
       return;
     }
 
@@ -928,8 +929,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
             turkish: 'Günlük ritüel ${updated.formattedTime} için ayarlandı.',
             spanish:
                 'Ritual diario programado para las ${updated.formattedTime}.',
-            french:
-                'Rituel quotidien programmé à ${updated.formattedTime}.',
+            french: 'Rituel quotidien programmé à ${updated.formattedTime}.',
             portugueseBrazil:
                 'Ritual diário agendado para ${updated.formattedTime}.',
           ),
@@ -1227,10 +1227,8 @@ class _CardDiscoveryDialogState extends State<_CardDiscoveryDialog>
     _ => mysticText(widget.language, 'Common', 'Yaygın'),
   };
 
-  String _cardName(String name) => localizedTarotCardName(
-    name,
-    languageCode: widget.language.code,
-  );
+  String _cardName(String name) =>
+      localizedTarotCardName(name, languageCode: widget.language.code);
 }
 
 String _cardRarity(TarotCardData card) {
@@ -1448,16 +1446,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 14),
           Text(
             _copy(
-              en: 'Reveal the cards. Track what returns. Turn insight into a private daily ritual that remembers you.',
-              es: 'Revela las cartas. Observa lo que vuelve. Convierte la intuición en un ritual diario privado que te recuerda.',
-              fr: 'Révélez les cartes. Observez ce qui revient. Transformez l’intuition en un rituel quotidien privé qui se souvient de vous.',
-              pt: 'Revele as cartas. Observe o que retorna. Transforme a percepção em um ritual diário privado que se lembra de você.',
-              tr: 'Kartları aç. Tekrar edenleri izle. İçgörüyü seni hatırlayan özel bir günlük ritüele dönüştür.',
-              it: 'Rivela le carte. Osserva ciò che ritorna. Trasforma l’intuizione in un rituale quotidiano privato che si ricorda di te.',
-              de: 'Enthülle die Karten. Beobachte, was wiederkehrt. Verwandle Erkenntnis in ein privates tägliches Ritual, das sich an dich erinnert.',
+              en: 'One private reading becomes tomorrow’s reality check and, with enough evidence, a pattern you can understand.',
+              es: 'Una lectura privada se convierte mañana en una comprobación de la realidad y, con suficiente evidencia, en un patrón que puedes comprender.',
+              fr: 'Un tirage privé devient demain une confrontation au réel puis, avec assez d’indices, une tendance que vous pouvez comprendre.',
+              pt: 'Uma leitura privada se torna amanhã uma verificação da realidade e, com evidências suficientes, um padrão que você pode compreender.',
+              tr: 'Tek bir özel okuma yarın gerçeklik kontrolüne, yeterli kanıt biriktiğinde anlayabileceğin bir örüntüye dönüşür.',
+              it: 'Una lettura privata diventa domani un confronto con la realtà e, con abbastanza elementi, uno schema che puoi comprendere.',
+              de: 'Eine private Lesung wird morgen zum Realitätscheck und mit genügend Hinweisen zu einem verständlichen Muster.',
             ),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 16),
+          LaunchContinuityTimeline(
+            language: language,
+            compact: true,
+            showTitle: false,
           ),
           const SizedBox(height: 22),
           Wrap(
@@ -1876,233 +1880,124 @@ class HomeScreen extends StatelessWidget {
       mirrorDueCount: mirrorDueCount,
     );
     return MysticBackground(
-    child: CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _greeting(),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          userName.isEmpty
-                              ? mysticText(
-                                  language,
-                                  'Your cards are waiting',
-                                  'Kartların seni bekliyor',
-                                )
-                              : mysticText(
-                                  language,
-                                  'Your cards are waiting, $userName',
-                                  'Kartların seni bekliyor, $userName',
-                                ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  InkWell(
-                    onTap: onPremium,
-                    borderRadius: BorderRadius.circular(30),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        color: MysticColors.gold.withValues(alpha: .12),
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: MysticColors.gold.withValues(alpha: .4),
-                        ),
-                      ),
-                      child: const Row(
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 10),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '✦ ',
-                            style: TextStyle(color: MysticColors.gold),
+                            _greeting(),
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
+                          const SizedBox(height: 4),
                           Text(
-                            'PLUS',
-                            style: TextStyle(
-                              fontFamily: 'Arial',
-                              fontWeight: FontWeight.w800,
-                              color: MysticColors.gold,
-                              fontSize: 12,
-                            ),
+                            userName.isEmpty
+                                ? mysticText(
+                                    language,
+                                    'Your cards are waiting',
+                                    'Kartların seni bekliyor',
+                                  )
+                                : mysticText(
+                                    language,
+                                    'Your cards are waiting, $userName',
+                                    'Kartların seni bekliyor, $userName',
+                                  ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              MysticNextStepCard(
-                snapshot: growthSnapshot,
-                language: language,
-                streak: streak,
-                mirrorDueCount: mirrorDueCount,
-                completedArcanaDays: completedArcanaDays.length,
-                freeReadingsLeft: freeReadingsLeft,
-                onTap: () => _runNextAction(
-                  context,
-                  growthSnapshot.nextAction.type,
-                ),
-              ),
-              const SizedBox(height: 14),
-              _DailyCard(
-                streak: streak,
-                deckStyle: deckStyle,
-                language: language,
-                onTap: () => onReading(ReadingKind.daily),
-              ),
-              const SizedBox(height: 14),
-              _DailyQuest(
-                readingDone: dailyReadingDone,
-                ritualDone: ritualDone,
-                claimed: dailyQuestClaimed,
-                language: language,
-                onClaim: onClaimDailyQuest,
-                onRitual: onRitual,
-              ),
-              const SizedBox(height: 12),
-              _MoonBriefing(language: language),
-              const SizedBox(height: 12),
-              _ReadingAllowance(
-                readingsLeft: freeReadingsLeft,
-                language: language,
-                onUpgrade: onPremium,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      mysticText(
-                        language,
-                        'Choose a reading',
-                        'Bir okuma seç',
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '$xp XP',
-                    style: const TextStyle(
-                      fontFamily: 'Arial',
-                      color: MysticColors.gold,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ]),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 126,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 3,
-                    separatorBuilder: (_, __) => const SizedBox(width: 10),
-                    itemBuilder: (_, index) => _featuredReadingCard(
-                      context,
-                      const [
-                        ReadingKind.love,
-                        ReadingKind.career,
-                        ReadingKind.decision,
-                      ][index],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                InkWell(
-                  onTap: () => _showAllReadings(context),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 13,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .04),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: .09),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.grid_view_rounded,
-                          size: 18,
-                          color: MysticColors.lavender,
+                    const SizedBox(width: 10),
+                    InkWell(
+                      onTap: onPremium,
+                      borderRadius: BorderRadius.circular(30),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            mysticText(
-                              language,
-                              'Explore every reading',
-                              'Tüm okumaları keşfet',
-                            ),
-                            style: const TextStyle(
-                              fontFamily: 'Arial',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        decoration: BoxDecoration(
+                          color: MysticColors.gold.withValues(alpha: .12),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: MysticColors.gold.withValues(alpha: .4),
                           ),
                         ),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 18,
-                          color: MysticColors.gold,
+                        child: const Row(
+                          children: [
+                            Text(
+                              '✦ ',
+                              style: TextStyle(color: MysticColors.gold),
+                            ),
+                            Text(
+                              'PLUS',
+                              style: TextStyle(
+                                fontFamily: 'Arial',
+                                fontWeight: FontWeight.w800,
+                                color: MysticColors.gold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                const SizedBox(height: 18),
+                MysticNextStepCard(
+                  snapshot: growthSnapshot,
+                  language: language,
+                  streak: streak,
+                  mirrorDueCount: mirrorDueCount,
+                  completedArcanaDays: completedArcanaDays.length,
+                  freeReadingsLeft: freeReadingsLeft,
+                  onTap: () =>
+                      _runNextAction(context, growthSnapshot.nextAction.type),
+                ),
+                const SizedBox(height: 14),
+                _DailyCard(
+                  streak: streak,
+                  deckStyle: deckStyle,
+                  language: language,
+                  onTap: () => onReading(ReadingKind.daily),
+                ),
+                const SizedBox(height: 14),
+                _DailyQuest(
+                  readingDone: dailyReadingDone,
+                  ritualDone: ritualDone,
+                  claimed: dailyQuestClaimed,
+                  language: language,
+                  onClaim: onClaimDailyQuest,
+                  onRitual: onRitual,
+                ),
+                const SizedBox(height: 12),
+                _MoonBriefing(language: language),
+                const SizedBox(height: 12),
+                _ReadingAllowance(
+                  readingsLeft: freeReadingsLeft,
+                  language: language,
+                  onUpgrade: onPremium,
+                ),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     Expanded(
                       child: Text(
                         mysticText(
                           language,
-                          'Mystic Plus readings',
-                          'Mystic Plus okumaları',
+                          'Choose a reading',
+                          'Bir okuma seç',
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -2110,92 +2005,196 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
+                    Text(
+                      '$xp XP',
+                      style: const TextStyle(
+                        fontFamily: 'Arial',
                         color: MysticColors.gold,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'PLUS',
-                        style: TextStyle(
-                          fontFamily: 'Arial',
-                          color: MysticColors.ink,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: .7,
-                        ),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  mysticText(
-                    language,
-                    'High-depth spreads built for the questions people return to most.',
-                    'En çok geri dönülen sorular için tasarlanmış derin açılımlar.',
-                  ),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
                 const SizedBox(height: 12),
-                SizedBox(
-                  height: 166,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _premiumReadingKinds.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 10),
-                    itemBuilder: (_, index) => _premiumReadingCard(
-                      context,
-                      _premiumReadingKinds[index],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 26),
-                Text(
-                  mysticText(
-                    language,
-                    'Your path remembers',
-                    'Yolun seni hatırlıyor',
-                  ),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                _PersonalSignal(
-                  intention: intention,
-                  records: records,
-                  language: language,
-                ),
-                const SizedBox(height: 14),
-                MysticIntelligenceTeaser(
-                  records: records,
-                  language: language,
-                  isPlus: isPlus,
-                  onOpen: onPremium,
-                ),
-                const SizedBox(height: 14),
-                DestinyFlagshipCard(
-                  records: records,
-                  completedDays: completedArcanaDays,
-                  language: language,
-                  onOpen: onOpenDestiny,
-                ),
-              ],
+              ]),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 126,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 3,
+                      separatorBuilder: (_, __) => const SizedBox(width: 10),
+                      itemBuilder: (_, index) => _featuredReadingCard(
+                        context,
+                        const [
+                          ReadingKind.love,
+                          ReadingKind.career,
+                          ReadingKind.decision,
+                        ][index],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () => _showAllReadings(context),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 13,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: .04),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: .09),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.grid_view_rounded,
+                            size: 18,
+                            color: MysticColors.lavender,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              mysticText(
+                                language,
+                                'Explore every reading',
+                                'Tüm okumaları keşfet',
+                              ),
+                              style: const TextStyle(
+                                fontFamily: 'Arial',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 18,
+                            color: MysticColors.gold,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          mysticText(
+                            language,
+                            'Mystic Plus readings',
+                            'Mystic Plus okumaları',
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: MysticColors.gold,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'PLUS',
+                          style: TextStyle(
+                            fontFamily: 'Arial',
+                            color: MysticColors.ink,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: .7,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    mysticText(
+                      language,
+                      'High-depth spreads built for the questions people return to most.',
+                      'En çok geri dönülen sorular için tasarlanmış derin açılımlar.',
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 166,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _premiumReadingKinds.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 10),
+                      itemBuilder: (_, index) => _premiumReadingCard(
+                        context,
+                        _premiumReadingKinds[index],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 26),
+                  Text(
+                    mysticText(
+                      language,
+                      'Your path remembers',
+                      'Yolun seni hatırlıyor',
+                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  _PersonalSignal(
+                    intention: intention,
+                    records: records,
+                    language: language,
+                  ),
+                  const SizedBox(height: 14),
+                  MysticIntelligenceTeaser(
+                    records: records,
+                    language: language,
+                    isPlus: isPlus,
+                    onOpen: onPremium,
+                  ),
+                  const SizedBox(height: 14),
+                  DestinyFlagshipCard(
+                    records: records,
+                    completedDays: completedArcanaDays,
+                    language: language,
+                    onOpen: onOpenDestiny,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void _runNextAction(
-    BuildContext context,
-    MysticNextActionType type,
-  ) {
+  void _runNextAction(BuildContext context, MysticNextActionType type) {
     switch (type) {
       case MysticNextActionType.firstReading:
       case MysticNextActionType.dailyReading:
@@ -4087,10 +4086,12 @@ class _ReadingFlowState extends State<ReadingFlow> {
       ),
     ),
   );
-  String _guidance() => mysticText(
-    widget.language,
-    '${_localizedCardAdvice(drawn!.last, widget.language)} Hold this beside your intention of ${_localizedIntention(widget.intention, widget.language).toLowerCase()}. Let it be an invitation, not a command, and notice what changes over the next twenty-four hours.',
-    '${_localizedCardAdvice(drawn!.last, widget.language)} Bunu seçtiğin niyetin yanında tut. Bir emir değil, davet olarak gör ve önümüzdeki yirmi dört saatte neyin değiştiğini fark et.',
+  String _guidance() => buildReadingSynthesis(
+    kind: widget.kind,
+    cards: drawn!,
+    emotion: emotion,
+    intention: widget.intention,
+    language: widget.language,
   );
   String _alignedAction() {
     switch (emotion) {
@@ -4483,8 +4484,8 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
   List<OracleConversationTurn> get _historyTurns => lastSavedTurnId == null
       ? turns
       : turns
-          .where((turn) => turn.turnId != lastSavedTurnId)
-          .toList(growable: false);
+            .where((turn) => turn.turnId != lastSavedTurnId)
+            .toList(growable: false);
 
   @override
   void initState() {
@@ -4905,9 +4906,7 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .04),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: MysticColors.lavender.withValues(alpha: .18),
-        ),
+        border: Border.all(color: MysticColors.lavender.withValues(alpha: .18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -4951,19 +4950,13 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
               fr: 'Stockée uniquement sur cet appareil et liée à ce tirage.',
               pt: 'Armazenada somente neste dispositivo e ligada a esta leitura.',
             ),
-            style: const TextStyle(
-              color: MysticColors.muted,
-              fontSize: 10,
-            ),
+            style: const TextStyle(color: MysticColors.muted, fontSize: 10),
           ),
           for (final turn in history) ...[
             const SizedBox(height: 14),
             Text(
               _formatOracleTime(turn.createdAt),
-              style: const TextStyle(
-                color: MysticColors.muted,
-                fontSize: 9,
-              ),
+              style: const TextStyle(color: MysticColors.muted, fontSize: 9),
             ),
             const SizedBox(height: 6),
             _messageBubble(context, turn.question, fromOracle: false),
@@ -5189,7 +5182,8 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
 
   Future<void> _ask(String question) async {
     final cleanQuestion = question.trim();
-    if (askedQuestion != null || cleanQuestion.isEmpty || historyLoading) return;
+    if (askedQuestion != null || cleanQuestion.isEmpty || historyLoading)
+      return;
     if (!widget.isPlus && turns.isNotEmpty) return;
     FocusScope.of(context).unfocus();
     widget.onQuestionUsed();
@@ -5218,8 +5212,10 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
       thinking = false;
       answer = response;
       if (saved) {
-        turns = <OracleConversationTurn>[...turns, turn]
-          ..sort((first, second) => first.createdAt.compareTo(second.createdAt));
+        turns = <OracleConversationTurn>[
+          ...turns,
+          turn,
+        ]..sort((first, second) => first.createdAt.compareTo(second.createdAt));
         lastSavedTurnId = turn.turnId;
       } else {
         saveError = _oracleCopy(
@@ -5385,29 +5381,28 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
     return switch (widget.language) {
       MysticLanguage.turkish =>
         ' Hafızandaki ${recent.length} okumada $cardName ${recurring.value} kez '
-        'göründü ve baskın başlangıç duygun $emotion oldu. Bu bir kehanet değil; '
-        'üzerinde düşünmeye değer tekrar eden bir iz.',
+            'göründü ve baskın başlangıç duygun $emotion oldu. Bu bir kehanet değil; '
+            'üzerinde düşünmeye değer tekrar eden bir iz.',
       MysticLanguage.spanish =>
         ' En ${recent.length} lecturas recordadas, $cardName apareció '
-        '${recurring.value} veces y $emotion fue tu emoción inicial más común. '
-        'No es una predicción, sino un hilo recurrente que merece atención.',
+            '${recurring.value} veces y $emotion fue tu emoción inicial más común. '
+            'No es una predicción, sino un hilo recurrente que merece atención.',
       MysticLanguage.french =>
         ' Dans les ${recent.length} tirages mémorisés, $cardName est apparue '
-        '${recurring.value} fois et $emotion était votre émotion de départ la '
-        'plus fréquente. Ce n’est pas une prédiction, mais un fil récurrent qui '
-        'mérite votre attention.',
+            '${recurring.value} fois et $emotion était votre émotion de départ la '
+            'plus fréquente. Ce n’est pas une prédiction, mais un fil récurrent qui '
+            'mérite votre attention.',
       MysticLanguage.portugueseBrazil =>
         ' Em ${recent.length} leituras lembradas, $cardName apareceu '
-        '${recurring.value} vezes e $emotion foi sua emoção inicial mais comum. '
-        'Isso não é uma previsão, mas um fio recorrente que merece atenção.',
+            '${recurring.value} vezes e $emotion foi sua emoção inicial mais comum. '
+            'Isso não é uma previsão, mas um fio recorrente que merece atenção.',
       _ =>
         ' Across ${recent.length} remembered readings, $cardName appeared '
-        '${recurring.value} times and $emotion was your most common starting '
-        'emotion. That is not a prediction; it is a recurring thread worth '
-        'examining.',
+            '${recurring.value} times and $emotion was your most common starting '
+            'emotion. That is not a prediction; it is a recurring thread worth '
+            'examining.',
     };
   }
-
 }
 
 class _RitualRevealCard extends StatefulWidget {
@@ -5523,38 +5518,27 @@ class _ReadingInProgress extends StatelessWidget {
 }
 
 String _readingKindTitle(ReadingKind kind, MysticLanguage language) {
-  return localizedReadingKindTitle(
-    kind,
-    languageCode: language.code,
-  );
+  return localizedReadingKindTitle(kind, languageCode: language.code);
 }
 
 String _emotionLabel(EmotionalState emotion, MysticLanguage language) {
-  return localizedEmotionLabel(
-    emotion,
-    languageCode: language.code,
-  );
+  return localizedEmotionLabel(emotion, languageCode: language.code);
 }
 
-String _localizedIntention(String value, MysticLanguage language) => switch (value) {
-  'Love' => mysticText(language, 'Love', 'Aşk'),
-  'Purpose' => mysticText(language, 'Purpose', 'Amaç'),
-  'Healing' => mysticText(language, 'Healing', 'İyileşme'),
-  _ => mysticText(language, 'Clarity', 'Netlik'),
-};
+String _localizedIntention(String value, MysticLanguage language) =>
+    switch (value) {
+      'Love' => mysticText(language, 'Love', 'Aşk'),
+      'Purpose' => mysticText(language, 'Purpose', 'Amaç'),
+      'Healing' => mysticText(language, 'Healing', 'İyileşme'),
+      _ => mysticText(language, 'Clarity', 'Netlik'),
+    };
 
 String _localizedCardMeaning(DrawnCard drawn, MysticLanguage language) {
-  return localizedTarotCardMeaning(
-    drawn,
-    languageCode: language.code,
-  );
+  return localizedTarotCardMeaning(drawn, languageCode: language.code);
 }
 
 String _localizedCardAdvice(DrawnCard drawn, MysticLanguage language) {
-  return localizedTarotCardAdvice(
-    drawn,
-    languageCode: language.code,
-  );
+  return localizedTarotCardAdvice(drawn, languageCode: language.code);
 }
 
 class JourneyScreen extends StatefulWidget {
@@ -6256,10 +6240,7 @@ class _ArcanaVault extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             unlocked
-                ? localizedTarotCardName(
-                    card.name,
-                    languageCode: language.code,
-                  )
+                ? localizedTarotCardName(card.name, languageCode: language.code)
                 : mysticText(language, 'Undiscovered', 'Keşfedilmedi'),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -8250,10 +8231,7 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
         const Divider(),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(
-            Icons.sync_alt,
-            color: MysticColors.lavender,
-          ),
+          leading: const Icon(Icons.sync_alt, color: MysticColors.lavender),
           title: Text(
             localizedProfileCopy(
               en: 'Transfer private journal',
@@ -8392,14 +8370,13 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (widget.language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (widget.language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   Widget _intro(BuildContext context, String title, String body) => Padding(
     padding: const EdgeInsets.only(bottom: 18),

@@ -8,13 +8,19 @@ void main() {
     final main = File('lib/main.dart').readAsStringSync();
     final lock = File('lib/src/app_lock.dart').readAsStringSync();
     final gate = File('lib/src/app_lock_gate.dart').readAsStringSync();
-    final configurator = File('tool/configure_app_lock.dart').readAsStringSync();
+    final configurator = File(
+      'tool/configure_app_lock.dart',
+    ).readAsStringSync();
     final ci = File('.github/workflows/flutter-ci.yml').readAsStringSync();
-    final qa =
-        File('.github/workflows/release-candidate.yml').readAsStringSync();
+    final qa = File(
+      '.github/workflows/release-candidate.yml',
+    ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.20.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.20.0+26'));
+    final version = RegExp(r'version: 1\.(\d+)\.0\+(\d+)').firstMatch(pubspec);
+    expect(version, isNotNull);
+    expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(20));
+    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(26));
     expect(pubspec, contains('flutter_secure_storage: ^10.3.1'));
     expect(pubspec, contains('local_auth: ^3.0.2'));
     expect(main, contains("import 'src/app_lock_gate.dart';"));

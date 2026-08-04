@@ -1,6 +1,6 @@
 # Mystic Tarot
 
-Mystic Tarot is a private, reflection-first tarot ritual built with Flutter. The public release runs as an installable PWA and the same product code is prepared for native iOS and Android packaging.
+Mystic Tarot is a private, reflection-first tarot ritual built with Flutter. A reading becomes a 24-hour reality check and, with enough evidence, an explainable personal pattern. Private history stays on-device and the complete app can be protected with a local PIN and optional biometrics on supported devices. The public release runs as an installable PWA and the same product code is prepared for native iOS and Android packaging.
 
 ## Live release
 
