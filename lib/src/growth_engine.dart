@@ -71,7 +71,11 @@ class MysticGrowthEngine {
     DateTime? now,
   }) {
     final moment = now ?? DateTime.now();
-    final stage = _stage(records.length, streak, completedArcanaDays);
+    final stage = _stage(
+      records: records,
+      streak: streak,
+      completedArcanaDays: completedArcanaDays,
+    );
     final visiblePattern = _hasVisiblePattern(records);
     final returnState = _returnState(records, streak, moment);
     final score = _premiumValueScore(
@@ -99,11 +103,25 @@ class MysticGrowthEngine {
     );
   }
 
-  MysticGrowthStage _stage(int readings, int streak, int chapters) {
+  MysticGrowthStage _stage({
+    required List<ReadingRecord> records,
+    required int streak,
+    required int completedArcanaDays,
+  }) {
+    final readings = records.length;
     if (readings == 0) return MysticGrowthStage.newUser;
-    if (readings < 3) return MysticGrowthStage.activated;
-    if (readings < 8 || streak < 3) return MysticGrowthStage.engaged;
-    if (readings < 20 || streak < 7 || chapters < 5) {
+
+    final activeDays = _activeDayCount(records);
+    if (readings < 3 || activeDays < 2) {
+      return MysticGrowthStage.activated;
+    }
+    if (readings < 8 || activeDays < 4 || streak < 3) {
+      return MysticGrowthStage.engaged;
+    }
+    if (readings < 20 ||
+        activeDays < 10 ||
+        streak < 7 ||
+        completedArcanaDays < 5) {
       return MysticGrowthStage.habit;
     }
     return MysticGrowthStage.powerUser;
@@ -157,6 +175,20 @@ class MysticGrowthEngine {
       );
     }
 
+    // Mystic's strongest differentiator is evidence gathered from the user's
+    // own private history. Surface that earned value before sending an engaged
+    // user into another content loop or an upgrade path.
+    if (visiblePattern) {
+      return const MysticNextAction(
+        type: MysticNextActionType.reviewPattern,
+        title: 'A repeating pattern is becoming visible',
+        body:
+            'Compare the symbol, emotion, and choice that keep returning across your readings.',
+        cta: 'View my pattern',
+        priority: 85,
+      );
+    }
+
     if (completedArcanaDays < 22 && completedArcanaDays < records.length) {
       return MysticNextAction(
         type: MysticNextActionType.continueJourney,
@@ -165,17 +197,6 @@ class MysticGrowthEngine {
             '${22 - completedArcanaDays} chapters remain in your personal path.',
         cta: 'Continue my journey',
         priority: 80,
-      );
-    }
-
-    if (visiblePattern) {
-      return const MysticNextAction(
-        type: MysticNextActionType.reviewPattern,
-        title: 'A repeating pattern is becoming visible',
-        body:
-            'Compare the symbol, emotion, and choice that keep returning across your readings.',
-        cta: 'View my pattern',
-        priority: 75,
       );
     }
 
@@ -208,7 +229,7 @@ class MysticGrowthEngine {
     final latest = records.reduce(
       (a, b) => a.createdAt.isAfter(b.createdAt) ? a : b,
     );
-    final days = now.difference(latest.createdAt).inDays;
+    final days = _calendarDayDifference(latest.createdAt, now);
     if (days <= 0) return MysticReturnState.activeToday;
     if (days == 1) return MysticReturnState.returnedNextDay;
     if (streak >= 3) return MysticReturnState.continuingStreak;
@@ -248,10 +269,29 @@ class MysticGrowthEngine {
     required int completedArcanaDays,
     required bool visiblePattern,
   }) {
-    var score = records.length * 6 + streak * 4 + completedArcanaDays * 3;
+    final activeDays = _activeDayCount(records);
+    var score =
+        records.length.clamp(0, 12) * 3 +
+        activeDays.clamp(0, 14) * 5 +
+        streak.clamp(0, 14) * 4 +
+        completedArcanaDays.clamp(0, 22) * 3;
     if (visiblePattern) score += 20;
     return score.clamp(0, 100);
   }
+
+  int _activeDayCount(List<ReadingRecord> records) => records
+      .map((record) => _calendarDayKey(record.createdAt))
+      .toSet()
+      .length;
+
+  int _calendarDayDifference(DateTime earlier, DateTime later) {
+    final earlierDay = DateTime(earlier.year, earlier.month, earlier.day);
+    final laterDay = DateTime(later.year, later.month, later.day);
+    return laterDay.difference(earlierDay).inDays;
+  }
+
+  String _calendarDayKey(DateTime value) =>
+      '${value.year}-${value.month}-${value.day}';
 
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
