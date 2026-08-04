@@ -172,8 +172,8 @@ void main() {
 
     final result = engine.analyze(
       records: records,
-      streak: 8,
-      completedArcanaDays: 8,
+      streak: 1,
+      completedArcanaDays: 0,
       freeReadingsLeft: 0,
       now: now,
     );
