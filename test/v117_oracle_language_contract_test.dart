@@ -10,11 +10,11 @@ void main() {
 
   test('v1.17 uses the multilingual Oracle intent engine', () {
     final version = RegExp(
-      r'version: 1\.(\d+)\.0\+(\d+)',
+      r'version: 1\.(\d+)\.(\d+)\+(\d+)',
     ).firstMatch(pubspec);
     expect(version, isNotNull);
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(17));
-    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(23));
+    expect(int.parse(version.group(3)!), greaterThanOrEqualTo(23));
     expect(app, contains("import 'oracle_language.dart';"));
     expect(app, contains('detectOracleQuestionIntent(question, widget.language)'));
     expect(language, contains('MysticLanguage.french'));
