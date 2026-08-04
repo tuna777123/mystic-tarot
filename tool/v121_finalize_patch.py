@@ -71,6 +71,28 @@ if timeline_old in source:
     source = source.replace(timeline_old, timeline_new, 1)
 position.write_text(source, encoding='utf-8')
 
+synthesis = root / 'lib/src/reading_synthesis.dart'
+source = synthesis.read_text(encoding='utf-8')
+grammar_replacements = {
+    'One grounded experiment is to ${_lowerFirst(_sentence(card.advice))}': 'Try this grounded action: ${_sentence(card.advice)}',
+    'Un experimento concreto es ${_lowerFirst(_sentence(card.advice))}': 'Prueba esta acción concreta: ${_sentence(card.advice)}',
+    'Une expérience concrète consiste à ${_lowerFirst(_sentence(card.advice))}': 'Essayez cette action concrète : ${_sentence(card.advice)}',
+    'Um experimento concreto é ${_lowerFirst(_sentence(card.advice))}': 'Experimente esta ação concreta: ${_sentence(card.advice)}',
+    'Tek ve somut deney şu olabilir: ${_lowerFirst(_sentence(card.advice))}': 'Şu somut eylemi dene: ${_sentence(card.advice)}',
+    'One grounded experiment is to ${_lowerFirst(_sentence(second.advice))}': 'Try this grounded action: ${_sentence(second.advice)}',
+    'Un experimento concreto es ${_lowerFirst(_sentence(second.advice))}': 'Prueba esta acción concreta: ${_sentence(second.advice)}',
+    'Une expérience concrète consiste à ${_lowerFirst(_sentence(second.advice))}': 'Essayez cette action concrète : ${_sentence(second.advice)}',
+    'Um experimento concreto é ${_lowerFirst(_sentence(second.advice))}': 'Experimente esta ação concreta: ${_sentence(second.advice)}',
+    'Tek somut deney şu olabilir: ${_lowerFirst(_sentence(second.advice))}': 'Şu somut eylemi dene: ${_sentence(second.advice)}',
+}
+for old, new in grammar_replacements.items():
+    source = source.replace(old, new)
+source = source.replace(
+    "\nString _lowerFirst(String value) {\n  final text = value.trim();\n  if (text.isEmpty) return text;\n  return '${text[0].toLowerCase()}${text.substring(1)}';\n}\n",
+    '\n',
+)
+synthesis.write_text(source, encoding='utf-8')
+
 privacy = root / 'lib/src/launch_differentiation.dart'
 source = privacy.read_text(encoding='utf-8')
 replacements = {
