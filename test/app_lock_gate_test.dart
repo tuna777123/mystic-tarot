@@ -15,12 +15,12 @@ void main() {
       AppLockGate(
         service: service,
         authenticator: const FakeAuthenticator(available: false),
+        languageCodeLoader: () async => 'en',
         promptDelay: Duration.zero,
         child: const MaterialApp(home: Scaffold(body: Text('PRIVATE APP'))),
       ),
     );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 20));
+    await _pumpUntilFound(tester, find.text('Protect your private journal'));
 
     expect(find.text('Protect your private journal'), findsOneWidget);
     await tester.tap(find.text('Enable lock'));
@@ -46,6 +46,7 @@ void main() {
       AppLockGate(
         service: service,
         authenticator: const FakeAuthenticator(available: false),
+        languageCodeLoader: () async => 'en',
         child: const MaterialApp(home: Scaffold(body: Text('PRIVATE APP'))),
       ),
     );
@@ -76,6 +77,7 @@ void main() {
           available: true,
           authenticated: true,
         ),
+        languageCodeLoader: () async => 'en',
         child: const MaterialApp(home: Scaffold(body: Text('PRIVATE APP'))),
       ),
     );
