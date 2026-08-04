@@ -2,7 +2,7 @@
 
 This is the canonical launch handoff for App Store Connect, Google Play Console, and RevenueCat.
 
-Current verified source version: `1.22.0+29`. Android, web, and unsigned iOS release builds must pass before signing and submission.
+Current verified source version: `1.22.1+30`. Android, web, and unsigned iOS release builds must pass before signing and submission.
 
 ## Positioning
 

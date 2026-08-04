@@ -18,7 +18,10 @@ void main() {
       lessThan(engine.indexOf('if (completedArcanaDays < 22')),
     );
     expect(engine, contains('_calendarDayDifference(latest.createdAt, now)'));
-    expect(engine, contains(".map((record) => _calendarDayKey(record.createdAt))"));
+    expect(
+      engine,
+      contains(".map((record) => _calendarDayKey(record.createdAt))"),
+    );
     expect(
       engineTests,
       contains('same-day binge use does not masquerade as a durable habit'),
