@@ -91,6 +91,32 @@ void main() {
     expect(result.nextAction.priority, 90);
   });
 
+  test('earned private patterns surface before another content chapter', () {
+    final records = [
+      record(createdAt: now, cardName: 'The Star'),
+      record(
+        createdAt: now.subtract(const Duration(days: 1)),
+        cardName: 'The Star',
+      ),
+      record(
+        createdAt: now.subtract(const Duration(days: 2)),
+        emotion: EmotionalState.hopeful,
+      ),
+    ];
+
+    final result = engine.analyze(
+      records: records,
+      streak: 3,
+      completedArcanaDays: 1,
+      freeReadingsLeft: 2,
+      now: now,
+    );
+
+    expect(result.hasVisiblePattern, isTrue);
+    expect(result.nextAction.type, MysticNextActionType.reviewPattern);
+    expect(result.nextAction.priority, 85);
+  });
+
   test('old readings do not resurface as Mirror tasks without due evidence', () {
     final records = [
       record(createdAt: now),
@@ -132,6 +158,41 @@ void main() {
 
     expect(result.hasVisiblePattern, isTrue);
     expect(result.premiumValueScore, greaterThanOrEqualTo(50));
+  });
+
+  test('same-day binge use does not masquerade as a durable habit', () {
+    final records = List.generate(
+      12,
+      (index) => record(
+        createdAt: now.subtract(Duration(minutes: index * 5)),
+        kind: ReadingKind.love,
+        cardName: index.isEven ? 'The Star' : 'The Fool',
+      ),
+    );
+
+    final result = engine.analyze(
+      records: records,
+      streak: 8,
+      completedArcanaDays: 8,
+      freeReadingsLeft: 0,
+      now: now,
+    );
+
+    expect(result.stage, MysticGrowthStage.activated);
+    expect(result.premiumValueScore, lessThan(100));
+  });
+
+  test('calendar-day return is recognized even when less than 24 hours passed', () {
+    final afterMidnight = DateTime(2026, 7, 25, 1);
+    final result = engine.analyze(
+      records: [record(createdAt: DateTime(2026, 7, 24, 23))],
+      streak: 2,
+      completedArcanaDays: 0,
+      freeReadingsLeft: 3,
+      now: afterMidnight,
+    );
+
+    expect(result.returnState, MysticReturnState.returnedNextDay);
   });
 
   test('habit stage requires meaningful repeated use', () {
