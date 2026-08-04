@@ -15,10 +15,12 @@ void main() {
     ).readAsStringSync();
     final notes = File('RELEASE_NOTES.md').readAsStringSync();
 
-    final version = RegExp(r'version: 1\.(\d+)\.0\+(\d+)').firstMatch(pubspec);
+    final version = RegExp(
+      r'version: 1\.(\d+)\.(\d+)\+(\d+)',
+    ).firstMatch(pubspec);
     expect(version, isNotNull);
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(18));
-    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(24));
+    expect(int.parse(version.group(3)!), greaterThanOrEqualTo(24));
     expect(app, contains("import 'private_journal_transfer_screen.dart';"));
     expect(app, contains('onJournalRestored: _applyRestoredJournal'));
     expect(app, contains('PrivateJournalTransferScreen('));

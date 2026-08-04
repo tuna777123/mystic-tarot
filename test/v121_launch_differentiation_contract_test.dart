@@ -17,7 +17,12 @@ void main() {
     ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.21.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.21.0+27'));
+    final version = RegExp(
+      r'version: 1\.(\d+)\.(\d+)\+(\d+)',
+    ).firstMatch(pubspec);
+    expect(version, isNotNull);
+    expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(21));
+    expect(int.parse(version.group(3)!), greaterThanOrEqualTo(27));
     expect(app, contains("import 'launch_differentiation.dart';"));
     expect(app, contains("import 'reading_synthesis.dart';"));
     expect(app, contains('LaunchContinuityTimeline('));

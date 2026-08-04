@@ -5,20 +5,23 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('v1.19 protected transfer release contract stays complete', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
-    final protection =
-        File('lib/src/journal_transfer_protection.dart').readAsStringSync();
-    final service =
-        File('lib/src/private_journal_transfer.dart').readAsStringSync();
-    final screen =
-        File('lib/src/private_journal_transfer_screen.dart').readAsStringSync();
+    final protection = File(
+      'lib/src/journal_transfer_protection.dart',
+    ).readAsStringSync();
+    final service = File(
+      'lib/src/private_journal_transfer.dart',
+    ).readAsStringSync();
+    final screen = File(
+      'lib/src/private_journal_transfer_screen.dart',
+    ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.19.md').readAsStringSync();
 
     final version = RegExp(
-      r'version: 1\.(\d+)\.0\+(\d+)',
+      r'version: 1\.(\d+)\.(\d+)\+(\d+)',
     ).firstMatch(pubspec);
     expect(version, isNotNull);
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(19));
-    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(25));
+    expect(int.parse(version.group(3)!), greaterThanOrEqualTo(25));
     expect(pubspec, contains('cryptography: ^2.9.0'));
     expect(protection, contains("marker = 'MYSTIC-TAROT-JOURNAL-V2'"));
     expect(protection, contains('AesGcm.with256bits()'));

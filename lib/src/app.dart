@@ -3,11 +3,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'app_language.dart';
+import 'app_locale.dart';
 import 'daily_practice.dart';
 import 'daily_state.dart';
 import 'flagship.dart';
@@ -146,6 +148,9 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
     title: 'Mystic Tarot',
     navigatorKey: navigatorKey,
     debugShowCheckedModeBanner: false,
+    locale: mysticLocale(language),
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    supportedLocales: mysticSupportedLocales,
     theme: buildMysticTheme(),
     builder: (context, child) {
       final width = MediaQuery.sizeOf(context).width;

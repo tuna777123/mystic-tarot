@@ -17,10 +17,12 @@ void main() {
     ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.20.md').readAsStringSync();
 
-    final version = RegExp(r'version: 1\.(\d+)\.0\+(\d+)').firstMatch(pubspec);
+    final version = RegExp(
+      r'version: 1\.(\d+)\.(\d+)\+(\d+)',
+    ).firstMatch(pubspec);
     expect(version, isNotNull);
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(20));
-    expect(int.parse(version.group(2)!), greaterThanOrEqualTo(26));
+    expect(int.parse(version.group(3)!), greaterThanOrEqualTo(26));
     expect(pubspec, contains('flutter_secure_storage: ^10.3.1'));
     expect(pubspec, contains('local_auth: ^3.0.2'));
     expect(main, contains("import 'src/app_lock_gate.dart';"));
@@ -34,7 +36,9 @@ void main() {
     expect(lock, contains('LocalAuthentication'));
     expect(gate, contains('backgroundGrace = const Duration(seconds: 5)'));
     expect(gate, contains('There is no cloud reset or hidden recovery key.'));
-    expect(gate, isNot(contains('MysticLanguage')));
+    expect(gate, contains("import 'app_locale.dart';"));
+    expect(gate, isNot(contains("import 'flagship.dart';")));
+    expect(gate, isNot(contains('MysticLanguage.')));
     expect(configurator, contains('android.permission.USE_BIOMETRIC'));
     expect(configurator, contains('FlutterFragmentActivity'));
     expect(configurator, contains('android:allowBackup="false"'));

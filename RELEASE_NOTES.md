@@ -1,3 +1,11 @@
+# Mystic Tarot 1.21.1 — Prelaunch Hardening
+
+- App-lock, PIN, biometric, and native Material controls now follow the language selected inside Mystic rather than leaking the device language.
+- Background/resume relocking refreshes the selected language and preserves the configured grace period.
+- CI now rejects unformatted Dart and whitespace defects.
+- A macOS/Xcode gate builds the unsigned iOS release before store submission.
+- Version `1.21.1+28`.
+
 # Mystic Tarot 1.21.0 — A Reading That Continues
 
 Mystic Tarot now makes its defining advantage unmistakable in the first session: a private reading becomes a 24-hour reality check and, with enough evidence, an explainable personal pattern.
