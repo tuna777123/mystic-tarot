@@ -1,0 +1,70 @@
+name: Integrate Mystic Tarot v1.20
+
+on:
+  push:
+    branches:
+      - feature/v1.20-launch-differentiation
+    paths:
+      - tool/v120_integrate.py
+      - .github/workflows/v120-integrate.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mystic-tarot-v120-integration
+  cancel-in-progress: false
+
+jobs:
+  integrate-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply focused v1.20 product changes
+        run: python tool/v120_integrate.py
+
+      - name: Format Dart sources
+        run: dart format lib test
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Complete automated tests
+        run: flutter test
+
+      - name: Build release web app
+        run: flutter build web --release
+
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
+      - name: Verify clean patch
+        run: git diff --check
+
+      - name: Commit verified v1.20 release candidate
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "release: Mystic Tarot 1.20 launch differentiation"
+          git push origin HEAD:feature/v1.20-launch-differentiation
