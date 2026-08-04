@@ -7,6 +7,12 @@ on:
     paths:
       - tool/v120_integrate.py
       - .github/workflows/v120-integrate.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - tool/v120_integrate.py
+      - .github/workflows/v120-integrate.yml
 
 permissions:
   contents: write
@@ -23,6 +29,7 @@ jobs:
       - name: Check out feature branch
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Set up Java
