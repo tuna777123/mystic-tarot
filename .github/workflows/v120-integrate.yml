@@ -6,12 +6,14 @@ on:
       - feature/v1.20-launch-differentiation
     paths:
       - tool/v120_integrate.py
+      - tool/v120_run.py
       - .github/workflows/v120-integrate.yml
   pull_request:
     branches:
       - main
     paths:
       - tool/v120_integrate.py
+      - tool/v120_run.py
       - .github/workflows/v120-integrate.yml
 
 permissions:
@@ -45,10 +47,19 @@ jobs:
           cache: true
 
       - name: Apply focused v1.20 product changes
-        run: python tool/v120_integrate.py
+        run: python tool/v120_run.py
 
-      - name: Format Dart sources
-        run: dart format lib test
+      - name: Format only v1.20 files
+        run: >-
+          dart format
+          lib/src/app.dart
+          lib/src/launch_differentiation.dart
+          lib/src/mystic_next_step.dart
+          lib/src/reading_synthesis.dart
+          lib/src/store_ready_premium_screen.dart
+          test/launch_differentiation_test.dart
+          test/reading_synthesis_test.dart
+          test/v120_launch_differentiation_contract_test.dart
 
       - name: Install dependencies
         run: flutter pub get
