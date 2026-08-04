@@ -31,8 +31,8 @@ void main() {
     expect(state.failedAttempts, 5);
     expect(state.remainingLockout(now), const Duration(seconds: 30));
 
-    expect(
-      () => service.verifyPin(
+    await expectLater(
+      service.verifyPin(
         '135790',
         now: now.add(const Duration(seconds: 1)),
       ),
@@ -51,8 +51,8 @@ void main() {
   test('biometrics require an enabled PIN lock', () async {
     final service = AppLockService(store: MemoryAppLockStore());
 
-    expect(
-      () => service.setBiometricsEnabled(true),
+    await expectLater(
+      service.setBiometricsEnabled(true),
       throwsA(isA<StateError>()),
     );
 
@@ -91,12 +91,12 @@ void main() {
   test('PIN must contain exactly six digits', () async {
     final service = AppLockService(store: MemoryAppLockStore());
 
-    expect(
-      () => service.enableWithPin('12345'),
+    await expectLater(
+      service.enableWithPin('12345'),
       throwsA(isA<ArgumentError>()),
     );
-    expect(
-      () => service.enableWithPin('12345x'),
+    await expectLater(
+      service.enableWithPin('12345x'),
       throwsA(isA<ArgumentError>()),
     );
   });
