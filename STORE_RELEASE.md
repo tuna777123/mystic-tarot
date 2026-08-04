@@ -4,9 +4,9 @@ This is the canonical launch handoff for App Store Connect, Google Play Console,
 
 ## Positioning
 
-**Category:** Lifestyle  
-**Primary promise:** A private daily tarot ritual that remembers recurring cards, emotions, and choices.  
-**Differentiator:** Mystic combines cinematic readings with pattern memory, a 24-hour reflection loop, and a collectible 78-card journey instead of delivering one disposable prediction.
+**Category:** Lifestyle
+**Primary promise:** A private reading that becomes tomorrow’s reality check and, with enough evidence, an explainable personal pattern.
+**Differentiator:** Mystic connects cinematic readings, transparent interpretation, the 24-hour Mystic Mirror, weekly pattern evidence, and optional whole-app PIN and supported-device biometric protection instead of delivering one disposable prediction or generic AI fortune.
 
 ## Permanent identifiers
 
@@ -21,28 +21,28 @@ Changing the bundle/application IDs after the first store upload is disruptive. 
 
 ## App Store metadata
 
-**Name (30 characters max)**  
+**Name (30 characters max)**
 Mystic Tarot: Daily Ritual
 
-**Subtitle (30 characters max)**  
+**Subtitle (30 characters max)**
 Tarot, Journal & Patterns
 
-**Promotional text**  
+**Promotional text**
 Reveal the cards, notice what returns, and turn each reading into a private ritual that grows more meaningful over time.
 
-**Keywords (100 characters max)**  
+**Keywords (100 characters max)**
 tarot,daily card,journal,oracle,reflection,spiritual,arcana,mindfulness,horoscope,self care
 
-**Primary category:** Lifestyle  
+**Primary category:** Lifestyle
 **Secondary category:** Entertainment
 
-**Privacy policy URL**  
+**Privacy policy URL**
 https://tuna777123.github.io/mystic-tarot/privacy.html
 
-**Support URL**  
+**Support URL**
 https://tuna777123.github.io/mystic-tarot/support.html
 
-**Marketing URL**  
+**Marketing URL**
 https://tuna777123.github.io/mystic-tarot/
 
 Localized store metadata:
@@ -54,10 +54,10 @@ Localized store metadata:
 
 ## Google Play metadata
 
-**App name (30 characters max)**  
+**App name (30 characters max)**
 Mystic Tarot: Daily Ritual
 
-**Short description (80 characters max)**  
+**Short description (80 characters max)**
 Private tarot readings, pattern memory, a journal, and a daily ritual.
 
 **Full description**

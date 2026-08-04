@@ -35,11 +35,11 @@ String buildReadingSynthesis({
     final card = lenses.single;
     return _copy(
       language,
-      en: '$context ${card.name} appears in ${card.position.toLowerCase()}. ${_sentence(card.meaning)} One grounded experiment is to ${_lowerFirst(_sentence(card.advice))} Record what actually changes over the next twenty-four hours. This is a reflective invitation, not a prediction or certainty.',
-      es: '$context ${card.name} aparece en ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Un experimento concreto es ${_lowerFirst(_sentence(card.advice))} Registra qué cambia realmente durante las próximas veinticuatro horas. Es una invitación a reflexionar, no una predicción ni una certeza.',
-      fr: '$context ${card.name} apparaît dans ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Une expérience concrète consiste à ${_lowerFirst(_sentence(card.advice))} Notez ce qui change réellement pendant les prochaines vingt-quatre heures. C’est une invitation à réfléchir, pas une prédiction ni une certitude.',
-      pt: '$context ${card.name} aparece em ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Um experimento concreto é ${_lowerFirst(_sentence(card.advice))} Registre o que realmente muda nas próximas vinte e quatro horas. É um convite à reflexão, não uma previsão nem uma certeza.',
-      tr: '$context ${card.name}, ${card.position.toLowerCase()} konumunda beliriyor. ${_sentence(card.meaning)} Tek ve somut deney şu olabilir: ${_lowerFirst(_sentence(card.advice))} Önümüzdeki yirmi dört saatte gerçekte neyin değiştiğini kaydet. Bu, düşünmeye yönelik bir davettir; kehanet veya kesinlik değildir.',
+      en: '$context ${card.name} appears in ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Try this grounded action: ${_sentence(card.advice)} Record what actually changes over the next twenty-four hours. This is a reflective invitation, not a prediction or certainty.',
+      es: '$context ${card.name} aparece en ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Prueba esta acción concreta: ${_sentence(card.advice)} Registra qué cambia realmente durante las próximas veinticuatro horas. Es una invitación a reflexionar, no una predicción ni una certeza.',
+      fr: '$context ${card.name} apparaît dans ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Essayez cette action concrète : ${_sentence(card.advice)} Notez ce qui change réellement pendant les prochaines vingt-quatre heures. C’est une invitation à réfléchir, pas une prédiction ni une certitude.',
+      pt: '$context ${card.name} aparece em ${card.position.toLowerCase()}. ${_sentence(card.meaning)} Experimente esta ação concreta: ${_sentence(card.advice)} Registre o que realmente muda nas próximas vinte e quatro horas. É um convite à reflexão, não uma previsão nem uma certeza.',
+      tr: '$context ${card.name}, ${card.position.toLowerCase()} konumunda beliriyor. ${_sentence(card.meaning)} Şu somut eylemi dene: ${_sentence(card.advice)} Önümüzdeki yirmi dört saatte gerçekte neyin değiştiğini kaydet. Bu, düşünmeye yönelik bir davettir; kehanet veya kesinlik değildir.',
     );
   }
 
@@ -48,11 +48,11 @@ String buildReadingSynthesis({
     final second = lenses[1];
     return _copy(
       language,
-      en: '$context ${first.name} frames ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${second.name} frames ${second.position.toLowerCase()}: ${_sentence(second.meaning)} Read together, the cards compare two emphases rather than naming a predetermined winner. One grounded experiment is to ${_lowerFirst(_sentence(second.advice))} Record what actually changes after twenty-four hours instead of treating either path as certainty.',
-      es: '$context ${first.name} enmarca ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${second.name} enmarca ${second.position.toLowerCase()}: ${_sentence(second.meaning)} Leídas juntas, las cartas comparan dos énfasis en lugar de declarar un resultado predeterminado. Un experimento concreto es ${_lowerFirst(_sentence(second.advice))} Registra qué cambia realmente después de veinticuatro horas sin tratar ninguno de los caminos como certeza.',
-      fr: '$context ${first.name} éclaire ${first.position.toLowerCase()} : ${_sentence(first.meaning)} ${second.name} éclaire ${second.position.toLowerCase()} : ${_sentence(second.meaning)} Ensemble, les cartes comparent deux accents sans désigner un résultat prédéterminé. Une expérience concrète consiste à ${_lowerFirst(_sentence(second.advice))} Notez ce qui change réellement après vingt-quatre heures sans traiter l’une des voies comme une certitude.',
-      pt: '$context ${first.name} enquadra ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${second.name} enquadra ${second.position.toLowerCase()}: ${_sentence(second.meaning)} Juntas, as cartas comparam duas ênfases em vez de declarar um resultado predeterminado. Um experimento concreto é ${_lowerFirst(_sentence(second.advice))} Registre o que realmente muda após vinte e quatro horas sem tratar nenhum caminho como certeza.',
-      tr: '$context ${first.name}, ${first.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(first.meaning)} ${second.name}, ${second.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(second.meaning)} Birlikte okunduğunda kartlar önceden belirlenmiş bir kazanan söylemek yerine iki vurguyu karşılaştırıyor. Tek somut deney şu olabilir: ${_lowerFirst(_sentence(second.advice))} İki yoldan birini kesinlik saymak yerine yirmi dört saat sonra gerçekte neyin değiştiğini kaydet.',
+      en: '$context ${first.name} frames ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${second.name} frames ${second.position.toLowerCase()}: ${_sentence(second.meaning)} Read together, the cards compare two emphases rather than naming a predetermined winner. Try this grounded action: ${_sentence(second.advice)} Record what actually changes after twenty-four hours instead of treating either path as certainty.',
+      es: '$context ${first.name} enmarca ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${second.name} enmarca ${second.position.toLowerCase()}: ${_sentence(second.meaning)} Leídas juntas, las cartas comparan dos énfasis en lugar de declarar un resultado predeterminado. Prueba esta acción concreta: ${_sentence(second.advice)} Registra qué cambia realmente después de veinticuatro horas sin tratar ninguno de los caminos como certeza.',
+      fr: '$context ${first.name} éclaire ${first.position.toLowerCase()} : ${_sentence(first.meaning)} ${second.name} éclaire ${second.position.toLowerCase()} : ${_sentence(second.meaning)} Ensemble, les cartes comparent deux accents sans désigner un résultat prédéterminé. Essayez cette action concrète : ${_sentence(second.advice)} Notez ce qui change réellement après vingt-quatre heures sans traiter l’une des voies comme une certitude.',
+      pt: '$context ${first.name} enquadra ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${second.name} enquadra ${second.position.toLowerCase()}: ${_sentence(second.meaning)} Juntas, as cartas comparam duas ênfases em vez de declarar um resultado predeterminado. Experimente esta ação concreta: ${_sentence(second.advice)} Registre o que realmente muda após vinte e quatro horas sem tratar nenhum caminho como certeza.',
+      tr: '$context ${first.name}, ${first.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(first.meaning)} ${second.name}, ${second.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(second.meaning)} Birlikte okunduğunda kartlar önceden belirlenmiş bir kazanan söylemek yerine iki vurguyu karşılaştırıyor. Şu somut eylemi dene: ${_sentence(second.advice)} İki yoldan birini kesinlik saymak yerine yirmi dört saat sonra gerçekte neyin değiştiğini kaydet.',
     );
   }
 
@@ -143,32 +143,30 @@ String _context(
   MysticLanguage language, {
   required String emotion,
   required String intention,
-}) =>
-    _copy(
-      language,
-      en: 'You began this reading feeling ${emotion.toLowerCase()} and holding ${intention.toLowerCase()} as your intention.',
-      es: 'Comenzaste esta lectura sintiéndote ${emotion.toLowerCase()} y sosteniendo ${intention.toLowerCase()} como intención.',
-      fr: 'Vous avez commencé ce tirage avec un ressenti ${emotion.toLowerCase()} et l’intention ${intention.toLowerCase()}.',
-      pt: 'Você começou esta leitura se sentindo ${emotion.toLowerCase()} e mantendo ${intention.toLowerCase()} como intenção.',
-      tr: 'Bu okumaya ${emotion.toLowerCase()} hissederek ve ${intention.toLowerCase()} niyetini taşıyarak başladın.',
-    );
+}) => _copy(
+  language,
+  en: 'You began this reading feeling ${emotion.toLowerCase()} and holding ${intention.toLowerCase()} as your intention.',
+  es: 'Comenzaste esta lectura sintiéndote ${emotion.toLowerCase()} y sosteniendo ${intention.toLowerCase()} como intención.',
+  fr: 'Vous avez commencé ce tirage avec un ressenti ${emotion.toLowerCase()} et l’intention ${intention.toLowerCase()}.',
+  pt: 'Você começou esta leitura se sentindo ${emotion.toLowerCase()} e mantendo ${intention.toLowerCase()} como intenção.',
+  tr: 'Bu okumaya ${emotion.toLowerCase()} hissederek ve ${intention.toLowerCase()} niyetini taşıyarak başladın.',
+);
 
 _ReadingLens _lens(
   ReadingKind kind,
   DrawnCard card,
   int index,
   MysticLanguage language,
-) =>
-    _ReadingLens(
-      name: localizedTarotCardName(card.card.name, languageCode: language.code),
-      position: localizedReadingPosition(
-        kind: kind,
-        index: index,
-        language: language,
-      ),
-      meaning: localizedTarotCardMeaning(card, languageCode: language.code),
-      advice: localizedTarotCardAdvice(card, languageCode: language.code),
-    );
+) => _ReadingLens(
+  name: localizedTarotCardName(card.card.name, languageCode: language.code),
+  position: localizedReadingPosition(
+    kind: kind,
+    index: index,
+    language: language,
+  ),
+  meaning: localizedTarotCardMeaning(card, languageCode: language.code),
+  advice: localizedTarotCardAdvice(card, languageCode: language.code),
+);
 
 class _ReadingLens {
   const _ReadingLens({
@@ -224,12 +222,6 @@ String _sentence(String value) {
   return '$text.';
 }
 
-String _lowerFirst(String value) {
-  final text = value.trim();
-  if (text.isEmpty) return text;
-  return '${text[0].toLowerCase()}${text.substring(1)}';
-}
-
 String _copy(
   MysticLanguage language, {
   required String en,
@@ -237,11 +229,10 @@ String _copy(
   required String fr,
   required String pt,
   required String tr,
-}) =>
-    switch (language) {
-      MysticLanguage.turkish => tr,
-      MysticLanguage.spanish => es,
-      MysticLanguage.french => fr,
-      MysticLanguage.portugueseBrazil => pt,
-      _ => en,
-    };
+}) => switch (language) {
+  MysticLanguage.turkish => tr,
+  MysticLanguage.spanish => es,
+  MysticLanguage.french => fr,
+  MysticLanguage.portugueseBrazil => pt,
+  _ => en,
+};

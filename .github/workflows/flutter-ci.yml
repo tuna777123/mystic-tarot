@@ -32,26 +32,6 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Materialize v1.21 release candidate
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1.21-launch-differentiation'
-        run: python tool/v121_integrate.py
-
-      - name: Format v1.21 release files
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1.21-launch-differentiation'
-        run: >-
-          dart format
-          lib/src/app.dart
-          lib/src/launch_differentiation.dart
-          lib/src/mystic_next_step.dart
-          lib/src/reading_position.dart
-          lib/src/reading_synthesis.dart
-          lib/src/store_ready_premium_screen.dart
-          test/launch_differentiation_test.dart
-          test/reading_synthesis_test.dart
-          test/v118_private_journal_transfer_contract_test.dart
-          test/v120_private_app_lock_contract_test.dart
-          test/v121_launch_differentiation_contract_test.dart
-
       - name: Generate platform shells
         run: flutter create . --platforms=android,ios --org com.tunabozcali
 
@@ -88,30 +68,6 @@ jobs:
 
       - name: Build Android release bundle
         run: flutter build appbundle --release
-
-      - name: Upload verified v1.21 source
-        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1.21-launch-differentiation'
-        uses: actions/upload-artifact@v4
-        with:
-          name: mystic-tarot-v121-verified-source
-          if-no-files-found: error
-          path: |
-            lib/src/app.dart
-            lib/src/launch_differentiation.dart
-            lib/src/mystic_next_step.dart
-            lib/src/reading_position.dart
-            lib/src/reading_synthesis.dart
-            lib/src/store_ready_premium_screen.dart
-            pubspec.yaml
-            README.md
-            STORE_RELEASE.md
-            RELEASE_NOTES.md
-            RELEASE_NOTES_1.21.md
-            test/launch_differentiation_test.dart
-            test/reading_synthesis_test.dart
-            test/v118_private_journal_transfer_contract_test.dart
-            test/v120_private_app_lock_contract_test.dart
-            test/v121_launch_differentiation_contract_test.dart
 
       - name: Upload web release
         uses: actions/upload-artifact@v4

@@ -23,37 +23,43 @@ void main() {
   };
   const unsafeTokens = <MysticLanguage, List<String>>{
     MysticLanguage.english: ['guaranteed', 'definitely will', 'must happen'],
-    MysticLanguage.turkish: ['kesin olacak', 'garantili', 'mutlaka gerçekleşecek'],
+    MysticLanguage.turkish: [
+      'kesin olacak',
+      'garantili',
+      'mutlaka gerçekleşecek',
+    ],
     MysticLanguage.spanish: ['garantizado', 'ocurrirá sin duda'],
     MysticLanguage.french: ['garanti', 'arrivera certainement'],
     MysticLanguage.portugueseBrazil: ['garantido', 'vai acontecer com certeza'],
   };
 
   for (final language in languages) {
-    test('single-card synthesis is grounded and bounded in ${language.code}', () {
-      final card = DrawnCard(tarotDeck.first, false);
-      final result = buildReadingSynthesis(
-        kind: ReadingKind.daily,
-        cards: [card],
-        emotion: EmotionalState.grounded,
-        intention: 'Clarity',
-        language: language,
-      );
-      final lower = result.toLowerCase();
-      expect(result.trim().length, greaterThan(150));
-      expect(
-        result,
-        contains(localizedTarotCardName(
-          card.card.name,
-          languageCode: language.code,
-        )),
-      );
-      expect(lower, contains(boundaryTokens[language]!));
-      for (final token in unsafeTokens[language]!) {
-        expect(lower, isNot(contains(token)));
-      }
-      _expectCleanCopy(result);
-    });
+    test(
+      'single-card synthesis is grounded and bounded in ${language.code}',
+      () {
+        final card = DrawnCard(tarotDeck.first, false);
+        final result = buildReadingSynthesis(
+          kind: ReadingKind.daily,
+          cards: [card],
+          emotion: EmotionalState.grounded,
+          intention: 'Clarity',
+          language: language,
+        );
+        final lower = result.toLowerCase();
+        expect(result.trim().length, greaterThan(150));
+        expect(
+          result,
+          contains(
+            localizedTarotCardName(card.card.name, languageCode: language.code),
+          ),
+        );
+        expect(lower, contains(boundaryTokens[language]!));
+        for (final token in unsafeTokens[language]!) {
+          expect(lower, isNot(contains(token)));
+        }
+        _expectCleanCopy(result);
+      },
+    );
 
     for (final kind in ReadingKind.values.where((item) => item.cardCount > 1)) {
       test('${kind.name} synthesis is coherent in ${language.code}', () {
@@ -71,10 +77,7 @@ void main() {
         final lower = result.toLowerCase();
         final names = <String>[
           for (final card in cards)
-            localizedTarotCardName(
-              card.card.name,
-              languageCode: language.code,
-            ),
+            localizedTarotCardName(card.card.name, languageCode: language.code),
         ];
         expect(result.trim().length, greaterThan(260));
         expect(result, contains(names.first));
@@ -149,17 +152,17 @@ int _occurrences(String source, String pattern) =>
     pattern.isEmpty ? 0 : source.split(pattern).length - 1;
 
 String _compatibilityActionLabel(MysticLanguage language) => switch (language) {
-      MysticLanguage.turkish => 'Bağ için sıradaki dürüst adım',
-      MysticLanguage.spanish => 'El siguiente paso honesto para el vínculo',
-      MysticLanguage.french => 'La prochaine étape honnête pour le lien',
-      MysticLanguage.portugueseBrazil => 'O próximo passo honesto para a conexão',
-      _ => 'The next honest step for the connection',
-    };
+  MysticLanguage.turkish => 'Bağ için sıradaki dürüst adım',
+  MysticLanguage.spanish => 'El siguiente paso honesto para el vínculo',
+  MysticLanguage.french => 'La prochaine étape honnête pour le lien',
+  MysticLanguage.portugueseBrazil => 'O próximo passo honesto para a conexão',
+  _ => 'The next honest step for the connection',
+};
 
 String _timelineAgencyLabel(MysticLanguage language) => switch (language) {
-      MysticLanguage.turkish => 'Gidişatı değiştirebilecek seçim',
-      MysticLanguage.spanish => 'La elección que puede cambiar la trayectoria',
-      MysticLanguage.french => 'Le choix qui peut changer la trajectoire',
-      MysticLanguage.portugueseBrazil => 'A escolha que pode mudar a trajetória',
-      _ => 'The choice that can change the trajectory',
-    };
+  MysticLanguage.turkish => 'Gidişatı değiştirebilecek seçim',
+  MysticLanguage.spanish => 'La elección que puede cambiar la trayectoria',
+  MysticLanguage.french => 'Le choix qui peut changer la trajectoire',
+  MysticLanguage.portugueseBrazil => 'A escolha que pode mudar a trajetória',
+  _ => 'The choice that can change the trajectory',
+};
