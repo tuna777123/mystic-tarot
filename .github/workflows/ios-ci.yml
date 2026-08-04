@@ -1,0 +1,54 @@
+name: iOS Release CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-release-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios-release:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate iOS shell
+        run: flutter create . --platforms=ios --org com.tunabozcali
+
+      - name: Configure permanent store identity
+        run: dart run tool/configure_store_identifiers.dart
+
+      - name: Configure daily ritual notifications
+        run: dart run tool/configure_ritual_notifications.dart
+
+      - name: Configure private app lock
+        run: dart run tool/configure_app_lock.dart
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate branded native icons
+        run: dart run flutter_launcher_icons
+
+      - name: Build unsigned iOS release
+        run: flutter build ios --release --no-codesign
+
+      - name: Verify release application
+        run: |
+          test -d build/ios/iphoneos/Runner.app
+          grep -q 'com.tunabozcali.mystictarot' ios/Runner.xcodeproj/project.pbxproj
