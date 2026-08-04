@@ -1,3 +1,3 @@
-Apply the reviewed v1.21.1 prelaunch hardening patch and commit only clean product, test, documentation, and permanent CI sources.
+Apply the reviewed v1.21.1 prelaunch hardening patch and commit only clean product, test, and documentation sources.
 
-Trigger: final clean-source commit respecting the repository's ignored lockfile policy.
+Trigger: source-only finalization; permanent workflow updates are applied separately with workflow permission.
