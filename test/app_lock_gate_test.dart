@@ -7,8 +7,9 @@ import 'package:mystic_tarot/src/app_lock_gate.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('offers setup and unlocks the child after creating a PIN',
-      (tester) async {
+  testWidgets('offers setup and unlocks the child after creating a PIN', (
+    tester,
+  ) async {
     final service = testAppLockService(MemoryAppLockStore());
 
     await tester.pumpWidget(
@@ -37,8 +38,9 @@ void main() {
     expect((await service.loadState()).enabled, isTrue);
   });
 
-  testWidgets('enabled lock hides the app until the correct PIN is entered',
-      (tester) async {
+  testWidgets('enabled lock hides the app until the correct PIN is entered', (
+    tester,
+  ) async {
     final service = testAppLockService(MemoryAppLockStore());
     await service.enableWithPin('135790');
 
@@ -64,8 +66,9 @@ void main() {
     expect(find.text('PRIVATE APP'), findsOneWidget);
   });
 
-  testWidgets('successful biometrics unlocks without exposing the PIN',
-      (tester) async {
+  testWidgets('successful biometrics unlocks without exposing the PIN', (
+    tester,
+  ) async {
     final service = testAppLockService(MemoryAppLockStore());
     await service.enableWithPin('112233');
     await service.setBiometricsEnabled(true);
@@ -88,25 +91,24 @@ void main() {
   });
 }
 
-AppLockService testAppLockService(MemoryAppLockStore store) => AppLockService(
-      store: store,
-      keyDeriver: fastKeyDeriver,
-    );
+AppLockService testAppLockService(MemoryAppLockStore store) =>
+    AppLockService(store: store, keyDeriver: fastKeyDeriver);
 
 Future<SecretKey> fastKeyDeriver(String pin, List<int> salt) async {
   final pinBytes = pin.codeUnits;
-  return SecretKeyData(List<int>.generate(
-    32,
-    (index) =>
-        (pinBytes[index % pinBytes.length] + salt[index % salt.length] + index) &
-        0xff,
-  ));
+  return SecretKeyData(
+    List<int>.generate(
+      32,
+      (index) =>
+          (pinBytes[index % pinBytes.length] +
+              salt[index % salt.length] +
+              index) &
+          0xff,
+    ),
+  );
 }
 
-Future<void> _pumpUntilFound(
-  WidgetTester tester,
-  Finder finder,
-) async {
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
   for (var attempt = 0; attempt < 80 && finder.evaluate().isEmpty; attempt++) {
     await tester.pump(const Duration(milliseconds: 50));
   }

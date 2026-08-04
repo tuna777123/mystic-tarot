@@ -1,3 +1,0 @@
-Apply the reviewed v1.21.1 prelaunch hardening patch and commit only clean product, test, and documentation sources.
-
-Trigger: source-only finalization; permanent workflow updates are applied separately with workflow permission.

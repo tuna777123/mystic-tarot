@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_lock.dart';
+import 'app_locale.dart';
 import 'theme.dart';
 
 class AppLockGate extends StatefulWidget {
@@ -11,6 +13,7 @@ class AppLockGate extends StatefulWidget {
     required this.child,
     this.service,
     this.authenticator,
+    this.languageCodeLoader,
     this.promptDelay = const Duration(seconds: 6),
     this.backgroundGrace = const Duration(seconds: 5),
     super.key,
@@ -19,6 +22,7 @@ class AppLockGate extends StatefulWidget {
   final Widget child;
   final AppLockService? service;
   final AppLockAuthenticator? authenticator;
+  final Future<String> Function()? languageCodeLoader;
   final Duration promptDelay;
   final Duration backgroundGrace;
 
@@ -28,8 +32,7 @@ class AppLockGate extends StatefulWidget {
 
 enum _AppLockMode { unlocked, locked, setup, manage }
 
-class _AppLockGateState extends State<AppLockGate>
-    with WidgetsBindingObserver {
+class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   late final AppLockService _service = widget.service ?? AppLockService();
   late final AppLockAuthenticator _authenticator =
       widget.authenticator ?? DeviceAppLockAuthenticator();
@@ -42,8 +45,7 @@ class _AppLockGateState extends State<AppLockGate>
   DateTime? _backgroundedAt;
   Timer? _promptTimer;
 
-  String get _languageCode =>
-      WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+  String _languageCode = 'en';
 
   @override
   void initState() {
@@ -59,12 +61,33 @@ class _AppLockGateState extends State<AppLockGate>
     super.dispose();
   }
 
+  Future<String> _safeLanguageCode() async {
+    try {
+      final loader = widget.languageCodeLoader;
+      final code = loader == null
+          ? await loadPersistedMysticLanguageCode()
+          : await loader();
+      final normalized = code.trim();
+      return normalized.isEmpty ? 'en' : normalized;
+    } catch (_) {
+      return 'en';
+    }
+  }
+
+  Future<void> _refreshLanguage() async {
+    final code = await _safeLanguageCode();
+    if (!mounted || code == _languageCode) return;
+    setState(() => _languageCode = code);
+  }
+
   Future<void> _initialize() async {
     try {
+      final languageCode = await _safeLanguageCode();
       final state = await _service.loadState();
       final biometrics = await _authenticator.isAvailable();
       if (!mounted) return;
       setState(() {
+        _languageCode = languageCode;
         _state = state;
         _biometricAvailable = biometrics;
         _mode = state.enabled ? _AppLockMode.locked : _AppLockMode.unlocked;
@@ -73,7 +96,8 @@ class _AppLockGateState extends State<AppLockGate>
       if (state.enabled && state.biometricsEnabled && biometrics) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _useBiometrics());
       } else if (!state.enabled && !state.promptDismissed) {
-        _promptTimer = Timer(widget.promptDelay, () {
+        _promptTimer = Timer(widget.promptDelay, () async {
+          await _refreshLanguage();
           if (mounted && _mode == _AppLockMode.unlocked) {
             setState(() => _showPrompt = true);
           }
@@ -113,10 +137,16 @@ class _AppLockGateState extends State<AppLockGate>
       return;
     }
     if (_mode == _AppLockMode.unlocked) {
-      setState(() => _mode = _AppLockMode.locked);
-      if ((_state?.biometricsEnabled ?? false) && _biometricAvailable) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _useBiometrics());
-      }
+      unawaited(_lockAfterBackground());
+    }
+  }
+
+  Future<void> _lockAfterBackground() async {
+    await _refreshLanguage();
+    if (!mounted || _mode != _AppLockMode.unlocked) return;
+    setState(() => _mode = _AppLockMode.locked);
+    if ((_state?.biometricsEnabled ?? false) && _biometricAvailable) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _useBiometrics());
     }
   }
 
@@ -132,9 +162,7 @@ class _AppLockGateState extends State<AppLockGate>
 
   Future<void> _completeSetup(String pin, bool biometrics) async {
     await _service.enableWithPin(pin);
-    await _service.setBiometricsEnabled(
-      biometrics && _biometricAvailable,
-    );
+    await _service.setBiometricsEnabled(biometrics && _biometricAvailable);
     final state = await _service.loadState();
     if (!mounted) return;
     setState(() {
@@ -185,9 +213,7 @@ class _AppLockGateState extends State<AppLockGate>
   Future<void> _changePin(String pin) async {
     final biometrics = _state?.biometricsEnabled ?? false;
     await _service.enableWithPin(pin);
-    await _service.setBiometricsEnabled(
-      biometrics && _biometricAvailable,
-    );
+    await _service.setBiometricsEnabled(biometrics && _biometricAvailable);
     final state = await _service.loadState();
     if (mounted) setState(() => _state = state);
   }
@@ -253,7 +279,9 @@ class _AppLockGateState extends State<AppLockGate>
   }
 
   Widget _unlockedLayer(BuildContext context) {
-    final bottomInset = MediaQueryData.fromView(View.of(context)).padding.bottom;
+    final bottomInset = MediaQueryData.fromView(
+      View.of(context),
+    ).padding.bottom;
     final lockEnabled = _state?.enabled ?? false;
     final actionLabel = lockEnabled
         ? appLockCopy(
@@ -301,11 +329,15 @@ class _AppLockGateState extends State<AppLockGate>
                 label: actionLabel,
                 button: true,
                 child: IconButton.filledTonal(
-                  onPressed: () => setState(() {
-                    _mode = lockEnabled
-                        ? _AppLockMode.locked
-                        : _AppLockMode.setup;
-                  }),
+                  onPressed: () async {
+                    await _refreshLanguage();
+                    if (!mounted) return;
+                    setState(() {
+                      _mode = lockEnabled
+                          ? _AppLockMode.locked
+                          : _AppLockMode.setup;
+                    });
+                  },
                   icon: Icon(
                     lockEnabled ? Icons.lock_outline : Icons.shield_outlined,
                   ),
@@ -318,19 +350,22 @@ class _AppLockGateState extends State<AppLockGate>
   }
 
   Widget _overlayMaterial(Widget child) => Theme(
-        data: buildMysticTheme(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(color: Colors.transparent, child: child),
-        ),
-      );
+    data: buildMysticTheme(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(color: Colors.transparent, child: child),
+    ),
+  );
 
   Widget _standalone(Widget home) => MaterialApp(
-        title: 'Mystic Tarot',
-        debugShowCheckedModeBanner: false,
-        theme: buildMysticTheme(),
-        home: home,
-      );
+    title: 'Mystic Tarot',
+    debugShowCheckedModeBanner: false,
+    locale: mysticLocaleFromCode(_languageCode),
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    supportedLocales: mysticSupportedLocales,
+    theme: buildMysticTheme(),
+    home: home,
+  );
 }
 
 class _PrivateLoadingScreen extends StatelessWidget {
@@ -338,11 +373,9 @@ class _PrivateLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Scaffold(
-        backgroundColor: Color(0xFF080711),
-        body: Center(
-          child: CircularProgressIndicator(color: MysticColors.gold),
-        ),
-      );
+    backgroundColor: Color(0xFF080711),
+    body: Center(child: CircularProgressIndicator(color: MysticColors.gold)),
+  );
 }
 
 class _PrivacyPrompt extends StatelessWidget {
@@ -358,92 +391,92 @@ class _PrivacyPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF32204D), Color(0xFF171023)],
-          ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black54,
-              blurRadius: 24,
-              offset: Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [Color(0xFF32204D), Color(0xFF171023)],
+      ),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
+      boxShadow: const [
+        BoxShadow(color: Colors.black54, blurRadius: 24, offset: Offset(0, 8)),
+      ],
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.shield_outlined, color: MysticColors.gold),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    appLockCopy(
-                      languageCode,
-                      en: 'Protect your private journal',
-                      tr: 'Özel günlüğünü koru',
-                      es: 'Protege tu diario privado',
-                      fr: 'Protégez votre journal privé',
-                      pt: 'Proteja seu diário privado',
-                    ),
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+            const Icon(Icons.shield_outlined, color: MysticColors.gold),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                appLockCopy(
+                  languageCode,
+                  en: 'Protect your private journal',
+                  tr: 'Özel günlüğünü koru',
+                  es: 'Protege tu diario privado',
+                  fr: 'Protégez votre journal privé',
+                  pt: 'Proteja seu diário privado',
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              appLockCopy(
-                languageCode,
-                en: 'Add a six-digit PIN and optional biometrics. The PIN never leaves this device.',
-                tr: 'Altı haneli PIN ve isteğe bağlı biyometri ekle. PIN bu cihazdan asla çıkmaz.',
-                es: 'Añade un PIN de seis dígitos y biometría opcional. El PIN nunca sale del dispositivo.',
-                fr: 'Ajoutez un code à six chiffres et la biométrie facultative. Le code ne quitte jamais cet appareil.',
-                pt: 'Adicione um PIN de seis dígitos e biometria opcional. O PIN nunca sai do dispositivo.',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-              style: const TextStyle(color: MysticColors.mist, height: 1.4),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: onLater,
-                  child: Text(appLockCopy(
-                    languageCode,
-                    en: 'Not now',
-                    tr: 'Şimdi değil',
-                    es: 'Ahora no',
-                    fr: 'Pas maintenant',
-                    pt: 'Agora não',
-                  )),
-                ),
-                const SizedBox(width: 8),
-                FilledButton.icon(
-                  onPressed: onEnable,
-                  icon: const Icon(Icons.lock_outline),
-                  label: Text(appLockCopy(
-                    languageCode,
-                    en: 'Enable lock',
-                    tr: 'Kilidi etkinleştir',
-                    es: 'Activar bloqueo',
-                    fr: 'Activer le verrou',
-                    pt: 'Ativar bloqueio',
-                  )),
-                ),
-              ],
             ),
           ],
         ),
-      );
+        const SizedBox(height: 8),
+        Text(
+          appLockCopy(
+            languageCode,
+            en: 'Add a six-digit PIN and optional biometrics. The PIN never leaves this device.',
+            tr: 'Altı haneli PIN ve isteğe bağlı biyometri ekle. PIN bu cihazdan asla çıkmaz.',
+            es: 'Añade un PIN de seis dígitos y biometría opcional. El PIN nunca sale del dispositivo.',
+            fr: 'Ajoutez un code à six chiffres et la biométrie facultative. Le code ne quitte jamais cet appareil.',
+            pt: 'Adicione um PIN de seis dígitos e biometria opcional. O PIN nunca sai do dispositivo.',
+          ),
+          style: const TextStyle(color: MysticColors.mist, height: 1.4),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: onLater,
+              child: Text(
+                appLockCopy(
+                  languageCode,
+                  en: 'Not now',
+                  tr: 'Şimdi değil',
+                  es: 'Ahora no',
+                  fr: 'Pas maintenant',
+                  pt: 'Agora não',
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            FilledButton.icon(
+              onPressed: onEnable,
+              icon: const Icon(Icons.lock_outline),
+              label: Text(
+                appLockCopy(
+                  languageCode,
+                  en: 'Enable lock',
+                  tr: 'Kilidi etkinleştir',
+                  es: 'Activar bloqueo',
+                  fr: 'Activer le verrou',
+                  pt: 'Ativar bloqueio',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }
 
 class _SetupScreen extends StatefulWidget {
@@ -479,25 +512,29 @@ class _SetupScreenState extends State<_SetupScreen> {
 
   Future<void> _submit() async {
     if (!RegExp(r'^\d{6}$').hasMatch(_pin.text)) {
-      setState(() => _error = appLockCopy(
-            widget.languageCode,
-            en: 'Use exactly six digits.',
-            tr: 'Tam olarak altı rakam kullan.',
-            es: 'Usa exactamente seis dígitos.',
-            fr: 'Utilisez exactement six chiffres.',
-            pt: 'Use exatamente seis dígitos.',
-          ));
+      setState(
+        () => _error = appLockCopy(
+          widget.languageCode,
+          en: 'Use exactly six digits.',
+          tr: 'Tam olarak altı rakam kullan.',
+          es: 'Usa exactamente seis dígitos.',
+          fr: 'Utilisez exactement six chiffres.',
+          pt: 'Use exatamente seis dígitos.',
+        ),
+      );
       return;
     }
     if (_pin.text != _confirm.text) {
-      setState(() => _error = appLockCopy(
-            widget.languageCode,
-            en: 'The PINs do not match.',
-            tr: 'PIN’ler eşleşmiyor.',
-            es: 'Los PIN no coinciden.',
-            fr: 'Les codes ne correspondent pas.',
-            pt: 'Os PINs não coincidem.',
-          ));
+      setState(
+        () => _error = appLockCopy(
+          widget.languageCode,
+          en: 'The PINs do not match.',
+          tr: 'PIN’ler eşleşmiyor.',
+          es: 'Los PIN no coinciden.',
+          fr: 'Les codes ne correspondent pas.',
+          pt: 'Os PINs não coincidem.',
+        ),
+      );
       return;
     }
     setState(() {
@@ -511,14 +548,16 @@ class _SetupScreenState extends State<_SetupScreen> {
       );
     } catch (_) {
       if (mounted) {
-        setState(() => _error = appLockCopy(
-              widget.languageCode,
-              en: 'The private lock could not be saved.',
-              tr: 'Özel kilit kaydedilemedi.',
-              es: 'No se pudo guardar el bloqueo privado.',
-              fr: 'Le verrou privé n’a pas pu être enregistré.',
-              pt: 'O bloqueio privado não pôde ser salvo.',
-            ));
+        setState(
+          () => _error = appLockCopy(
+            widget.languageCode,
+            en: 'The private lock could not be saved.',
+            tr: 'Özel kilit kaydedilemedi.',
+            es: 'No se pudo guardar el bloqueo privado.',
+            fr: 'Le verrou privé n’a pas pu être enregistré.',
+            pt: 'O bloqueio privado não pôde ser salvo.',
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -527,110 +566,108 @@ class _SetupScreenState extends State<_SetupScreen> {
 
   @override
   Widget build(BuildContext context) => _LockShell(
-        title: appLockCopy(
-          widget.languageCode,
-          en: 'Create private lock',
-          tr: 'Özel kilit oluştur',
-          es: 'Crear bloqueo privado',
-          fr: 'Créer un verrou privé',
-          pt: 'Criar bloqueio privado',
+    title: appLockCopy(
+      widget.languageCode,
+      en: 'Create private lock',
+      tr: 'Özel kilit oluştur',
+      es: 'Crear bloqueo privado',
+      fr: 'Créer un verrou privé',
+      pt: 'Criar bloqueio privado',
+    ),
+    leading: IconButton(
+      onPressed: _busy ? null : widget.onCancel,
+      icon: const Icon(Icons.close),
+    ),
+    child: ListView(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+      children: [
+        const _LockHero(icon: Icons.shield_moon_outlined),
+        const SizedBox(height: 20),
+        Text(
+          appLockCopy(
+            widget.languageCode,
+            en: 'Choose a six-digit PIN',
+            tr: 'Altı haneli PIN seç',
+            es: 'Elige un PIN de seis dígitos',
+            fr: 'Choisissez un code à six chiffres',
+            pt: 'Escolha um PIN de seis dígitos',
+          ),
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
-        leading: IconButton(
-          onPressed: _busy ? null : widget.onCancel,
-          icon: const Icon(Icons.close),
+        const SizedBox(height: 8),
+        Text(
+          appLockCopy(
+            widget.languageCode,
+            en: 'Mystic stores only an encrypted verifier. There is no cloud reset or hidden recovery key.',
+            tr: 'Mystic yalnızca şifreli bir doğrulayıcı saklar. Bulut sıfırlaması veya gizli kurtarma anahtarı yoktur.',
+            es: 'Mystic solo guarda un verificador cifrado. No existe restablecimiento en la nube ni clave oculta.',
+            fr: 'Mystic ne conserve qu’un vérificateur chiffré. Il n’existe ni réinitialisation cloud ni clé cachée.',
+            pt: 'O Mystic guarda apenas um verificador criptografado. Não há redefinição na nuvem nem chave oculta.',
+          ),
+          style: const TextStyle(color: MysticColors.mist, height: 1.45),
         ),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
-          children: [
-            const _LockHero(icon: Icons.shield_moon_outlined),
-            const SizedBox(height: 20),
-            Text(
+        const SizedBox(height: 20),
+        _PinField(controller: _pin, label: 'PIN'),
+        const SizedBox(height: 12),
+        _PinField(
+          controller: _confirm,
+          label: appLockCopy(
+            widget.languageCode,
+            en: 'Confirm PIN',
+            tr: 'PIN’i doğrula',
+            es: 'Confirmar PIN',
+            fr: 'Confirmer le code',
+            pt: 'Confirmar PIN',
+          ),
+        ),
+        if (widget.biometricsAvailable) ...[
+          const SizedBox(height: 10),
+          SwitchListTile.adaptive(
+            value: _biometrics,
+            onChanged: _busy
+                ? null
+                : (value) => setState(() => _biometrics = value),
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.fingerprint, color: MysticColors.gold),
+            title: Text(
               appLockCopy(
                 widget.languageCode,
-                en: 'Choose a six-digit PIN',
-                tr: 'Altı haneli PIN seç',
-                es: 'Elige un PIN de seis dígitos',
-                fr: 'Choisissez un code à six chiffres',
-                pt: 'Escolha um PIN de seis dígitos',
-              ),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              appLockCopy(
-                widget.languageCode,
-                en: 'Mystic stores only an encrypted verifier. There is no cloud reset or hidden recovery key.',
-                tr: 'Mystic yalnızca şifreli bir doğrulayıcı saklar. Bulut sıfırlaması veya gizli kurtarma anahtarı yoktur.',
-                es: 'Mystic solo guarda un verificador cifrado. No existe restablecimiento en la nube ni clave oculta.',
-                fr: 'Mystic ne conserve qu’un vérificateur chiffré. Il n’existe ni réinitialisation cloud ni clé cachée.',
-                pt: 'O Mystic guarda apenas um verificador criptografado. Não há redefinição na nuvem nem chave oculta.',
-              ),
-              style: const TextStyle(color: MysticColors.mist, height: 1.45),
-            ),
-            const SizedBox(height: 20),
-            _PinField(controller: _pin, label: 'PIN'),
-            const SizedBox(height: 12),
-            _PinField(
-              controller: _confirm,
-              label: appLockCopy(
-                widget.languageCode,
-                en: 'Confirm PIN',
-                tr: 'PIN’i doğrula',
-                es: 'Confirmar PIN',
-                fr: 'Confirmer le code',
-                pt: 'Confirmar PIN',
+                en: 'Use biometrics',
+                tr: 'Biyometri kullan',
+                es: 'Usar biometría',
+                fr: 'Utiliser la biométrie',
+                pt: 'Usar biometria',
               ),
             ),
-            if (widget.biometricsAvailable) ...[
-              const SizedBox(height: 10),
-              SwitchListTile.adaptive(
-                value: _biometrics,
-                onChanged: _busy
-                    ? null
-                    : (value) => setState(() => _biometrics = value),
-                contentPadding: EdgeInsets.zero,
-                secondary: const Icon(
-                  Icons.fingerprint,
-                  color: MysticColors.gold,
-                ),
-                title: Text(appLockCopy(
-                  widget.languageCode,
-                  en: 'Use biometrics',
-                  tr: 'Biyometri kullan',
-                  es: 'Usar biometría',
-                  fr: 'Utiliser la biométrie',
-                  pt: 'Usar biometria',
-                )),
-              ),
-            ],
-            if (_error != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                _error!,
-                style: const TextStyle(color: Color(0xFFFF8796)),
-              ),
-            ],
-            const SizedBox(height: 22),
-            FilledButton.icon(
-              onPressed: _busy ? null : _submit,
-              icon: _busy
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.lock_outline),
-              label: Text(appLockCopy(
-                widget.languageCode,
-                en: 'Protect journal',
-                tr: 'Günlüğü koru',
-                es: 'Proteger diario',
-                fr: 'Protéger le journal',
-                pt: 'Proteger diário',
-              )),
+          ),
+        ],
+        if (_error != null) ...[
+          const SizedBox(height: 10),
+          Text(_error!, style: const TextStyle(color: Color(0xFFFF8796))),
+        ],
+        const SizedBox(height: 22),
+        FilledButton.icon(
+          onPressed: _busy ? null : _submit,
+          icon: _busy
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.lock_outline),
+          label: Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Protect journal',
+              tr: 'Günlüğü koru',
+              es: 'Proteger diario',
+              fr: 'Protéger le journal',
+              pt: 'Proteger diário',
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _UnlockScreen extends StatefulWidget {
@@ -702,14 +739,16 @@ class _UnlockScreenState extends State<_UnlockScreen> {
       final valid = await widget.onVerifyPin(_pin.text);
       if (!mounted) return;
       if (!valid) {
-        setState(() => _error = appLockCopy(
-              widget.languageCode,
-              en: 'Incorrect PIN.',
-              tr: 'PIN yanlış.',
-              es: 'PIN incorrecto.',
-              fr: 'Code incorrect.',
-              pt: 'PIN incorreto.',
-            ));
+        setState(
+          () => _error = appLockCopy(
+            widget.languageCode,
+            en: 'Incorrect PIN.',
+            tr: 'PIN yanlış.',
+            es: 'PIN incorrecto.',
+            fr: 'Code incorrect.',
+            pt: 'PIN incorreto.',
+          ),
+        );
         return;
       }
       _pin.clear();
@@ -722,14 +761,16 @@ class _UnlockScreenState extends State<_UnlockScreen> {
       if (mounted) setState(() => _remaining = error.remaining);
     } on ArgumentError {
       if (mounted) {
-        setState(() => _error = appLockCopy(
-              widget.languageCode,
-              en: 'Enter your six-digit PIN.',
-              tr: 'Altı haneli PIN’ini gir.',
-              es: 'Introduce tu PIN de seis dígitos.',
-              fr: 'Saisissez votre code à six chiffres.',
-              pt: 'Digite seu PIN de seis dígitos.',
-            ));
+        setState(
+          () => _error = appLockCopy(
+            widget.languageCode,
+            en: 'Enter your six-digit PIN.',
+            tr: 'Altı haneli PIN’ini gir.',
+            es: 'Introduce tu PIN de seis dígitos.',
+            fr: 'Saisissez votre code à six chiffres.',
+            pt: 'Digite seu PIN de seis dígitos.',
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -738,110 +779,114 @@ class _UnlockScreenState extends State<_UnlockScreen> {
 
   @override
   Widget build(BuildContext context) => _LockShell(
-        title: appLockCopy(
-          widget.languageCode,
-          en: 'Private journal locked',
-          tr: 'Özel günlük kilitli',
-          es: 'Diario privado bloqueado',
-          fr: 'Journal privé verrouillé',
-          pt: 'Diário privado bloqueado',
+    title: appLockCopy(
+      widget.languageCode,
+      en: 'Private journal locked',
+      tr: 'Özel günlük kilitli',
+      es: 'Diario privado bloqueado',
+      fr: 'Journal privé verrouillé',
+      pt: 'Diário privado bloqueado',
+    ),
+    child: ListView(
+      padding: const EdgeInsets.fromLTRB(24, 34, 24, 36),
+      children: [
+        const _LockHero(icon: Icons.lock_person_outlined),
+        const SizedBox(height: 24),
+        Text(
+          appLockCopy(
+            widget.languageCode,
+            en: 'Your readings, Mirror reflections, and Oracle memory stay hidden until you unlock.',
+            tr: 'Okumaların, Mirror yansımaların ve Oracle hafızan kilidi açana kadar gizli kalır.',
+            es: 'Tus lecturas, reflexiones Mirror y memoria Oracle permanecen ocultas hasta desbloquear.',
+            fr: 'Vos tirages, réflexions Mirror et mémoire Oracle restent masqués jusqu’au déverrouillage.',
+            pt: 'Suas leituras, reflexões Mirror e memória Oracle ficam ocultas até o desbloqueio.',
+          ),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: MysticColors.mist, height: 1.45),
         ),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 34, 24, 36),
-          children: [
-            const _LockHero(icon: Icons.lock_person_outlined),
-            const SizedBox(height: 24),
-            Text(
+        const SizedBox(height: 24),
+        _PinField(
+          controller: _pin,
+          autofocus:
+              !(widget.state.biometricsEnabled && widget.biometricsAvailable),
+          label: 'PIN',
+          onSubmitted: (_) => _submit(),
+        ),
+        if (_remaining > Duration.zero) ...[
+          const SizedBox(height: 12),
+          Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Try again in ${_remaining.inSeconds + 1} seconds.',
+              tr: '${_remaining.inSeconds + 1} saniye sonra tekrar dene.',
+              es: 'Inténtalo de nuevo en ${_remaining.inSeconds + 1} segundos.',
+              fr: 'Réessayez dans ${_remaining.inSeconds + 1} secondes.',
+              pt: 'Tente novamente em ${_remaining.inSeconds + 1} segundos.',
+            ),
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: MysticColors.gold),
+          ),
+        ],
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _error!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Color(0xFFFF8796)),
+          ),
+        ],
+        const SizedBox(height: 18),
+        FilledButton.icon(
+          onPressed: _busy || _remaining > Duration.zero ? null : _submit,
+          icon: const Icon(Icons.lock_open_outlined),
+          label: Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Unlock',
+              tr: 'Kilidi aç',
+              es: 'Desbloquear',
+              fr: 'Déverrouiller',
+              pt: 'Desbloquear',
+            ),
+          ),
+        ),
+        if (widget.state.biometricsEnabled && widget.biometricsAvailable) ...[
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: widget.authenticating ? null : widget.onBiometrics,
+            icon: const Icon(Icons.fingerprint),
+            label: Text(
               appLockCopy(
                 widget.languageCode,
-                en: 'Your readings, Mirror reflections, and Oracle memory stay hidden until you unlock.',
-                tr: 'Okumaların, Mirror yansımaların ve Oracle hafızan kilidi açana kadar gizli kalır.',
-                es: 'Tus lecturas, reflexiones Mirror y memoria Oracle permanecen ocultas hasta desbloquear.',
-                fr: 'Vos tirages, réflexions Mirror et mémoire Oracle restent masqués jusqu’au déverrouillage.',
-                pt: 'Suas leituras, reflexões Mirror e memória Oracle ficam ocultas até o desbloqueio.',
+                en: 'Use biometrics',
+                tr: 'Biyometri kullan',
+                es: 'Usar biometría',
+                fr: 'Utiliser la biométrie',
+                pt: 'Usar biometria',
               ),
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: MysticColors.mist, height: 1.45),
             ),
-            const SizedBox(height: 24),
-            _PinField(
-              controller: _pin,
-              autofocus: !(widget.state.biometricsEnabled &&
-                  widget.biometricsAvailable),
-              label: 'PIN',
-              onSubmitted: (_) => _submit(),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: _busy || _remaining > Duration.zero
+              ? null
+              : () => _submit(manage: true),
+          icon: const Icon(Icons.settings_outlined),
+          label: Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Manage lock after PIN',
+              tr: 'PIN’den sonra kilidi yönet',
+              es: 'Gestionar bloqueo tras el PIN',
+              fr: 'Gérer le verrou après le code',
+              pt: 'Gerenciar bloqueio após o PIN',
             ),
-            if (_remaining > Duration.zero) ...[
-              const SizedBox(height: 12),
-              Text(
-                appLockCopy(
-                  widget.languageCode,
-                  en: 'Try again in ${_remaining.inSeconds + 1} seconds.',
-                  tr: '${_remaining.inSeconds + 1} saniye sonra tekrar dene.',
-                  es: 'Inténtalo de nuevo en ${_remaining.inSeconds + 1} segundos.',
-                  fr: 'Réessayez dans ${_remaining.inSeconds + 1} secondes.',
-                  pt: 'Tente novamente em ${_remaining.inSeconds + 1} segundos.',
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: MysticColors.gold),
-              ),
-            ],
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _error!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFFFF8796)),
-              ),
-            ],
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              onPressed: _busy || _remaining > Duration.zero ? null : _submit,
-              icon: const Icon(Icons.lock_open_outlined),
-              label: Text(appLockCopy(
-                widget.languageCode,
-                en: 'Unlock',
-                tr: 'Kilidi aç',
-                es: 'Desbloquear',
-                fr: 'Déverrouiller',
-                pt: 'Desbloquear',
-              )),
-            ),
-            if (widget.state.biometricsEnabled &&
-                widget.biometricsAvailable) ...[
-              const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed:
-                    widget.authenticating ? null : widget.onBiometrics,
-                icon: const Icon(Icons.fingerprint),
-                label: Text(appLockCopy(
-                  widget.languageCode,
-                  en: 'Use biometrics',
-                  tr: 'Biyometri kullan',
-                  es: 'Usar biometría',
-                  fr: 'Utiliser la biométrie',
-                  pt: 'Usar biometria',
-                )),
-              ),
-            ],
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: _busy || _remaining > Duration.zero
-                  ? null
-                  : () => _submit(manage: true),
-              icon: const Icon(Icons.settings_outlined),
-              label: Text(appLockCopy(
-                widget.languageCode,
-                en: 'Manage lock after PIN',
-                tr: 'PIN’den sonra kilidi yönet',
-                es: 'Gestionar bloqueo tras el PIN',
-                fr: 'Gérer le verrou après le code',
-                pt: 'Gerenciar bloqueio após o PIN',
-              )),
-            ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _ManageScreen extends StatefulWidget {
@@ -879,14 +924,16 @@ class _ManageScreenState extends State<_ManageScreen> {
     final pin = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(appLockCopy(
-          widget.languageCode,
-          en: 'Change PIN',
-          tr: 'PIN’i değiştir',
-          es: 'Cambiar PIN',
-          fr: 'Changer le code',
-          pt: 'Alterar PIN',
-        )),
+        title: Text(
+          appLockCopy(
+            widget.languageCode,
+            en: 'Change PIN',
+            tr: 'PIN’i değiştir',
+            es: 'Cambiar PIN',
+            fr: 'Changer le code',
+            pt: 'Alterar PIN',
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -908,7 +955,9 @@ class _ManageScreenState extends State<_ManageScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(MaterialLocalizations.of(dialogContext).cancelButtonLabel),
+            child: Text(
+              MaterialLocalizations.of(dialogContext).cancelButtonLabel,
+            ),
           ),
           FilledButton(
             onPressed: () {
@@ -917,14 +966,16 @@ class _ManageScreenState extends State<_ManageScreen> {
                 Navigator.pop(dialogContext, first.text);
               }
             },
-            child: Text(appLockCopy(
-              widget.languageCode,
-              en: 'Save',
-              tr: 'Kaydet',
-              es: 'Guardar',
-              fr: 'Enregistrer',
-              pt: 'Salvar',
-            )),
+            child: Text(
+              appLockCopy(
+                widget.languageCode,
+                en: 'Save',
+                tr: 'Kaydet',
+                es: 'Guardar',
+                fr: 'Enregistrer',
+                pt: 'Salvar',
+              ),
+            ),
           ),
         ],
       ),
@@ -952,37 +1003,45 @@ class _ManageScreenState extends State<_ManageScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(appLockCopy(
-          widget.languageCode,
-          en: 'Disable private lock?',
-          tr: 'Özel kilit kapatılsın mı?',
-          es: '¿Desactivar el bloqueo privado?',
-          fr: 'Désactiver le verrou privé ?',
-          pt: 'Desativar o bloqueio privado?',
-        )),
-        content: Text(appLockCopy(
-          widget.languageCode,
-          en: 'Anyone holding the unlocked device will be able to open the journal.',
-          tr: 'Kilidi açık cihazı elinde tutan herkes günlüğü açabilecek.',
-          es: 'Cualquiera que tenga el dispositivo desbloqueado podrá abrir el diario.',
-          fr: 'Toute personne tenant l’appareil déverrouillé pourra ouvrir le journal.',
-          pt: 'Qualquer pessoa com o dispositivo desbloqueado poderá abrir o diário.',
-        )),
+        title: Text(
+          appLockCopy(
+            widget.languageCode,
+            en: 'Disable private lock?',
+            tr: 'Özel kilit kapatılsın mı?',
+            es: '¿Desactivar el bloqueo privado?',
+            fr: 'Désactiver le verrou privé ?',
+            pt: 'Desativar o bloqueio privado?',
+          ),
+        ),
+        content: Text(
+          appLockCopy(
+            widget.languageCode,
+            en: 'Anyone holding the unlocked device will be able to open the journal.',
+            tr: 'Kilidi açık cihazı elinde tutan herkes günlüğü açabilecek.',
+            es: 'Cualquiera que tenga el dispositivo desbloqueado podrá abrir el diario.',
+            fr: 'Toute personne tenant l’appareil déverrouillé pourra ouvrir le journal.',
+            pt: 'Qualquer pessoa com o dispositivo desbloqueado poderá abrir o diário.',
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(MaterialLocalizations.of(dialogContext).cancelButtonLabel),
+            child: Text(
+              MaterialLocalizations.of(dialogContext).cancelButtonLabel,
+            ),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(appLockCopy(
-              widget.languageCode,
-              en: 'Disable',
-              tr: 'Kapat',
-              es: 'Desactivar',
-              fr: 'Désactiver',
-              pt: 'Desativar',
-            )),
+            child: Text(
+              appLockCopy(
+                widget.languageCode,
+                en: 'Disable',
+                tr: 'Kapat',
+                es: 'Desactivar',
+                fr: 'Désactiver',
+                pt: 'Desativar',
+              ),
+            ),
           ),
         ],
       ),
@@ -994,107 +1053,108 @@ class _ManageScreenState extends State<_ManageScreen> {
 
   @override
   Widget build(BuildContext context) => _LockShell(
-        title: appLockCopy(
-          widget.languageCode,
-          en: 'Private lock settings',
-          tr: 'Özel kilit ayarları',
-          es: 'Ajustes del bloqueo privado',
-          fr: 'Réglages du verrou privé',
-          pt: 'Configurações do bloqueio privado',
-        ),
-        leading: IconButton(
-          onPressed: _busy ? null : widget.onReturnLocked,
-          icon: const Icon(Icons.arrow_back),
-        ),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
-          children: [
-            const _LockHero(icon: Icons.admin_panel_settings_outlined),
-            const SizedBox(height: 22),
-            ListTile(
-              leading: const Icon(Icons.password, color: MysticColors.gold),
-              title: Text(appLockCopy(
-                widget.languageCode,
-                en: 'Change PIN',
-                tr: 'PIN’i değiştir',
-                es: 'Cambiar PIN',
-                fr: 'Changer le code',
-                pt: 'Alterar PIN',
-              )),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _busy ? null : _changePin,
+    title: appLockCopy(
+      widget.languageCode,
+      en: 'Private lock settings',
+      tr: 'Özel kilit ayarları',
+      es: 'Ajustes del bloqueo privado',
+      fr: 'Réglages du verrou privé',
+      pt: 'Configurações do bloqueio privado',
+    ),
+    leading: IconButton(
+      onPressed: _busy ? null : widget.onReturnLocked,
+      icon: const Icon(Icons.arrow_back),
+    ),
+    child: ListView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
+      children: [
+        const _LockHero(icon: Icons.admin_panel_settings_outlined),
+        const SizedBox(height: 22),
+        ListTile(
+          leading: const Icon(Icons.password, color: MysticColors.gold),
+          title: Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Change PIN',
+              tr: 'PIN’i değiştir',
+              es: 'Cambiar PIN',
+              fr: 'Changer le code',
+              pt: 'Alterar PIN',
             ),
-            if (widget.biometricsAvailable)
-              SwitchListTile.adaptive(
-                value: widget.state.biometricsEnabled,
-                onChanged: _busy
-                    ? null
-                    : (value) async {
-                        setState(() => _busy = true);
-                        await widget.onBiometricsChanged(value);
-                        if (mounted) setState(() => _busy = false);
-                      },
-                secondary: const Icon(
-                  Icons.fingerprint,
-                  color: MysticColors.gold,
-                ),
-                title: Text(appLockCopy(
-                  widget.languageCode,
-                  en: 'Biometric unlock',
-                  tr: 'Biyometrik kilit açma',
-                  es: 'Desbloqueo biométrico',
-                  fr: 'Déverrouillage biométrique',
-                  pt: 'Desbloqueio biométrico',
-                )),
-              ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(
-                Icons.no_encryption_outlined,
-                color: Color(0xFFFF8796),
-              ),
-              title: Text(appLockCopy(
-                widget.languageCode,
-                en: 'Disable private lock',
-                tr: 'Özel kilidi kapat',
-                es: 'Desactivar bloqueo privado',
-                fr: 'Désactiver le verrou privé',
-                pt: 'Desativar bloqueio privado',
-              )),
-              onTap: _busy ? null : _disable,
-            ),
-            if (_message != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _message!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: MysticColors.gold),
-              ),
-            ],
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _busy ? null : widget.onUnlock,
-              icon: const Icon(Icons.lock_open_outlined),
-              label: Text(appLockCopy(
-                widget.languageCode,
-                en: 'Unlock app',
-                tr: 'Uygulamayı aç',
-                es: 'Desbloquear aplicación',
-                fr: 'Déverrouiller l’application',
-                pt: 'Desbloquear aplicativo',
-              )),
-            ),
-          ],
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: _busy ? null : _changePin,
         ),
-      );
+        if (widget.biometricsAvailable)
+          SwitchListTile.adaptive(
+            value: widget.state.biometricsEnabled,
+            onChanged: _busy
+                ? null
+                : (value) async {
+                    setState(() => _busy = true);
+                    await widget.onBiometricsChanged(value);
+                    if (mounted) setState(() => _busy = false);
+                  },
+            secondary: const Icon(Icons.fingerprint, color: MysticColors.gold),
+            title: Text(
+              appLockCopy(
+                widget.languageCode,
+                en: 'Biometric unlock',
+                tr: 'Biyometrik kilit açma',
+                es: 'Desbloqueo biométrico',
+                fr: 'Déverrouillage biométrique',
+                pt: 'Desbloqueio biométrico',
+              ),
+            ),
+          ),
+        const Divider(),
+        ListTile(
+          leading: const Icon(
+            Icons.no_encryption_outlined,
+            color: Color(0xFFFF8796),
+          ),
+          title: Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Disable private lock',
+              tr: 'Özel kilidi kapat',
+              es: 'Desactivar bloqueo privado',
+              fr: 'Désactiver le verrou privé',
+              pt: 'Desativar bloqueio privado',
+            ),
+          ),
+          onTap: _busy ? null : _disable,
+        ),
+        if (_message != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _message!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: MysticColors.gold),
+          ),
+        ],
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed: _busy ? null : widget.onUnlock,
+          icon: const Icon(Icons.lock_open_outlined),
+          label: Text(
+            appLockCopy(
+              widget.languageCode,
+              en: 'Unlock app',
+              tr: 'Uygulamayı aç',
+              es: 'Desbloquear aplicación',
+              fr: 'Déverrouiller l’application',
+              pt: 'Desbloquear aplicativo',
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _LockShell extends StatelessWidget {
-  const _LockShell({
-    required this.title,
-    required this.child,
-    this.leading,
-  });
+  const _LockShell({required this.title, required this.child, this.leading});
 
   final String title;
   final Widget child;
@@ -1102,18 +1162,18 @@ class _LockShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title), leading: leading),
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF171027), Color(0xFF080711)],
-            ),
-          ),
-          child: SafeArea(child: child),
+    appBar: AppBar(title: Text(title), leading: leading),
+    body: DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF171027), Color(0xFF080711)],
         ),
-      );
+      ),
+      child: SafeArea(child: child),
+    ),
+  );
 }
 
 class _LockHero extends StatelessWidget {
@@ -1123,26 +1183,24 @@ class _LockHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Container(
-          width: 92,
-          height: 92,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
+    child: Container(
+      width: 92,
+      height: 92,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: MysticColors.violet.withValues(alpha: .24),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .45)),
+        boxShadow: [
+          BoxShadow(
             color: MysticColors.violet.withValues(alpha: .24),
-            border: Border.all(
-              color: MysticColors.gold.withValues(alpha: .45),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: MysticColors.violet.withValues(alpha: .24),
-                blurRadius: 32,
-              ),
-            ],
+            blurRadius: 32,
           ),
-          child: Icon(icon, size: 43, color: MysticColors.gold),
-        ),
-      );
+        ],
+      ),
+      child: Icon(icon, size: 43, color: MysticColors.gold),
+    ),
+  );
 }
 
 class _PinField extends StatelessWidget {
@@ -1160,23 +1218,23 @@ class _PinField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextField(
-        controller: controller,
-        autofocus: autofocus,
-        obscureText: true,
-        keyboardType: TextInputType.number,
-        textInputAction: TextInputAction.done,
-        maxLength: AppLockService.pinLength,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(AppLockService.pinLength),
-        ],
-        onSubmitted: onSubmitted,
-        decoration: InputDecoration(
-          labelText: label,
-          counterText: '',
-          prefixIcon: const Icon(Icons.password),
-        ),
-      );
+    controller: controller,
+    autofocus: autofocus,
+    obscureText: true,
+    keyboardType: TextInputType.number,
+    textInputAction: TextInputAction.done,
+    maxLength: AppLockService.pinLength,
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(AppLockService.pinLength),
+    ],
+    onSubmitted: onSubmitted,
+    decoration: InputDecoration(
+      labelText: label,
+      counterText: '',
+      prefixIcon: const Icon(Icons.password),
+    ),
+  );
 }
 
 String appLockCopy(
@@ -1186,11 +1244,10 @@ String appLockCopy(
   required String es,
   required String fr,
   required String pt,
-}) =>
-    switch (languageCode.toLowerCase()) {
-      'tr' => tr,
-      'es' => es,
-      'fr' => fr,
-      'pt' => pt,
-      _ => en,
-    };
+}) => switch (languageCode.toLowerCase()) {
+  'tr' => tr,
+  'es' => es,
+  'fr' => fr,
+  'pt' => pt,
+  _ => en,
+};

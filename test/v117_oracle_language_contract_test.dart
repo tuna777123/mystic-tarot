@@ -16,7 +16,10 @@ void main() {
     expect(int.parse(version!.group(1)!), greaterThanOrEqualTo(17));
     expect(int.parse(version.group(3)!), greaterThanOrEqualTo(23));
     expect(app, contains("import 'oracle_language.dart';"));
-    expect(app, contains('detectOracleQuestionIntent(question, widget.language)'));
+    expect(
+      app,
+      contains('detectOracleQuestionIntent(question, widget.language)'),
+    );
     expect(language, contains('MysticLanguage.french'));
     expect(language, contains('OracleQuestionIntent.keyCard'));
   });

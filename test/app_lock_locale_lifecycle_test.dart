@@ -7,8 +7,9 @@ import 'package:mystic_tarot/src/app_lock_gate.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('private lock follows the language selected inside the app',
-      (tester) async {
+  testWidgets('private lock follows the language selected inside the app', (
+    tester,
+  ) async {
     final service = _testService(_MemoryAppLockStore());
     await service.enableWithPin('135790');
 
@@ -26,39 +27,42 @@ void main() {
     expect(find.text('Özel günlük kilitli'), findsOneWidget);
   });
 
-  testWidgets('resume after the grace period relocks in the latest app language',
-      (tester) async {
-    final service = _testService(_MemoryAppLockStore());
-    await service.enableWithPin('246810');
-    var languageCode = 'en';
+  testWidgets(
+    'resume after the grace period relocks in the latest app language',
+    (tester) async {
+      final service = _testService(_MemoryAppLockStore());
+      await service.enableWithPin('246810');
+      var languageCode = 'en';
 
-    await tester.pumpWidget(
-      AppLockGate(
-        service: service,
-        authenticator: const _FakeAuthenticator(),
-        languageCodeLoader: () async => languageCode,
-        backgroundGrace: Duration.zero,
-        child: const MaterialApp(home: Scaffold(body: Text('PRIVATE APP'))),
-      ),
-    );
-    await _pumpUntilFound(tester, find.text('Private journal locked'));
+      await tester.pumpWidget(
+        AppLockGate(
+          service: service,
+          authenticator: const _FakeAuthenticator(),
+          languageCodeLoader: () async => languageCode,
+          backgroundGrace: Duration.zero,
+          child: const MaterialApp(home: Scaffold(body: Text('PRIVATE APP'))),
+        ),
+      );
+      await _pumpUntilFound(tester, find.text('Private journal locked'));
 
-    await tester.enterText(find.byType(TextField), '246810');
-    await tester.tap(find.text('Unlock'));
-    await _pumpUntilFound(tester, find.text('PRIVATE APP'));
+      await tester.enterText(find.byType(TextField), '246810');
+      await tester.tap(find.text('Unlock'));
+      await _pumpUntilFound(tester, find.text('PRIVATE APP'));
 
-    languageCode = 'tr';
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    await tester.pump(const Duration(milliseconds: 1));
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await _pumpUntilFound(tester, find.text('Özel günlük kilitli'));
+      languageCode = 'tr';
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump(const Duration(milliseconds: 1));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await _pumpUntilFound(tester, find.text('Özel günlük kilitli'));
 
-    expect(find.text('PRIVATE APP'), findsNothing);
-    expect(find.text('Özel günlük kilitli'), findsOneWidget);
-  });
+      expect(find.text('PRIVATE APP'), findsNothing);
+      expect(find.text('Özel günlük kilitli'), findsOneWidget);
+    },
+  );
 
-  testWidgets('a brief background transition stays unlocked inside grace',
-      (tester) async {
+  testWidgets('a brief background transition stays unlocked inside grace', (
+    tester,
+  ) async {
     final service = _testService(_MemoryAppLockStore());
     await service.enableWithPin('112233');
 
@@ -87,19 +91,21 @@ void main() {
   });
 }
 
-AppLockService _testService(_MemoryAppLockStore store) => AppLockService(
-      store: store,
-      keyDeriver: _fastKeyDeriver,
-    );
+AppLockService _testService(_MemoryAppLockStore store) =>
+    AppLockService(store: store, keyDeriver: _fastKeyDeriver);
 
 Future<SecretKey> _fastKeyDeriver(String pin, List<int> salt) async {
   final pinBytes = pin.codeUnits;
-  return SecretKeyData(List<int>.generate(
-    32,
-    (index) =>
-        (pinBytes[index % pinBytes.length] + salt[index % salt.length] + index) &
-        0xff,
-  ));
+  return SecretKeyData(
+    List<int>.generate(
+      32,
+      (index) =>
+          (pinBytes[index % pinBytes.length] +
+              salt[index % salt.length] +
+              index) &
+          0xff,
+    ),
+  );
 }
 
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {

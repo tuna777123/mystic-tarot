@@ -2,6 +2,8 @@
 
 This is the canonical launch handoff for App Store Connect, Google Play Console, and RevenueCat.
 
+Current verified source version: `1.21.1+28`. Android, web, and unsigned iOS release builds must pass before signing and submission.
+
 ## Positioning
 
 **Category:** Lifestyle

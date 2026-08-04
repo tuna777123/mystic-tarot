@@ -5,12 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('v1.19 protected transfer release contract stays complete', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
-    final protection =
-        File('lib/src/journal_transfer_protection.dart').readAsStringSync();
-    final service =
-        File('lib/src/private_journal_transfer.dart').readAsStringSync();
-    final screen =
-        File('lib/src/private_journal_transfer_screen.dart').readAsStringSync();
+    final protection = File(
+      'lib/src/journal_transfer_protection.dart',
+    ).readAsStringSync();
+    final service = File(
+      'lib/src/private_journal_transfer.dart',
+    ).readAsStringSync();
+    final screen = File(
+      'lib/src/private_journal_transfer_screen.dart',
+    ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.19.md').readAsStringSync();
 
     final version = RegExp(

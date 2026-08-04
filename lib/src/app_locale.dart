@@ -12,12 +12,12 @@ const List<Locale> mysticSupportedLocales = <Locale>[
 ];
 
 Locale mysticLocale(MysticLanguage language) => switch (language) {
-      MysticLanguage.turkish => const Locale('tr'),
-      MysticLanguage.spanish => const Locale('es'),
-      MysticLanguage.french => const Locale('fr'),
-      MysticLanguage.portugueseBrazil => const Locale('pt', 'BR'),
-      _ => const Locale('en'),
-    };
+  MysticLanguage.turkish => const Locale('tr'),
+  MysticLanguage.spanish => const Locale('es'),
+  MysticLanguage.french => const Locale('fr'),
+  MysticLanguage.portugueseBrazil => const Locale('pt', 'BR'),
+  _ => const Locale('en'),
+};
 
 Locale mysticLocaleFromCode(String languageCode) {
   final normalized = languageCode.trim().toLowerCase().replaceAll('_', '-');
@@ -31,12 +31,12 @@ Locale mysticLocaleFromCode(String languageCode) {
 }
 
 String mysticLanguageCode(MysticLanguage language) => switch (language) {
-      MysticLanguage.turkish => 'tr',
-      MysticLanguage.spanish => 'es',
-      MysticLanguage.french => 'fr',
-      MysticLanguage.portugueseBrazil => 'pt-BR',
-      _ => 'en',
-    };
+  MysticLanguage.turkish => 'tr',
+  MysticLanguage.spanish => 'es',
+  MysticLanguage.french => 'fr',
+  MysticLanguage.portugueseBrazil => 'pt-BR',
+  _ => 'en',
+};
 
 Future<String> loadPersistedMysticLanguageCode() async {
   final prefs = await SharedPreferences.getInstance();

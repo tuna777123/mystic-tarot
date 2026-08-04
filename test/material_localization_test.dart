@@ -6,16 +6,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/app_locale.dart';
 
 void main() {
-  testWidgets('Material controls use the selected launch locale', (tester) async {
+  testWidgets('Material controls use the selected launch locale', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('es'),
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: mysticSupportedLocales,
         home: Builder(
-          builder: (context) => Text(
-            MaterialLocalizations.of(context).cancelButtonLabel,
-          ),
+          builder: (context) =>
+              Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
       ),
     );
