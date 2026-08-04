@@ -1,0 +1,336 @@
+name: Materialize Mystic Tarot v1.21
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/v121-release-materializer.yml
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: mystic-tarot-v121-release-materializer
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v1.21-launch-differentiation
+          fetch-depth: 0
+
+      - name: Preserve reviewed spread-aware synthesis
+        run: |
+          cp lib/src/reading_synthesis.dart /tmp/reading_synthesis.dart
+          cp test/reading_synthesis_test.dart /tmp/reading_synthesis_test.dart
+
+      - name: Download latest verified v1.21 source
+        uses: actions/download-artifact@v4
+        with:
+          name: mystic-tarot-v121-verified-source
+          path: /tmp/v121-source
+          repository: tuna777123/mystic-tarot
+          run-id: 30930305096
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build clean reviewed source tree
+        shell: bash
+        run: |
+          cp -a /tmp/v121-source/. .
+          cp /tmp/reading_synthesis.dart lib/src/reading_synthesis.dart
+          cp /tmp/reading_synthesis_test.dart test/reading_synthesis_test.dart
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise RuntimeError(f'{label}: expected one match, found {count}')
+              return text.replace(old, new, 1)
+
+          # Complete every deep spread position so no card falls back to a generic label.
+          position = root / 'lib/src/reading_position.dart'
+          source = position.read_text(encoding='utf-8')
+          if 'The shared growth edge' not in source:
+              source = replace_once(
+                  source,
+                  """      copy(
+                    en: 'The dynamic between you',
+                    tr: 'Aranızdaki dinamik',
+                    es: 'La dinámica entre ustedes',
+                    fr: 'La dynamique entre vous',
+                    pt: 'A dinâmica entre vocês',
+                  ),
+                ],
+                ReadingKind.timeline => <String>[
+          """,
+                  """      copy(
+                    en: 'The dynamic between you',
+                    tr: 'Aranızdaki dinamik',
+                    es: 'La dinámica entre ustedes',
+                    fr: 'La dynamique entre vous',
+                    pt: 'A dinâmica entre vocês',
+                  ),
+                  copy(
+                    en: 'The shared growth edge',
+                    tr: 'Birlikte gelişebileceğiniz alan',
+                    es: 'El punto de crecimiento compartido',
+                    fr: 'La zone de croissance partagée',
+                    pt: 'O ponto de crescimento compartilhado',
+                  ),
+                  copy(
+                    en: 'The next honest step for the connection',
+                    tr: 'Bağ için sıradaki dürüst adım',
+                    es: 'El siguiente paso honesto para el vínculo',
+                    fr: 'La prochaine étape honnête pour le lien',
+                    pt: 'O próximo passo honesto para a conexão',
+                  ),
+                ],
+                ReadingKind.timeline => <String>[
+          """,
+                  'compatibility positions',
+              )
+          if 'The choice that can change the trajectory' not in source:
+              source = replace_once(
+                  source,
+                  """      copy(
+                    en: 'The longer horizon if the pattern continues',
+                    tr: 'Örüntü sürerse daha uzun vade',
+                    es: 'El horizonte más lejano si continúa el patrón',
+                    fr: 'L’horizon plus lointain si le schéma continue',
+                    pt: 'O horizonte mais longo se o padrão continuar',
+                  ),
+                ],
+                ReadingKind.celticCross => <String>[
+          """,
+                  """      copy(
+                    en: 'The longer horizon if the pattern continues',
+                    tr: 'Örüntü sürerse daha uzun vade',
+                    es: 'El horizonte más lejano si continúa el patrón',
+                    fr: 'L’horizon plus lointain si le schéma continue',
+                    pt: 'O horizonte mais longo se o padrão continuar',
+                  ),
+                  copy(
+                    en: 'The choice that can change the trajectory',
+                    tr: 'Gidişatı değiştirebilecek seçim',
+                    es: 'La elección que puede cambiar la trayectoria',
+                    fr: 'Le choix qui peut changer la trajectoire',
+                    pt: 'A escolha que pode mudar a trajetória',
+                  ),
+                ],
+                ReadingKind.celticCross => <String>[
+          """,
+                  'timeline position',
+              )
+          position.write_text(source, encoding='utf-8')
+
+          # Make single- and two-card guidance natural in all five languages.
+          synthesis = root / 'lib/src/reading_synthesis.dart'
+          source = synthesis.read_text(encoding='utf-8')
+          replacements = {
+              'One grounded experiment is to ${_lowerFirst(_sentence(card.advice))}': 'Try this grounded action: ${_sentence(card.advice)}',
+              'Un experimento concreto es ${_lowerFirst(_sentence(card.advice))}': 'Prueba esta acción concreta: ${_sentence(card.advice)}',
+              'Une expérience concrète consiste à ${_lowerFirst(_sentence(card.advice))}': 'Essayez cette action concrète : ${_sentence(card.advice)}',
+              'Um experimento concreto é ${_lowerFirst(_sentence(card.advice))}': 'Experimente esta ação concreta: ${_sentence(card.advice)}',
+              'Tek ve somut deney şu olabilir: ${_lowerFirst(_sentence(card.advice))}': 'Şu somut eylemi dene: ${_sentence(card.advice)}',
+              'One grounded experiment is to ${_lowerFirst(_sentence(second.advice))}': 'Try this grounded action: ${_sentence(second.advice)}',
+              'Un experimento concreto es ${_lowerFirst(_sentence(second.advice))}': 'Prueba esta acción concreta: ${_sentence(second.advice)}',
+              'Une expérience concrète consiste à ${_lowerFirst(_sentence(second.advice))}': 'Essayez cette action concrète : ${_sentence(second.advice)}',
+              'Um experimento concreto é ${_lowerFirst(_sentence(second.advice))}': 'Experimente esta ação concreta: ${_sentence(second.advice)}',
+              'Tek somut deney şu olabilir: ${_lowerFirst(_sentence(second.advice))}': 'Şu somut eylemi dene: ${_sentence(second.advice)}',
+          }
+          for old, new in replacements.items():
+              source = replace_once(source, old, new, old[:45])
+          source, removed = re.subn(
+              r"\nString _lowerFirst\(String value\) \{\n  final text = value\.trim\(\);\n  if \(text\.isEmpty\) return text;\n  return '\$\{text\[0\]\.toLowerCase\(\)\}\$\{text\.substring\(1\)\}';\n\}\n",
+              '\n',
+              source,
+              count=1,
+          )
+          if removed != 1:
+              raise RuntimeError(f'_lowerFirst removal: expected one match, found {removed}')
+          synthesis.write_text(source, encoding='utf-8')
+
+          # Keep privacy promises accurate on devices without biometric hardware.
+          privacy = root / 'lib/src/launch_differentiation.dart'
+          source = privacy.read_text(encoding='utf-8')
+          privacy_replacements = {
+              'with an optional six-digit PIN and device biometrics for the whole app.': 'with an optional six-digit PIN and biometrics on supported devices for the whole app.',
+              'con PIN opcional de seis dígitos y biometría para toda la app.': 'con PIN opcional de seis dígitos y biometría en dispositivos compatibles para toda la app.',
+              'avec un code PIN facultatif à six chiffres et la biométrie pour toute l’app.': 'avec un code PIN facultatif à six chiffres et la biométrie sur les appareils compatibles pour toute l’app.',
+              'com PIN opcional de seis dígitos e biometria para todo o app.': 'com PIN opcional de seis dígitos e biometria em dispositivos compatíveis para todo o app.',
+              'altı haneli PIN ve cihaz biyometrisiyle koruyabilirsin.': 'altı haneli PIN ve desteklenen cihazlarda biyometriyle koruyabilirsin.',
+          }
+          for old, new in privacy_replacements.items():
+              source = replace_once(source, old, new, old[:45])
+          privacy.write_text(source, encoding='utf-8')
+
+          readme = root / 'README.md'
+          text = readme.read_text(encoding='utf-8').replace(
+              'local PIN and optional biometrics.',
+              'local PIN and optional biometrics on supported devices.',
+          )
+          readme.write_text(text, encoding='utf-8')
+
+          for name in ('RELEASE_NOTES.md', 'RELEASE_NOTES_1.21.md'):
+              notes = root / name
+              text = notes.read_text(encoding='utf-8')
+              text = text.replace(
+                  '- Complete spreads now end with one deterministic synthesis that connects the opening card, the central tension, and the direction card.',
+                  '- Complete spreads now end with one deterministic, spread-aware synthesis; Compatibility connects both people, the shared dynamic, growth edge, and next honest step; Timeline preserves agency across six stages; Celtic Cross links the present situation, immediate challenge, near-future movement, and conditional direction.',
+              )
+              text = text.replace(
+                  'optional device biometrics.',
+                  'optional device biometrics on supported devices.',
+              )
+              notes.write_text(text, encoding='utf-8')
+
+          store = root / 'STORE_RELEASE.md'
+          text = store.read_text(encoding='utf-8').replace(
+              'optional whole-app PIN/biometric protection',
+              'optional whole-app PIN and supported-device biometric protection',
+          )
+          store.write_text(text, encoding='utf-8')
+
+          final_test = root / 'test/v121_final_craftsmanship_test.dart'
+          final_test.write_text("""import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('v1.21 final craftsmanship contract', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    final synthesis = File('lib/src/reading_synthesis.dart').readAsStringSync();
+    final positions = File('lib/src/reading_position.dart').readAsStringSync();
+    final privacy = File('lib/src/launch_differentiation.dart').readAsStringSync();
+
+    expect(pubspec, contains('version: 1.21.0+27'));
+    expect(synthesis, contains('ReadingKind.compatibility'));
+    expect(synthesis, contains('ReadingKind.timeline'));
+    expect(synthesis, contains('ReadingKind.celticCross'));
+    expect(synthesis, contains('Try this grounded action'));
+    expect(synthesis, isNot(contains('_lowerFirst')));
+    expect(positions, contains('The shared growth edge'));
+    expect(positions, contains('The next honest step for the connection'));
+    expect(positions, contains('The choice that can change the trajectory'));
+    expect(privacy, contains('biometrics on supported devices'));
+    expect(File('tool/v121_integrate.py').existsSync(), isFalse);
+    expect(File('tool/v121_finalize_patch.py').existsSync(), isFalse);
+    expect(File('.github/workflows/v121-finalize.yml').existsSync(), isFalse);
+  });
+}
+""", encoding='utf-8')
+          PY
+
+          git fetch origin main
+          git show origin/main:.github/workflows/flutter-ci.yml > .github/workflows/flutter-ci.yml
+          rm -f .github/workflows/v121-finalize.yml
+          rm -f tool/v121_integrate.py tool/v121_finalize_patch.py
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format approved release files
+        run: >-
+          dart format
+          lib/src/app.dart
+          lib/src/launch_differentiation.dart
+          lib/src/mystic_next_step.dart
+          lib/src/reading_position.dart
+          lib/src/reading_synthesis.dart
+          lib/src/store_ready_premium_screen.dart
+          test/launch_differentiation_test.dart
+          test/reading_synthesis_test.dart
+          test/v118_private_journal_transfer_contract_test.dart
+          test/v120_private_app_lock_contract_test.dart
+          test/v121_launch_differentiation_contract_test.dart
+          test/v121_final_craftsmanship_test.dart
+
+      - name: Generate native shells
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
+
+      - name: Configure native release contracts
+        run: |
+          dart run tool/configure_store_identifiers.dart
+          dart run tool/configure_ritual_notifications.dart
+          dart run tool/configure_app_lock.dart
+          cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts
+          dart run tool/configure_android_signing.dart
+          grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
+          mv /tmp/mystic-build.gradle.kts android/app/build.gradle.kts
+
+      - name: Install dependencies and icons
+        run: |
+          flutter pub get
+          dart run flutter_launcher_icons
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build web release
+        run: flutter build web --release
+
+      - name: Build Android release bundle
+        run: flutter build appbundle --release
+
+      - name: Verify clean release source
+        run: |
+          test "$(grep '^version:' pubspec.yaml)" = 'version: 1.21.0+27'
+          test ! -e .github/workflows/v121-finalize.yml
+          test ! -e tool/v121_integrate.py
+          test ! -e tool/v121_finalize_patch.py
+          grep -q 'ReadingKind.celticCross' lib/src/reading_synthesis.dart
+          grep -q 'Try this grounded action' lib/src/reading_synthesis.dart
+          grep -q 'The next honest step for the connection' lib/src/reading_position.dart
+          grep -q 'The choice that can change the trajectory' lib/src/reading_position.dart
+          grep -q 'biometrics on supported devices' lib/src/launch_differentiation.dart
+          git diff --check
+
+      - name: Commit only approved release sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            .github/workflows/flutter-ci.yml \
+            README.md \
+            RELEASE_NOTES.md \
+            RELEASE_NOTES_1.21.md \
+            STORE_RELEASE.md \
+            pubspec.yaml \
+            lib/src/app.dart \
+            lib/src/launch_differentiation.dart \
+            lib/src/mystic_next_step.dart \
+            lib/src/reading_position.dart \
+            lib/src/reading_synthesis.dart \
+            lib/src/store_ready_premium_screen.dart \
+            test/launch_differentiation_test.dart \
+            test/reading_synthesis_test.dart \
+            test/v118_private_journal_transfer_contract_test.dart \
+            test/v120_private_app_lock_contract_test.dart \
+            test/v121_launch_differentiation_contract_test.dart \
+            test/v121_final_craftsmanship_test.dart
+          git add -u .github/workflows/v121-finalize.yml tool/v121_integrate.py tool/v121_finalize_patch.py
+          git commit -m "release: Mystic Tarot 1.21 launch differentiation"
+          git push origin HEAD:feature/v1.21-launch-differentiation
