@@ -30,6 +30,7 @@ Mystic Tarot now makes its defining advantage unmistakable in the first session:
 - Complete English, Turkish, Spanish, French, and Brazilian Portuguese continuity and privacy copy.
 - Deterministic synthesis tests across every launch reading type and all five launch languages.
 - Dedicated 320-pixel narrow-phone widget coverage for the new launch experience.
+- Clean release source passed Flutter analysis, 370 automated tests, web release, and Android App Bundle generation before merge review.
 - Version `1.21.0+27`.
 
 No astrology bundle, live reader marketplace, social feed, cloud profile, advertising integration, pricing mutation, signing operation, or store submission is introduced.
