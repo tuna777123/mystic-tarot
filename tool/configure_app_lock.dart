@@ -179,7 +179,8 @@ void configureIosProject(File file) {
   var source = file.readAsStringSync();
   if (!source.contains('CODE_SIGN_ENTITLEMENTS = $_entitlementsPath;')) {
     final productPattern = RegExp(
-      r'(?m)^(\s*)PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);',
+      r'^(\s*)PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);',
+      multiLine: true,
     );
     if (!productPattern.hasMatch(source)) {
       throw StateError('Generated iOS project has no bundle identifier setting.');
