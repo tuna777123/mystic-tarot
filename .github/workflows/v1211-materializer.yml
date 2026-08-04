@@ -144,7 +144,6 @@ jobs:
             RELEASE_NOTES_1.21.1.md \
             STORE_RELEASE.md \
             pubspec.yaml \
-            pubspec.lock \
             lib/src/app.dart \
             lib/src/app_lock_gate.dart \
             lib/src/app_locale.dart \
