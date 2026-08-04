@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: mystic-tarot-v1211-materializer
+  group: mystic-tarot-v1211-source-finalizer
   cancel-in-progress: true
 
 jobs:
