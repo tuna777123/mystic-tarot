@@ -187,7 +187,7 @@ void configureIosProject(File file) {
     source = source.replaceAllMapped(productPattern, (match) {
       final indent = match.group(1)!;
       final productLine = match.group(0)!;
-      return '$indentCODE_SIGN_ENTITLEMENTS = $_entitlementsPath;\n$productLine';
+      return '${indent}CODE_SIGN_ENTITLEMENTS = $_entitlementsPath;\n$productLine';
     });
   }
   file.writeAsStringSync(source);
