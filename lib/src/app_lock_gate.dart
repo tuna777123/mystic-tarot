@@ -254,6 +254,24 @@ class _AppLockGateState extends State<AppLockGate>
 
   Widget _unlockedLayer(BuildContext context) {
     final bottomInset = MediaQueryData.fromView(View.of(context)).padding.bottom;
+    final lockEnabled = _state?.enabled ?? false;
+    final actionLabel = lockEnabled
+        ? appLockCopy(
+            _languageCode,
+            en: 'Lock now',
+            tr: 'Şimdi kilitle',
+            es: 'Bloquear ahora',
+            fr: 'Verrouiller maintenant',
+            pt: 'Bloquear agora',
+          )
+        : appLockCopy(
+            _languageCode,
+            en: 'Set private lock',
+            tr: 'Özel kilit kur',
+            es: 'Configurar bloqueo privado',
+            fr: 'Configurer le verrou privé',
+            pt: 'Configurar bloqueio privado',
+          );
     return Stack(
       textDirection: TextDirection.ltr,
       children: [
@@ -279,34 +297,17 @@ class _AppLockGateState extends State<AppLockGate>
             right: 12,
             bottom: bottomInset + 88,
             child: _overlayMaterial(
-              Tooltip(
-                message: (_state?.enabled ?? false)
-                    ? appLockCopy(
-                        _languageCode,
-                        en: 'Lock now',
-                        tr: 'Şimdi kilitle',
-                        es: 'Bloquear ahora',
-                        fr: 'Verrouiller maintenant',
-                        pt: 'Bloquear agora',
-                      )
-                    : appLockCopy(
-                        _languageCode,
-                        en: 'Set private lock',
-                        tr: 'Özel kilit kur',
-                        es: 'Configurar bloqueo privado',
-                        fr: 'Configurer le verrou privé',
-                        pt: 'Configurar bloqueio privado',
-                      ),
+              Semantics(
+                label: actionLabel,
+                button: true,
                 child: IconButton.filledTonal(
                   onPressed: () => setState(() {
-                    _mode = (_state?.enabled ?? false)
+                    _mode = lockEnabled
                         ? _AppLockMode.locked
                         : _AppLockMode.setup;
                   }),
                   icon: Icon(
-                    (_state?.enabled ?? false)
-                        ? Icons.lock_outline
-                        : Icons.shield_outlined,
+                    lockEnabled ? Icons.lock_outline : Icons.shield_outlined,
                   ),
                 ),
               ),
