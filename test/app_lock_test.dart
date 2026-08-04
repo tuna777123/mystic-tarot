@@ -1,3 +1,4 @@
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/app_lock.dart';
 
@@ -6,7 +7,7 @@ void main() {
 
   test('enables and verifies a PIN without storing the raw PIN', () async {
     final store = MemoryAppLockStore();
-    final service = AppLockService(store: store);
+    final service = testAppLockService(store);
 
     await service.enableWithPin('246810');
 
@@ -20,7 +21,7 @@ void main() {
   test('wrong PIN is rejected and persistent delay begins at attempt five',
       () async {
     final store = MemoryAppLockStore();
-    final service = AppLockService(store: store);
+    final service = testAppLockService(store);
     final now = DateTime.utc(2026, 8, 4, 12);
 
     await service.enableWithPin('135790');
@@ -49,7 +50,7 @@ void main() {
   });
 
   test('biometrics require an enabled PIN lock', () async {
-    final service = AppLockService(store: MemoryAppLockStore());
+    final service = testAppLockService(MemoryAppLockStore());
 
     await expectLater(
       service.setBiometricsEnabled(true),
@@ -67,7 +68,7 @@ void main() {
   test('trusted unlock clears failed attempts and disable removes lock data',
       () async {
     final store = MemoryAppLockStore();
-    final service = AppLockService(store: store);
+    final service = testAppLockService(store);
 
     await service.enableWithPin('445566');
     store.values['mystic.app-lock.failed-attempts.v1'] = '9';
@@ -89,7 +90,7 @@ void main() {
   });
 
   test('PIN must contain exactly six digits', () async {
-    final service = AppLockService(store: MemoryAppLockStore());
+    final service = testAppLockService(MemoryAppLockStore());
 
     await expectLater(
       service.enableWithPin('12345'),
@@ -100,6 +101,21 @@ void main() {
       throwsA(isA<ArgumentError>()),
     );
   });
+}
+
+AppLockService testAppLockService(MemoryAppLockStore store) => AppLockService(
+      store: store,
+      keyDeriver: fastKeyDeriver,
+    );
+
+Future<SecretKey> fastKeyDeriver(String pin, List<int> salt) async {
+  final pinBytes = pin.codeUnits;
+  return SecretKeyData(List<int>.generate(
+    32,
+    (index) =>
+        (pinBytes[index % pinBytes.length] + salt[index % salt.length] + index) &
+        0xff,
+  ));
 }
 
 class MemoryAppLockStore implements AppLockStore {
