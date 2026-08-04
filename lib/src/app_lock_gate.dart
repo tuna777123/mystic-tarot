@@ -26,7 +26,7 @@ class AppLockGate extends StatefulWidget {
   State<AppLockGate> createState() => _AppLockGateState();
 }
 
-enum _GateMode { unlocked, locked, setup, manage }
+enum _AppLockMode { unlocked, locked, setup, manage }
 
 class _AppLockGateState extends State<AppLockGate>
     with WidgetsBindingObserver {
@@ -34,7 +34,7 @@ class _AppLockGateState extends State<AppLockGate>
   late final AppLockAuthenticator _authenticator =
       widget.authenticator ?? DeviceAppLockAuthenticator();
   AppLockState? _state;
-  _GateMode _mode = _GateMode.unlocked;
+  _AppLockMode _mode = _AppLockMode.unlocked;
   bool _loading = true;
   bool _biometricAvailable = false;
   bool _showPrompt = false;
@@ -62,21 +62,19 @@ class _AppLockGateState extends State<AppLockGate>
   Future<void> _initialize() async {
     try {
       final state = await _service.loadState();
-      final biometricAvailable = await _authenticator.isAvailable();
+      final biometrics = await _authenticator.isAvailable();
       if (!mounted) return;
       setState(() {
         _state = state;
-        _biometricAvailable = biometricAvailable;
-        _mode = state.enabled ? _GateMode.locked : _GateMode.unlocked;
+        _biometricAvailable = biometrics;
+        _mode = state.enabled ? _AppLockMode.locked : _AppLockMode.unlocked;
         _loading = false;
       });
-      if (state.enabled &&
-          state.biometricsEnabled &&
-          biometricAvailable) {
+      if (state.enabled && state.biometricsEnabled && biometrics) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _useBiometrics());
       } else if (!state.enabled && !state.promptDismissed) {
         _promptTimer = Timer(widget.promptDelay, () {
-          if (mounted && _mode == _GateMode.unlocked) {
+          if (mounted && _mode == _AppLockMode.unlocked) {
             setState(() => _showPrompt = true);
           }
         });
@@ -91,7 +89,7 @@ class _AppLockGateState extends State<AppLockGate>
           lockedUntil: null,
           promptDismissed: true,
         );
-        _mode = _GateMode.unlocked;
+        _mode = _AppLockMode.unlocked;
         _loading = false;
       });
     }
@@ -99,8 +97,7 @@ class _AppLockGateState extends State<AppLockGate>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final lockEnabled = _state?.enabled ?? false;
-    if (!lockEnabled) return;
+    if (!(_state?.enabled ?? false)) return;
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.detached ||
@@ -108,24 +105,29 @@ class _AppLockGateState extends State<AppLockGate>
       _backgroundedAt ??= DateTime.now();
       return;
     }
-    if (state == AppLifecycleState.resumed) {
-      final backgroundedAt = _backgroundedAt;
-      _backgroundedAt = null;
-      if (_authenticating || backgroundedAt == null) return;
-      if (DateTime.now().difference(backgroundedAt) >= widget.backgroundGrace &&
-          _mode == _GateMode.unlocked) {
-        setState(() => _mode = _GateMode.locked);
-        if ((_state?.biometricsEnabled ?? false) && _biometricAvailable) {
-          WidgetsBinding.instance.addPostFrameCallback((_) => _useBiometrics());
-        }
+    if (state != AppLifecycleState.resumed) return;
+    final backgroundedAt = _backgroundedAt;
+    _backgroundedAt = null;
+    if (_authenticating || backgroundedAt == null) return;
+    if (DateTime.now().difference(backgroundedAt) < widget.backgroundGrace) {
+      return;
+    }
+    if (_mode == _AppLockMode.unlocked) {
+      setState(() => _mode = _AppLockMode.locked);
+      if ((_state?.biometricsEnabled ?? false) && _biometricAvailable) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _useBiometrics());
       }
     }
   }
 
   Future<void> _dismissPrompt() async {
     await _service.dismissPrompt();
+    final state = await _service.loadState();
     if (!mounted) return;
-    setState(() => _showPrompt = false);
+    setState(() {
+      _state = state;
+      _showPrompt = false;
+    });
   }
 
   Future<void> _completeSetup(String pin, bool biometrics) async {
@@ -138,16 +140,17 @@ class _AppLockGateState extends State<AppLockGate>
     setState(() {
       _state = state;
       _showPrompt = false;
-      _mode = _GateMode.unlocked;
+      _mode = _AppLockMode.unlocked;
     });
   }
 
   Future<bool> _verifyPin(String pin) async {
-    final valid = await _service.verifyPin(pin);
-    if (!valid) return false;
-    final state = await _service.loadState();
-    if (mounted) setState(() => _state = state);
-    return true;
+    try {
+      return await _service.verifyPin(pin);
+    } finally {
+      final state = await _service.loadState();
+      if (mounted) setState(() => _state = state);
+    }
   }
 
   Future<void> _unlock() async {
@@ -155,7 +158,7 @@ class _AppLockGateState extends State<AppLockGate>
     if (!mounted) return;
     setState(() {
       _state = state;
-      _mode = _GateMode.unlocked;
+      _mode = _AppLockMode.unlocked;
     });
   }
 
@@ -163,7 +166,8 @@ class _AppLockGateState extends State<AppLockGate>
     if (_authenticating || !_biometricAvailable) return;
     setState(() => _authenticating = true);
     final authenticated = await _authenticator.authenticate(
-      _copy(
+      appLockCopy(
+        _languageCode,
         en: 'Unlock your private Mystic Tarot journal',
         tr: 'Özel Mystic Tarot günlüğünün kilidini aç',
         es: 'Desbloquea tu diario privado de Mystic Tarot',
@@ -173,24 +177,16 @@ class _AppLockGateState extends State<AppLockGate>
     );
     if (!mounted) return;
     setState(() => _authenticating = false);
-    if (authenticated) await _unlock();
-  }
-
-  Future<void> _disableLock() async {
-    await _service.disable();
-    final state = await _service.loadState();
-    if (!mounted) return;
-    setState(() {
-      _state = state;
-      _mode = _GateMode.unlocked;
-    });
+    if (!authenticated) return;
+    await _service.markTrustedUnlock();
+    await _unlock();
   }
 
   Future<void> _changePin(String pin) async {
+    final biometrics = _state?.biometricsEnabled ?? false;
     await _service.enableWithPin(pin);
-    final currentBiometrics = _state?.biometricsEnabled ?? false;
     await _service.setBiometricsEnabled(
-      currentBiometrics && _biometricAvailable,
+      biometrics && _biometricAvailable,
     );
     final state = await _service.loadState();
     if (mounted) setState(() => _state = state);
@@ -202,12 +198,22 @@ class _AppLockGateState extends State<AppLockGate>
     if (mounted) setState(() => _state = state);
   }
 
+  Future<void> _disableLock() async {
+    await _service.disable();
+    final state = await _service.loadState();
+    if (!mounted) return;
+    setState(() {
+      _state = state;
+      _mode = _AppLockMode.unlocked;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return _standalone(const _PrivateLoadingScreen());
-    if (_mode == _GateMode.locked) {
+    if (_mode == _AppLockMode.locked) {
       return _standalone(
-        AppLockScreen(
+        _UnlockScreen(
           languageCode: _languageCode,
           state: _state!,
           biometricsAvailable: _biometricAvailable,
@@ -215,81 +221,114 @@ class _AppLockGateState extends State<AppLockGate>
           onVerifyPin: _verifyPin,
           onUnlock: _unlock,
           onBiometrics: _useBiometrics,
-          onManage: () => setState(() => _mode = _GateMode.manage),
+          onManage: () => setState(() => _mode = _AppLockMode.manage),
         ),
       );
     }
-    if (_mode == _GateMode.setup) {
+    if (_mode == _AppLockMode.setup) {
       return _standalone(
-        AppLockSetupScreen(
+        _SetupScreen(
           languageCode: _languageCode,
           biometricsAvailable: _biometricAvailable,
-          onCancel: () => setState(() => _mode = _GateMode.unlocked),
+          onCancel: () => setState(() => _mode = _AppLockMode.unlocked),
           onComplete: _completeSetup,
         ),
       );
     }
-    if (_mode == _GateMode.manage) {
+    if (_mode == _AppLockMode.manage) {
       return _standalone(
-        AppLockManageScreen(
+        _ManageScreen(
           languageCode: _languageCode,
           state: _state!,
           biometricsAvailable: _biometricAvailable,
-          onVerifyPin: _verifyPin,
           onChangePin: _changePin,
           onBiometricsChanged: _setBiometrics,
           onDisable: _disableLock,
           onUnlock: _unlock,
-          onReturnLocked: () => setState(() => _mode = _GateMode.locked),
+          onReturnLocked: () => setState(() => _mode = _AppLockMode.locked),
         ),
       );
     }
-    if (!_showPrompt) return widget.child;
-    final padding = MediaQueryData.fromView(View.of(context)).padding;
+    return _unlockedLayer(context);
+  }
+
+  Widget _unlockedLayer(BuildContext context) {
+    final bottomInset = MediaQueryData.fromView(View.of(context)).padding.bottom;
     return Stack(
       textDirection: TextDirection.ltr,
       children: [
         widget.child,
-        Positioned(
-          left: 14,
-          right: 14,
-          bottom: 14 + padding.bottom,
-          child: Material(
-            color: Colors.transparent,
-            child: _PrivacyPrompt(
-              languageCode: _languageCode,
-              onLater: _dismissPrompt,
-              onEnable: () => setState(() {
-                _showPrompt = false;
-                _mode = _GateMode.setup;
-              }),
+        if (_showPrompt)
+          Positioned(
+            left: 14,
+            right: 14,
+            bottom: bottomInset + 14,
+            child: _overlayMaterial(
+              _PrivacyPrompt(
+                languageCode: _languageCode,
+                onLater: _dismissPrompt,
+                onEnable: () => setState(() {
+                  _showPrompt = false;
+                  _mode = _AppLockMode.setup;
+                }),
+              ),
+            ),
+          )
+        else
+          Positioned(
+            right: 12,
+            bottom: bottomInset + 88,
+            child: _overlayMaterial(
+              Tooltip(
+                message: (_state?.enabled ?? false)
+                    ? appLockCopy(
+                        _languageCode,
+                        en: 'Lock now',
+                        tr: 'Şimdi kilitle',
+                        es: 'Bloquear ahora',
+                        fr: 'Verrouiller maintenant',
+                        pt: 'Bloquear agora',
+                      )
+                    : appLockCopy(
+                        _languageCode,
+                        en: 'Set private lock',
+                        tr: 'Özel kilit kur',
+                        es: 'Configurar bloqueo privado',
+                        fr: 'Configurer le verrou privé',
+                        pt: 'Configurar bloqueio privado',
+                      ),
+                child: IconButton.filledTonal(
+                  onPressed: () => setState(() {
+                    _mode = (_state?.enabled ?? false)
+                        ? _AppLockMode.locked
+                        : _AppLockMode.setup;
+                  }),
+                  icon: Icon(
+                    (_state?.enabled ?? false)
+                        ? Icons.lock_outline
+                        : Icons.shield_outlined,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
+
+  Widget _overlayMaterial(Widget child) => Theme(
+        data: buildMysticTheme(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(color: Colors.transparent, child: child),
+        ),
+      );
 
   Widget _standalone(Widget home) => MaterialApp(
         title: 'Mystic Tarot',
         debugShowCheckedModeBanner: false,
         theme: buildMysticTheme(),
         home: home,
-      );
-
-  String _copy({
-    required String en,
-    required String tr,
-    required String es,
-    required String fr,
-    required String pt,
-  }) => appLockCopy(
-        _languageCode,
-        en: en,
-        tr: tr,
-        es: es,
-        fr: fr,
-        pt: pt,
       );
 }
 
@@ -326,7 +365,11 @@ class _PrivacyPrompt extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
           boxShadow: const [
-            BoxShadow(color: Colors.black54, blurRadius: 24, offset: Offset(0, 8)),
+            BoxShadow(
+              color: Colors.black54,
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
           ],
         ),
         child: Column(
@@ -347,7 +390,10 @@ class _PrivacyPrompt extends StatelessWidget {
                       fr: 'Protégez votre journal privé',
                       pt: 'Proteja seu diário privado',
                     ),
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],
@@ -386,7 +432,7 @@ class _PrivacyPrompt extends StatelessWidget {
                   label: Text(appLockCopy(
                     languageCode,
                     en: 'Enable lock',
-                    tr: 'Kilidi aç',
+                    tr: 'Kilidi etkinleştir',
                     es: 'Activar bloqueo',
                     fr: 'Activer le verrou',
                     pt: 'Ativar bloqueio',
@@ -399,13 +445,12 @@ class _PrivacyPrompt extends StatelessWidget {
       );
 }
 
-class AppLockSetupScreen extends StatefulWidget {
-  const AppLockSetupScreen({
+class _SetupScreen extends StatefulWidget {
+  const _SetupScreen({
     required this.languageCode,
     required this.biometricsAvailable,
     required this.onCancel,
     required this.onComplete,
-    super.key,
   });
 
   final String languageCode;
@@ -414,10 +459,10 @@ class AppLockSetupScreen extends StatefulWidget {
   final Future<void> Function(String pin, bool biometrics) onComplete;
 
   @override
-  State<AppLockSetupScreen> createState() => _AppLockSetupScreenState();
+  State<_SetupScreen> createState() => _SetupScreenState();
 }
 
-class _AppLockSetupScreenState extends State<AppLockSetupScreen> {
+class _SetupScreenState extends State<_SetupScreen> {
   final _pin = TextEditingController();
   final _confirm = TextEditingController();
   bool _biometrics = true;
@@ -480,7 +525,7 @@ class _AppLockSetupScreenState extends State<AppLockSetupScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => _LockScaffold(
+  Widget build(BuildContext context) => _LockShell(
         title: appLockCopy(
           widget.languageCode,
           en: 'Create private lock',
@@ -522,10 +567,7 @@ class _AppLockSetupScreenState extends State<AppLockSetupScreen> {
               style: const TextStyle(color: MysticColors.mist, height: 1.45),
             ),
             const SizedBox(height: 20),
-            _PinField(
-              controller: _pin,
-              label: appLockCopy(widget.languageCode, en: 'PIN', tr: 'PIN', es: 'PIN', fr: 'Code', pt: 'PIN'),
-            ),
+            _PinField(controller: _pin, label: 'PIN'),
             const SizedBox(height: 12),
             _PinField(
               controller: _confirm,
@@ -539,12 +581,17 @@ class _AppLockSetupScreenState extends State<AppLockSetupScreen> {
               ),
             ),
             if (widget.biometricsAvailable) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               SwitchListTile.adaptive(
                 value: _biometrics,
-                onChanged: _busy ? null : (value) => setState(() => _biometrics = value),
+                onChanged: _busy
+                    ? null
+                    : (value) => setState(() => _biometrics = value),
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.fingerprint, color: MysticColors.gold),
+                secondary: const Icon(
+                  Icons.fingerprint,
+                  color: MysticColors.gold,
+                ),
                 title: Text(appLockCopy(
                   widget.languageCode,
                   en: 'Use biometrics',
@@ -557,7 +604,10 @@ class _AppLockSetupScreenState extends State<AppLockSetupScreen> {
             ],
             if (_error != null) ...[
               const SizedBox(height: 10),
-              Text(_error!, style: const TextStyle(color: Color(0xFFFF8796))),
+              Text(
+                _error!,
+                style: const TextStyle(color: Color(0xFFFF8796)),
+              ),
             ],
             const SizedBox(height: 22),
             FilledButton.icon(
@@ -582,8 +632,8 @@ class _AppLockSetupScreenState extends State<AppLockSetupScreen> {
       );
 }
 
-class AppLockScreen extends StatefulWidget {
-  const AppLockScreen({
+class _UnlockScreen extends StatefulWidget {
+  const _UnlockScreen({
     required this.languageCode,
     required this.state,
     required this.biometricsAvailable,
@@ -592,7 +642,6 @@ class AppLockScreen extends StatefulWidget {
     required this.onUnlock,
     required this.onBiometrics,
     required this.onManage,
-    super.key,
   });
 
   final String languageCode;
@@ -605,27 +654,27 @@ class AppLockScreen extends StatefulWidget {
   final VoidCallback onManage;
 
   @override
-  State<AppLockScreen> createState() => _AppLockScreenState();
+  State<_UnlockScreen> createState() => _UnlockScreenState();
 }
 
-class _AppLockScreenState extends State<AppLockScreen> {
+class _UnlockScreenState extends State<_UnlockScreen> {
   final _pin = TextEditingController();
-  bool _busy = false;
-  String? _error;
   Timer? _timer;
   Duration _remaining = Duration.zero;
+  bool _busy = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _syncRemaining();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _syncRemaining());
+    _remaining = widget.state.remainingLockout(DateTime.now().toUtc());
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _syncLockout());
   }
 
   @override
-  void didUpdateWidget(covariant AppLockScreen oldWidget) {
+  void didUpdateWidget(covariant _UnlockScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _syncRemaining();
+    _syncLockout();
   }
 
   @override
@@ -635,9 +684,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
     super.dispose();
   }
 
-  void _syncRemaining() {
-    final next = widget.state.remainingLockout(DateTime.now().toUtc());
-    if (mounted && next != _remaining) setState(() => _remaining = next);
+  void _syncLockout() {
+    final remaining = widget.state.remainingLockout(DateTime.now().toUtc());
+    if (mounted && remaining != _remaining) {
+      setState(() => _remaining = remaining);
+    }
   }
 
   Future<void> _submit({bool manage = false}) async {
@@ -649,14 +700,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
     try {
       final valid = await widget.onVerifyPin(_pin.text);
       if (!mounted) return;
-      if (valid) {
-        _pin.clear();
-        if (manage) {
-          widget.onManage();
-        } else {
-          await widget.onUnlock();
-        }
-      } else {
+      if (!valid) {
         setState(() => _error = appLockCopy(
               widget.languageCode,
               en: 'Incorrect PIN.',
@@ -665,6 +709,13 @@ class _AppLockScreenState extends State<AppLockScreen> {
               fr: 'Code incorrect.',
               pt: 'PIN incorreto.',
             ));
+        return;
+      }
+      _pin.clear();
+      if (manage) {
+        widget.onManage();
+      } else {
+        await widget.onUnlock();
       }
     } on AppLockTemporarilyUnavailable catch (error) {
       if (mounted) setState(() => _remaining = error.remaining);
@@ -685,7 +736,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => _LockScaffold(
+  Widget build(BuildContext context) => _LockShell(
         title: appLockCopy(
           widget.languageCode,
           en: 'Private journal locked',
@@ -714,8 +765,9 @@ class _AppLockScreenState extends State<AppLockScreen> {
             const SizedBox(height: 24),
             _PinField(
               controller: _pin,
-              autofocus: !(widget.state.biometricsEnabled && widget.biometricsAvailable),
-              label: appLockCopy(widget.languageCode, en: 'PIN', tr: 'PIN', es: 'PIN', fr: 'Code', pt: 'PIN'),
+              autofocus: !(widget.state.biometricsEnabled &&
+                  widget.biometricsAvailable),
+              label: 'PIN',
               onSubmitted: (_) => _submit(),
             ),
             if (_remaining > Duration.zero) ...[
@@ -735,7 +787,11 @@ class _AppLockScreenState extends State<AppLockScreen> {
             ],
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFFF8796))),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFFFF8796)),
+              ),
             ],
             const SizedBox(height: 18),
             FilledButton.icon(
@@ -750,10 +806,12 @@ class _AppLockScreenState extends State<AppLockScreen> {
                 pt: 'Desbloquear',
               )),
             ),
-            if (widget.state.biometricsEnabled && widget.biometricsAvailable) ...[
+            if (widget.state.biometricsEnabled &&
+                widget.biometricsAvailable) ...[
               const SizedBox(height: 10),
               OutlinedButton.icon(
-                onPressed: widget.authenticating ? null : widget.onBiometrics,
+                onPressed:
+                    widget.authenticating ? null : widget.onBiometrics,
                 icon: const Icon(Icons.fingerprint),
                 label: Text(appLockCopy(
                   widget.languageCode,
@@ -785,24 +843,21 @@ class _AppLockScreenState extends State<AppLockScreen> {
       );
 }
 
-class AppLockManageScreen extends StatefulWidget {
-  const AppLockManageScreen({
+class _ManageScreen extends StatefulWidget {
+  const _ManageScreen({
     required this.languageCode,
     required this.state,
     required this.biometricsAvailable,
-    required this.onVerifyPin,
     required this.onChangePin,
     required this.onBiometricsChanged,
     required this.onDisable,
     required this.onUnlock,
     required this.onReturnLocked,
-    super.key,
   });
 
   final String languageCode;
   final AppLockState state;
   final bool biometricsAvailable;
-  final Future<bool> Function(String pin) onVerifyPin;
   final Future<void> Function(String pin) onChangePin;
   final Future<void> Function(bool enabled) onBiometricsChanged;
   final Future<void> Function() onDisable;
@@ -810,10 +865,10 @@ class AppLockManageScreen extends StatefulWidget {
   final VoidCallback onReturnLocked;
 
   @override
-  State<AppLockManageScreen> createState() => _AppLockManageScreenState();
+  State<_ManageScreen> createState() => _ManageScreenState();
 }
 
-class _AppLockManageScreenState extends State<AppLockManageScreen> {
+class _ManageScreenState extends State<_ManageScreen> {
   bool _busy = false;
   String? _message;
 
@@ -937,7 +992,7 @@ class _AppLockManageScreenState extends State<AppLockManageScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => _LockScaffold(
+  Widget build(BuildContext context) => _LockShell(
         title: appLockCopy(
           widget.languageCode,
           en: 'Private lock settings',
@@ -978,7 +1033,10 @@ class _AppLockManageScreenState extends State<AppLockManageScreen> {
                         await widget.onBiometricsChanged(value);
                         if (mounted) setState(() => _busy = false);
                       },
-                secondary: const Icon(Icons.fingerprint, color: MysticColors.gold),
+                secondary: const Icon(
+                  Icons.fingerprint,
+                  color: MysticColors.gold,
+                ),
                 title: Text(appLockCopy(
                   widget.languageCode,
                   en: 'Biometric unlock',
@@ -990,7 +1048,10 @@ class _AppLockManageScreenState extends State<AppLockManageScreen> {
               ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.no_encryption_outlined, color: Color(0xFFFF8796)),
+              leading: const Icon(
+                Icons.no_encryption_outlined,
+                color: Color(0xFFFF8796),
+              ),
               title: Text(appLockCopy(
                 widget.languageCode,
                 en: 'Disable private lock',
@@ -1003,7 +1064,11 @@ class _AppLockManageScreenState extends State<AppLockManageScreen> {
             ),
             if (_message != null) ...[
               const SizedBox(height: 12),
-              Text(_message!, textAlign: TextAlign.center, style: const TextStyle(color: MysticColors.gold)),
+              Text(
+                _message!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: MysticColors.gold),
+              ),
             ],
             const SizedBox(height: 20),
             FilledButton.icon(
@@ -1023,8 +1088,12 @@ class _AppLockManageScreenState extends State<AppLockManageScreen> {
       );
 }
 
-class _LockScaffold extends StatelessWidget {
-  const _LockScaffold({required this.title, required this.child, this.leading});
+class _LockShell extends StatelessWidget {
+  const _LockShell({
+    required this.title,
+    required this.child,
+    this.leading,
+  });
 
   final String title;
   final Widget child;
@@ -1060,7 +1129,9 @@ class _LockHero extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: MysticColors.violet.withValues(alpha: .24),
-            border: Border.all(color: MysticColors.gold.withValues(alpha: .45)),
+            border: Border.all(
+              color: MysticColors.gold.withValues(alpha: .45),
+            ),
             boxShadow: [
               BoxShadow(
                 color: MysticColors.violet.withValues(alpha: .24),
@@ -1094,7 +1165,7 @@ class _PinField extends StatelessWidget {
         keyboardType: TextInputType.number,
         textInputAction: TextInputAction.done,
         maxLength: AppLockService.pinLength,
-        inputFormatters: const [
+        inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(AppLockService.pinLength),
         ],
