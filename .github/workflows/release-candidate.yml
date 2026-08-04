@@ -49,6 +49,9 @@ jobs:
           grep -R "com.tunabozcali.mystictarot" android/app
           grep "com.tunabozcali.mystictarot" ios/Runner.xcodeproj/project.pbxproj
 
+      - name: Configure private app lock
+        run: dart run tool/configure_app_lock.dart
+
       - name: Install dependencies
         run: flutter pub get
 

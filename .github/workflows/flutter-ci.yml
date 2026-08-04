@@ -41,6 +41,9 @@ jobs:
       - name: Configure daily ritual notifications
         run: dart run tool/configure_ritual_notifications.dart
 
+      - name: Configure private app lock
+        run: dart run tool/configure_app_lock.dart
+
       - name: Validate protected signing configurator
         run: |
           cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts
