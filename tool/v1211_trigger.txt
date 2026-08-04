@@ -1,3 +1,3 @@
-Apply the reviewed v1.21.1 prelaunch hardening patch and commit only clean product, test, documentation, dependency-lock, and permanent CI sources.
+Apply the reviewed v1.21.1 prelaunch hardening patch and commit only clean product, test, documentation, and permanent CI sources.
 
-Trigger: isolated clean-source finalizer before authoritative Android and iOS package gates.
+Trigger: final clean-source commit respecting the repository's ignored lockfile policy.
