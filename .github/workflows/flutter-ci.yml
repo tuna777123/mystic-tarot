@@ -34,9 +34,7 @@ jobs:
 
       - name: Materialize v1.21 release candidate
         if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1.21-launch-differentiation'
-        run: |
-          python tool/v121_integrate.py
-          python tool/v121_source_overrides.py
+        run: python tool/v121_integrate.py
 
       - name: Format v1.21 release files
         if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1.21-launch-differentiation'
