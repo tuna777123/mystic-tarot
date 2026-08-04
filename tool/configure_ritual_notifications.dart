@@ -3,7 +3,15 @@ import 'dart:io';
 const _desugaringDependency =
     'coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")';
 
-void main() {
+void main() => configureRitualNotifications();
+
+void configureRitualNotifications({bool requireAndroid = true}) {
+  if (!Directory('android').existsSync() && !requireAndroid) {
+    stdout.writeln(
+      'Android shell not present; ritual notification configuration skipped.',
+    );
+    return;
+  }
   final gradle = File('android/app/build.gradle.kts');
   final manifest = File('android/app/src/main/AndroidManifest.xml');
   final errors = <String>[];
@@ -56,7 +64,9 @@ void _configureGradle(File file) {
   if (!source.contains('isCoreLibraryDesugaringEnabled = true')) {
     const marker = 'compileOptions {';
     if (!source.contains(marker)) {
-      throw StateError('Generated Android Gradle file has no compileOptions block.');
+      throw StateError(
+        'Generated Android Gradle file has no compileOptions block.',
+      );
     }
     source = source.replaceFirst(
       marker,
@@ -103,7 +113,9 @@ void _configureManifest(File file) {
         </receiver>
 ''';
     if (!source.contains(applicationEnd)) {
-      throw StateError('Generated Android manifest has no application end tag.');
+      throw StateError(
+        'Generated Android manifest has no application end tag.',
+      );
     }
     source = source.replaceFirst(applicationEnd, '$receivers$applicationEnd');
   }

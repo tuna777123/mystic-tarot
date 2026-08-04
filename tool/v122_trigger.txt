@@ -1,1 +1,0 @@
-Apply the reviewed v1.22.0 revenue-ready final patch and commit only clean product, test, documentation, and permanent release workflow sources.

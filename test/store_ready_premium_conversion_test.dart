@@ -1,84 +1,4 @@
-from pathlib import Path
-import runpy
-
-ROOT = Path(__file__).resolve().parents[1]
-
-runpy.run_path(
-    str(ROOT / 'tool/v122_revenue_final_v3.py'),
-    run_name='__main__',
-)
-
-premium_path = ROOT / 'lib/src/store_ready_premium_screen.dart'
-premium = premium_path.read_text(encoding='utf-8')
-build_marker = """  Widget build(BuildContext context) => Scaffold(
-    body: MysticBackground(
-"""
-if build_marker not in premium:
-    raise SystemExit('Premium Scaffold marker not found')
-premium = premium.replace(
-    build_marker,
-    """  Widget build(BuildContext context) => Scaffold(
-    bottomNavigationBar: _purchaseDock(context),
-    body: MysticBackground(
-""",
-    1,
-)
-method_marker = """  List<String> get _planIds => const [
-"""
-if method_marker not in premium:
-    raise SystemExit('Premium plan-list marker not found')
-dock = """  Widget _purchaseDock(BuildContext context) => AnimatedBuilder(
-    animation: store,
-    builder: (context, _) => Material(
-      elevation: 18,
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: SafeArea(
-        top: false,
-        minimum: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!store.isPlus) ...[
-              _renewalDisclosure(context),
-              const SizedBox(height: 8),
-            ],
-            KeyedSubtree(
-              key: const ValueKey('premium-sticky-primary-action'),
-              child: GoldButton(
-                label: store.isPlus
-                    ? t(
-                        en: 'Continue with Mystic Plus',
-                        es: 'Continuar con Mystic Plus',
-                        fr: 'Continuer avec Mystic Plus',
-                        pt: 'Continuar com Mystic Plus',
-                        tr: 'Mystic Plus ile devam et',
-                        it: 'Continua con Mystic Plus',
-                        de: 'Mit Mystic Plus fortfahren',
-                      )
-                    : _purchaseButtonLabel(),
-                icon: store.isPlus
-                    ? Icons.arrow_forward_rounded
-                    : Icons.lock_open_rounded,
-                onPressed: store.isPlus
-                    ? () => Navigator.pop(context, true)
-                    : (store.canPurchase
-                          ? () => store.buy(selectedId)
-                          : null),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-"""
-premium = premium.replace(method_marker, dock + method_marker, 1)
-premium_path.write_text(premium, encoding='utf-8')
-
-widget_test = ROOT / 'test/store_ready_premium_conversion_test.dart'
-widget_test.write_text(
-    r'''import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/flagship.dart';
 import 'package:mystic_tarot/src/store_purchase_service.dart';
@@ -120,7 +40,6 @@ void main() {
       const ValueKey('premium-sticky-primary-action'),
     );
 
-    expect(yearly, findsOneWidget);
     expect(stickyAction, findsOneWidget);
     final actionRect = tester.getRect(stickyAction);
     expect(actionRect.top, greaterThanOrEqualTo(0));
@@ -132,6 +51,12 @@ void main() {
       findsOneWidget,
     );
 
+    await tester.scrollUntilVisible(
+      yearly,
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(yearly, findsOneWidget);
     await tester.scrollUntilVisible(
       monthly,
       240,
@@ -201,7 +126,8 @@ void main() {
     final retry = find.byKey(const ValueKey('premium-store-retry'));
     expect(retry, findsOneWidget);
     await tester.tap(retry);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
 
     expect(retry, findsNothing);
     expect(
@@ -226,7 +152,8 @@ Future<void> _pumpPremium(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 120));
 }
 
 class _FakeSubscriptionClient implements SubscriptionClient {
@@ -243,9 +170,7 @@ class _FakeSubscriptionClient implements SubscriptionClient {
   Future<void> configure(String apiKey) async {}
 
   @override
-  Future<SubscriptionEntitlement> getEntitlement(
-    String entitlementId,
-  ) async =>
+  Future<SubscriptionEntitlement> getEntitlement(String entitlementId) async =>
       entitlement;
 
   @override
@@ -257,9 +182,7 @@ class _FakeSubscriptionClient implements SubscriptionClient {
   }
 
   @override
-  Future<List<SubscriptionProduct>> loadProducts(
-    Set<String> productIds,
-  ) async {
+  Future<List<SubscriptionProduct>> loadProducts(Set<String> productIds) async {
     if (failedLoadsRemaining > 0) {
       failedLoadsRemaining--;
       throw const SubscriptionClientException(
@@ -295,8 +218,7 @@ class _FakeSubscriptionClient implements SubscriptionClient {
   Future<SubscriptionEntitlement> purchase(
     String productId,
     String entitlementId,
-  ) async =>
-      entitlement;
+  ) async => entitlement;
 
   @override
   Future<SubscriptionEntitlement> restore(String entitlementId) async =>
@@ -305,34 +227,3 @@ class _FakeSubscriptionClient implements SubscriptionClient {
   @override
   void dispose() {}
 }
-''',
-    encoding='utf-8',
-)
-
-contract_path = ROOT / 'test/v122_revenue_final_contract_test.dart'
-contract = contract_path.read_text(encoding='utf-8')
-contract = contract.replace(
-    "expect(File('tool/v122_revenue_final_v2.py').existsSync(), isFalse);",
-    """expect(File('tool/v122_revenue_final_v2.py').existsSync(), isFalse);
-    expect(File('tool/v122_revenue_final_v3.py').existsSync(), isFalse);
-    expect(File('tool/v122_revenue_final_v4.py').existsSync(), isFalse);""",
-    1,
-)
-contract = contract.replace(
-    "expect(premium, contains(\"ValueKey('premium-store-retry')\"));",
-    """expect(premium, contains("ValueKey('premium-store-retry')"));
-    expect(
-      premium,
-      contains("ValueKey('premium-sticky-primary-action')"),
-    );""",
-    1,
-)
-contract_path.write_text(contract, encoding='utf-8')
-
-# Tests must see the clean release tree. The workflow is removed from the
-# branch through the GitHub API after the clean product commit is created.
-materializer = ROOT / '.github/workflows/v122-materialize.yml'
-if materializer.exists():
-    materializer.unlink()
-
-Path(__file__).unlink()

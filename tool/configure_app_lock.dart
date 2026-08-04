@@ -4,41 +4,58 @@ const _faceIdDescription =
     'Use Face ID to unlock your private Mystic Tarot journal.';
 const _entitlementsPath = 'Runner/Runner.entitlements';
 
-void main() {
+void main() => configureAppLock();
+
+void configureAppLock({bool requireAndroid = true, bool requireIos = true}) {
   final errors = <String>[];
+  final hasAndroid = Directory('android').existsSync();
+  final hasIos = Directory('ios').existsSync();
 
-  final manifest = File('android/app/src/main/AndroidManifest.xml');
-  if (!manifest.existsSync()) {
-    errors.add('Missing generated Android manifest.');
-  } else {
-    configureAndroidManifest(manifest);
+  File? manifest;
+  File? activity;
+  if (hasAndroid) {
+    manifest = File('android/app/src/main/AndroidManifest.xml');
+    if (!manifest.existsSync()) {
+      errors.add('Missing generated Android manifest.');
+    } else {
+      configureAndroidManifest(manifest);
+    }
+
+    activity = findAndroidMainActivity(Directory('android/app/src/main'));
+    if (activity == null) {
+      errors.add('Missing generated Android MainActivity.kt.');
+    } else {
+      configureAndroidActivity(activity);
+    }
+  } else if (requireAndroid) {
+    errors.add('Missing generated Android shell.');
   }
 
-  final activity = findAndroidMainActivity(Directory('android/app/src/main'));
-  if (activity == null) {
-    errors.add('Missing generated Android MainActivity.kt.');
-  } else {
-    configureAndroidActivity(activity);
+  File? infoPlist;
+  File? entitlements;
+  File? iosProject;
+  if (hasIos) {
+    infoPlist = File('ios/Runner/Info.plist');
+    if (!infoPlist.existsSync()) {
+      errors.add('Missing generated iOS Info.plist.');
+    } else {
+      configureIosInfoPlist(infoPlist);
+    }
+
+    entitlements = File('ios/Runner/Runner.entitlements');
+    configureIosEntitlements(entitlements);
+
+    iosProject = File('ios/Runner.xcodeproj/project.pbxproj');
+    if (!iosProject.existsSync()) {
+      errors.add('Missing generated iOS project file.');
+    } else {
+      configureIosProject(iosProject);
+    }
+  } else if (requireIos) {
+    errors.add('Missing generated iOS shell.');
   }
 
-  final infoPlist = File('ios/Runner/Info.plist');
-  if (!infoPlist.existsSync()) {
-    errors.add('Missing generated iOS Info.plist.');
-  } else {
-    configureIosInfoPlist(infoPlist);
-  }
-
-  final entitlements = File('ios/Runner/Runner.entitlements');
-  configureIosEntitlements(entitlements);
-
-  final iosProject = File('ios/Runner.xcodeproj/project.pbxproj');
-  if (!iosProject.existsSync()) {
-    errors.add('Missing generated iOS project file.');
-  } else {
-    configureIosProject(iosProject);
-  }
-
-  if (manifest.existsSync()) {
+  if (manifest != null && manifest.existsSync()) {
     final source = manifest.readAsStringSync();
     for (final required in const [
       'android.permission.USE_BIOMETRIC',
@@ -56,21 +73,25 @@ void main() {
       errors.add('Android MainActivity does not use FlutterFragmentActivity.');
     }
   }
-  if (infoPlist.existsSync()) {
+  if (infoPlist != null && infoPlist.existsSync()) {
     final source = infoPlist.readAsStringSync();
     if (!source.contains('NSFaceIDUsageDescription') ||
         !source.contains(_faceIdDescription)) {
       errors.add('iOS Face ID usage description was not configured.');
     }
   }
-  if (!entitlements.existsSync() ||
-      !entitlements.readAsStringSync().contains('keychain-access-groups')) {
+  if (entitlements != null &&
+      (!entitlements.existsSync() ||
+          !entitlements.readAsStringSync().contains(
+            'keychain-access-groups',
+          ))) {
     errors.add('iOS Keychain entitlement was not configured.');
   }
-  if (iosProject.existsSync() &&
+  if (iosProject != null &&
+      iosProject.existsSync() &&
       !iosProject.readAsStringSync().contains(
-            'CODE_SIGN_ENTITLEMENTS = $_entitlementsPath;',
-          )) {
+        'CODE_SIGN_ENTITLEMENTS = $_entitlementsPath;',
+      )) {
     errors.add('iOS project does not reference the app-lock entitlements.');
   }
 
@@ -102,14 +123,14 @@ void configureAndroidManifest(File file) {
     source = source.replaceFirst(
       manifestStart,
       '$manifestStart\n'
-          '    <uses-permission android:name="android.permission.USE_BIOMETRIC" />',
+      '    <uses-permission android:name="android.permission.USE_BIOMETRIC" />',
     );
   }
   if (!source.contains('android.permission.USE_FINGERPRINT')) {
     source = source.replaceFirst(
       manifestStart,
       '$manifestStart\n'
-          '    <uses-permission android:name="android.permission.USE_FINGERPRINT" />',
+      '    <uses-permission android:name="android.permission.USE_FINGERPRINT" />',
     );
   }
   if (source.contains('<application') &&
@@ -153,8 +174,8 @@ void configureIosInfoPlist(File file) {
     source = source.replaceFirst(
       end,
       '\t<key>NSFaceIDUsageDescription</key>\n'
-          '\t<string>$_faceIdDescription</string>\n'
-          '$end',
+      '\t<string>$_faceIdDescription</string>\n'
+      '$end',
     );
   }
   file.writeAsStringSync(source);
@@ -183,7 +204,9 @@ void configureIosProject(File file) {
       multiLine: true,
     );
     if (!productPattern.hasMatch(source)) {
-      throw StateError('Generated iOS project has no bundle identifier setting.');
+      throw StateError(
+        'Generated iOS project has no bundle identifier setting.',
+      );
     }
     source = source.replaceAllMapped(productPattern, (match) {
       final indent = match.group(1)!;

@@ -1,3 +1,13 @@
+# Mystic Tarot 1.22.0 — Revenue-Ready Final
+
+- Official plans and the primary purchase action now appear before long-form proof, while yearly remains the honest default value path.
+- Every selected plan shows its actual store price, billing period, renewal cadence, and an explicit reminder that Daily Guidance and the saved journal remain usable without Plus.
+- A failed store connection now exposes a visible localized retry instead of leaving a disabled purchase screen.
+- After verified purchase or restore, the primary action returns the member to Mystic; subscription management remains a clear secondary action.
+- Production Android and iOS workflows now apply store identity, ritual notifications, and private app-lock configuration before signed packaging.
+- Every release path that applies permanent store identity now also applies the correct notification and app-lock native hardening for the generated platform shell.
+- Version `1.22.0+29`.
+
 # Mystic Tarot 1.21.1 — Prelaunch Hardening
 
 - App-lock, PIN, biometric, and native Material controls now follow the language selected inside Mystic rather than leaking the device language.

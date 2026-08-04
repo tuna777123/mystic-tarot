@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'configure_app_lock.dart' as app_lock_config;
+import 'configure_ritual_notifications.dart' as ritual_config;
+
 const permanentIdentifier = 'com.tunabozcali.mystictarot';
 
 const generatedIdentifiers = <String>[
@@ -45,8 +48,8 @@ void main() {
   final iosProject = File('ios/Runner.xcodeproj/project.pbxproj');
   if (iosProject.existsSync() &&
       !iosProject.readAsStringSync().contains(
-            'PRODUCT_BUNDLE_IDENTIFIER = $permanentIdentifier;',
-          )) {
+        'PRODUCT_BUNDLE_IDENTIFIER = $permanentIdentifier;',
+      )) {
     errors.add('iOS bundle identifier was not set to $permanentIdentifier.');
   }
 
@@ -57,6 +60,20 @@ void main() {
     exitCode = 1;
     return;
   }
+
+  final hasAndroid = Directory('android').existsSync();
+  final hasIos = Directory('ios').existsSync();
+  if (hasAndroid) {
+    ritual_config.configureRitualNotifications();
+  }
+  if (hasAndroid || hasIos) {
+    app_lock_config.configureAppLock(
+      requireAndroid: hasAndroid,
+      requireIos: hasIos,
+    );
+  }
+  if (exitCode != 0) return;
+
   stdout.writeln(
     'Permanent store identifiers verified; $changedFiles file(s) updated.',
   );
