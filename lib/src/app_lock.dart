@@ -184,6 +184,8 @@ class AppLockService {
     }
   }
 
+  Future<void> markTrustedUnlock() => _resetFailures();
+
   Future<void> setBiometricsEnabled(bool enabled) async {
     final state = await loadState();
     if (!state.enabled && enabled) {
