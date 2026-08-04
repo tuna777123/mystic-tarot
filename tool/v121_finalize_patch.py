@@ -131,6 +131,7 @@ source = store.read_text(encoding='utf-8').replace(
     'optional whole-app PIN/biometric protection',
     'optional whole-app PIN and supported-device biometric protection',
 )
+source = '\n'.join(line.rstrip() for line in source.splitlines()) + '\n'
 store.write_text(source, encoding='utf-8')
 
 contract = root / 'test/v121_launch_differentiation_contract_test.dart'
