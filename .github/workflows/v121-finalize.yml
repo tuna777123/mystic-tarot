@@ -113,6 +113,7 @@ jobs:
           grep -q 'The next honest step for the connection' lib/src/reading_position.dart
           grep -q 'The choice that can change the trajectory' lib/src/reading_position.dart
           grep -q 'ReadingKind.celticCross' lib/src/reading_synthesis.dart
+          grep -q 'Try this grounded action' lib/src/reading_synthesis.dart
           grep -q 'biometrics on supported devices' lib/src/launch_differentiation.dart
           git diff --check
 
@@ -180,3 +181,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "release: Mystic Tarot 1.21 launch differentiation"
           git push origin HEAD:feature/v1.21-launch-differentiation
+
+# Triggered after the final multilingual grammar review.
