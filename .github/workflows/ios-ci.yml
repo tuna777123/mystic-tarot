@@ -27,8 +27,8 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Generate iOS shell
-        run: flutter create . --platforms=ios --org com.tunabozcali
+      - name: Generate native shells
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
 
       - name: Configure permanent store identity
         run: dart run tool/configure_store_identifiers.dart
