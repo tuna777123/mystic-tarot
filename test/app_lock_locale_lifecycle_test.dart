@@ -48,9 +48,9 @@ void main() {
     await _pumpUntilFound(tester, find.text('PRIVATE APP'));
 
     languageCode = 'tr';
-    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump(const Duration(milliseconds: 1));
-    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await _pumpUntilFound(tester, find.text('Özel günlük kilitli'));
 
     expect(find.text('PRIVATE APP'), findsNothing);
@@ -77,9 +77,9 @@ void main() {
     await tester.tap(find.text('Unlock'));
     await _pumpUntilFound(tester, find.text('PRIVATE APP'));
 
-    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     await tester.pump(const Duration(milliseconds: 1));
-    await tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
     expect(find.text('PRIVATE APP'), findsOneWidget);
