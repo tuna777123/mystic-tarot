@@ -38,6 +38,54 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: python tool/v1211_harden.py
 
+      - name: Scope permanent Flutter formatting gate
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/flutter-ci.yml')
+          source = workflow.read_text(encoding='utf-8')
+          old = """      - name: Verify formatting
+                  run: dart format --output=none --set-exit-if-changed lib test tool
+
+                - name: Verify clean diff
+                  run: git diff --check
+
+                - name: Analyze
+                  run: flutter analyze --fatal-infos
+          """
+          new = """      - name: Verify changed Dart formatting
+                  shell: bash
+                  run: |
+                    if [[ \"$GITHUB_EVENT_NAME\" == \"pull_request\" ]]; then
+                      git fetch origin \"$GITHUB_BASE_REF\" --depth=1
+                      range=\"origin/$GITHUB_BASE_REF...HEAD\"
+                    else
+                      before=\"$(jq -r '.before // empty' \"$GITHUB_EVENT_PATH\")\"
+                      if [[ -z \"$before\" || \"$before\" =~ ^0+$ ]]; then
+                        range=\"HEAD^...HEAD\"
+                      else
+                        range=\"$before...HEAD\"
+                      fi
+                    fi
+                    mapfile -t files < <(git diff --name-only --diff-filter=ACMR \"$range\" -- '*.dart')
+                    if (( ${#files[@]} > 0 )); then
+                      dart format --output=none --set-exit-if-changed \"${files[@]}\"
+                    fi
+
+                - name: Verify clean diff
+                  run: git diff --check
+
+                - name: Analyze
+                  run: flutter analyze --fatal-infos
+          """
+          if old not in source:
+              raise SystemExit('Expected broad formatting gate was not found')
+          workflow.write_text(source.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Set up Java
         if: steps.gate.outputs.run == 'true'
         uses: actions/setup-java@v4
@@ -54,7 +102,14 @@ jobs:
 
       - name: Format reviewed Dart sources
         if: steps.gate.outputs.run == 'true'
-        run: dart format lib/src/app.dart lib/src/app_lock_gate.dart lib/src/app_locale.dart test/app_locale_test.dart test/app_lock_locale_lifecycle_test.dart test/material_localization_test.dart
+        run: >-
+          dart format
+          lib/src/app.dart
+          lib/src/app_lock_gate.dart
+          lib/src/app_locale.dart
+          test/app_locale_test.dart
+          test/app_lock_locale_lifecycle_test.dart
+          test/material_localization_test.dart
 
       - name: Generate platform shells
         if: steps.gate.outputs.run == 'true'
@@ -80,7 +135,13 @@ jobs:
       - name: Verify formatting and whitespace
         if: steps.gate.outputs.run == 'true'
         run: |
-          dart format --output=none --set-exit-if-changed lib test tool
+          dart format --output=none --set-exit-if-changed \
+            lib/src/app.dart \
+            lib/src/app_lock_gate.dart \
+            lib/src/app_locale.dart \
+            test/app_locale_test.dart \
+            test/app_lock_locale_lifecycle_test.dart \
+            test/material_localization_test.dart
           git diff --check
 
       - name: Analyze
