@@ -28,7 +28,7 @@ jobs:
         id: gate
         shell: bash
         run: |
-          if test -e tool/v122_revenue_final_v5.py; then
+          if test -e tool/v122_revenue_final_v6.py; then
             echo 'run=true' >> "$GITHUB_OUTPUT"
           else
             echo 'run=false' >> "$GITHUB_OUTPUT"
@@ -36,7 +36,7 @@ jobs:
 
       - name: Apply reviewed revenue final patch
         if: steps.gate.outputs.run == 'true'
-        run: python tool/v122_revenue_final_v5.py
+        run: python tool/v122_revenue_final_v6.py
 
       - name: Set up Flutter
         if: steps.gate.outputs.run == 'true'
@@ -66,6 +66,7 @@ jobs:
           test ! -e tool/v122_revenue_final_v3.py
           test ! -e tool/v122_revenue_final_v4.py
           test ! -e tool/v122_revenue_final_v5.py
+          test ! -e tool/v122_revenue_final_v6.py
           test ! -e tool/v122_trigger.txt
           test ! -e .github/workflows/v122-materialize.yml
           grep -q "ValueKey('premium-store-retry')" lib/src/store_ready_premium_screen.dart
@@ -105,6 +106,7 @@ jobs:
             tool/v122_revenue_final_v3.py \
             tool/v122_revenue_final_v4.py \
             tool/v122_revenue_final_v5.py \
+            tool/v122_revenue_final_v6.py \
             tool/v122_trigger.txt
           git commit -m "release: Mystic Tarot 1.22.0 revenue-ready final"
           git push origin HEAD:release/v1.22.0-revenue-final
