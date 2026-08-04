@@ -117,23 +117,26 @@ void main() {
     expect(result.nextAction.priority, 85);
   });
 
-  test('old readings do not resurface as Mirror tasks without due evidence', () {
-    final records = [
-      record(createdAt: now),
-      record(createdAt: now.subtract(const Duration(days: 2))),
-    ];
+  test(
+    'old readings do not resurface as Mirror tasks without due evidence',
+    () {
+      final records = [
+        record(createdAt: now),
+        record(createdAt: now.subtract(const Duration(days: 2))),
+      ];
 
-    final result = engine.analyze(
-      records: records,
-      streak: 2,
-      completedArcanaDays: 0,
-      freeReadingsLeft: 2,
-      mirrorDueCount: 0,
-      now: now,
-    );
+      final result = engine.analyze(
+        records: records,
+        streak: 2,
+        completedArcanaDays: 0,
+        freeReadingsLeft: 2,
+        mirrorDueCount: 0,
+        now: now,
+      );
 
-    expect(result.nextAction.type, MysticNextActionType.continueJourney);
-  });
+      expect(result.nextAction.type, MysticNextActionType.continueJourney);
+    },
+  );
 
   test('repeating cards create a visible pattern and higher value score', () {
     final records = [
@@ -182,18 +185,21 @@ void main() {
     expect(result.premiumValueScore, lessThan(100));
   });
 
-  test('calendar-day return is recognized even when less than 24 hours passed', () {
-    final afterMidnight = DateTime(2026, 7, 25, 1);
-    final result = engine.analyze(
-      records: [record(createdAt: DateTime(2026, 7, 24, 23))],
-      streak: 2,
-      completedArcanaDays: 0,
-      freeReadingsLeft: 3,
-      now: afterMidnight,
-    );
+  test(
+    'calendar-day return is recognized even when less than 24 hours passed',
+    () {
+      final afterMidnight = DateTime(2026, 7, 25, 1);
+      final result = engine.analyze(
+        records: [record(createdAt: DateTime(2026, 7, 24, 23))],
+        streak: 2,
+        completedArcanaDays: 0,
+        freeReadingsLeft: 3,
+        now: afterMidnight,
+      );
 
-    expect(result.returnState, MysticReturnState.returnedNextDay);
-  });
+      expect(result.returnState, MysticReturnState.returnedNextDay);
+    },
+  );
 
   test('habit stage requires meaningful repeated use', () {
     final records = List.generate(

@@ -1,12 +1,6 @@
 import 'models.dart';
 
-enum MysticGrowthStage {
-  newUser,
-  activated,
-  engaged,
-  habit,
-  powerUser,
-}
+enum MysticGrowthStage { newUser, activated, engaged, habit, powerUser }
 
 enum MysticNextActionType {
   firstReading,
@@ -237,17 +231,17 @@ class MysticGrowthEngine {
   }
 
   String _returnMessage(MysticReturnState state, int streak) => switch (state) {
-        MysticReturnState.firstVisit =>
-          'Your path begins with one honest question.',
-        MysticReturnState.activeToday =>
-          'Today’s signal is already part of your story.',
-        MysticReturnState.returnedNextDay =>
-          'You returned before yesterday’s insight went quiet.',
-        MysticReturnState.continuingStreak =>
-          'Your $streak-day practice is building real continuity.',
-        MysticReturnState.resumedPath =>
-          'Your path kept its place. Continue from where you left it.',
-      };
+    MysticReturnState.firstVisit =>
+      'Your path begins with one honest question.',
+    MysticReturnState.activeToday =>
+      'Today’s signal is already part of your story.',
+    MysticReturnState.returnedNextDay =>
+      'You returned before yesterday’s insight went quiet.',
+    MysticReturnState.continuingStreak =>
+      'Your $streak-day practice is building real continuity.',
+    MysticReturnState.resumedPath =>
+      'Your path kept its place. Continue from where you left it.',
+  };
 
   bool _hasVisiblePattern(List<ReadingRecord> records) {
     if (records.length < 3) return false;
@@ -279,10 +273,8 @@ class MysticGrowthEngine {
     return score.clamp(0, 100);
   }
 
-  int _activeDayCount(List<ReadingRecord> records) => records
-      .map((record) => _calendarDayKey(record.createdAt))
-      .toSet()
-      .length;
+  int _activeDayCount(List<ReadingRecord> records) =>
+      records.map((record) => _calendarDayKey(record.createdAt)).toSet().length;
 
   int _calendarDayDifference(DateTime earlier, DateTime later) {
     final earlierDay = DateTime(earlier.year, earlier.month, earlier.day);
