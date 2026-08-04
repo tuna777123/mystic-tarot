@@ -1,0 +1,102 @@
+name: Materialize Mystic Tarot v1.22
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mystic-tarot-v122-source-finalizer
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    if: github.head_ref == 'release/v1.22.0-revenue-final'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out revenue final branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/v1.22.0-revenue-final
+          fetch-depth: 0
+
+      - name: Determine whether patch is pending
+        id: gate
+        shell: bash
+        run: |
+          if test -e tool/v122_revenue_final_v2.py; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply reviewed revenue final patch
+        if: steps.gate.outputs.run == 'true'
+        run: python tool/v122_revenue_final_v2.py
+
+      - name: Set up Flutter
+        if: steps.gate.outputs.run == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+          cache: true
+
+      - name: Resolve dependencies and format reviewed sources
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          flutter pub get
+          dart format \
+            lib/src/store_ready_premium_screen.dart \
+            tool/configure_store_identifiers.dart \
+            tool/configure_ritual_notifications.dart \
+            tool/configure_app_lock.dart \
+            test/store_ready_premium_conversion_test.dart \
+            test/v122_revenue_final_contract_test.dart
+
+      - name: Verify clean source
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          test "$(grep '^version:' pubspec.yaml)" = 'version: 1.22.0+29'
+          test ! -e tool/v122_revenue_final.py
+          test ! -e tool/v122_revenue_final_v2.py
+          test ! -e tool/v122_trigger.txt
+          grep -q "ValueKey('premium-store-retry')" lib/src/store_ready_premium_screen.dart
+          grep -q 'Navigator.pop(context, true)' lib/src/store_ready_premium_screen.dart
+          grep -q 'configureRitualNotifications()' tool/configure_store_identifiers.dart
+          grep -q 'configureAppLock(' tool/configure_store_identifiers.dart
+          git diff --check
+
+      - name: Analyze with fatal infos
+        if: steps.gate.outputs.run == 'true'
+        run: flutter analyze --fatal-infos
+
+      - name: Run complete test suite
+        if: steps.gate.outputs.run == 'true'
+        run: flutter test
+
+      - name: Commit clean final release
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            RELEASE_NOTES.md \
+            RELEASE_NOTES_1.22.md \
+            STORE_RELEASE.md \
+            pubspec.yaml \
+            lib/src/store_ready_premium_screen.dart \
+            tool/configure_store_identifiers.dart \
+            tool/configure_ritual_notifications.dart \
+            tool/configure_app_lock.dart \
+            test/store_ready_premium_conversion_test.dart \
+            test/v122_revenue_final_contract_test.dart
+          git add -u \
+            tool/v122_revenue_final.py \
+            tool/v122_revenue_final_v2.py \
+            tool/v122_trigger.txt
+          git commit -m "release: Mystic Tarot 1.22.0 revenue-ready final"
+          git push origin HEAD:release/v1.22.0-revenue-final
