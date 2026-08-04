@@ -28,7 +28,7 @@ jobs:
         id: gate
         shell: bash
         run: |
-          if test -e tool/v122_revenue_final_v2.py; then
+          if test -e tool/v122_revenue_final_v3.py; then
             echo 'run=true' >> "$GITHUB_OUTPUT"
           else
             echo 'run=false' >> "$GITHUB_OUTPUT"
@@ -36,7 +36,7 @@ jobs:
 
       - name: Apply reviewed revenue final patch
         if: steps.gate.outputs.run == 'true'
-        run: python tool/v122_revenue_final_v2.py
+        run: python tool/v122_revenue_final_v3.py
 
       - name: Set up Flutter
         if: steps.gate.outputs.run == 'true'
@@ -63,6 +63,7 @@ jobs:
           test "$(grep '^version:' pubspec.yaml)" = 'version: 1.22.0+29'
           test ! -e tool/v122_revenue_final.py
           test ! -e tool/v122_revenue_final_v2.py
+          test ! -e tool/v122_revenue_final_v3.py
           test ! -e tool/v122_trigger.txt
           grep -q "ValueKey('premium-store-retry')" lib/src/store_ready_premium_screen.dart
           grep -q 'Navigator.pop(context, true)' lib/src/store_ready_premium_screen.dart
@@ -81,7 +82,7 @@ jobs:
       - name: Commit clean final release
         if: steps.gate.outputs.run == 'true'
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name "github-actions[bot]]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
             RELEASE_NOTES.md \
@@ -97,6 +98,7 @@ jobs:
           git add -u \
             tool/v122_revenue_final.py \
             tool/v122_revenue_final_v2.py \
+            tool/v122_revenue_final_v3.py \
             tool/v122_trigger.txt
           git commit -m "release: Mystic Tarot 1.22.0 revenue-ready final"
           git push origin HEAD:release/v1.22.0-revenue-final
