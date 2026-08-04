@@ -2,13 +2,22 @@
 
 This is the canonical launch handoff for App Store Connect, Google Play Console, and RevenueCat.
 
-Current verified source version: `1.21.1+28`. Android, web, and unsigned iOS release builds must pass before signing and submission.
+Current verified source version: `1.22.0+29`. Android, web, and unsigned iOS release builds must pass before signing and submission.
 
 ## Positioning
 
 **Category:** Lifestyle
 **Primary promise:** A private reading that becomes tomorrow’s reality check and, with enough evidence, an explainable personal pattern.
 **Differentiator:** Mystic connects cinematic readings, transparent interpretation, the 24-hour Mystic Mirror, weekly pattern evidence, and optional whole-app PIN and supported-device biometric protection instead of delivering one disposable prediction or generic AI fortune.
+
+## Final conversion and billing controls
+
+- The official yearly and monthly plans and purchase action appear before long-form proof so users can understand the offer without scrolling through multiple promotional sections.
+- Yearly is the default value path, but savings appear only when official monthly and yearly prices share the same currency and the yearly total is genuinely lower.
+- The selected plan discloses the full store price, charge period, and automatic renewal cadence next to the purchase action.
+- The paywall states that Daily Guidance and the saved journal remain available without Mystic Plus.
+- Store connection failures provide a localized retry; verified purchases return users to the product instead of subscription-management settings.
+- No countdown, fake scarcity, invented popularity claim, hidden trial conversion, or hardcoded price is used.
 
 ## Permanent identifiers
 

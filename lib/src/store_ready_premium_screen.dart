@@ -83,6 +83,7 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    bottomNavigationBar: _purchaseDock(context),
     body: MysticBackground(
       child: SafeArea(
         child: AnimatedBuilder(
@@ -186,72 +187,184 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen>
               ),
               const SizedBox(height: 20),
               _statusCard(context),
+              if (_canRetryStore) ...[
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  key: const ValueKey('premium-store-retry'),
+                  onPressed: _retryStore,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(
+                    t(
+                      en: 'Try the store connection again',
+                      es: 'Reintentar la conexión con la tienda',
+                      fr: 'Réessayer la connexion à la boutique',
+                      pt: 'Tentar novamente a conexão com a loja',
+                      tr: 'Mağaza bağlantısını yeniden dene',
+                      it: 'Riprova la connessione allo store',
+                      de: 'Store-Verbindung erneut versuchen',
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 18),
+              if (store.isPlus)
+                _activeAccountCard(context)
+              else
+                ..._planIds.map((id) => _productTile(context, id)),
+              const SizedBox(height: 12),
+              KeyedSubtree(
+                key: const ValueKey('premium-primary-action'),
+                child: GoldButton(
+                  label: store.isPlus
+                      ? t(
+                          en: 'Continue with Mystic Plus',
+                          es: 'Continuar con Mystic Plus',
+                          fr: 'Continuer avec Mystic Plus',
+                          pt: 'Continuar com Mystic Plus',
+                          tr: 'Mystic Plus ile devam et',
+                          it: 'Continua con Mystic Plus',
+                          de: 'Mit Mystic Plus fortfahren',
+                        )
+                      : _purchaseButtonLabel(),
+                  icon: store.isPlus
+                      ? Icons.arrow_forward_rounded
+                      : Icons.lock_open_rounded,
+                  onPressed: store.isPlus
+                      ? () => Navigator.pop(context, true)
+                      : (store.canPurchase
+                            ? () => store.buy(selectedId)
+                            : null),
+                ),
+              ),
+              if (!store.isPlus) ...[
+                const SizedBox(height: 10),
+                _renewalDisclosure(context),
+                const SizedBox(height: 8),
+                Text(
+                  t(
+                    en: 'Daily Guidance and your saved journal remain available without Plus.',
+                    es: 'La Guía diaria y tu diario guardado siguen disponibles sin Plus.',
+                    fr: 'La Guidance quotidienne et votre journal restent disponibles sans Plus.',
+                    pt: 'A Orientação diária e seu diário salvo continuam disponíveis sem o Plus.',
+                    tr: 'Günlük Rehberlik ve kaydettiğin günlük Plus olmadan da kullanılabilir.',
+                    it: 'La Guida quotidiana e il diario salvato restano disponibili senza Plus.',
+                    de: 'Tägliche Führung und dein gespeichertes Journal bleiben ohne Plus verfügbar.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+              if (store.isPlus) ...[
+                const SizedBox(height: 6),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 4,
+                  runSpacing: 2,
+                  children: [
+                    if (_managementUri != null)
+                      TextButton.icon(
+                        onPressed: _manageSubscription,
+                        icon: const Icon(Icons.settings_outlined, size: 18),
+                        label: Text(
+                          t(
+                            en: 'Manage subscription',
+                            es: 'Gestionar suscripción',
+                            fr: 'Gérer l’abonnement',
+                            pt: 'Gerenciar assinatura',
+                            tr: 'Aboneliği yönet',
+                            it: 'Gestisci abbonamento',
+                            de: 'Abo verwalten',
+                          ),
+                        ),
+                      ),
+                    TextButton.icon(
+                      onPressed: store.refreshEntitlement,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: Text(
+                        t(
+                          en: 'Refresh membership',
+                          es: 'Actualizar membresía',
+                          fr: 'Actualiser le statut',
+                          pt: 'Atualizar status',
+                          tr: 'Üyeliği yenile',
+                          it: 'Aggiorna stato',
+                          de: 'Mitgliedschaft aktualisieren',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 18),
+              _benefits(context),
+              const SizedBox(height: 12),
               LaunchContinuityTimeline(
                 language: widget.language,
                 compact: true,
               ),
               const SizedBox(height: 12),
-              _benefits(context),
-              const SizedBox(height: 12),
               PrivateByDesignCard(language: widget.language),
-              const SizedBox(height: 18),
-              if (store.isPlus) _activeAccountCard(context),
-              if (!store.isPlus)
-                ..._planIds.map((id) => _productTile(context, id)),
-              const SizedBox(height: 18),
-              GoldButton(
+              if (!store.isPlus) ...[
+                const SizedBox(height: 14),
+                Text(
+                  t(
+                    en: 'Subscriptions renew automatically unless cancelled in your store account. The store controls billing, eligibility, refunds, and cancellation.',
+                    es: 'Las suscripciones se renuevan automáticamente salvo cancelación en la tienda.',
+                    fr: 'Les abonnements se renouvellent automatiquement sauf annulation dans la boutique.',
+                    pt: 'As assinaturas renovam automaticamente, salvo cancelamento na loja.',
+                    tr: 'Abonelikler mağaza hesabından iptal edilmedikçe otomatik yenilenir. Faturalandırma, uygunluk, iade ve iptal işlemlerini mağaza yönetir.',
+                    it: 'Gli abbonamenti si rinnovano automaticamente salvo annullamento nello store.',
+                    de: 'Abonnements verlängern sich automatisch, sofern sie nicht im Store gekündigt werden.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _purchaseDock(BuildContext context) => AnimatedBuilder(
+    animation: store,
+    builder: (context, _) => Material(
+      elevation: 18,
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!store.isPlus) ...[
+              _renewalDisclosure(context),
+              const SizedBox(height: 8),
+            ],
+            KeyedSubtree(
+              key: const ValueKey('premium-sticky-primary-action'),
+              child: GoldButton(
                 label: store.isPlus
                     ? t(
-                        en: 'Manage subscription',
-                        es: 'Gestionar suscripción',
-                        fr: 'Gérer l’abonnement',
-                        pt: 'Gerenciar assinatura',
-                        tr: 'Aboneliği yönet',
-                        it: 'Gestisci abbonamento',
-                        de: 'Abo verwalten',
+                        en: 'Continue with Mystic Plus',
+                        es: 'Continuar con Mystic Plus',
+                        fr: 'Continuer avec Mystic Plus',
+                        pt: 'Continuar com Mystic Plus',
+                        tr: 'Mystic Plus ile devam et',
+                        it: 'Continua con Mystic Plus',
+                        de: 'Mit Mystic Plus fortfahren',
                       )
                     : _purchaseButtonLabel(),
                 icon: store.isPlus
-                    ? Icons.settings_outlined
+                    ? Icons.arrow_forward_rounded
                     : Icons.lock_open_rounded,
                 onPressed: store.isPlus
-                    ? (_managementUri == null ? null : _manageSubscription)
+                    ? () => Navigator.pop(context, true)
                     : (store.canPurchase ? () => store.buy(selectedId) : null),
               ),
-              const SizedBox(height: 8),
-              if (store.isPlus)
-                TextButton.icon(
-                  onPressed: store.refreshEntitlement,
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: Text(
-                    t(
-                      en: 'Refresh membership status',
-                      es: 'Actualizar membresía',
-                      fr: 'Actualiser le statut',
-                      pt: 'Atualizar status',
-                      tr: 'Üyelik durumunu yenile',
-                      it: 'Aggiorna stato',
-                      de: 'Mitgliedschaft aktualisieren',
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Text(
-                t(
-                  en: 'Subscriptions renew automatically unless cancelled in your store account. The store controls billing, eligibility, refunds, and cancellation.',
-                  es: 'Las suscripciones se renuevan automáticamente salvo cancelación en la tienda.',
-                  fr: 'Les abonnements se renouvellent automatiquement sauf annulation dans la boutique.',
-                  pt: 'As assinaturas renovam automaticamente, salvo cancelamento na loja.',
-                  tr: 'Abonelikler mağaza hesabından iptal edilmedikçe otomatik yenilenir. Faturalandırma, uygunluk, iade ve iptal işlemlerini mağaza yönetir.',
-                  it: 'Gli abbonamenti si rinnovano automaticamente salvo annullamento nello store.',
-                  de: 'Abonnements verlängern sich automatisch, sofern sie nicht im Store gekündigt werden.',
-                ),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     ),
@@ -261,6 +374,63 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen>
     MysticProductIds.yearly,
     MysticProductIds.monthly,
   ];
+
+  bool get _canRetryStore =>
+      !store.isPlus &&
+      (store.phase == StorePurchasePhase.error ||
+          store.phase == StorePurchasePhase.unavailable) &&
+      store.notice != StorePurchaseNotice.nativeOnly &&
+      store.notice != StorePurchaseNotice.configurationMissing;
+
+  Future<void> _retryStore() async {
+    await store.initialize();
+  }
+
+  Widget _renewalDisclosure(BuildContext context) {
+    final product = store.productFor(selectedId);
+    final price = product?.price;
+    final yearly = selectedId == MysticProductIds.yearly;
+    final disclosure = price == null
+        ? t(
+            en: 'The official store will show the exact price and billing period before purchase.',
+            es: 'La tienda oficial mostrará el precio exacto y el periodo de cobro antes de la compra.',
+            fr: 'La boutique officielle affichera le prix exact et la période de facturation avant l’achat.',
+            pt: 'A loja oficial mostrará o preço exato e o período de cobrança antes da compra.',
+            tr: 'Resmi mağaza satın almadan önce kesin fiyatı ve faturalandırma dönemini gösterir.',
+            it: 'Lo store ufficiale mostrerà prezzo e periodo di fatturazione prima dell’acquisto.',
+            de: 'Der offizielle Store zeigt Preis und Abrechnungszeitraum vor dem Kauf.',
+          )
+        : yearly
+        ? t(
+            en: 'The store charges $price for one year. It renews yearly unless cancelled before the next renewal.',
+            es: 'La tienda cobra $price por un año. Se renueva cada año salvo cancelación antes de la siguiente renovación.',
+            fr: 'La boutique facture $price pour un an. Le renouvellement est annuel sauf annulation avant la prochaine échéance.',
+            pt: 'A loja cobra $price por um ano. A renovação é anual, salvo cancelamento antes da próxima renovação.',
+            tr: 'Mağaza bir yıl için $price tahsil eder. Sonraki yenilemeden önce iptal edilmezse yıllık yenilenir.',
+            it: 'Lo store addebita $price per un anno. Si rinnova ogni anno salvo annullamento prima del rinnovo successivo.',
+            de: 'Der Store berechnet $price für ein Jahr. Das Abo verlängert sich jährlich, sofern es nicht vorher gekündigt wird.',
+          )
+        : t(
+            en: 'The store charges $price for one month. It renews monthly unless cancelled before the next renewal.',
+            es: 'La tienda cobra $price por un mes. Se renueva cada mes salvo cancelación antes de la siguiente renovación.',
+            fr: 'La boutique facture $price pour un mois. Le renouvellement est mensuel sauf annulation avant la prochaine échéance.',
+            pt: 'A loja cobra $price por um mês. A renovação é mensal, salvo cancelamento antes da próxima renovação.',
+            tr: 'Mağaza bir ay için $price tahsil eder. Sonraki yenilemeden önce iptal edilmezse aylık yenilenir.',
+            it: 'Lo store addebita $price per un mese. Si rinnova ogni mese salvo annullamento prima del rinnovo successivo.',
+            de: 'Der Store berechnet $price für einen Monat. Das Abo verlängert sich monatlich, sofern es nicht vorher gekündigt wird.',
+          );
+    return Semantics(
+      label: disclosure,
+      child: Text(
+        disclosure,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: MysticColors.lavender,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
 
   Uri? get _managementUri {
     final direct = Uri.tryParse(store.managementUrl ?? '');
@@ -456,6 +626,7 @@ class _StoreReadyPremiumScreenState extends State<StoreReadyPremiumScreen>
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Semantics(
+        key: ValueKey('premium-plan-$id'),
         button: true,
         selected: active,
         label: _planTitle(id),
