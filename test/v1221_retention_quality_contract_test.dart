@@ -20,7 +20,7 @@ void main() {
     expect(engine, contains('_calendarDayDifference(latest.createdAt, now)'));
     expect(
       engine,
-      contains(".map((record) => _calendarDayKey(record.createdAt))"),
+      contains('.map((record) => _calendarDayKey(record.createdAt))'),
     );
     expect(
       engineTests,
