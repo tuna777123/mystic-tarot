@@ -36,7 +36,9 @@ void main() {
     expect(lock, contains('LocalAuthentication'));
     expect(gate, contains('backgroundGrace = const Duration(seconds: 5)'));
     expect(gate, contains('There is no cloud reset or hidden recovery key.'));
-    expect(gate, isNot(contains('MysticLanguage')));
+    expect(gate, contains("import 'app_locale.dart';"));
+    expect(gate, isNot(contains("import 'flagship.dart';")));
+    expect(gate, isNot(contains('MysticLanguage.')));
     expect(configurator, contains('android.permission.USE_BIOMETRIC'));
     expect(configurator, contains('FlutterFragmentActivity'));
     expect(configurator, contains('android:allowBackup="false"'));
