@@ -5,6 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
+typedef AppLockKeyDeriver = Future<SecretKey> Function(
+  String pin,
+  List<int> salt,
+);
+
 abstract interface class AppLockStore {
   Future<String?> read(String key);
   Future<void> write(String key, String value);
@@ -57,8 +62,11 @@ class AppLockState {
 }
 
 class AppLockService {
-  AppLockService({AppLockStore? store})
-      : _store = store ?? const SecureAppLockStore();
+  AppLockService({
+    AppLockStore? store,
+    AppLockKeyDeriver? keyDeriver,
+  })  : _store = store ?? const SecureAppLockStore(),
+        _keyDeriver = keyDeriver ?? _deriveProductionKey;
 
   static const pinLength = 6;
   static const _enabledKey = 'mystic.app-lock.enabled.v1';
@@ -81,6 +89,7 @@ class AppLockService {
   );
 
   final AppLockStore _store;
+  final AppLockKeyDeriver _keyDeriver;
 
   Future<AppLockState> loadState() async {
     final enabled = await _store.read(_enabledKey) == '1';
@@ -203,8 +212,14 @@ class AppLockService {
     await _store.write(_promptDismissedKey, '1');
   }
 
-  Future<SecretKey> _deriveKey(String pin, List<int> salt) =>
+  static Future<SecretKey> _deriveProductionKey(
+    String pin,
+    List<int> salt,
+  ) =>
       _kdf.deriveKeyFromPassword(password: pin, nonce: salt);
+
+  Future<SecretKey> _deriveKey(String pin, List<int> salt) =>
+      _keyDeriver(pin, salt);
 
   Future<void> _resetFailures() async {
     await _store.write(_failedAttemptsKey, '0');
