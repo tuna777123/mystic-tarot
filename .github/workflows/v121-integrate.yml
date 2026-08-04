@@ -92,3 +92,5 @@ jobs:
           git add -A
           git commit -m "release: Mystic Tarot 1.21 launch differentiation"
           git push origin HEAD:feature/v1.21-launch-differentiation
+
+# This workflow is intentionally removed by the verified integration commit.
