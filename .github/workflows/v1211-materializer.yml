@@ -1,0 +1,134 @@
+name: Materialize Mystic Tarot v1.21.1
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mystic-tarot-v1211-materializer
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    if: github.head_ref == 'release/v1.21.1-prelaunch-hardening'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out hardening branch
+        uses: actions/checkout@v4
+        with:
+          ref: release/v1.21.1-prelaunch-hardening
+          fetch-depth: 0
+
+      - name: Determine whether patch is pending
+        id: gate
+        shell: bash
+        run: |
+          if test -e tool/v1211_harden.py && test -e tool/v1211_trigger.txt; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply reviewed hardening patch
+        if: steps.gate.outputs.run == 'true'
+        run: python tool/v1211_harden.py
+
+      - name: Set up Java
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        if: steps.gate.outputs.run == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format reviewed Dart sources
+        if: steps.gate.outputs.run == 'true'
+        run: dart format lib/src/app.dart lib/src/app_lock_gate.dart lib/src/app_locale.dart test/app_locale_test.dart test/app_lock_locale_lifecycle_test.dart test/material_localization_test.dart
+
+      - name: Generate platform shells
+        if: steps.gate.outputs.run == 'true'
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
+
+      - name: Configure release contracts
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          dart run tool/configure_store_identifiers.dart
+          dart run tool/configure_ritual_notifications.dart
+          dart run tool/configure_app_lock.dart
+          cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts
+          dart run tool/configure_android_signing.dart
+          grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
+          mv /tmp/mystic-build.gradle.kts android/app/build.gradle.kts
+
+      - name: Install dependencies and icons
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          flutter pub get
+          dart run flutter_launcher_icons
+
+      - name: Verify formatting and whitespace
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          dart format --output=none --set-exit-if-changed lib test tool
+          git diff --check
+
+      - name: Analyze
+        if: steps.gate.outputs.run == 'true'
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        if: steps.gate.outputs.run == 'true'
+        run: flutter test
+
+      - name: Build web release
+        if: steps.gate.outputs.run == 'true'
+        run: flutter build web --release
+
+      - name: Build Android release bundle
+        if: steps.gate.outputs.run == 'true'
+        run: flutter build appbundle --release
+
+      - name: Verify clean hardening source
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          test "$(grep '^version:' pubspec.yaml)" = 'version: 1.21.1+28'
+          test ! -e tool/v1211_harden.py
+          test ! -e tool/v1211_trigger.txt
+          grep -q 'languageCodeLoader' lib/src/app_lock_gate.dart
+          grep -q 'GlobalMaterialLocalizations.delegates' lib/src/app.dart
+          grep -q 'flutter build ios --release --no-codesign' .github/workflows/ios-ci.yml
+          git diff --check
+
+      - name: Commit clean hardening release
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            .github/workflows/flutter-ci.yml \
+            .github/workflows/ios-ci.yml \
+            README.md \
+            RELEASE_NOTES.md \
+            RELEASE_NOTES_1.21.1.md \
+            STORE_RELEASE.md \
+            pubspec.yaml \
+            lib/src/app.dart \
+            lib/src/app_lock_gate.dart \
+            lib/src/app_locale.dart \
+            test/app_locale_test.dart \
+            test/app_lock_locale_lifecycle_test.dart \
+            test/material_localization_test.dart
+          git add -u tool/v1211_harden.py tool/v1211_trigger.txt
+          git commit -m "release: Mystic Tarot 1.21.1 prelaunch hardening"
+          git push origin HEAD:release/v1.21.1-prelaunch-hardening
