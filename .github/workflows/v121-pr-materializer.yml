@@ -1,0 +1,174 @@
+name: Materialize Mystic Tarot v1.21 PR
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: mystic-tarot-v121-pr-materializer
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    if: github.head_ref == 'feature/v1.21-launch-differentiation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/v1.21-launch-differentiation
+          fetch-depth: 0
+
+      - name: Determine whether materialization is needed
+        id: gate
+        shell: bash
+        run: |
+          if test -e tool/v121_integrate.py && test -e tool/v121_finalize_patch.py; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Preserve reviewed spread-aware synthesis
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          cp lib/src/reading_synthesis.dart /tmp/reading_synthesis.dart
+          cp test/reading_synthesis_test.dart /tmp/reading_synthesis_test.dart
+
+      - name: Download latest verified v1.21 source
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: mystic-tarot-v121-verified-source
+          path: /tmp/v121-source
+          repository: tuna777123/mystic-tarot
+          run-id: 30930305096
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build clean reviewed source tree
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          cp -a /tmp/v121-source/. .
+          cp /tmp/reading_synthesis.dart lib/src/reading_synthesis.dart
+          cp /tmp/reading_synthesis_test.dart test/reading_synthesis_test.dart
+          python tool/v121_finalize_patch.py
+          git fetch origin main
+          git show origin/main:.github/workflows/flutter-ci.yml > .github/workflows/flutter-ci.yml
+          rm -f .github/workflows/v121-finalize.yml
+          rm -f tool/v121_integrate.py tool/v121_finalize_patch.py tool/v121_trigger.txt
+
+      - name: Set up Java
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        if: steps.gate.outputs.run == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format approved release files
+        if: steps.gate.outputs.run == 'true'
+        run: >-
+          dart format
+          lib/src/app.dart
+          lib/src/launch_differentiation.dart
+          lib/src/mystic_next_step.dart
+          lib/src/reading_position.dart
+          lib/src/reading_synthesis.dart
+          lib/src/store_ready_premium_screen.dart
+          test/launch_differentiation_test.dart
+          test/reading_synthesis_test.dart
+          test/v118_private_journal_transfer_contract_test.dart
+          test/v120_private_app_lock_contract_test.dart
+          test/v121_launch_differentiation_contract_test.dart
+
+      - name: Generate native shells
+        if: steps.gate.outputs.run == 'true'
+        run: flutter create . --platforms=android,ios --org com.tunabozcali
+
+      - name: Configure native release contracts
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          dart run tool/configure_store_identifiers.dart
+          dart run tool/configure_ritual_notifications.dart
+          dart run tool/configure_app_lock.dart
+          cp android/app/build.gradle.kts /tmp/mystic-build.gradle.kts
+          dart run tool/configure_android_signing.dart
+          grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
+          mv /tmp/mystic-build.gradle.kts android/app/build.gradle.kts
+
+      - name: Install dependencies and icons
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          flutter pub get
+          dart run flutter_launcher_icons
+
+      - name: Analyze
+        if: steps.gate.outputs.run == 'true'
+        run: flutter analyze
+
+      - name: Test
+        if: steps.gate.outputs.run == 'true'
+        run: flutter test
+
+      - name: Build web release
+        if: steps.gate.outputs.run == 'true'
+        run: flutter build web --release
+
+      - name: Build Android release bundle
+        if: steps.gate.outputs.run == 'true'
+        run: flutter build appbundle --release
+
+      - name: Verify clean release source
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          test "$(grep '^version:' pubspec.yaml)" = 'version: 1.21.0+27'
+          test ! -e .github/workflows/v121-finalize.yml
+          test ! -e tool/v121_integrate.py
+          test ! -e tool/v121_finalize_patch.py
+          test ! -e tool/v121_trigger.txt
+          grep -q 'ReadingKind.celticCross' lib/src/reading_synthesis.dart
+          grep -q 'Try this grounded action' lib/src/reading_synthesis.dart
+          grep -q 'The next honest step for the connection' lib/src/reading_position.dart
+          grep -q 'The choice that can change the trajectory' lib/src/reading_position.dart
+          grep -q 'biometrics on supported devices' lib/src/launch_differentiation.dart
+          git diff --check
+
+      - name: Commit only approved release sources
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            .github/workflows/flutter-ci.yml \
+            README.md \
+            RELEASE_NOTES.md \
+            RELEASE_NOTES_1.21.md \
+            STORE_RELEASE.md \
+            pubspec.yaml \
+            lib/src/app.dart \
+            lib/src/launch_differentiation.dart \
+            lib/src/mystic_next_step.dart \
+            lib/src/reading_position.dart \
+            lib/src/reading_synthesis.dart \
+            lib/src/store_ready_premium_screen.dart \
+            test/launch_differentiation_test.dart \
+            test/reading_synthesis_test.dart \
+            test/v118_private_journal_transfer_contract_test.dart \
+            test/v120_private_app_lock_contract_test.dart \
+            test/v121_launch_differentiation_contract_test.dart
+          git add -u .github/workflows/v121-finalize.yml tool/v121_integrate.py tool/v121_finalize_patch.py tool/v121_trigger.txt
+          git commit -m "release: Mystic Tarot 1.21 launch differentiation"
+          git push origin HEAD:feature/v1.21-launch-differentiation
