@@ -108,9 +108,10 @@ void main() {
       validateSha256Fingerprint('ABC123', label: 'certificate'),
       isNotEmpty,
     );
+    final nonHexFingerprint = '${List.filled(63, 'A').join()}Z';
     expect(
       validateSha256Fingerprint(
-        '${'A' * 63}Z',
+        nonHexFingerprint,
         label: 'certificate',
       ),
       isNotEmpty,
