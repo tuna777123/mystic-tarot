@@ -12,17 +12,20 @@ Future versions of Flutter will fail to build.
     expect(detected, {'flutter_timezone', 'purchases_flutter'});
   });
 
-  test('passes when detected blockers are a subset of the reviewed allowlist', () {
-    final result = auditLegacyKotlinPlugins(
-      buildLog: '''
+  test(
+    'passes when detected blockers are a subset of the reviewed allowlist',
+    () {
+      final result = auditLegacyKotlinPlugins(
+        buildLog: '''
 WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): purchases_flutter
 ''',
-      allowedBlockers: {'flutter_timezone', 'purchases_flutter'},
-    );
+        allowedBlockers: {'flutter_timezone', 'purchases_flutter'},
+      );
 
-    expect(result.detectedBlockers, {'purchases_flutter'});
-    expect(result.resolvedBlockers, {'flutter_timezone'});
-  });
+      expect(result.detectedBlockers, {'purchases_flutter'});
+      expect(result.resolvedBlockers, {'flutter_timezone'});
+    },
+  );
 
   test('passes when every plugin has migrated to built-in Kotlin', () {
     final result = auditLegacyKotlinPlugins(
@@ -31,10 +34,7 @@ WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KG
     );
 
     expect(result.detectedBlockers, isEmpty);
-    expect(result.resolvedBlockers, {
-      'flutter_timezone',
-      'purchases_flutter',
-    });
+    expect(result.resolvedBlockers, {'flutter_timezone', 'purchases_flutter'});
   });
 
   test('fails when an unreviewed plugin applies the legacy Kotlin plugin', () {
