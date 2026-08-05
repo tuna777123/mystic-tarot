@@ -147,13 +147,20 @@ void validateStrictJarsignerResult({
     RegExp(r'certificate[^\r\n]*(?:has expired|not yet valid)'),
     RegExp(r'algorithm[^\r\n]*(?:security risk|is disabled)'),
     RegExp(r"certificate[^\r\n]*doesn't allow code signing"),
+    RegExp(r'unsigned entries'),
   ].any((pattern) => pattern.hasMatch(normalized));
-  final isSelfSignedOnly =
+  final reviewedTrustChainWarning =
+      RegExp(r'self[- ]signed').hasMatch(normalized) ||
+      normalized.contains('certificate chain is invalid') ||
+      normalized.contains('certificate chain is not validated') ||
+      normalized.contains("certificate chain isn't validated") ||
+      normalized.contains('unable to find valid certification path');
+  final isReviewedTrustChainOnly =
       exitCode == 4 &&
       normalized.contains('jar verified, with signer errors') &&
-      RegExp(r'self[- ]signed').hasMatch(normalized) &&
+      reviewedTrustChainWarning &&
       !severeCertificateMessage;
-  if (isSelfSignedOnly) {
+  if (isReviewedTrustChainOnly) {
     return;
   }
 
