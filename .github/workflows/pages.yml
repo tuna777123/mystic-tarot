@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: github-pages
@@ -17,6 +15,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
     steps:
       - name: Check out source
         uses: actions/checkout@v6
@@ -58,7 +59,50 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  report:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Publish deployment status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        shell: bash
+        run: |
+          if [[ "$DEPLOY_RESULT" == "success" ]]; then
+            state="success"
+            description="Mystic Tarot Pages deployment is live"
+          else
+            state="failure"
+            description="Mystic Tarot Pages deployment failed"
+          fi
+
+          args=(
+            --method POST
+            "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
+            -f "state=${state}"
+            -f "context=pages/deployment"
+            -f "description=${description}"
+          )
+
+          if [[ -n "$PAGE_URL" ]]; then
+            args+=(-f "target_url=${PAGE_URL}landing.html")
+          fi
+
+          gh api "${args[@]}"
