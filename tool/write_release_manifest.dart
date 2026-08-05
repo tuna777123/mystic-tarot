@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'src/ios_artifact_certificate.dart';
 import 'src/store_release_contract.dart';
 
-void main(List<String> arguments) {
+Future<void> main(List<String> arguments) async {
   try {
     final values = _parseArguments(arguments);
     final platform = parseStoreReleasePlatform(_required(values, 'platform'));
@@ -13,10 +14,29 @@ void main(List<String> arguments) {
     final channel = _required(values, 'channel');
 
     if (!artifact.existsSync()) {
-      throw FormatException('Release artifact does not exist: ${artifact.path}');
+      throw FormatException(
+        'Release artifact does not exist: ${artifact.path}',
+      );
     }
     if (!RegExp(r'^[a-f0-9]{64}$').hasMatch(checksum)) {
-      throw const FormatException('Artifact SHA-256 must be 64 hex characters.');
+      throw const FormatException(
+        'Artifact SHA-256 must be 64 hex characters.',
+      );
+    }
+
+    String? signingCertificateSha256;
+    if (platform == StoreReleasePlatform.ios) {
+      final reviewedFingerprint =
+          Platform.environment['IOS_DISTRIBUTION_CERT_SHA256'] ?? '';
+      if (reviewedFingerprint.trim().isEmpty) {
+        throw const FormatException(
+          'IOS_DISTRIBUTION_CERT_SHA256 is required to verify the final IPA.',
+        );
+      }
+      signingCertificateSha256 = await verifyIosArtifactSigningCertificate(
+        ipaFile: artifact,
+        expectedFingerprint: reviewedFingerprint,
+      );
     }
 
     final pubspec = File('pubspec.yaml');
@@ -39,6 +59,8 @@ void main(List<String> arguments) {
       'artifact': artifact.uri.pathSegments.last,
       'artifactBytes': artifact.lengthSync(),
       'artifactSha256': checksum,
+      if (signingCertificateSha256 != null)
+        'signingCertificateSha256': signingCertificateSha256,
       'signed': true,
       'gitSha': Platform.environment['GITHUB_SHA'],
       'sourceRef': Platform.environment['GITHUB_REF_NAME'],
@@ -69,7 +91,9 @@ Map<String, String> _parseArguments(List<String> arguments) {
   for (final argument in arguments) {
     if (!argument.startsWith('--') || !argument.contains('=')) continue;
     final separator = argument.indexOf('=');
-    values[argument.substring(2, separator)] = argument.substring(separator + 1);
+    values[argument.substring(2, separator)] = argument.substring(
+      separator + 1,
+    );
   }
   return values;
 }

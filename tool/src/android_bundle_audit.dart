@@ -134,6 +134,32 @@ const forbiddenDexClassMarkers = <String>{
   'Lio/sentry/',
 };
 
+void validateStrictJarsignerResult({
+  required int exitCode,
+  required String output,
+}) {
+  final normalized = output.toLowerCase();
+  if (exitCode == 0 && normalized.contains('jar verified.')) {
+    return;
+  }
+
+  final isSelfSignedOnly =
+      exitCode == 4 &&
+      normalized.contains('jar verified, with signer errors') &&
+      RegExp(r'self[- ]signed').hasMatch(normalized) &&
+      !normalized.contains('has expired') &&
+      !normalized.contains('not yet valid') &&
+      !normalized.contains('disabled') &&
+      !normalized.contains("doesn't allow code signing");
+  if (isSelfSignedOnly) {
+    return;
+  }
+
+  throw AuditFailure(
+    'Strict JAR signature verification failed with exit code $exitCode.',
+  );
+}
+
 Set<String> parseAndroidAbis(Iterable<String> bundleEntries) {
   final pattern = RegExp(r'^base/lib/([^/]+)/[^/]+\.so$');
   final result = <String>{};

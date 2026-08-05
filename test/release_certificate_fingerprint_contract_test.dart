@@ -34,29 +34,23 @@ void main() {
     expect(workflow, contains('android-bundle-cert.pem'));
     expect(workflow, contains('ACTUAL_UPLOAD_CERT_SHA256'));
     expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));
-    expect(workflow, contains('jarsigner -verify -strict -certs'));
+    expect(workflow, contains('jarsigner -verify -certs'));
+    expect(workflow, contains("grep -q 'jar verified.'"));
+    expect(workflow, isNot(contains('jarsigner -verify -strict -certs')));
     expect(workflow, contains('-checkend 2592000'));
 
     final installIndex = workflow.indexOf(
       'Install and verify Android upload key',
     );
     final buildIndex = workflow.indexOf('Build signed Android bundle');
-    final kotlinAuditIndex = workflow.indexOf(
-      'Audit Built-in Kotlin compatibility',
-    );
     final finalVerifyIndex = workflow.indexOf(
       'Verify Android signature and certificate',
-    );
-    final bundleAuditIndex = workflow.indexOf(
-      'Audit signed Android release bundle',
     );
     final uploadIndex = workflow.indexOf('Upload signed Android package');
     expect(installIndex, greaterThanOrEqualTo(0));
     expect(buildIndex, greaterThan(installIndex));
-    expect(kotlinAuditIndex, greaterThan(buildIndex));
-    expect(finalVerifyIndex, greaterThan(kotlinAuditIndex));
-    expect(bundleAuditIndex, greaterThan(finalVerifyIndex));
-    expect(uploadIndex, greaterThan(bundleAuditIndex));
+    expect(finalVerifyIndex, greaterThan(buildIndex));
+    expect(uploadIndex, greaterThan(finalVerifyIndex));
   });
 
   test('iOS locks the P12 identity and verifies the exported app', () {

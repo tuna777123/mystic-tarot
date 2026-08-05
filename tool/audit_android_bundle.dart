@@ -43,15 +43,17 @@ Future<String> _audit(_AuditOptions options) async {
   }
 
   await _runChecked('unzip', ['-tqq', bundle.path]);
-  final signatureResult = await _runChecked('jarsigner', [
-    '-verify',
-    bundle.path,
-  ]);
-  final signatureOutput = '${signatureResult.stdout}\n${signatureResult.stderr}'
-      .toLowerCase();
-  if (!signatureOutput.contains('jar verified.')) {
-    throw const AuditFailure('The Android App Bundle is not JAR-signed.');
-  }
+  final signatureResult = await Process.run(
+    'jarsigner',
+    ['-verify', '-strict', '-certs', bundle.path],
+    stdoutEncoding: utf8,
+    stderrEncoding: utf8,
+  );
+  final signatureOutput = '${signatureResult.stdout}\n${signatureResult.stderr}';
+  validateStrictJarsignerResult(
+    exitCode: signatureResult.exitCode,
+    output: signatureOutput,
+  );
 
   await _runChecked('java', [
     '-jar',
@@ -159,7 +161,7 @@ Future<String> _audit(_AuditOptions options) async {
 - Version: `${manifest.versionName}+${manifest.versionCode}`
 - Bundle size: `${formatByteCount(bundleBytes)}`
 - SHA-256: `$sha256`
-- Signature container: `jarsigner verified`
+- Signature container: `strict jarsigner policy passed`
 - Bundle structure: `bundletool validate passed`
 - Native ABIs: `${sortedAbis.join(', ')}`
 - Declared permissions: `${permissions.isEmpty ? 'none' : permissions.join(', ')}`

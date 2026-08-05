@@ -77,6 +77,67 @@ version: 1.22.1+30
     expect(findForbiddenDexMarkers(trackedBytes), {'Lcom/appsflyer/'});
   });
 
+  test('accepts a clean strict jarsigner result', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 0,
+        output: 'jar verified.',
+      ),
+      returnsNormally,
+    );
+  });
+
+  test('accepts only the self-signed upload-certificate warning', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed.
+''',
+      ),
+      returnsNormally,
+    );
+  });
+
+  test('rejects unsigned entries even when another signature is valid', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 20,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed.
+This jar contains unsigned entries which have not been integrity-checked.
+''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
+  test('rejects expired or disabled self-signed certificates', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed and has expired.
+''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed.
+An algorithm used is considered a security risk and is disabled.
+''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
   test('formats release size in binary megabytes', () {
     expect(formatByteCount(61 * 1024 * 1024), '61.00 MiB');
   });
