@@ -17,12 +17,14 @@ class StoreReleaseContract {
     'ANDROID_KEY_ALIAS',
     'ANDROID_KEY_PASSWORD',
     'ANDROID_STORE_PASSWORD',
+    'ANDROID_UPLOAD_CERT_SHA256',
   ];
 
   static const iosRequiredEnvironment = <String>[
     'REVENUECAT_IOS_API_KEY',
     'IOS_DISTRIBUTION_CERTIFICATE_BASE64',
     'IOS_DISTRIBUTION_CERTIFICATE_PASSWORD',
+    'IOS_DISTRIBUTION_CERT_SHA256',
     'IOS_PROVISIONING_PROFILE_BASE64',
     'IOS_TEAM_ID',
   ];
@@ -62,18 +64,14 @@ List<String> validateRevenueCatPublicKey(
   }
 
   final lower = key.toLowerCase();
-  const forbiddenPrefixes = <String>[
-    'sk_',
-    'secret_',
-    'rc_secret_',
-    'bearer ',
-  ];
+  const forbiddenPrefixes = <String>['sk_', 'secret_', 'rc_secret_', 'bearer '];
   if (forbiddenPrefixes.any(lower.startsWith)) {
     errors.add('A secret API key must never be embedded in a client release.');
   }
 
-  final expectedPrefix =
-      platform == StoreReleasePlatform.android ? 'goog_' : 'appl_';
+  final expectedPrefix = platform == StoreReleasePlatform.android
+      ? 'goog_'
+      : 'appl_';
   if (!lower.startsWith(expectedPrefix)) {
     errors.add(
       'RevenueCat key does not match the expected $expectedPrefix public '
@@ -83,10 +81,7 @@ List<String> validateRevenueCatPublicKey(
   return errors;
 }
 
-List<String> validateBase64Secret(
-  String value, {
-  required String label,
-}) {
+List<String> validateBase64Secret(String value, {required String label}) {
   final clean = value.replaceAll(RegExp(r'\s'), '');
   if (clean.isEmpty) return ['$label is missing.'];
   try {
@@ -94,6 +89,27 @@ List<String> validateBase64Secret(
     if (decoded.isEmpty) return ['$label decodes to an empty file.'];
   } on FormatException {
     return ['$label is not valid base64.'];
+  }
+  return const [];
+}
+
+String normalizeSha256Fingerprint(String value) {
+  final fingerprint = value.replaceAll(RegExp(r'[:\s]'), '').toUpperCase();
+  if (!RegExp(r'^[0-9A-F]{64}$').hasMatch(fingerprint)) {
+    throw const FormatException(
+      'SHA-256 certificate fingerprint must contain exactly 64 hexadecimal '
+      'characters, with optional colons or whitespace.',
+    );
+  }
+  return fingerprint;
+}
+
+List<String> validateSha256Fingerprint(String value, {required String label}) {
+  if (value.trim().isEmpty) return ['$label is missing.'];
+  try {
+    normalizeSha256Fingerprint(value);
+  } on FormatException catch (error) {
+    return ['$label is invalid: ${error.message}'];
   }
   return const [];
 }
