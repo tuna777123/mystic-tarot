@@ -80,24 +80,24 @@ void main() {
     expect(prefs.getString('language'), MysticLanguage.spanish.name);
   });
 
-  test('startup preserves and normalizes an explicit launch language', () async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      'language': 'pt_BR',
-    });
+  test(
+    'startup preserves and normalizes an explicit launch language',
+    () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'language': 'pt_BR',
+      });
 
-    expect(
-      await ensureInitialMysticLanguagePreference(
-        platformLocale: const Locale('tr', 'TR'),
-      ),
-      MysticLanguage.portugueseBrazil,
-    );
+      expect(
+        await ensureInitialMysticLanguagePreference(
+          platformLocale: const Locale('tr', 'TR'),
+        ),
+        MysticLanguage.portugueseBrazil,
+      );
 
-    final prefs = await SharedPreferences.getInstance();
-    expect(
-      prefs.getString('language'),
-      MysticLanguage.portugueseBrazil.name,
-    );
-  });
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('language'), MysticLanguage.portugueseBrazil.name);
+    },
+  );
 
   test('app lock reads the language selected inside Mystic', () async {
     SharedPreferences.setMockInitialValues(<String, Object>{
