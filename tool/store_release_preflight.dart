@@ -14,9 +14,11 @@ void main(List<String> arguments) {
       if (missing.isNotEmpty)
         'Missing protected values: ${missing.join(', ')}.',
       ...validateReleaseIdentity(
-        bundleIdentifier: environment['STORE_BUNDLE_ID'] ??
+        bundleIdentifier:
+            environment['STORE_BUNDLE_ID'] ??
             StoreReleaseContract.bundleIdentifier,
-        entitlementId: environment['REVENUECAT_ENTITLEMENT_ID'] ??
+        entitlementId:
+            environment['REVENUECAT_ENTITLEMENT_ID'] ??
             StoreReleaseContract.entitlementId,
       ),
     ];
@@ -34,6 +36,12 @@ void main(List<String> arguments) {
           label: 'Android upload keystore',
         ),
       );
+      errors.addAll(
+        validateSha256Fingerprint(
+          environment['ANDROID_UPLOAD_CERT_SHA256'] ?? '',
+          label: 'Android upload certificate SHA-256 fingerprint',
+        ),
+      );
     } else {
       errors.addAll(
         validateRevenueCatPublicKey(
@@ -45,6 +53,12 @@ void main(List<String> arguments) {
         validateBase64Secret(
           environment['IOS_DISTRIBUTION_CERTIFICATE_BASE64'] ?? '',
           label: 'iOS distribution certificate',
+        ),
+      );
+      errors.addAll(
+        validateSha256Fingerprint(
+          environment['IOS_DISTRIBUTION_CERT_SHA256'] ?? '',
+          label: 'iOS distribution certificate SHA-256 fingerprint',
         ),
       );
       errors.addAll(
@@ -65,9 +79,7 @@ void main(List<String> arguments) {
       return;
     }
 
-    stdout.writeln(
-      'Store release preflight passed for ${platform.name}.',
-    );
+    stdout.writeln('Store release preflight passed for ${platform.name}.');
     stdout.writeln(
       'Validated protected value names: ${requiredNames.join(', ')}.',
     );
@@ -85,7 +97,9 @@ void main(List<String> arguments) {
 StoreReleasePlatform _platformFromArguments(List<String> arguments) {
   for (final argument in arguments) {
     if (argument.startsWith('--platform=')) {
-      return parseStoreReleasePlatform(argument.substring('--platform='.length));
+      return parseStoreReleasePlatform(
+        argument.substring('--platform='.length),
+      );
     }
   }
   throw const FormatException('The --platform argument is required.');
