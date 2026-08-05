@@ -143,14 +143,16 @@ void validateStrictJarsignerResult({
     return;
   }
 
+  final severeCertificateMessage = <RegExp>[
+    RegExp(r'certificate[^\r\n]*(?:has expired|not yet valid)'),
+    RegExp(r'algorithm[^\r\n]*(?:security risk|is disabled)'),
+    RegExp(r"certificate[^\r\n]*doesn't allow code signing"),
+  ].any((pattern) => pattern.hasMatch(normalized));
   final isSelfSignedOnly =
       exitCode == 4 &&
       normalized.contains('jar verified, with signer errors') &&
       RegExp(r'self[- ]signed').hasMatch(normalized) &&
-      !normalized.contains('has expired') &&
-      !normalized.contains('not yet valid') &&
-      !normalized.contains('disabled') &&
-      !normalized.contains("doesn't allow code signing");
+      !severeCertificateMessage;
   if (isSelfSignedOnly) {
     return;
   }
