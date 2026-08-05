@@ -84,11 +84,27 @@ String mysticLanguageCode(MysticLanguage language) => switch (language) {
   _ => 'en',
 };
 
-Future<String> loadPersistedMysticLanguageCode({Locale? platformLocale}) async {
+/// Ensures the value consumed by the main app is a launch-ready enum name.
+/// This runs before [runApp], so first-run onboarding and the private lock gate
+/// agree on the same device-derived language without a visible English flash.
+Future<MysticLanguage> ensureInitialMysticLanguagePreference({
+  Locale? platformLocale,
+}) async {
   final prefs = await SharedPreferences.getInstance();
+  final storedValue = prefs.getString('language');
   final language = resolveMysticLanguage(
-    storedValue: prefs.getString('language'),
+    storedValue: storedValue,
     platformLocale: platformLocale ?? ui.PlatformDispatcher.instance.locale,
+  );
+  if (storedValue != language.name) {
+    await prefs.setString('language', language.name);
+  }
+  return language;
+}
+
+Future<String> loadPersistedMysticLanguageCode({Locale? platformLocale}) async {
+  final language = await ensureInitialMysticLanguagePreference(
+    platformLocale: platformLocale,
   );
   return mysticLanguageCode(language);
 }
