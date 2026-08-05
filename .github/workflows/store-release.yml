@@ -104,6 +104,7 @@ jobs:
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+      ANDROID_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERT_SHA256 }}
     steps:
       - name: Check out source
         uses: actions/checkout@v6
@@ -129,8 +130,10 @@ jobs:
       - name: Validate protected Android release inputs
         run: dart run tool/store_release_preflight.dart --platform=android
 
-      - name: Install Android upload key
+      - name: Install and verify Android upload key
+        shell: bash
         run: |
+          set -euo pipefail
           python3 - <<'PY'
           import base64
           import os
@@ -147,6 +150,21 @@ jobs:
             -keystore android/app/upload-keystore.jks \
             -storepass "$ANDROID_STORE_PASSWORD" \
             -alias "$ANDROID_KEY_ALIAS" >/dev/null
+
+          keytool -exportcert \
+            -keystore android/app/upload-keystore.jks \
+            -storepass "$ANDROID_STORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" \
+            -file "$RUNNER_TEMP/android-upload-cert.der"
+
+          EXPECTED_UPLOAD_CERT_SHA256=$(printf '%s' \
+            "$ANDROID_UPLOAD_CERT_SHA256" | tr -d '[:space:]:' | tr '[:lower:]' '[:upper:]')
+          ACTUAL_UPLOAD_CERT_SHA256=$(sha256sum \
+            "$RUNNER_TEMP/android-upload-cert.der" | awk '{print toupper($1)}')
+          test "$ACTUAL_UPLOAD_CERT_SHA256" = "$EXPECTED_UPLOAD_CERT_SHA256"
+          openssl x509 -inform der \
+            -in "$RUNNER_TEMP/android-upload-cert.der" \
+            -checkend 2592000 -noout
 
           {
             printf 'storePassword=%s\n' "$ANDROID_STORE_PASSWORD"
@@ -172,12 +190,22 @@ jobs:
             --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY" \
             --dart-define=REVENUECAT_ENTITLEMENT_ID="$REVENUECAT_ENTITLEMENT_ID"
 
-      - name: Verify Android signature
+      - name: Verify Android signature and certificate
+        shell: bash
         run: |
+          set -euo pipefail
           AAB_PATH=build/app/outputs/bundle/release/app-release.aab
           test -s "$AAB_PATH"
           jarsigner -verify -strict -certs "$AAB_PATH"
-          keytool -printcert -jarfile "$AAB_PATH" >/dev/null
+          keytool -printcert -jarfile "$AAB_PATH" -rfc \
+            > "$RUNNER_TEMP/android-bundle-cert.pem"
+
+          EXPECTED_UPLOAD_CERT_SHA256=$(printf '%s' \
+            "$ANDROID_UPLOAD_CERT_SHA256" | tr -d '[:space:]:' | tr '[:lower:]' '[:upper:]')
+          ACTUAL_BUNDLE_CERT_SHA256=$(openssl x509 \
+            -in "$RUNNER_TEMP/android-bundle-cert.pem" \
+            -outform der | sha256sum | awk '{print toupper($1)}')
+          test "$ACTUAL_BUNDLE_CERT_SHA256" = "$EXPECTED_UPLOAD_CERT_SHA256"
 
       - name: Install pinned bundletool
         env:
@@ -245,6 +273,8 @@ jobs:
         run: |
           rm -f android/key.properties
           rm -f android/app/upload-keystore.jks
+          rm -f "$RUNNER_TEMP/android-upload-cert.der"
+          rm -f "$RUNNER_TEMP/android-bundle-cert.pem"
 
   ios-release:
     name: Build signed iOS IPA
@@ -257,6 +287,7 @@ jobs:
       REVENUECAT_IOS_API_KEY: ${{ secrets.REVENUECAT_IOS_API_KEY }}
       IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
       IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      IOS_DISTRIBUTION_CERT_SHA256: ${{ secrets.IOS_DISTRIBUTION_CERT_SHA256 }}
       IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
       IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
     steps:
@@ -278,9 +309,11 @@ jobs:
       - name: Validate protected iOS release inputs
         run: dart run tool/store_release_preflight.dart --platform=ios
 
-      - name: Install Apple signing identity
+      - name: Install and verify Apple signing identity
         id: apple_signing
+        shell: bash
         run: |
+          set -euo pipefail
           python3 - <<'PY'
           import base64
           import os
@@ -297,6 +330,22 @@ jobs:
               target.chmod(0o600)
           PY
 
+          openssl pkcs12 \
+            -in "$RUNNER_TEMP/distribution.p12" \
+            -clcerts -nokeys \
+            -passin env:IOS_DISTRIBUTION_CERTIFICATE_PASSWORD \
+            -out "$RUNNER_TEMP/distribution-cert.pem"
+          openssl x509 -in "$RUNNER_TEMP/distribution-cert.pem" \
+            -checkend 604800 -noout
+
+          EXPECTED_DISTRIBUTION_CERT_SHA256=$(printf '%s' \
+            "$IOS_DISTRIBUTION_CERT_SHA256" | tr -d '[:space:]:' | tr '[:lower:]' '[:upper:]')
+          ACTUAL_DISTRIBUTION_CERT_SHA256=$(openssl x509 \
+            -in "$RUNNER_TEMP/distribution-cert.pem" \
+            -outform der | shasum -a 256 | awk '{print toupper($1)}')
+          test "$ACTUAL_DISTRIBUTION_CERT_SHA256" = \
+            "$EXPECTED_DISTRIBUTION_CERT_SHA256"
+
           KEYCHAIN_PATH="$RUNNER_TEMP/mystic-signing.keychain-db"
           KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -308,6 +357,7 @@ jobs:
           security set-key-partition-list \
             -S apple-tool:,apple:,codesign: \
             -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
           security default-keychain -s "$KEYCHAIN_PATH"
 
           security cms -D -i "$RUNNER_TEMP/profile.mobileprovision" \
@@ -462,6 +512,7 @@ jobs:
           security delete-keychain "$RUNNER_TEMP/mystic-signing.keychain-db" \
             2>/dev/null || true
           rm -f "$RUNNER_TEMP/distribution.p12"
+          rm -f "$RUNNER_TEMP/distribution-cert.pem"
           rm -f "$RUNNER_TEMP/profile.mobileprovision"
           rm -f "$RUNNER_TEMP/profile.plist"
           rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/${{ steps.apple_signing.outputs.profile_uuid }}.mobileprovision"
