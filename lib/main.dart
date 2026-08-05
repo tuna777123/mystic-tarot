@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'src/app.dart';
@@ -11,7 +13,7 @@ Future<void> main() async {
   await MysticAppObservability.run(() async {
     WidgetsFlutterBinding.ensureInitialized();
     await ensureInitialMysticLanguagePreference();
-    await RitualReminderService.instance.initialize();
     runApp(const AppLockGate(child: MysticApp()));
+    unawaited(RitualReminderService.instance.initialize());
   });
 }
