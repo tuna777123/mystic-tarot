@@ -49,7 +49,8 @@ Future<String> _audit(_AuditOptions options) async {
     stdoutEncoding: utf8,
     stderrEncoding: utf8,
   );
-  final signatureOutput = '${signatureResult.stdout}\n${signatureResult.stderr}';
+  final signatureOutput =
+      '${signatureResult.stdout}\n${signatureResult.stderr}';
   validateStrictJarsignerResult(
     exitCode: signatureResult.exitCode,
     output: signatureOutput,
