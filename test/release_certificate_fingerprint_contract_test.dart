@@ -34,6 +34,7 @@ void main() {
     expect(workflow, contains('android-bundle-cert.pem'));
     expect(workflow, contains('ACTUAL_UPLOAD_CERT_SHA256'));
     expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));
+    expect(workflow, contains('jarsigner -verify -strict -certs'));
     expect(workflow, contains('-checkend 2592000'));
 
     final installIndex = workflow.indexOf(
@@ -50,7 +51,7 @@ void main() {
     expect(uploadIndex, greaterThan(finalVerifyIndex));
   });
 
-  test('iOS verifies the P12 fingerprint and near-term validity', () {
+  test('iOS locks the P12 identity and verifies the exported app', () {
     final workflow = File(
       '.github/workflows/store-release.yml',
     ).readAsStringSync();
@@ -62,15 +63,23 @@ void main() {
       workflow,
       contains('security list-keychains -d user -s "\$KEYCHAIN_PATH"'),
     );
+    expect(workflow, contains('codesign --verify --deep --strict'));
+    expect(workflow, contains("-c 'Print :application-identifier'"));
 
-    final verifyIndex = workflow.indexOf(
+    final installIndex = workflow.indexOf(
       'Install and verify Apple signing identity',
     );
     final archiveIndex = workflow.indexOf('Archive signed iOS app');
+    final exportIndex = workflow.indexOf('Export signed IPA');
+    final finalVerifyIndex = workflow.indexOf(
+      'Verify iOS signature and identity',
+    );
     final uploadIndex = workflow.indexOf('Upload signed iOS package');
-    expect(verifyIndex, greaterThanOrEqualTo(0));
-    expect(archiveIndex, greaterThan(verifyIndex));
-    expect(uploadIndex, greaterThan(archiveIndex));
+    expect(installIndex, greaterThanOrEqualTo(0));
+    expect(archiveIndex, greaterThan(installIndex));
+    expect(exportIndex, greaterThan(archiveIndex));
+    expect(finalVerifyIndex, greaterThan(exportIndex));
+    expect(uploadIndex, greaterThan(finalVerifyIndex));
   });
 
   test('temporary certificate files are removed even after failure', () {
