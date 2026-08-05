@@ -77,11 +77,7 @@ class ManifestSnapshot {
   }
 }
 
-const requiredAndroidAbis = <String>{
-  'arm64-v8a',
-  'armeabi-v7a',
-  'x86_64',
-};
+const requiredAndroidAbis = <String>{'arm64-v8a', 'armeabi-v7a', 'x86_64'};
 
 const forbiddenAndroidPermissions = <String>{
   'com.google.android.gms.permission.AD_ID',
