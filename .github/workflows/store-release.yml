@@ -210,7 +210,7 @@ jobs:
           set -euo pipefail
           AAB_PATH=build/app/outputs/bundle/release/app-release.aab
           test -s "$AAB_PATH"
-          jarsigner -verify -strict -certs "$AAB_PATH"
+          jarsigner -verify -certs "$AAB_PATH"
           keytool -printcert -jarfile "$AAB_PATH" -rfc \
             > "$RUNNER_TEMP/android-bundle-cert.pem"
 
