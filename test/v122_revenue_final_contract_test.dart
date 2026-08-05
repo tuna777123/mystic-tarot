@@ -19,9 +19,12 @@ void main() {
       '.github/workflows/store-release.yml',
     ).readAsStringSync();
     final notes = File('RELEASE_NOTES_1.22.md').readAsStringSync();
+    final currentPatchNotes = File(
+      'RELEASE_NOTES_1.22.2.md',
+    ).readAsStringSync();
     final storePack = File('STORE_RELEASE.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.22.1+30'));
+    expect(pubspec, contains('version: 1.22.2+31'));
     expect(
       premium.indexOf('..._planIds.map((id) => _productTile(context, id))'),
       lessThan(premium.indexOf('LaunchContinuityTimeline(')),
@@ -71,7 +74,8 @@ void main() {
     expect(production, contains('Verify Android signature'));
     expect(production, contains('Verify iOS signature and identity'));
     expect(notes, startsWith('# Mystic Tarot 1.22.0'));
-    expect(storePack, contains('Current verified source version: `1.22.1+30`'));
+    expect(currentPatchNotes, startsWith('# Mystic Tarot 1.22.2'));
+    expect(storePack, contains('Current verified source version: `1.22.2+31`'));
     expect(storePack, contains('No countdown, fake scarcity'));
     expect(File('tool/v122_revenue_final.py').existsSync(), isFalse);
     expect(File('tool/v122_revenue_final_v2.py').existsSync(), isFalse);
