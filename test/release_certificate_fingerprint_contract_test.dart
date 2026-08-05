@@ -60,7 +60,7 @@ void main() {
     expect(workflow, contains('-checkend 604800'));
     expect(
       workflow,
-      contains('security list-keychains -d user -s "$KEYCHAIN_PATH"'),
+      contains(r'security list-keychains -d user -s "$KEYCHAIN_PATH"'),
     );
 
     final verifyIndex = workflow.indexOf(
@@ -78,8 +78,17 @@ void main() {
       '.github/workflows/store-release.yml',
     ).readAsStringSync();
 
-    expect(workflow, contains('rm -f "$RUNNER_TEMP/android-upload-cert.der"'));
-    expect(workflow, contains('rm -f "$RUNNER_TEMP/android-bundle-cert.pem"'));
-    expect(workflow, contains('rm -f "$RUNNER_TEMP/distribution-cert.pem"'));
+    expect(
+      workflow,
+      contains(r'rm -f "$RUNNER_TEMP/android-upload-cert.der"'),
+    );
+    expect(
+      workflow,
+      contains(r'rm -f "$RUNNER_TEMP/android-bundle-cert.pem"'),
+    );
+    expect(
+      workflow,
+      contains(r'rm -f "$RUNNER_TEMP/distribution-cert.pem"'),
+    );
   });
 }
