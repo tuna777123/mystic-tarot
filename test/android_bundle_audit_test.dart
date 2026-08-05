@@ -77,6 +77,105 @@ version: 1.22.1+30
     expect(findForbiddenDexMarkers(trackedBytes), {'Lcom/appsflyer/'});
   });
 
+  test('accepts a clean strict jarsigner result', () {
+    expect(
+      () => validateStrictJarsignerResult(exitCode: 0, output: 'jar verified.'),
+      returnsNormally,
+    );
+  });
+
+  test('accepts the reviewed self-signed trust warning', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed.
+''',
+      ),
+      returnsNormally,
+    );
+  });
+
+  test('accepts the equivalent invalid-chain trust warning', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose certificate chain is invalid. Reason: PKIX path building failed: unable to find valid certification path to requested target.
+''',
+      ),
+      returnsNormally,
+    );
+  });
+
+  test(
+    'resource names containing disabled do not mimic algorithm failures',
+    () {
+      expect(
+        () => validateStrictJarsignerResult(
+          exitCode: 4,
+          output: '''
+jar verified, with signer errors.
+This jar contains entries whose certificate chain is invalid.
+This jar contains entries whose signer certificate is self-signed.
+- Entry base/res/drawable/abc_list_selector_disabled_holo_light.png is signed.
+''',
+        ),
+        returnsNormally,
+      );
+    },
+  );
+
+  test('rejects unsigned entries even when another signature is valid', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 20,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed.
+This jar contains unsigned entries which have not been integrity-checked.
+''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
+  test('rejects expired or disabled trust-chain certificates', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose certificate chain is invalid and has expired.
+''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose signer certificate is self-signed.
+An algorithm used is considered a security risk and is disabled.
+''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
+  test('rejects an unclassified strict code-four failure', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: 'jar verified, with signer errors.',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
   test('formats release size in binary megabytes', () {
     expect(formatByteCount(61 * 1024 * 1024), '61.00 MiB');
   });

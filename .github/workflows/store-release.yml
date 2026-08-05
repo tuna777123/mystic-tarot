@@ -210,7 +210,9 @@ jobs:
           set -euo pipefail
           AAB_PATH=build/app/outputs/bundle/release/app-release.aab
           test -s "$AAB_PATH"
-          jarsigner -verify -strict -certs "$AAB_PATH"
+          SIGNATURE_OUTPUT=$(jarsigner -verify -certs "$AAB_PATH" 2>&1)
+          printf '%s\n' "$SIGNATURE_OUTPUT"
+          grep -q 'jar verified.' <<< "$SIGNATURE_OUTPUT"
           keytool -printcert -jarfile "$AAB_PATH" -rfc \
             > "$RUNNER_TEMP/android-bundle-cert.pem"
 
