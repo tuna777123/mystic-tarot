@@ -79,10 +79,7 @@ version: 1.22.1+30
 
   test('accepts a clean strict jarsigner result', () {
     expect(
-      () => validateStrictJarsignerResult(
-        exitCode: 0,
-        output: 'jar verified.',
-      ),
+      () => validateStrictJarsignerResult(exitCode: 0, output: 'jar verified.'),
       returnsNormally,
     );
   });
