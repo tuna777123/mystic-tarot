@@ -87,17 +87,8 @@ void main() {
       '.github/workflows/store-release.yml',
     ).readAsStringSync();
 
-    expect(
-      workflow,
-      contains('rm -f "\$RUNNER_TEMP/android-upload-cert.der"'),
-    );
-    expect(
-      workflow,
-      contains('rm -f "\$RUNNER_TEMP/android-bundle-cert.pem"'),
-    );
-    expect(
-      workflow,
-      contains('rm -f "\$RUNNER_TEMP/distribution-cert.pem"'),
-    );
+    expect(workflow, contains('rm -f "\$RUNNER_TEMP/android-upload-cert.der"'));
+    expect(workflow, contains('rm -f "\$RUNNER_TEMP/android-bundle-cert.pem"'));
+    expect(workflow, contains('rm -f "\$RUNNER_TEMP/distribution-cert.pem"'));
   });
 }
