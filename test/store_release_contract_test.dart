@@ -59,6 +59,17 @@ void main() {
     expect(missing, ['TWO', 'THREE']);
   });
 
+  test('requires certificate fingerprints for both store platforms', () {
+    expect(
+      StoreReleaseContract.androidRequiredEnvironment,
+      contains('ANDROID_UPLOAD_CERT_SHA256'),
+    );
+    expect(
+      StoreReleaseContract.iosRequiredEnvironment,
+      contains('IOS_DISTRIBUTION_CERT_SHA256'),
+    );
+  });
+
   test('validates base64 file secrets without exposing them', () {
     final encoded = base64Encode(const [1, 2, 3, 4]);
     expect(
@@ -67,6 +78,41 @@ void main() {
     );
     expect(
       validateBase64Secret('not-base64%', label: 'certificate'),
+      isNotEmpty,
+    );
+  });
+
+  test('normalizes Play Console style SHA-256 fingerprints', () {
+    const compact =
+        '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+    final colonSeparated = RegExp('.{2}')
+        .allMatches(compact)
+        .map((match) => match.group(0))
+        .join(':');
+
+    expect(
+      normalizeSha256Fingerprint(colonSeparated),
+      compact.toUpperCase(),
+    );
+    expect(
+      validateSha256Fingerprint(
+        colonSeparated,
+        label: 'upload certificate',
+      ),
+      isEmpty,
+    );
+  });
+
+  test('rejects malformed or truncated certificate fingerprints', () {
+    expect(
+      validateSha256Fingerprint('ABC123', label: 'certificate'),
+      isNotEmpty,
+    );
+    expect(
+      validateSha256Fingerprint(
+        '${'A' * 63}Z',
+        label: 'certificate',
+      ),
       isNotEmpty,
     );
   });
