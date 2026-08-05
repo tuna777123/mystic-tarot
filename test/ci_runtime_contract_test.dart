@@ -42,4 +42,11 @@ void main() {
     expect(pubspec, contains('share_plus: ^13.3.0'));
     expect(pubspec, isNot(contains('share_plus: ^12.')));
   });
+
+  test('legacy jni dependency override stays removed', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+
+    expect(pubspec, isNot(contains('dependency_overrides:')));
+    expect(pubspec, isNot(contains('jni: 1.0.0')));
+  });
 }
