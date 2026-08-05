@@ -22,12 +22,7 @@ void main() {
     expect(storeRelease, contains('actions/setup-java@v5'));
     expect(storeRelease, contains('actions/upload-artifact@v7'));
 
-    for (final workflow in <String>[
-      flutterCi,
-      iosCi,
-      pages,
-      storeRelease,
-    ]) {
+    for (final workflow in <String>[flutterCi, iosCi, pages, storeRelease]) {
       expect(workflow, isNot(contains('actions/checkout@v4')));
       expect(workflow, isNot(contains('actions/setup-java@v4')));
       expect(workflow, isNot(contains('actions/upload-artifact@v4')));
