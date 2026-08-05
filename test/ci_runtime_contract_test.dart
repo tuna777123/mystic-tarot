@@ -36,4 +36,26 @@ void main() {
     expect(pubspec, contains('share_plus: ^13.3.0'));
     expect(pubspec, isNot(contains('share_plus: ^12.')));
   });
+
+  test('Android release enforces a narrow legacy Kotlin warning budget', () {
+    final flutterCi = File(
+      '.github/workflows/flutter-ci.yml',
+    ).readAsStringSync();
+
+    expect(flutterCi, contains('flutter-appbundle.log'));
+    expect(
+      flutterCi,
+      contains('dart run tool/check_kotlin_plugin_warnings.dart'),
+    );
+    expect(flutterCi, contains('--allow flutter_timezone'));
+    expect(flutterCi, contains('--allow purchases_flutter'));
+    expect(flutterCi, isNot(contains('--allow share_plus')));
+
+    final warningCheck = flutterCi.indexOf(
+      'dart run tool/check_kotlin_plugin_warnings.dart',
+    );
+    final bundleAudit = flutterCi.indexOf('Install pinned bundletool');
+    expect(warningCheck, greaterThan(-1));
+    expect(bundleAudit, greaterThan(warningCheck));
+  });
 }
