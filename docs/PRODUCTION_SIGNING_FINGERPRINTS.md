@@ -44,7 +44,14 @@ Required protected value:
 
 - `IOS_DISTRIBUTION_CERT_SHA256`
 
-Calculate the fingerprint from the public certificate contained in the protected distribution P12. The workflow verifies the P12 fingerprint before importing it, requires at least seven days of remaining validity, limits the signing keychain search list to the temporary release keychain, and still verifies the final app signature, Team ID, bundle ID, provisioning profile, and application identifier.
+Calculate the fingerprint from the public certificate contained in the protected distribution P12. The workflow verifies the P12 fingerprint before importing it, requires at least seven days of remaining validity, and limits the signing keychain search list to the temporary release keychain.
+
+After export, the workflow also:
+
+1. verifies the final app signature, Team ID, bundle ID, provisioning profile, and application identifier;
+2. extracts the leaf signing certificate from the `.app` inside the final IPA;
+3. requires that certificate to match the same reviewed SHA-256 fingerprint;
+4. records the verified certificate fingerprint in the release manifest shipped with the IPA.
 
 A local fingerprint can be calculated with:
 
