@@ -140,10 +140,14 @@ const forbiddenDexClassMarkers = <String>{
 
 Set<String> parseAndroidAbis(Iterable<String> bundleEntries) {
   final pattern = RegExp(r'^base/lib/([^/]+)/[^/]+\.so$');
-  return {
-    for (final entry in bundleEntries)
-      if (pattern.firstMatch(entry) case final match?) match.group(1)!,
-  };
+  final result = <String>{};
+  for (final entry in bundleEntries) {
+    final match = pattern.firstMatch(entry);
+    if (match != null) {
+      result.add(match.group(1)!);
+    }
+  }
+  return result;
 }
 
 Set<String> findForbiddenPermissions(Set<String> permissions) {
