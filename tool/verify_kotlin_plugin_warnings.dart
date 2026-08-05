@@ -15,7 +15,9 @@ Future<void> main(List<String> arguments) async {
     await options.reportFile.writeAsString(report);
     stdout.write(report);
   } on KotlinPluginAuditFailure catch (error) {
-    stderr.writeln('Built-in Kotlin compatibility audit failed: ${error.message}');
+    stderr.writeln(
+      'Built-in Kotlin compatibility audit failed: ${error.message}',
+    );
     exitCode = 1;
   } on FileSystemException catch (error) {
     stderr.writeln('Built-in Kotlin compatibility audit could not run: $error');
