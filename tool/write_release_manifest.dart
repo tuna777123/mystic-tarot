@@ -14,10 +14,14 @@ Future<void> main(List<String> arguments) async {
     final channel = _required(values, 'channel');
 
     if (!artifact.existsSync()) {
-      throw FormatException('Release artifact does not exist: ${artifact.path}');
+      throw FormatException(
+        'Release artifact does not exist: ${artifact.path}',
+      );
     }
     if (!RegExp(r'^[a-f0-9]{64}$').hasMatch(checksum)) {
-      throw const FormatException('Artifact SHA-256 must be 64 hex characters.');
+      throw const FormatException(
+        'Artifact SHA-256 must be 64 hex characters.',
+      );
     }
 
     String? signingCertificateSha256;
@@ -87,7 +91,9 @@ Map<String, String> _parseArguments(List<String> arguments) {
   for (final argument in arguments) {
     if (!argument.startsWith('--') || !argument.contains('=')) continue;
     final separator = argument.indexOf('=');
-    values[argument.substring(2, separator)] = argument.substring(separator + 1);
+    values[argument.substring(2, separator)] = argument.substring(
+      separator + 1,
+    );
   }
   return values;
 }
