@@ -97,6 +97,21 @@ This jar contains entries whose signer certificate is self-signed.
     );
   });
 
+  test('resource names containing disabled do not mimic algorithm failures', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose certificate chain is invalid.
+This jar contains entries whose signer certificate is self-signed.
+- Entry base/res/drawable/abc_list_selector_disabled_holo_light.png is signed.
+''',
+      ),
+      returnsNormally,
+    );
+  });
+
   test('rejects unsigned entries even when another signature is valid', () {
     expect(
       () => validateStrictJarsignerResult(
