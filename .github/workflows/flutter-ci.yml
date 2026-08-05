@@ -86,7 +86,15 @@ jobs:
         run: flutter build web --release
 
       - name: Build Android release bundle
-        run: flutter build appbundle --release
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/flutter-appbundle.log"
+          flutter build appbundle --release 2>&1 | tee "$log"
+          dart run tool/check_kotlin_plugin_warnings.dart \
+            --log "$log" \
+            --allow flutter_timezone \
+            --allow purchases_flutter
 
       - name: Install pinned bundletool
         env:
