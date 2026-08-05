@@ -9,14 +9,20 @@ void main() {
     ).readAsStringSync();
     final iosCi = File('.github/workflows/ios-ci.yml').readAsStringSync();
     final pages = File('.github/workflows/pages.yml').readAsStringSync();
+    final storeRelease = File(
+      '.github/workflows/store-release.yml',
+    ).readAsStringSync();
 
     expect(flutterCi, contains('actions/checkout@v6'));
     expect(flutterCi, contains('actions/setup-java@v5'));
     expect(flutterCi, contains('actions/upload-artifact@v7'));
     expect(iosCi, contains('actions/checkout@v6'));
     expect(pages, contains('actions/checkout@v6'));
+    expect(storeRelease, contains('actions/checkout@v6'));
+    expect(storeRelease, contains('actions/setup-java@v5'));
+    expect(storeRelease, contains('actions/upload-artifact@v7'));
 
-    for (final workflow in <String>[flutterCi, iosCi, pages]) {
+    for (final workflow in <String>[flutterCi, iosCi, pages, storeRelease]) {
       expect(workflow, isNot(contains('actions/checkout@v4')));
       expect(workflow, isNot(contains('actions/setup-java@v4')));
       expect(workflow, isNot(contains('actions/upload-artifact@v4')));
