@@ -29,4 +29,11 @@ void main() {
     expect(pubspec, contains('cupertino_icons: ^1.0.9'));
     expect(pubspec, contains('uses-material-design: true'));
   });
+
+  test('sharing uses a built-in Kotlin compatible plugin release', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+
+    expect(pubspec, contains('share_plus: ^13.3.0'));
+    expect(pubspec, isNot(contains('share_plus: ^12.')));
+  });
 }
