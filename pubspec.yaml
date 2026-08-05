@@ -1,7 +1,7 @@
 name: mystic_tarot
 description: A private, multilingual, local-first premium tarot, journaling, and spiritual companion app.
 publish_to: none
-version: 1.22.2+31
+version: 1.22.3+32
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
