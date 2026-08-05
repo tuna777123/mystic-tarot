@@ -84,13 +84,26 @@ version: 1.22.1+30
     );
   });
 
-  test('accepts only the self-signed upload-certificate warning', () {
+  test('accepts the reviewed self-signed trust warning', () {
     expect(
       () => validateStrictJarsignerResult(
         exitCode: 4,
         output: '''
 jar verified, with signer errors.
 This jar contains entries whose signer certificate is self-signed.
+''',
+      ),
+      returnsNormally,
+    );
+  });
+
+  test('accepts the equivalent invalid-chain trust warning', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: '''
+jar verified, with signer errors.
+This jar contains entries whose certificate chain is invalid. Reason: PKIX path building failed: unable to find valid certification path to requested target.
 ''',
       ),
       returnsNormally,
@@ -126,13 +139,13 @@ This jar contains unsigned entries which have not been integrity-checked.
     );
   });
 
-  test('rejects expired or disabled self-signed certificates', () {
+  test('rejects expired or disabled trust-chain certificates', () {
     expect(
       () => validateStrictJarsignerResult(
         exitCode: 4,
         output: '''
 jar verified, with signer errors.
-This jar contains entries whose signer certificate is self-signed and has expired.
+This jar contains entries whose certificate chain is invalid and has expired.
 ''',
       ),
       throwsA(isA<AuditFailure>()),
@@ -145,6 +158,16 @@ jar verified, with signer errors.
 This jar contains entries whose signer certificate is self-signed.
 An algorithm used is considered a security risk and is disabled.
 ''',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
+  test('rejects an unclassified strict code-four failure', () {
+    expect(
+      () => validateStrictJarsignerResult(
+        exitCode: 4,
+        output: 'jar verified, with signer errors.',
       ),
       throwsA(isA<AuditFailure>()),
     );
