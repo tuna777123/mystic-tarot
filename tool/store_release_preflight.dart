@@ -34,6 +34,12 @@ void main(List<String> arguments) {
           label: 'Android upload keystore',
         ),
       );
+      errors.addAll(
+        validateSha256Fingerprint(
+          environment['ANDROID_UPLOAD_CERT_SHA256'] ?? '',
+          label: 'Android upload certificate SHA-256 fingerprint',
+        ),
+      );
     } else {
       errors.addAll(
         validateRevenueCatPublicKey(
@@ -45,6 +51,12 @@ void main(List<String> arguments) {
         validateBase64Secret(
           environment['IOS_DISTRIBUTION_CERTIFICATE_BASE64'] ?? '',
           label: 'iOS distribution certificate',
+        ),
+      );
+      errors.addAll(
+        validateSha256Fingerprint(
+          environment['IOS_DISTRIBUTION_CERT_SHA256'] ?? '',
+          label: 'iOS distribution certificate SHA-256 fingerprint',
         ),
       );
       errors.addAll(
