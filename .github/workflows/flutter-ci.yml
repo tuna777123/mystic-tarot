@@ -70,11 +70,7 @@ jobs:
           fi
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$range" -- '*.dart')
           if (( ${#files[@]} > 0 )); then
-            dart format "${files[@]}"
-            if ! git diff --exit-code -- "${files[@]}"; then
-              echo '::error::Commit the dart format output shown above.'
-              exit 1
-            fi
+            dart format --output=none --set-exit-if-changed "${files[@]}"
           fi
 
       - name: Verify clean diff
