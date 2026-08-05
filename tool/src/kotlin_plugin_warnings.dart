@@ -39,8 +39,8 @@ String buildKotlinCompatibilityReport(Set<String> plugins) {
   if (sortedPlugins.isEmpty) {
     status = 'All packaged Flutter plugins use Built-in Kotlin.';
   } else {
-    status = 'Known upstream migration blockers remain: '
-        '${sortedPlugins.join(', ')}.';
+    final blockers = sortedPlugins.join(', ');
+    status = 'Known upstream migration blockers remain: $blockers.';
   }
 
   return '''# Mystic Tarot Built-in Kotlin Audit
