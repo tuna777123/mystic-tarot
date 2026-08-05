@@ -34,7 +34,9 @@ void main() {
     expect(workflow, contains('android-bundle-cert.pem'));
     expect(workflow, contains('ACTUAL_UPLOAD_CERT_SHA256'));
     expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));
-    expect(workflow, contains('jarsigner -verify -strict -certs'));
+    expect(workflow, contains('jarsigner -verify -certs'));
+    expect(workflow, contains("grep -q 'jar verified.'"));
+    expect(workflow, isNot(contains('jarsigner -verify -strict -certs')));
     expect(workflow, contains('-checkend 2592000'));
 
     final installIndex = workflow.indexOf(
