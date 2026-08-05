@@ -59,14 +59,48 @@ void main() {
     expect(missing, ['TWO', 'THREE']);
   });
 
-  test('validates base64 file secrets without exposing them', () {
-    final encoded = base64Encode(const [1, 2, 3, 4]);
+  test('requires certificate fingerprints for both store platforms', () {
     expect(
-      validateBase64Secret(encoded, label: 'certificate'),
-      isEmpty,
+      StoreReleaseContract.androidRequiredEnvironment,
+      contains('ANDROID_UPLOAD_CERT_SHA256'),
     );
     expect(
+      StoreReleaseContract.iosRequiredEnvironment,
+      contains('IOS_DISTRIBUTION_CERT_SHA256'),
+    );
+  });
+
+  test('validates base64 file secrets without exposing them', () {
+    final encoded = base64Encode(const [1, 2, 3, 4]);
+    expect(validateBase64Secret(encoded, label: 'certificate'), isEmpty);
+    expect(
       validateBase64Secret('not-base64%', label: 'certificate'),
+      isNotEmpty,
+    );
+  });
+
+  test('normalizes Play Console style SHA-256 fingerprints', () {
+    const compact =
+        '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+    final colonSeparated = RegExp(
+      '.{2}',
+    ).allMatches(compact).map((match) => match.group(0)).join(':');
+
+    expect(normalizeSha256Fingerprint(colonSeparated), compact.toUpperCase());
+    expect(
+      validateSha256Fingerprint(colonSeparated, label: 'upload certificate'),
+      isEmpty,
+    );
+  });
+
+  test('rejects malformed or truncated certificate fingerprints', () {
+    expect(
+      validateSha256Fingerprint('ABC123', label: 'certificate'),
+      isNotEmpty,
+    );
+    final nonHexFingerprint = '${List.filled(63, 'A').join()}Z';
+    expect(
+      validateSha256Fingerprint(nonHexFingerprint, label: 'certificate'),
       isNotEmpty,
     );
   });
@@ -99,10 +133,7 @@ void main() {
       readPubspecVersion('name: mystic_tarot\nversion: 1.8.0+11\n'),
       '1.8.0+11',
     );
-    expect(
-      () => readPubspecVersion('version: 1.8.0\n'),
-      throwsFormatException,
-    );
+    expect(() => readPubspecVersion('version: 1.8.0\n'), throwsFormatException);
   });
 
   test('creates stable release artifact names', () {
@@ -117,9 +148,6 @@ void main() {
   });
 
   test('rejects unsupported platform values', () {
-    expect(
-      () => parseStoreReleasePlatform('web'),
-      throwsFormatException,
-    );
+    expect(() => parseStoreReleasePlatform('web'), throwsFormatException);
   });
 }
