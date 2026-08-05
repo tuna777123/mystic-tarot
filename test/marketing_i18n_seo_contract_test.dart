@@ -60,7 +60,14 @@ void main() {
       expect(notFound, contains(path));
     }
 
-    for (final locale in <String>['tr', 'en', 'es', 'fr', 'pt-BR', 'x-default']) {
+    for (final locale in <String>[
+      'tr',
+      'en',
+      'es',
+      'fr',
+      'pt-BR',
+      'x-default',
+    ]) {
       expect(sitemap, contains('hreflang="$locale"'));
     }
 
