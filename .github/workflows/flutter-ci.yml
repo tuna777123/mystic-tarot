@@ -86,7 +86,22 @@ jobs:
         run: flutter build web --release
 
       - name: Build Android release bundle
-        run: flutter build appbundle --release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/release-audit
+          flutter build appbundle --release 2>&1 | tee build/release-audit/android-build.log
+
+      - name: Audit Built-in Kotlin compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="build/release-audit/kotlin-plugin-audit.md"
+          dart run tool/verify_kotlin_plugin_warnings.dart \
+            --log build/release-audit/android-build.log \
+            --allow flutter_timezone,purchases_flutter \
+            --report "$report"
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Install pinned bundletool
         env:
@@ -133,5 +148,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mystic-tarot-android-audit
-          path: build/app/outputs/bundle/release/aab-audit.md
+          path: |
+            build/app/outputs/bundle/release/aab-audit.md
+            build/release-audit/kotlin-plugin-audit.md
           if-no-files-found: error
