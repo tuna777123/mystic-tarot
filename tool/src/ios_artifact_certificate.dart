@@ -1,10 +1,11 @@
 import 'dart:io';
 
-typedef IosCertificateCommandRunner = Future<ProcessResult> Function(
-  String executable,
-  List<String> arguments, {
-  String? workingDirectory,
-});
+typedef IosCertificateCommandRunner =
+    Future<ProcessResult> Function(
+      String executable,
+      List<String> arguments, {
+      String? workingDirectory,
+    });
 
 Future<String> verifyIosArtifactSigningCertificate({
   required File ipaFile,
@@ -21,11 +22,12 @@ Future<String> verifyIosArtifactSigningCertificate({
   );
 
   try {
-    await _runChecked(
-      commandRunner,
-      'unzip',
-      ['-q', ipaFile.path, '-d', temporaryDirectory.path],
-    );
+    await _runChecked(commandRunner, 'unzip', [
+      '-q',
+      ipaFile.path,
+      '-d',
+      temporaryDirectory.path,
+    ]);
 
     final payloadDirectory = Directory(
       '${temporaryDirectory.path}${Platform.pathSeparator}Payload',
@@ -46,12 +48,11 @@ Future<String> verifyIosArtifactSigningCertificate({
       );
     }
 
-    await _runChecked(
-      commandRunner,
-      'codesign',
-      ['--display', '--extract-certificates', appBundles.single.path],
-      workingDirectory: temporaryDirectory.path,
-    );
+    await _runChecked(commandRunner, 'codesign', [
+      '--display',
+      '--extract-certificates',
+      appBundles.single.path,
+    ], workingDirectory: temporaryDirectory.path);
 
     final leafCertificate = File(
       '${temporaryDirectory.path}${Platform.pathSeparator}codesign0',
@@ -62,11 +63,11 @@ Future<String> verifyIosArtifactSigningCertificate({
       );
     }
 
-    final digestResult = await _runChecked(
-      commandRunner,
-      'shasum',
-      ['-a', '256', leafCertificate.path],
-    );
+    final digestResult = await _runChecked(commandRunner, 'shasum', [
+      '-a',
+      '256',
+      leafCertificate.path,
+    ]);
     final actual = _parseSha256Output(digestResult.stdout as String);
     if (actual != expected) {
       throw const FormatException(
@@ -87,11 +88,7 @@ Future<ProcessResult> _runProcess(
   List<String> arguments, {
   String? workingDirectory,
 }) {
-  return Process.run(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-  );
+  return Process.run(executable, arguments, workingDirectory: workingDirectory);
 }
 
 Future<ProcessResult> _runChecked(
