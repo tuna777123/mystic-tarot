@@ -73,8 +73,9 @@ MysticLanguage resolveMysticLanguage({
     mysticLanguageFromCode(storedValue) ??
     mysticLanguageFromLocale(platformLocale);
 
-Locale mysticLocaleFromCode(String languageCode) =>
-    mysticLocale(mysticLanguageFromCode(languageCode) ?? MysticLanguage.english);
+Locale mysticLocaleFromCode(String languageCode) => mysticLocale(
+  mysticLanguageFromCode(languageCode) ?? MysticLanguage.english,
+);
 
 String mysticLanguageCode(MysticLanguage language) => switch (language) {
   MysticLanguage.turkish => 'tr',
