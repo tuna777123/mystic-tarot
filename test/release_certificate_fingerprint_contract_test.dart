@@ -24,9 +24,12 @@ void main() {
     );
   });
 
-  test('Android verifies the keystore and final AAB certificate', () {
+  test('Android verifies the certificate before strict artifact audit', () {
     final workflow = File(
       '.github/workflows/store-release.yml',
+    ).readAsStringSync();
+    final bundleAudit = File(
+      'tool/audit_android_bundle.dart',
     ).readAsStringSync();
 
     expect(workflow, contains('keytool -exportcert'));
@@ -34,7 +37,10 @@ void main() {
     expect(workflow, contains('android-bundle-cert.pem'));
     expect(workflow, contains('ACTUAL_UPLOAD_CERT_SHA256'));
     expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));
-    expect(workflow, contains('jarsigner -verify -strict -certs'));
+    expect(workflow, contains('jarsigner -verify -certs'));
+    expect(workflow, isNot(contains('jarsigner -verify -strict -certs')));
+    expect(bundleAudit, contains("['-verify', '-strict', '-certs', bundle.path]"));
+    expect(bundleAudit, contains('validateStrictJarsignerResult'));
     expect(workflow, contains('-checkend 2592000'));
 
     final installIndex = workflow.indexOf(
