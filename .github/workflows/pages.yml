@@ -41,12 +41,36 @@ jobs:
       - name: Disable Jekyll processing
         run: touch build/web/.nojekyll
 
-      - name: Verify marketing entry point
+      - name: Verify application and marketing entry points
+        shell: bash
         run: |
-          test -s build/web/index.html
-          test -s build/web/landing.html
+          set -euo pipefail
+          required=(
+            index.html
+            landing.html
+            landing-en.html
+            landing-es.html
+            landing-fr.html
+            landing-pt-br.html
+            marketing-i18n.css
+            marketing-i18n.js
+            sitemap.xml
+            robots.txt
+            404.html
+          )
+          for file in "${required[@]}"; do
+            test -s "build/web/$file"
+          done
+
           grep -q 'Kartların ötesini' build/web/landing.html
-          grep -q 'Mystic Mirror' build/web/landing.html
+          grep -q 'See beyond' build/web/landing-en.html
+          grep -q 'Mira más allá' build/web/landing-es.html
+          grep -q 'Voyez au-delà' build/web/landing-fr.html
+          grep -q 'Veja além' build/web/landing-pt-br.html
+          grep -q 'Mystic Mirror' build/web/landing-en.html
+          grep -q 'hreflang="pt-BR"' build/web/sitemap.xml
+          grep -q 'hreflang="x-default"' build/web/sitemap.xml
+          grep -q 'mystic-tarot/sitemap.xml' build/web/robots.txt
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
