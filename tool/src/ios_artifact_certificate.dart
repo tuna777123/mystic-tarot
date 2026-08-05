@@ -116,13 +116,13 @@ Future<ProcessResult> _runChecked(
 }
 
 String _parseSha256Output(String output) {
-  final digest = output.trim().split(RegExp(r'\s+')).firstOrNull;
-  if (digest == null) {
+  final parts = output.trim().split(RegExp(r'\s+'));
+  if (parts.isEmpty || parts.first.isEmpty) {
     throw const FormatException(
       'Could not read the final iOS certificate SHA-256 fingerprint.',
     );
   }
-  return _normalizeFingerprint(digest);
+  return _normalizeFingerprint(parts.first);
 }
 
 String _normalizeFingerprint(String value) {
