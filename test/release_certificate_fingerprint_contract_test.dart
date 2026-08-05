@@ -39,7 +39,10 @@ void main() {
     expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));
     expect(workflow, contains('jarsigner -verify -certs'));
     expect(workflow, isNot(contains('jarsigner -verify -strict -certs')));
-    expect(bundleAudit, contains("['-verify', '-strict', '-certs', bundle.path]"));
+    expect(
+      bundleAudit,
+      contains("['-verify', '-strict', '-certs', bundle.path]"),
+    );
     expect(bundleAudit, contains('validateStrictJarsignerResult'));
     expect(workflow, contains('-checkend 2592000'));
 
