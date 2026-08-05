@@ -16,9 +16,7 @@ class KotlinPluginWarningSnapshot {
       '',
     );
     final warningPresent = normalized.contains(warningPrefix);
-    final pattern = RegExp(
-      '${RegExp.escape(warningPrefix)}\\s*([^\\r\\n]+)',
-    );
+    final pattern = RegExp('${RegExp.escape(warningPrefix)}\\s*([^\\r\\n]+)');
     final matches = pattern.allMatches(normalized).toList(growable: false);
 
     if (warningPresent && matches.isEmpty) {
