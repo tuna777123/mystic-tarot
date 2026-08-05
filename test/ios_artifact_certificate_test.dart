@@ -22,7 +22,9 @@ void main() {
       commands.add('$executable ${arguments.join(' ')}');
       if (executable == 'unzip') {
         final destination = arguments.last;
-        Directory('$destination/Payload/Runner.app').createSync(recursive: true);
+        Directory(
+          '$destination/Payload/Runner.app',
+        ).createSync(recursive: true);
       } else if (executable == 'codesign') {
         File('$workingDirectory/codesign0').writeAsBytesSync([1, 2, 3]);
       } else if (executable == 'shasum') {
@@ -48,9 +50,8 @@ void main() {
       commands,
       contains(
         predicate<String>(
-          (command) => command.contains(
-            'codesign --display --extract-certificates',
-          ),
+          (command) =>
+              command.contains('codesign --display --extract-certificates'),
         ),
       ),
     );
@@ -70,8 +71,9 @@ void main() {
       String? workingDirectory,
     }) async {
       if (executable == 'unzip') {
-        Directory('${arguments.last}/Payload/Runner.app')
-            .createSync(recursive: true);
+        Directory(
+          '${arguments.last}/Payload/Runner.app',
+        ).createSync(recursive: true);
       } else if (executable == 'codesign') {
         File('$workingDirectory/codesign0').writeAsBytesSync([1]);
       } else if (executable == 'shasum') {
