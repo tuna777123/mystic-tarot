@@ -105,4 +105,20 @@ void main() {
     expect(source, contains('IOS_DISTRIBUTION_CERT_SHA256'));
     expect(source, contains("'signingCertificateSha256'"));
   });
+
+  test('production verifies the final IPA certificate before upload', () {
+    final workflow = File(
+      '.github/workflows/store-release.yml',
+    ).readAsStringSync();
+
+    expect(workflow, contains('IOS_DISTRIBUTION_CERT_SHA256'));
+
+    final signatureIndex = workflow.indexOf('Verify iOS signature and identity');
+    final manifestIndex = workflow.indexOf('Create iOS release manifest');
+    final uploadIndex = workflow.indexOf('Upload signed iOS package');
+
+    expect(signatureIndex, greaterThanOrEqualTo(0));
+    expect(manifestIndex, greaterThan(signatureIndex));
+    expect(uploadIndex, greaterThan(manifestIndex));
+  });
 }
