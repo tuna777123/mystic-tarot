@@ -19,7 +19,10 @@ void main() {
   });
 
   test('Kotlin compatibility policy remains in the release tree', () {
-    expect(File('tool/verify_kotlin_plugin_warnings.dart').existsSync(), isTrue);
+    expect(
+      File('tool/verify_kotlin_plugin_warnings.dart').existsSync(),
+      isTrue,
+    );
     expect(File('tool/src/kotlin_plugin_audit.dart').existsSync(), isTrue);
   });
 }
