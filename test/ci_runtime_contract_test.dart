@@ -36,4 +36,31 @@ void main() {
     expect(pubspec, contains('share_plus: ^13.3.0'));
     expect(pubspec, isNot(contains('share_plus: ^12.')));
   });
+
+  test('Android releases enforce the partial Built-in Kotlin migration', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    final workflow = File(
+      '.github/workflows/flutter-ci.yml',
+    ).readAsStringSync();
+    final policy = File(
+      'tool/src/kotlin_plugin_warnings.dart',
+    ).readAsStringSync();
+
+    expect(pubspec, contains('share_plus: ^13.3.0'));
+    expect(workflow, contains('build/reports/android-release.log'));
+    expect(workflow, contains('verify_kotlin_plugin_warnings.dart'));
+    expect(workflow, contains('mystic-tarot-built-in-kotlin-audit'));
+    expect(policy, contains("'flutter_timezone'"));
+    expect(policy, contains("'purchases_flutter'"));
+    expect(policy, isNot(contains("'share_plus',")));
+
+    final buildIndex = workflow.indexOf('Build Android release bundle');
+    final kotlinAuditIndex = workflow.indexOf(
+      'Audit Built-in Kotlin compatibility',
+    );
+    final uploadIndex = workflow.indexOf('Upload Android bundle');
+    expect(buildIndex, greaterThanOrEqualTo(0));
+    expect(kotlinAuditIndex, greaterThan(buildIndex));
+    expect(uploadIndex, greaterThan(kotlinAuditIndex));
+  });
 }
