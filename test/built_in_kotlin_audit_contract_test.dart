@@ -25,6 +25,35 @@ void main() {
     expect(uploadIndex, greaterThan(bundleAuditIndex));
   });
 
+  test('production signed AAB enforces the reviewed warning set', () {
+    final workflow = File(
+      '.github/workflows/store-release.yml',
+    ).readAsStringSync();
+
+    expect(workflow, contains('build/release/android/android-release.log'));
+    expect(workflow, contains('verify_kotlin_plugin_warnings.dart'));
+    expect(
+      workflow,
+      contains('build/release/android/built-in-kotlin-audit.md'),
+    );
+
+    final buildIndex = workflow.indexOf('Build signed Android bundle');
+    final kotlinAuditIndex = workflow.indexOf(
+      'Audit Built-in Kotlin compatibility',
+    );
+    final signatureIndex = workflow.indexOf('Verify Android signature');
+    final bundleAuditIndex = workflow.indexOf(
+      'Audit signed Android release bundle',
+    );
+    final uploadIndex = workflow.indexOf('Upload signed Android package');
+
+    expect(buildIndex, greaterThanOrEqualTo(0));
+    expect(kotlinAuditIndex, greaterThan(buildIndex));
+    expect(signatureIndex, greaterThan(kotlinAuditIndex));
+    expect(bundleAuditIndex, greaterThan(signatureIndex));
+    expect(uploadIndex, greaterThan(bundleAuditIndex));
+  });
+
   test('policy requires the exact reviewed upstream blocker set', () {
     final policy = File(
       'tool/src/kotlin_plugin_warnings.dart',
