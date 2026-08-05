@@ -43,7 +43,16 @@ Future<String> _audit(_AuditOptions options) async {
   }
 
   await _runChecked('unzip', ['-tqq', bundle.path]);
-  await _runChecked('jarsigner', ['-verify', bundle.path]);
+  final signatureResult = await _runChecked('jarsigner', [
+    '-verify',
+    bundle.path,
+  ]);
+  final signatureOutput = '${signatureResult.stdout}\n${signatureResult.stderr}'
+      .toLowerCase();
+  if (!signatureOutput.contains('jar verified.')) {
+    throw const AuditFailure('The Android App Bundle is not JAR-signed.');
+  }
+
   await _runChecked('java', [
     '-jar',
     options.bundletoolFile.path,
@@ -121,7 +130,11 @@ Future<String> _audit(_AuditOptions options) async {
       ['-p', bundle.path, dexEntry],
       binaryStdout: true,
     );
-    final bytes = Uint8List.fromList(dexResult.stdout as List<int>);
+    final output = dexResult.stdout;
+    if (output is! List<int>) {
+      throw AuditFailure('Could not inspect binary DEX entry $dexEntry.');
+    }
+    final bytes = Uint8List.fromList(output);
     forbiddenMarkers.addAll(findForbiddenDexMarkers(bytes));
   }
   if (forbiddenMarkers.isNotEmpty) {
