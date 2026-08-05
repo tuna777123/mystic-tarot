@@ -87,19 +87,27 @@ String mysticLanguageCode(MysticLanguage language) => switch (language) {
 /// Ensures the value consumed by the main app is a launch-ready enum name.
 /// This runs before [runApp], so first-run onboarding and the private lock gate
 /// agree on the same device-derived language without a visible English flash.
+/// Local storage failure never blocks the application from starting.
 Future<MysticLanguage> ensureInitialMysticLanguagePreference({
   Locale? platformLocale,
 }) async {
-  final prefs = await SharedPreferences.getInstance();
-  final storedValue = prefs.getString('language');
-  final language = resolveMysticLanguage(
-    storedValue: storedValue,
-    platformLocale: platformLocale ?? ui.PlatformDispatcher.instance.locale,
+  final deviceLanguage = mysticLanguageFromLocale(
+    platformLocale ?? ui.PlatformDispatcher.instance.locale,
   );
-  if (storedValue != language.name) {
-    await prefs.setString('language', language.name);
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final storedValue = prefs.getString('language');
+    final language = resolveMysticLanguage(
+      storedValue: storedValue,
+      platformLocale: platformLocale ?? ui.PlatformDispatcher.instance.locale,
+    );
+    if (storedValue != language.name) {
+      await prefs.setString('language', language.name);
+    }
+    return language;
+  } catch (_) {
+    return deviceLanguage;
   }
-  return language;
 }
 
 Future<String> loadPersistedMysticLanguageCode({Locale? platformLocale}) async {
