@@ -64,18 +64,14 @@ List<String> validateRevenueCatPublicKey(
   }
 
   final lower = key.toLowerCase();
-  const forbiddenPrefixes = <String>[
-    'sk_',
-    'secret_',
-    'rc_secret_',
-    'bearer ',
-  ];
+  const forbiddenPrefixes = <String>['sk_', 'secret_', 'rc_secret_', 'bearer '];
   if (forbiddenPrefixes.any(lower.startsWith)) {
     errors.add('A secret API key must never be embedded in a client release.');
   }
 
-  final expectedPrefix =
-      platform == StoreReleasePlatform.android ? 'goog_' : 'appl_';
+  final expectedPrefix = platform == StoreReleasePlatform.android
+      ? 'goog_'
+      : 'appl_';
   if (!lower.startsWith(expectedPrefix)) {
     errors.add(
       'RevenueCat key does not match the expected $expectedPrefix public '
@@ -85,10 +81,7 @@ List<String> validateRevenueCatPublicKey(
   return errors;
 }
 
-List<String> validateBase64Secret(
-  String value, {
-  required String label,
-}) {
+List<String> validateBase64Secret(String value, {required String label}) {
   final clean = value.replaceAll(RegExp(r'\s'), '');
   if (clean.isEmpty) return ['$label is missing.'];
   try {
@@ -111,10 +104,7 @@ String normalizeSha256Fingerprint(String value) {
   return fingerprint;
 }
 
-List<String> validateSha256Fingerprint(
-  String value, {
-  required String label,
-}) {
+List<String> validateSha256Fingerprint(String value, {required String label}) {
   if (value.trim().isEmpty) return ['$label is missing.'];
   try {
     normalizeSha256Fingerprint(value);
