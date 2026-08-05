@@ -20,13 +20,10 @@ void main() {
     expect(manifest.packageName, 'com.tunabozcali.mystictarot');
     expect(manifest.versionName, '1.22.1');
     expect(manifest.versionCode, 30);
-    expect(
-      manifest.permissions,
-      <String>{
-        'android.permission.INTERNET',
-        'android.permission.USE_BIOMETRIC',
-      },
-    );
+    expect(manifest.permissions, <String>{
+      'android.permission.INTERNET',
+      'android.permission.USE_BIOMETRIC',
+    });
   });
 
   test('reads strict Flutter version identity', () {
@@ -58,22 +55,23 @@ version: 1.22.1+30
       'com.google.android.gms.permission.AD_ID',
     });
 
-    expect(
-      forbidden,
-      <String>{
-        'android.permission.ACCESS_FINE_LOCATION',
-        'com.google.android.gms.permission.AD_ID',
-      },
-    );
+    expect(forbidden, <String>{
+      'android.permission.ACCESS_FINE_LOCATION',
+      'com.google.android.gms.permission.AD_ID',
+    });
   });
 
   test('detects packaged advertising and analytics class descriptors', () {
-    final cleanBytes = Uint8List.fromList(ascii.encode(
-      'Lcom/revenuecat/purchases/Purchases;Lcom/tunabozcali/mystictarot/App;',
-    ));
-    final trackedBytes = Uint8List.fromList(ascii.encode(
-      'Lcom/tunabozcali/mystictarot/App;Lcom/appsflyer/AppsFlyerLib;',
-    ));
+    final cleanBytes = Uint8List.fromList(
+      ascii.encode(
+        'Lcom/revenuecat/purchases/Purchases;Lcom/tunabozcali/mystictarot/App;',
+      ),
+    );
+    final trackedBytes = Uint8List.fromList(
+      ascii.encode(
+        'Lcom/tunabozcali/mystictarot/App;Lcom/appsflyer/AppsFlyerLib;',
+      ),
+    );
 
     expect(findForbiddenDexMarkers(cleanBytes), isEmpty);
     expect(findForbiddenDexMarkers(trackedBytes), {'Lcom/appsflyer/'});
