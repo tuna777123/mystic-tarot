@@ -33,7 +33,9 @@ void main(List<String> arguments) {
     stderr.writeln('Could not read the Android build log: $error');
     exitCode = 1;
   } on FormatException catch (error) {
-    stderr.writeln('Could not parse the Android Kotlin warning: ${error.message}');
+    stderr.writeln(
+      'Could not parse the Android Kotlin warning: ${error.message}',
+    );
     exitCode = 1;
   } on ArgumentError catch (error) {
     stderr.writeln(error.message);
