@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080711">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="description" content="Mystic Tarot; günlük tarot ritüelini, 24 saatlik Mystic Mirror gerçeklik kontrolünü, özel günlüğü ve zamanla oluşan kişisel örüntüleri tek bir premium deneyimde birleştirir.">
+  <link rel="canonical" href="https://tuna777123.github.io/mystic-tarot/landing.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:title" content="Mystic Tarot — Kartların ötesini gör">
+  <meta property="og:description" content="Kartını çek. Ertesi gün gerçeği kontrol et. Zamanla kendi örüntünü gör.">
+  <meta property="og:url" content="https://tuna777123.github.io/mystic-tarot/landing.html">
+  <meta property="og:image" content="https://tuna777123.github.io/mystic-tarot/icons/Icon-512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mystic Tarot — Kartların ötesini gör">
+  <meta name="twitter:description" content="Özel günlük, Mystic Mirror ve açıklanabilir kişisel örüntülerle büyüyen tarot ritüeli.">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <title>Mystic Tarot — Özel Günlük Tarot Ritüeli</title>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "Mystic Tarot: Daily Ritual",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "iOS, Android, Web",
+    "description": "Günlük tarot rehberliği, 24 saatlik gerçeklik kontrolü, özel günlük ve zamanla oluşan kişisel örüntüler sunan gizlilik odaklı tarot uygulaması.",
+    "inLanguage": ["tr", "en", "es", "fr", "pt-BR"],
+    "url": "https://tuna777123.github.io/mystic-tarot/landing.html",
+    "image": "https://tuna777123.github.io/mystic-tarot/icons/Icon-512.png",
+    "featureList": [
+      "Daily Guidance",
+      "Mystic Mirror",
+      "Personal pattern memory",
+      "Private local journal",
+      "78-card Arcana collection",
+      "PIN and supported-device biometric protection",
+      "Five complete product languages"
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #080711;
+      --bg-soft: #0e0c1b;
+      --surface: rgba(22, 18, 39, .72);
+      --surface-strong: #171326;
+      --surface-light: rgba(255, 255, 255, .055);
+      --line: rgba(232, 199, 122, .18);
+      --line-bright: rgba(232, 199, 122, .42);
+      --gold: #e8c77a;
+      --gold-soft: #f4dfad;
+      --violet: #9b82d8;
+      --violet-soft: #c5b5ed;
+      --text: #f7f2e8;
+      --muted: #b8b0c7;
+      --muted-2: #8d849e;
+      --success: #9cd2b2;
+      --danger: #df9d9d;
+      --max: 1180px;
+      --radius-lg: 32px;
+      --radius-md: 22px;
+      --radius-sm: 14px;
+      --shadow: 0 28px 90px rgba(0, 0, 0, .45);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 14% 7%, rgba(117, 85, 180, .18), transparent 30%),
+        radial-gradient(circle at 88% 21%, rgba(232, 199, 122, .11), transparent 25%),
+        radial-gradient(circle at 50% 72%, rgba(92, 66, 151, .12), transparent 35%),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .22;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+      z-index: -1;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    img { max-width: 100%; display: block; }
+    h1, h2, h3, p { margin-top: 0; }
+
+    .container {
+      width: min(calc(100% - 40px), var(--max));
+      margin-inline: auto;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: 16px;
+      top: -80px;
+      z-index: 1000;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #090816;
+      background: var(--gold);
+      font-weight: 800;
+      transition: top .2s ease;
+    }
+    .skip-link:focus { top: 16px; }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,.055);
+      background: rgba(8, 7, 17, .74);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      font-size: .86rem;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-bright);
+      border-radius: 13px;
+      color: var(--gold);
+      background:
+        radial-gradient(circle at 35% 25%, rgba(255,255,255,.18), transparent 24%),
+        linear-gradient(145deg, rgba(155,130,216,.32), rgba(232,199,122,.08));
+      box-shadow: inset 0 0 22px rgba(232,199,122,.08);
+      font-size: 1.12rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 650;
+    }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--gold-soft); }
+
+    .button {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 12px 20px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 820;
+      letter-spacing: -.01em;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .button:hover { transform: translateY(-2px); }
+    .button:focus-visible { outline: 3px solid rgba(232,199,122,.28); outline-offset: 3px; }
+    .button-primary {
+      color: #100d18;
+      background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+      box-shadow: 0 16px 42px rgba(232, 199, 122, .18);
+    }
+    .button-primary:hover { box-shadow: 0 20px 55px rgba(232, 199, 122, .27); }
+    .button-secondary {
+      color: var(--text);
+      border-color: var(--line-bright);
+      background: rgba(255,255,255,.035);
+    }
+    .button-secondary:hover { background: rgba(232,199,122,.08); }
+    .button-small { min-height: 42px; padding: 9px 16px; font-size: .88rem; }
+
+    .menu-button {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--text);
+      background: var(--surface-light);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .hero {
+      position: relative;
+      padding: 88px 0 76px;
+    }
+    .hero::after {
+      content: "✦";
+      position: absolute;
+      right: max(4vw, 20px);
+      top: 92px;
+      color: rgba(232,199,122,.18);
+      font-size: clamp(5rem, 11vw, 10rem);
+      line-height: 1;
+      filter: blur(.2px);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr);
+      align-items: center;
+      gap: clamp(52px, 7vw, 96px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--gold-soft);
+      background: rgba(232,199,122,.045);
+      font-size: .78rem;
+      font-weight: 820;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 760px;
+      margin-bottom: 24px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(3.3rem, 7.1vw, 6.7rem);
+      line-height: .96;
+      letter-spacing: -.055em;
+      font-weight: 500;
+    }
+    .hero h1 span {
+      color: var(--gold-soft);
+      text-shadow: 0 0 38px rgba(232,199,122,.18);
+    }
+
+    .hero-lead {
+      max-width: 680px;
+      margin-bottom: 32px;
+      color: var(--muted);
+      font-size: clamp(1.08rem, 1.65vw, 1.28rem);
+      line-height: 1.72;
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 13px; }
+    .microcopy {
+      margin-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      color: var(--muted-2);
+      font-size: .84rem;
+    }
+    .microcopy span::before {
+      content: "✓";
+      margin-right: 7px;
+      color: var(--success);
+      font-weight: 900;
+    }
+
+    .phone-stage {
+      position: relative;
+      min-height: 640px;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+    .phone-stage::before {
+      content: "";
+      position: absolute;
+      width: 430px;
+      height: 430px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(155,130,216,.24), rgba(232,199,122,.08) 38%, transparent 68%);
+      filter: blur(18px);
+      z-index: -1;
+    }
+
+    .orbit {
+      position: absolute;
+      width: 540px;
+      aspect-ratio: 1;
+      border: 1px solid rgba(232,199,122,.1);
+      border-radius: 50%;
+      animation: rotate 32s linear infinite;
+      z-index: -1;
+    }
+    .orbit::before, .orbit::after {
+      content: "✦";
+      position: absolute;
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+    .orbit::before { top: 7%; left: 20%; }
+    .orbit::after { right: 5%; bottom: 28%; color: var(--violet-soft); }
+
+    .phone {
+      position: relative;
+      width: min(330px, 82vw);
+      min-height: 650px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 48px;
+      background: linear-gradient(145deg, #2a2538, #0d0b14 54%, #32283b);
+      box-shadow: var(--shadow), inset 0 0 0 1px rgba(255,255,255,.07);
+      transform: rotate(2deg);
+    }
+
+    .phone-screen {
+      position: relative;
+      min-height: 626px;
+      overflow: hidden;
+      padding: 26px 22px 24px;
+      border-radius: 38px;
+      background:
+        radial-gradient(circle at 74% 12%, rgba(232,199,122,.18), transparent 23%),
+        radial-gradient(circle at 10% 58%, rgba(128,93,194,.18), transparent 31%),
+        #0b0914;
+    }
+    .phone-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.13) .7px, transparent .7px);
+      background-size: 24px 24px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
+      opacity: .18;
+      pointer-events: none;
+    }
+
+    .notch {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      width: 104px;
+      height: 26px;
+      transform: translateX(-50%);
+      border-radius: 16px;
+      background: #050408;
+      z-index: 2;
+    }
+
+    .screen-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 30px;
+      color: var(--muted-2);
+      font-size: .74rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .screen-title {
+      position: relative;
+      z-index: 1;
+      margin: 38px 0 8px;
+      font-family: Georgia, serif;
+      font-size: 1.82rem;
+      line-height: 1.1;
+      font-weight: 500;
+    }
+    .screen-copy {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 24px;
+      color: #aaa2bb;
+      font-size: .86rem;
+    }
+
+    .cards {
+      position: relative;
+      z-index: 1;
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 900px;
+    }
+    .tarot-card {
+      position: absolute;
+      width: 132px;
+      height: 222px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(232,199,122,.48);
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(232,199,122,.09), transparent 36%),
+        radial-gradient(circle at center, rgba(155,130,216,.28), transparent 42%),
+        #151122;
+      box-shadow: 0 22px 50px rgba(0,0,0,.34), inset 0 0 0 5px rgba(8,7,17,.8), inset 0 0 0 6px rgba(232,199,122,.18);
+    }
+    .tarot-card::before {
+      content: "☾";
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(232,199,122,.28);
+      border-radius: 50%;
+      color: var(--gold-soft);
+      font-family: Georgia, serif;
+      font-size: 2.7rem;
+      box-shadow: 0 0 34px rgba(232,199,122,.1);
+    }
+    .tarot-card:nth-child(1) { transform: translateX(-88px) rotate(-14deg) translateZ(-30px); opacity: .72; }
+    .tarot-card:nth-child(2) { transform: translateY(-10px); z-index: 2; }
+    .tarot-card:nth-child(3) { transform: translateX(88px) rotate(14deg) translateZ(-30px); opacity: .72; }
+
+    .mirror-card {
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      padding: 17px;
+      border: 1px solid rgba(232,199,122,.2);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .mirror-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: var(--gold-soft);
+      font-size: .71rem;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .mirror-card strong { display: block; margin-bottom: 5px; font-size: .98rem; }
+    .mirror-card p { margin: 0; color: #9f96af; font-size: .77rem; line-height: 1.55; }
+
+    .float-note {
+      position: absolute;
+      z-index: 4;
+      max-width: 190px;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--text);
+      background: rgba(17, 14, 29, .88);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.32);
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+    .float-note strong { display: block; margin-bottom: 3px; color: var(--gold-soft); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .note-one { left: -18px; top: 130px; transform: rotate(-4deg); }
+    .note-two { right: -24px; bottom: 115px; transform: rotate(3deg); }
+
+    .trust-strip {
+      border-block: 1px solid rgba(255,255,255,.055);
+      background: rgba(255,255,255,.018);
+    }
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .trust-item {
+      padding: 26px 22px;
+      border-right: 1px solid rgba(255,255,255,.055);
+    }
+    .trust-item:last-child { border-right: 0; }
+    .trust-item strong { display: block; margin-bottom: 3px; color: var(--gold-soft); font-size: 1.05rem; }
+    .trust-item span { color: var(--muted-2); font-size: .83rem; }
+
+    section { padding: 108px 0; }
+    .section-kicker {
+      margin-bottom: 14px;
+      color: var(--gold);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .section-title {
+      max-width: 820px;
+      margin-bottom: 22px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.5rem, 5.2vw, 4.8rem);
+      line-height: 1.04;
+      letter-spacing: -.04em;
+      font-weight: 500;
+    }
+    .section-lead {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    .section-head { margin-bottom: 54px; }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: .82fr 1.18fr;
+      gap: 72px;
+      align-items: start;
+    }
+    .sticky-story { position: sticky; top: 130px; }
+
+    .journey {
+      display: grid;
+      gap: 16px;
+    }
+    .journey-step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 18px;
+      padding: 26px;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius-md);
+      background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
+      overflow: hidden;
+    }
+    .journey-step::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(155,130,216,.17), transparent 68%);
+    }
+    .step-number {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-bright);
+      border-radius: 18px;
+      color: var(--gold-soft);
+      background: rgba(232,199,122,.055);
+      font-family: Georgia, serif;
+      font-size: 1.25rem;
+    }
+    .journey-step h3 { margin-bottom: 7px; font-size: 1.18rem; }
+    .journey-step p { margin: 0; color: var(--muted); font-size: .93rem; }
+
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+    .feature-card {
+      position: relative;
+      min-height: 280px;
+      padding: 28px;
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at 100% 0, rgba(155,130,216,.13), transparent 38%),
+        rgba(255,255,255,.028);
+      overflow: hidden;
+      transition: transform .25s ease, border-color .25s ease;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: var(--line-bright); }
+    .feature-card.large { grid-column: span 7; }
+    .feature-card.medium { grid-column: span 5; }
+    .feature-card.third { grid-column: span 4; min-height: 250px; }
+    .feature-card h3 { max-width: 430px; margin: 20px 0 10px; font-size: 1.45rem; line-height: 1.2; }
+    .feature-card p { max-width: 520px; color: var(--muted); font-size: .94rem; }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: var(--gold-soft);
+      background: rgba(232,199,122,.045);
+      font-size: 1.2rem;
+    }
+    .feature-tag {
+      position: absolute;
+      right: 24px;
+      top: 24px;
+      padding: 6px 10px;
+      border: 1px solid rgba(156,210,178,.2);
+      border-radius: 999px;
+      color: var(--success);
+      background: rgba(156,210,178,.045);
+      font-size: .69rem;
+      font-weight: 850;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+    .pattern-visual {
+      position: absolute;
+      right: 25px;
+      bottom: 18px;
+      width: 190px;
+      height: 120px;
+      opacity: .72;
+    }
+    .pattern-line {
+      position: absolute;
+      height: 1px;
+      transform-origin: left;
+      background: linear-gradient(90deg, rgba(232,199,122,.12), rgba(232,199,122,.7));
+    }
+    .pattern-dot {
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      background: var(--surface-strong);
+      box-shadow: 0 0 18px rgba(232,199,122,.25);
+    }
+
+    .privacy-panel {
+      position: relative;
+      padding: clamp(34px, 6vw, 70px);
+      border: 1px solid var(--line-bright);
+      border-radius: 38px;
+      background:
+        linear-gradient(120deg, rgba(232,199,122,.08), transparent 35%),
+        radial-gradient(circle at 90% 20%, rgba(155,130,216,.18), transparent 34%),
+        #100d1b;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .privacy-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 70px;
+      align-items: center;
+    }
+    .privacy-list { display: grid; gap: 14px; }
+    .privacy-point {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 13px;
+      align-items: start;
+      color: var(--muted);
+    }
+    .privacy-point span:first-child {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(156,210,178,.24);
+      border-radius: 10px;
+      color: var(--success);
+      background: rgba(156,210,178,.05);
+      font-weight: 900;
+    }
+    .privacy-point strong { color: var(--text); }
+
+    .shield {
+      position: relative;
+      width: min(310px, 75vw);
+      aspect-ratio: .84;
+      margin-inline: auto;
+      display: grid;
+      place-items: center;
+      clip-path: polygon(50% 0, 92% 14%, 86% 67%, 50% 100%, 14% 67%, 8% 14%);
+      background: linear-gradient(145deg, rgba(232,199,122,.28), rgba(155,130,216,.13));
+      filter: drop-shadow(0 35px 46px rgba(0,0,0,.3));
+    }
+    .shield::before {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      clip-path: inherit;
+      background: #0d0a17;
+    }
+    .shield-core {
+      position: relative;
+      z-index: 1;
+      width: 112px;
+      height: 112px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-bright);
+      border-radius: 50%;
+      color: var(--gold-soft);
+      background: radial-gradient(circle, rgba(232,199,122,.13), transparent 68%);
+      font-size: 2.4rem;
+      box-shadow: 0 0 55px rgba(232,199,122,.15);
+    }
+
+    .comparison-wrap {
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 28px;
+      background: rgba(255,255,255,.025);
+    }
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .comparison th, .comparison td {
+      padding: 21px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+    }
+    .comparison tr:last-child td { border-bottom: 0; }
+    .comparison th {
+      color: var(--muted-2);
+      background: rgba(255,255,255,.025);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .comparison th:last-child, .comparison td:last-child { background: rgba(232,199,122,.035); }
+    .comparison td:first-child { width: 38%; font-weight: 760; }
+    .yes { color: var(--success); font-weight: 850; }
+    .limited { color: var(--muted-2); }
+
+    .plus-panel {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      border: 1px solid rgba(232,199,122,.34);
+      border-radius: 38px;
+      overflow: hidden;
+      background: #100d1a;
+      box-shadow: var(--shadow);
+    }
+    .plus-copy { padding: clamp(36px, 6vw, 72px); }
+    .plus-copy h2 {
+      margin-bottom: 18px;
+      font-family: Georgia, serif;
+      font-size: clamp(2.7rem, 5vw, 4.7rem);
+      line-height: 1;
+      font-weight: 500;
+    }
+    .plus-copy > p { color: var(--muted); }
+    .plus-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 18px;
+      margin: 28px 0 32px;
+    }
+    .plus-list div { color: var(--muted); font-size: .9rem; }
+    .plus-list div::before { content: "✦"; margin-right: 9px; color: var(--gold); }
+    .price-note { margin-top: 13px; color: var(--muted-2); font-size: .78rem; }
+
+    .plus-art {
+      position: relative;
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(232,199,122,.22), transparent 20%),
+        radial-gradient(circle at center, rgba(155,130,216,.15), transparent 49%),
+        #0b0913;
+      overflow: hidden;
+    }
+    .constellation {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      border: 1px solid rgba(232,199,122,.14);
+      border-radius: 50%;
+      box-shadow: 0 0 80px rgba(155,130,216,.12);
+    }
+    .constellation::before, .constellation::after {
+      content: "";
+      position: absolute;
+      inset: 34px;
+      border: 1px solid rgba(232,199,122,.11);
+      border-radius: 50%;
+    }
+    .constellation::after { inset: 85px; }
+    .star {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold-soft);
+      box-shadow: 0 0 18px var(--gold);
+    }
+    .star:nth-child(1) { left: 49%; top: 4%; }
+    .star:nth-child(2) { right: 13%; top: 23%; }
+    .star:nth-child(3) { right: 4%; bottom: 39%; }
+    .star:nth-child(4) { right: 27%; bottom: 8%; }
+    .star:nth-child(5) { left: 23%; bottom: 11%; }
+    .star:nth-child(6) { left: 5%; top: 42%; }
+    .star:nth-child(7) { left: 22%; top: 16%; }
+    .star-core {
+      position: absolute;
+      inset: 50%;
+      width: 114px;
+      height: 114px;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-bright);
+      border-radius: 50%;
+      color: var(--gold-soft);
+      background: rgba(15,12,26,.9);
+      font-family: Georgia, serif;
+      font-size: 2.5rem;
+      box-shadow: 0 0 60px rgba(232,199,122,.13);
+    }
+
+    .languages {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      margin-top: 24px;
+    }
+    .language-pill {
+      padding: 9px 13px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,.025);
+      font-size: .82rem;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: .72fr 1.28fr;
+      gap: 70px;
+      align-items: start;
+    }
+    .faq-list { display: grid; gap: 12px; }
+    details {
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 18px;
+      background: rgba(255,255,255,.026);
+      transition: border-color .2s ease;
+    }
+    details[open] { border-color: var(--line-bright); }
+    summary {
+      position: relative;
+      padding: 20px 55px 20px 22px;
+      list-style: none;
+      cursor: pointer;
+      font-weight: 760;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "+";
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      font-size: 1.3rem;
+    }
+    details[open] summary::after { content: "−"; }
+    details p { padding: 0 22px 22px; margin: 0; color: var(--muted); font-size: .92rem; }
+
+    .final-cta {
+      padding-top: 38px;
+    }
+    .final-card {
+      position: relative;
+      padding: clamp(48px, 8vw, 96px) clamp(28px, 7vw, 80px);
+      border: 1px solid var(--line-bright);
+      border-radius: 42px;
+      text-align: center;
+      background:
+        radial-gradient(circle at center top, rgba(232,199,122,.13), transparent 33%),
+        linear-gradient(145deg, rgba(155,130,216,.1), transparent 52%),
+        #0f0c19;
+      overflow: hidden;
+    }
+    .final-card h2 {
+      max-width: 820px;
+      margin: 0 auto 20px;
+      font-family: Georgia, serif;
+      font-size: clamp(2.7rem, 6vw, 5.5rem);
+      line-height: .98;
+      letter-spacing: -.04em;
+      font-weight: 500;
+    }
+    .final-card p { max-width: 620px; margin: 0 auto 30px; color: var(--muted); }
+    .final-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+
+    footer {
+      padding: 56px 0 34px;
+      color: var(--muted-2);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 30px;
+      align-items: start;
+      padding-bottom: 34px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .footer-copy { max-width: 460px; margin-top: 14px; font-size: .83rem; }
+    .footer-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 10px 30px;
+      font-size: .84rem;
+    }
+    .footer-links a:hover { color: var(--gold-soft); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding-top: 26px;
+      font-size: .77rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    @media (max-width: 980px) {
+      .hero-grid, .story-grid, .privacy-grid, .plus-panel, .faq-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 62px; }
+      .hero-copy { text-align: center; }
+      .hero-lead { margin-inline: auto; }
+      .hero-actions, .microcopy { justify-content: center; }
+      .phone-stage { min-height: 700px; }
+      .sticky-story { position: static; }
+      .feature-card.large, .feature-card.medium { grid-column: span 12; }
+      .feature-card.third { grid-column: span 6; }
+      .privacy-grid { gap: 48px; }
+      .plus-art { min-height: 430px; }
+      .faq-grid { gap: 34px; }
+    }
+
+    @media (max-width: 760px) {
+      .container { width: min(calc(100% - 28px), var(--max)); }
+      .nav-links {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        top: 68px;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(12, 10, 21, .98);
+        box-shadow: var(--shadow);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 13px 12px; }
+      .nav-links .button { margin-top: 8px; }
+      .menu-button { display: grid; place-items: center; }
+      .desktop-cta { display: none; }
+      .hero h1 { font-size: clamp(3rem, 15vw, 5rem); }
+      .phone-stage { min-height: 660px; }
+      .orbit { width: 430px; }
+      .float-note { display: none; }
+      .trust-grid { grid-template-columns: 1fr 1fr; }
+      .trust-item:nth-child(2) { border-right: 0; }
+      .trust-item:nth-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,.055); }
+      section { padding: 82px 0; }
+      .feature-card.third { grid-column: span 12; }
+      .comparison-wrap { overflow-x: auto; }
+      .comparison { min-width: 680px; }
+      .plus-list { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; }
+    }
+
+    @media (max-width: 440px) {
+      .hero-actions .button, .final-actions .button { width: 100%; }
+      .phone { width: 300px; min-height: 610px; }
+      .phone-screen { min-height: 586px; }
+      .cards { height: 236px; }
+      .tarot-card { width: 116px; height: 204px; }
+      .tarot-card:nth-child(1) { transform: translateX(-72px) rotate(-12deg); }
+      .tarot-card:nth-child(3) { transform: translateX(72px) rotate(12deg); }
+      .trust-grid { grid-template-columns: 1fr; }
+      .trust-item { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.055); }
+      .trust-item:last-child { border-bottom: 0; }
+      .journey-step { grid-template-columns: 46px 1fr; padding: 21px; }
+      .step-number { width: 44px; height: 44px; }
+      .feature-card { padding: 23px; border-radius: 24px; }
+      .pattern-visual { opacity: .3; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">İçeriğe geç</a>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="landing.html" aria-label="Mystic Tarot ana sayfa">
+        <span class="brand-mark" aria-hidden="true">☾</span>
+        <span>MYSTIC TAROT</span>
+      </a>
+
+      <nav class="nav-links" id="nav-links" aria-label="Ana menü">
+        <a href="#nasil-calisir">Nasıl çalışır?</a>
+        <a href="#ozellikler">Özellikler</a>
+        <a href="#gizlilik">Gizlilik</a>
+        <a href="#plus">Mystic Plus</a>
+        <a href="#sss">SSS</a>
+        <a class="button button-primary button-small" href="./">Web uygulamasını aç</a>
+      </nav>
+
+      <a class="button button-secondary button-small desktop-cta" href="./">Uygulamayı dene</a>
+      <button class="menu-button" id="menu-button" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menüyü aç">☰</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <div class="eyebrow"><span aria-hidden="true">✦</span> Özel tasarım günlük tarot ritüeli</div>
+          <h1>Kartların ötesini <span>gör.</span></h1>
+          <p class="hero-lead">Kartını çek. Ertesi gün gerçeği kontrol et. Zamanla hangi sembollerin, duyguların ve seçimlerin hayatında tekrar ettiğini keşfet.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="./">✦ Web uygulamasını aç</a>
+            <a class="button button-secondary" href="#nasil-calisir">Deneyimi keşfet</a>
+          </div>
+          <div class="microcopy" aria-label="Temel avantajlar">
+            <span>Hesap gerektirmez</span>
+            <span>Reklam içermez</span>
+            <span>5 tam dil</span>
+          </div>
+        </div>
+
+        <div class="phone-stage reveal" aria-label="Mystic Tarot uygulama deneyimi temsili">
+          <div class="orbit" aria-hidden="true"></div>
+          <div class="float-note note-one"><strong>24 saat sonra</strong>Okuma, Mystic Mirror ile gerçek hayata geri bağlanır.</div>
+          <div class="float-note note-two"><strong>Zamanla</strong>Tekrarlanan kartlar açıklanabilir kişisel örüntülere dönüşür.</div>
+          <div class="phone" aria-hidden="true">
+            <div class="phone-screen">
+              <div class="notch"></div>
+              <div class="screen-top"><span>Daily Guidance</span><span>☾ 07</span></div>
+              <h2 class="screen-title">Bugünün kartını seç.</h2>
+              <p class="screen-copy">Sana en çok seslenen kartı fark et.</p>
+              <div class="cards">
+                <div class="tarot-card"></div>
+                <div class="tarot-card"></div>
+                <div class="tarot-card"></div>
+              </div>
+              <div class="mirror-card">
+                <div class="mirror-label"><span>Mystic Mirror</span><span>24s</span></div>
+                <strong>Bugünkü mesaj hayatına nasıl yansıdı?</strong>
+                <p>Hissettiğin değişimi kaydet; Mystic zaman içinde geri dönen temaları fark etsin.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="trust-strip">
+      <div class="container trust-grid">
+        <div class="trust-item"><strong>78 kart</strong><span>Eksiksiz Arcana yolculuğu</span></div>
+        <div class="trust-item"><strong>24 saat</strong><span>Mystic Mirror gerçeklik kontrolü</span></div>
+        <div class="trust-item"><strong>Yerel öncelik</strong><span>Kişisel içerik cihazında kalır</span></div>
+        <div class="trust-item"><strong>5 dil</strong><span>TR, EN, ES, FR ve PT-BR</span></div>
+      </div>
+    </div>
+
+    <section id="nasil-calisir">
+      <div class="container story-grid">
+        <div class="sticky-story reveal">
+          <div class="section-kicker">Tek kullanımlık fal değil</div>
+          <h2 class="section-title">Her okuma, zamanla büyüyen bir hikâyeye dönüşür.</h2>
+          <p class="section-lead">Çoğu tarot deneyimi yorumu gösterir ve biter. Mystic Tarot okumayı günlük hayatına geri bağlar; neyin gerçekleştiğini, neyin değiştiğini ve neyin tekrar ettiğini görünür kılar.</p>
+        </div>
+
+        <div class="journey">
+          <article class="journey-step reveal">
+            <div class="step-number">01</div>
+            <div><h3>Kartlarını seç</h3><p>Daily Guidance veya derin okumalarda sana en çok seslenen kartları seç; geleneksel tarot sembolizmine dayalı, düşünme odaklı rehberliğini aç.</p></div>
+          </article>
+          <article class="journey-step reveal">
+            <div class="step-number">02</div>
+            <div><h3>Mesajı eyleme çevir</h3><p>Okuman yalnızca soyut bir metin olarak kalmaz. Uyumlu bir eylem, takip soruları ve kaydedilebilir düşünme alanıyla gününe bağlanır.</p></div>
+          </article>
+          <article class="journey-step reveal">
+            <div class="step-number">03</div>
+            <div><h3>Mystic Mirror’a dön</h3><p>24 saat sonra uygulama ne olduğunu sorar: Tema gerçekleşti mi, duygun değişti mi, kararın netleşti mi? Böylece yorum gerçekle karşılaşır.</p></div>
+          </article>
+          <article class="journey-step reveal">
+            <div class="step-number">04</div>
+            <div><h3>Kendi örüntünü gör</h3><p>Farklı günlerde tekrar eden kartlar, duygusal değişimler ve sonuçlar yeterli kanıt oluştuğunda anlaşılır bir kişisel örüntüye dönüşür.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="ozellikler">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker">A’dan Z’ye ürün deneyimi</div>
+          <h2 class="section-title">Tek uygulamada ritüel, hafıza, günlük ve keşif.</h2>
+          <p class="section-lead">Mystic Tarot yalnızca kart anlamı sunmaz. Bugünkü içgörüyü yarının geri bildirimiyle birleştiren, özel ve sürekli bir kişisel keşif sistemi kurar.</p>
+        </div>
+
+        <div class="bento">
+          <article class="feature-card large reveal">
+            <span class="feature-tag">Ayırt edici özellik</span>
+            <div class="feature-icon" aria-hidden="true">◐</div>
+            <h3>Mystic Mirror: Okumayı gerçek hayatla karşılaştır.</h3>
+            <p>24 saat sonra neyin değiştiğini kaydet. Kartın mesajının gerçekten karşılık bulup bulmadığını gör; sezgiyi hatırlanabilir kanıta dönüştür.</p>
+          </article>
+
+          <article class="feature-card medium reveal">
+            <div class="feature-icon" aria-hidden="true">✦</div>
+            <h3>Açıklanabilir kişisel örüntüler.</h3>
+            <p>Uygulama, aynı gün içindeki yoğun kullanımı sahte alışkanlık saymaz. Farklı günlerde oluşan gerçek devamlılıktan tekrar eden kartları ve duyguları gösterir.</p>
+            <div class="pattern-visual" aria-hidden="true">
+              <i class="pattern-line" style="width:88px;left:18px;top:78px;transform:rotate(-23deg)"></i>
+              <i class="pattern-line" style="width:92px;left:92px;top:43px;transform:rotate(31deg)"></i>
+              <i class="pattern-dot" style="left:12px;top:72px"></i>
+              <i class="pattern-dot" style="left:87px;top:37px"></i>
+              <i class="pattern-dot" style="right:4px;bottom:18px"></i>
+            </div>
+          </article>
+
+          <article class="feature-card third reveal">
+            <div class="feature-icon" aria-hidden="true">☀</div>
+            <h3>Daily Guidance</h3>
+            <p>Her güne tek bir kart, uygulanabilir bir odak ve sakin bir düşünme ritüeliyle başla.</p>
+          </article>
+
+          <article class="feature-card third reveal">
+            <div class="feature-icon" aria-hidden="true">⌁</div>
+            <h3>Oracle Dialogue</h3>
+            <p>“Neyi görmüyorum?” veya “Önümüzdeki 24 saatte neye odaklanmalıyım?” gibi daha iyi takip soruları sor.</p>
+          </article>
+
+          <article class="feature-card third reveal">
+            <div class="feature-icon" aria-hidden="true">☾</div>
+            <h3>Yaşayan özel günlük</h3>
+            <p>Okumalarını, niyetlerini, notlarını ve sonuçlarını aynı kişisel hafızada sakla; geçmişe anlamlı biçimde dön.</p>
+          </article>
+
+          <article class="feature-card medium reveal">
+            <div class="feature-icon" aria-hidden="true">✧</div>
+            <h3>Inner Constellation ve Mystic Path.</h3>
+            <p>XP kazan, ritüelleri tamamla, başarımları aç, 78 kartlık Arcana Vault koleksiyonunu büyüt ve yolculuğunun görsel haritasını oluştur.</p>
+          </article>
+
+          <article class="feature-card large reveal">
+            <div class="feature-icon" aria-hidden="true">▣</div>
+            <h3>Özel yedi günlük içgörü raporu.</h3>
+            <p>Mystic Plus, haftalık okumalarını ve geri bildirimlerini bir araya getirerek en sık dönen kartları, duygusal yön değişimlerini ve yeterli kanıtı olan temaları tek bir anlaşılır raporda sunar.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="gizlilik">
+      <div class="container">
+        <div class="privacy-panel reveal">
+          <div class="privacy-grid">
+            <div>
+              <div class="section-kicker">Private by design</div>
+              <h2 class="section-title">İç dünyan sana ait kalmalı.</h2>
+              <p class="section-lead">Mystic Tarot, kişisel düşünme içeriklerini cihazında tutar ve uzaktaki veri işlemeyi güvenli abonelik doğrulaması için gereken sınırlı bilgilerle sınırlar.</p>
+              <div class="privacy-list">
+                <div class="privacy-point"><span>✓</span><div><strong>Hesap zorunluluğu yok.</strong> Başlamak için e-posta veya sosyal hesap vermen gerekmez.</div></div>
+                <div class="privacy-point"><span>✓</span><div><strong>Reklam ve çapraz uygulama takibi yok.</strong> Dikkatin bir reklam profiline dönüştürülmez.</div></div>
+                <div class="privacy-point"><span>✓</span><div><strong>Yerel günlük ve ilerleme.</strong> Okumaların, notların, koleksiyonun ve tercihlerin cihazında saklanır.</div></div>
+                <div class="privacy-point"><span>✓</span><div><strong>PIN ve biyometrik koruma.</strong> Desteklenen cihazlarda uygulamanın tamamını ek bir güvenlik katmanıyla koruyabilirsin.</div></div>
+                <div class="privacy-point"><span>✓</span><div><strong>Dışa aktarma ve silme.</strong> Kendi kayıtlarını yönetebilir, güvenli biçimde aktarabilir veya cihazından kaldırabilirsin.</div></div>
+              </div>
+            </div>
+            <div class="shield" aria-hidden="true"><div class="shield-core">⌾</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="karsilastirma">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker">Neden farklı?</div>
+          <h2 class="section-title">Daha fazla fal değil. Daha anlamlı bir hafıza.</h2>
+          <p class="section-lead">Mystic Tarot rakiplerin özellik kalabalığını kopyalamak yerine, tarot deneyiminin en büyük eksikliği olan devamlılığı çözer.</p>
+        </div>
+
+        <div class="comparison-wrap reveal">
+          <table class="comparison">
+            <thead><tr><th>Deneyim</th><th>Tipik tarot uygulaması</th><th>Mystic Tarot</th></tr></thead>
+            <tbody>
+              <tr><td>Okumadan sonra ne olur?</td><td class="limited">Yorum gösterilir ve unutulur.</td><td class="yes">24 saat sonra Mystic Mirror geri gelir.</td></tr>
+              <tr><td>Kişiselleştirme</td><td class="limited">Genel yorum veya tek seferlik soru.</td><td class="yes">Farklı günlerden oluşan açıklanabilir örüntüler.</td></tr>
+              <tr><td>Günlük</td><td class="limited">Not arşivi.</td><td class="yes">Okuma, duygu, sonuç ve hafıza bağlantısı.</td></tr>
+              <tr><td>Gizlilik</td><td class="limited">Hesap, reklam veya bulut bağımlılığı olabilir.</td><td class="yes">Hesapsız, reklamsız, yerel öncelikli yapı.</td></tr>
+              <tr><td>İlerleme</td><td class="limited">Daha fazla içerik tüketimi.</td><td class="yes">Arcana Vault, XP, ritüeller ve Inner Constellation.</td></tr>
+              <tr><td>Dil deneyimi</td><td class="limited">Kısmi veya yalnızca menü çevirisi olabilir.</td><td class="yes">Beş dilde uçtan uca ürün deneyimi.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="plus">
+      <div class="container">
+        <div class="plus-panel reveal">
+          <div class="plus-copy">
+            <div class="section-kicker">Mystic Plus</div>
+            <h2>Daha derine bak.</h2>
+            <p>Ücretsiz deneyim günlük ritüelini ve kayıtlı günlüğünü korur. Mystic Plus, geçmiş okumaların arasında daha derin ve sınırsız bağlantılar kurmak için tasarlanmıştır.</p>
+            <div class="plus-list">
+              <div>Sınırsız derin okuma</div>
+              <div>Premium açılımlar</div>
+              <div>Sınırsız Oracle Dialogue</div>
+              <div>7 günlük intelligence report</div>
+              <div>Gelişmiş kişisel örüntüler</div>
+              <div>Reklamsız premium deneyim</div>
+            </div>
+            <a class="button button-primary" href="./">Mystic’i aç</a>
+            <p class="price-note">Aylık ve yıllık planlar, yayınlandığında mağazanın yerel ve resmi fiyatıyla gösterilir. Sahte indirim veya gizli yenileme kullanılmaz.</p>
+          </div>
+          <div class="plus-art" aria-hidden="true">
+            <div class="constellation">
+              <i class="star"></i><i class="star"></i><i class="star"></i><i class="star"></i><i class="star"></i><i class="star"></i><i class="star"></i>
+              <div class="star-core">✦</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="diller">
+      <div class="container story-grid">
+        <div class="reveal">
+          <div class="section-kicker">Tek deneyim, beş dil</div>
+          <h2 class="section-title">Yalnızca menüler değil, bütün yolculuk çevrildi.</h2>
+        </div>
+        <div class="reveal">
+          <p class="section-lead">Onboarding’den kart seçimlerine, sonuçlardan Oracle Dialogue’a, günlükten Mystic Path’e, premium ekranlardan gizlilik ve desteğe kadar tüm ürün akışı beş lansman dilinde tamamlandı.</p>
+          <div class="languages" aria-label="Desteklenen diller">
+            <span class="language-pill">Türkçe</span>
+            <span class="language-pill">English</span>
+            <span class="language-pill">Español</span>
+            <span class="language-pill">Français</span>
+            <span class="language-pill">Português do Brasil</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sss">
+      <div class="container faq-grid">
+        <div class="reveal">
+          <div class="section-kicker">Sıkça sorulanlar</div>
+          <h2 class="section-title">Merak ettiğin her şey.</h2>
+          <p class="section-lead">Mystic Tarot kişisel düşünme ve eğlence amacıyla tasarlanmıştır; kesin gelecek tahmini veya profesyonel tavsiye iddiasında bulunmaz.</p>
+        </div>
+        <div class="faq-list reveal">
+          <details open>
+            <summary>Mystic Tarot ücretsiz mi?</summary>
+            <p>Daily Guidance ve kayıtlı günlük ücretsiz deneyimde kalır. Ücretsiz kullanıcılar günlük sınırlı sayıda derin okuma yapabilir. Mystic Plus; sınırsız derin okumaları, premium açılımları, sınırsız takip sorularını ve özel yedi günlük raporu açar.</p>
+          </details>
+          <details>
+            <summary>Uygulama hesabı açmam gerekiyor mu?</summary>
+            <p>Hayır. Mystic Tarot hesap zorunluluğu olmadan çalışır. Kişisel günlük, profil, koleksiyon, ilerleme ve tercihler cihazında tutulur.</p>
+          </details>
+          <details>
+            <summary>Mystic Mirror nedir?</summary>
+            <p>Bir okumadan yaklaşık 24 saat sonra gelen gerçeklik kontrolüdür. Okumanın temasının hayatına nasıl yansıdığını, duygunun değişip değişmediğini ve hangi sonucun ortaya çıktığını kaydetmeni sağlar.</p>
+          </details>
+          <details>
+            <summary>Uygulama geleceği kesin olarak tahmin ediyor mu?</summary>
+            <p>Hayır. Mystic Tarot geleneksel tarot sembolizmini kişisel düşünme için kullanır. Tıbbi, ruh sağlığı, hukuki, mali veya acil durum tavsiyesi sunmaz ve kararlarının sorumluluğu sende kalır.</p>
+          </details>
+          <details>
+            <summary>Verilerim internete gönderiliyor mu?</summary>
+            <p>Kişisel tarot soruların, okumaların, notların ve seçtiğin niyet cihazında kalır. Yerel iOS ve Android sürümlerinde yalnızca abonelik doğrulaması için gereken sınırlı satın alma bilgileri Apple, Google ve RevenueCat tarafından işlenebilir.</p>
+          </details>
+          <details>
+            <summary>Satın almamı başka cihazda geri yükleyebilir miyim?</summary>
+            <p>Yayınlanan yerel uygulamada mağaza hesabın üzerinden “Satın alımları geri yükle” akışı sunulur. Aktif ve doğrulanmış Mystic Plus hakkı bulunduğunda premium erişim yeniden açılır.</p>
+          </details>
+          <details>
+            <summary>Hangi diller destekleniyor?</summary>
+            <p>İngilizce, Türkçe, nötr uluslararası İspanyolca, Fransızca ve Brezilya Portekizcesi lansmanda uçtan uca desteklenir.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta">
+      <div class="container">
+        <div class="final-card reveal">
+          <div class="section-kicker">Bugünün kartı seni bekliyor</div>
+          <h2>Her kart bir mesajdır. Her dönüş bir örüntü.</h2>
+          <p>Kartını seç, hislerini kaydet ve zamanla kendi hikâyenin tekrar eden sembollerini gör.</p>
+          <div class="final-actions">
+            <a class="button button-primary" href="./">✦ Mystic Tarot’u aç</a>
+            <a class="button button-secondary" href="support-tr.html">Destek merkezine git</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="landing.html"><span class="brand-mark" aria-hidden="true">☾</span><span>MYSTIC TAROT</span></a>
+          <p class="footer-copy">Özel günlük tarot ritüeli. Kartını çek, ertesi gün gerçeği kontrol et ve zamanla kendi örüntünü gör.</p>
+        </div>
+        <nav class="footer-links" aria-label="Alt menü">
+          <a href="./">Web uygulaması</a>
+          <a href="#ozellikler">Özellikler</a>
+          <a href="privacy-tr.html">Gizlilik</a>
+          <a href="terms-tr.html">Kullanım Koşulları</a>
+          <a href="support-tr.html">Destek</a>
+          <a href="privacy.html" lang="en">English legal</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> Mystic Tarot. Tüm hakları saklıdır.</span>
+        <span>Kişisel düşünme ve eğlence amaçlıdır. Profesyonel tavsiye değildir.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const menuButton = document.getElementById('menu-button');
+    const navLinks = document.getElementById('nav-links');
+    menuButton.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      menuButton.setAttribute('aria-expanded', String(open));
+      menuButton.setAttribute('aria-label', open ? 'Menüyü kapat' : 'Menüyü aç');
+      menuButton.textContent = open ? '×' : '☰';
+    });
+    navLinks.addEventListener('click', (event) => {
+      if (event.target.closest('a')) {
+        navLinks.classList.remove('open');
+        menuButton.setAttribute('aria-expanded', 'false');
+        menuButton.setAttribute('aria-label', 'Menüyü aç');
+        menuButton.textContent = '☰';
+      }
+    });
+    document.getElementById('year').textContent = String(new Date().getFullYear());
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach((element) => element.classList.add('visible'));
+    } else {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: .12 });
+      document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+    }
+  </script>
+</body>
+</html>
