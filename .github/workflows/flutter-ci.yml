@@ -88,6 +88,33 @@ jobs:
       - name: Build Android release bundle
         run: flutter build appbundle --release
 
+      - name: Install pinned bundletool
+        env:
+          BUNDLETOOL_VERSION: '1.18.3'
+          BUNDLETOOL_SHA256: a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundletool="$RUNNER_TEMP/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          curl --fail --location --silent --show-error \
+            --retry 3 --retry-all-errors \
+            --output "$bundletool" \
+            "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          echo "$BUNDLETOOL_SHA256  $bundletool" | sha256sum --check --strict
+          java -jar "$bundletool" version
+
+      - name: Audit Android release bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundletool="$RUNNER_TEMP/bundletool-all-1.18.3.jar"
+          report="build/app/outputs/bundle/release/aab-audit.md"
+          dart run tool/audit_android_bundle.dart \
+            --bundle build/app/outputs/bundle/release/app-release.aab \
+            --bundletool "$bundletool" \
+            --report "$report"
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload web release
         uses: actions/upload-artifact@v7
         with:
@@ -100,4 +127,11 @@ jobs:
         with:
           name: mystic-tarot-android-aab
           path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Upload Android audit report
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-android-audit
+          path: build/app/outputs/bundle/release/aab-audit.md
           if-no-files-found: error
