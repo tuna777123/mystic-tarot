@@ -50,6 +50,11 @@ void main() {
         isNot(contains('1.13.0')),
         reason: '$path still contains the obsolete launch-note version.',
       );
+      expect(
+        content.toLowerCase(),
+        contains('mystic intelligence'),
+        reason: '$path must preserve the current private report value.',
+      );
     }
   });
 
