@@ -7,9 +7,17 @@ class KotlinPluginWarningFailure implements Exception {
   String toString() => message;
 }
 
-const expectedLegacyKgpPlugins = <String>{
+const conditionallyCompatibleLegacyKgpPlugins = <String>{
   'flutter_timezone',
+};
+
+const upstreamBlockedLegacyKgpPlugins = <String>{
   'purchases_flutter',
+};
+
+const expectedLegacyKgpPlugins = <String>{
+  ...conditionallyCompatibleLegacyKgpPlugins,
+  ...upstreamBlockedLegacyKgpPlugins,
 };
 
 class KotlinPluginPolicyDelta {
@@ -49,18 +57,31 @@ KotlinPluginPolicyDelta compareLegacyKgpPlugins(Set<String> observed) {
 }
 
 String buildKotlinCompatibilityReport(Set<String> observed) {
-  final sortedObserved = observed.toList()..sort();
-  final sortedExpected = expectedLegacyKgpPlugins.toList()..sort();
+  final sortedObserved = _sorted(observed);
+  final conditional = _sorted(
+    observed.intersection(conditionallyCompatibleLegacyKgpPlugins),
+  );
+  final upstreamBlocked = _sorted(
+    observed.intersection(upstreamBlockedLegacyKgpPlugins),
+  );
 
   return '''# Mystic Tarot Built-in Kotlin Audit
 
 - Result: **PASS**
-- Expected temporary legacy KGP plugins: `${sortedExpected.join(', ')}`
-- Observed legacy KGP plugins: `${sortedObserved.join(', ')}`
+- Reviewed Flutter warning entries: `${sortedObserved.join(', ')}`
+- Conditional compatibility warning: `${conditional.join(', ')}`
+- Upstream migration pending: `${upstreamBlocked.join(', ')}`
 - Unknown or regressed plugins: `none`
 - Policy drift: `none`
 
-The two observed plugins remain tracked upstream. Any addition, removal, or
-warning-format change stops the release until the migration policy is reviewed.
+`flutter_timezone` conditionally avoids the legacy Kotlin Gradle Plugin when
+Built-in Kotlin is enabled; Flutter's warning scan does not evaluate that
+condition. `purchases_flutter` still applies the legacy plugin upstream and
+remains tracked separately. Any addition, removal, or warning-format change
+stops the release until this reviewed classification is updated.
 ''';
+}
+
+List<String> _sorted(Iterable<String> values) {
+  return values.toList()..sort();
 }
