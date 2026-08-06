@@ -57,6 +57,32 @@ void main() {
             reason: '${device.slug}/$locale/${scene.slug} must render cleanly.',
           );
           expect(find.text('MYSTIC TAROT'), findsOneWidget);
+
+          if (locale != 'en') {
+            for (final englishOnlyLabel in const <String>[
+              'The Star',
+              'Strength',
+              'The Moon',
+              'Clarity',
+              'Reflective',
+              'MOOD',
+              'PAST',
+              'NEXT',
+              'New view',
+              'Renewal',
+              '24 HOURS LATER',
+              'Your reflection becomes evidence for future readings and stays private on this device.',
+              'READINGS',
+              'MIRRORS',
+              'DAY STREAK',
+            ]) {
+              expect(
+                find.text(englishOnlyLabel),
+                findsNothing,
+                reason: '$locale/${scene.slug} must not leak English labels.',
+              );
+            }
+          }
         }
       });
     }
