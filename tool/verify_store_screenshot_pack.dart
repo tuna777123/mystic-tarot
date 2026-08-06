@@ -113,7 +113,7 @@ String _readReleaseVersion(File pubspec) {
   if (match == null) {
     _fail(<String>['pubspec.yaml must contain version x.y.z+build.']);
   }
-  return match!.group(1)!;
+  return match.group(1)!;
 }
 
 List<String> _validatePng(
