@@ -23,8 +23,16 @@ jobs:
   validate-screenshot-source:
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out source
+      - name: Check out source commit
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out source commit
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -94,8 +102,16 @@ jobs:
             locale: pt-BR
             locale_slug: pt-br
     steps:
-      - name: Check out source
+      - name: Check out source commit
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out source commit
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -126,8 +142,16 @@ jobs:
     needs: generate-store-screenshot-partitions
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out source
+      - name: Check out source commit
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out source commit
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
