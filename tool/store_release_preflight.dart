@@ -1,8 +1,9 @@
 import 'dart:io';
 
+import 'src/public_store_urls.dart';
 import 'src/store_release_contract.dart';
 
-void main(List<String> arguments) {
+Future<void> main(List<String> arguments) async {
   try {
     final platform = _platformFromArguments(arguments);
     final environment = Platform.environment;
@@ -71,17 +72,22 @@ void main(List<String> arguments) {
     }
 
     if (errors.isNotEmpty) {
-      stderr.writeln('Store release preflight failed:');
-      for (final error in errors) {
-        stderr.writeln('- $error');
-      }
-      exitCode = 1;
+      _fail(errors);
+      return;
+    }
+
+    final publicUrlErrors = await verifyPublicStoreEndpoints();
+    if (publicUrlErrors.isNotEmpty) {
+      _fail(publicUrlErrors);
       return;
     }
 
     stdout.writeln('Store release preflight passed for ${platform.name}.');
     stdout.writeln(
       'Validated protected value names: ${requiredNames.join(', ')}.',
+    );
+    stdout.writeln(
+      'Verified ${publicStoreEndpoints.length} live public store endpoints.',
     );
     stdout.writeln('No protected values were printed.');
   } on FormatException catch (error) {
@@ -92,6 +98,14 @@ void main(List<String> arguments) {
     );
     exitCode = 64;
   }
+}
+
+void _fail(List<String> errors) {
+  stderr.writeln('Store release preflight failed:');
+  for (final error in errors) {
+    stderr.writeln('- $error');
+  }
+  exitCode = 1;
 }
 
 StoreReleasePlatform _platformFromArguments(List<String> arguments) {
