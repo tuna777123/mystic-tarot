@@ -15,307 +15,20 @@ MysticLanguage storeScreenshotLanguage(String locale) => switch (locale) {
   _ => MysticLanguage.english,
 };
 
-const _copy = <String, Map<MysticLanguage, String>>{
-  'dailyLabel': {
-    MysticLanguage.english: 'DAILY GUIDANCE',
-    MysticLanguage.turkish: 'GÜNLÜK REHBERLİK',
-    MysticLanguage.spanish: 'GUÍA DIARIA',
-    MysticLanguage.french: 'GUIDANCE DU JOUR',
-    MysticLanguage.portugueseBrazil: 'ORIENTAÇÃO DIÁRIA',
-  },
-  'dailyTitle': {
-    MysticLanguage.english: 'Your daily guidance, grounded in you.',
-    MysticLanguage.turkish: 'Günlük rehberliğin, sana göre şekillenir.',
-    MysticLanguage.spanish: 'Tu guía diaria, conectada contigo.',
-    MysticLanguage.french: 'Votre guidance du jour, ancrée en vous.',
-    MysticLanguage.portugueseBrazil: 'Sua orientação diária, conectada a você.',
-  },
-  'dailySubtitle': {
-    MysticLanguage.english:
-        'A focused ritual built around your intention, mood, and chosen deck.',
-    MysticLanguage.turkish:
-        'Niyetin, duygun ve seçtiğin desteye göre odaklanan bir ritüel.',
-    MysticLanguage.spanish:
-        'Un ritual enfocado en tu intención, emoción y mazo elegido.',
-    MysticLanguage.french:
-        'Un rituel centré sur votre intention, votre émotion et votre jeu.',
-    MysticLanguage.portugueseBrazil:
-        'Um ritual focado na sua intenção, emoção e baralho escolhido.',
-  },
-  'dailyAdvice': {
-    MysticLanguage.english: 'Pause before naming uncertainty as fact.',
-    MysticLanguage.turkish: 'Belirsizliğe gerçek demeden önce dur.',
-    MysticLanguage.spanish: 'Pausa antes de llamar hecho a la incertidumbre.',
-    MysticLanguage.french:
-        'Faites une pause avant de nommer l’incertain comme un fait.',
-    MysticLanguage.portugueseBrazil:
-        'Pause antes de chamar a incerteza de fato.',
-  },
-  'readingLabel': {
-    MysticLanguage.english: 'EXPLAINABLE READINGS',
-    MysticLanguage.turkish: 'AÇIKLANABİLİR OKUMALAR',
-    MysticLanguage.spanish: 'LECTURAS EXPLICABLES',
-    MysticLanguage.french: 'LECTURES EXPLICABLES',
-    MysticLanguage.portugueseBrazil: 'LEITURAS EXPLICÁVEIS',
-  },
-  'readingTitle': {
-    MysticLanguage.english: 'See how every card shaped the reading.',
-    MysticLanguage.turkish: 'Her kartın yorumu nasıl şekillendirdiğini gör.',
-    MysticLanguage.spanish: 'Descubre cómo cada carta dio forma a la lectura.',
-    MysticLanguage.french: 'Voyez comment chaque carte façonne la lecture.',
-    MysticLanguage.portugueseBrazil: 'Veja como cada carta formou a leitura.',
-  },
-  'readingSubtitle': {
-    MysticLanguage.english:
-        'Position, orientation, evidence, and next step stay visible.',
-    MysticLanguage.turkish: 'Konum, yön, kanıt ve sonraki adım görünür kalır.',
-    MysticLanguage.spanish:
-        'La posición, orientación, evidencia y próximo paso son visibles.',
-    MysticLanguage.french:
-        'Position, orientation, indices et prochaine étape restent visibles.',
-    MysticLanguage.portugueseBrazil:
-        'Posição, orientação, evidências e próximo passo ficam visíveis.',
-  },
-  'coreMessage': {
-    MysticLanguage.english: 'Core message',
-    MysticLanguage.turkish: 'Ana mesaj',
-    MysticLanguage.spanish: 'Mensaje central',
-    MysticLanguage.french: 'Message central',
-    MysticLanguage.portugueseBrazil: 'Mensagem central',
-  },
-  'coreBody': {
-    MysticLanguage.english:
-        'Hope becomes useful when it is paired with a named direction.',
-    MysticLanguage.turkish:
-        'Umut, adı konmuş bir yönle birleştiğinde işe yarar.',
-    MysticLanguage.spanish:
-        'La esperanza sirve cuando se une a una dirección clara.',
-    MysticLanguage.french:
-        'L’espoir devient utile lorsqu’il rejoint une direction claire.',
-    MysticLanguage.portugueseBrazil:
-        'A esperança se torna útil quando encontra uma direção clara.',
-  },
-  'whyCards': {
-    MysticLanguage.english: 'Why these cards',
-    MysticLanguage.turkish: 'Neden bu kartlar',
-    MysticLanguage.spanish: 'Por qué estas cartas',
-    MysticLanguage.french: 'Pourquoi ces cartes',
-    MysticLanguage.portugueseBrazil: 'Por que estas cartas',
-  },
-  'whyBody': {
-    MysticLanguage.english:
-        'The present card softens the pause; the next card turns it into movement.',
-    MysticLanguage.turkish:
-        'Şimdiki kart duraklamayı yumuşatır; sonraki kart onu harekete çevirir.',
-    MysticLanguage.spanish:
-        'La carta presente suaviza la pausa; la siguiente la convierte en movimiento.',
-    MysticLanguage.french:
-        'La carte présente adoucit la pause; la suivante la transforme en mouvement.',
-    MysticLanguage.portugueseBrazil:
-        'A carta presente suaviza a pausa; a próxima a transforma em movimento.',
-  },
-  'nextStep': {
-    MysticLanguage.english: 'Grounded next step',
-    MysticLanguage.turkish: 'Somut sonraki adım',
-    MysticLanguage.spanish: 'Próximo paso concreto',
-    MysticLanguage.french: 'Prochaine étape concrète',
-    MysticLanguage.portugueseBrazil: 'Próximo passo concreto',
-  },
-  'nextBody': {
-    MysticLanguage.english:
-        'Write one destination before increasing your speed.',
-    MysticLanguage.turkish: 'Hızını artırmadan önce tek bir varış noktası yaz.',
-    MysticLanguage.spanish:
-        'Escribe un destino antes de aumentar la velocidad.',
-    MysticLanguage.french: 'Écrivez une destination avant d’accélérer.',
-    MysticLanguage.portugueseBrazil:
-        'Escreva um destino antes de aumentar a velocidade.',
-  },
-  'mirrorTitle': {
-    MysticLanguage.english:
-        'Return in 24 hours. Compare guidance with reality.',
-    MysticLanguage.turkish:
-        '24 saat sonra dön. Rehberliği gerçekle karşılaştır.',
-    MysticLanguage.spanish:
-        'Vuelve en 24 horas. Compara la guía con la realidad.',
-    MysticLanguage.french: 'Revenez dans 24 heures. Comparez au réel.',
-    MysticLanguage.portugueseBrazil:
-        'Volte em 24 horas. Compare a orientação com a realidade.',
-  },
-  'mirrorSubtitle': {
-    MysticLanguage.english:
-        'Close the loop instead of collecting endless predictions.',
-    MysticLanguage.turkish: 'Sonsuz tahmin biriktirmek yerine döngüyü kapat.',
-    MysticLanguage.spanish: 'Cierra el ciclo en vez de acumular predicciones.',
-    MysticLanguage.french:
-        'Fermez la boucle au lieu d’accumuler des prédictions.',
-    MysticLanguage.portugueseBrazil:
-        'Feche o ciclo em vez de acumular previsões.',
-  },
-  'yesterday': {
-    MysticLanguage.english: 'YESTERDAY’S GUIDANCE',
-    MysticLanguage.turkish: 'DÜNÜN REHBERLİĞİ',
-    MysticLanguage.spanish: 'GUÍA DE AYER',
-    MysticLanguage.french: 'GUIDANCE D’HIER',
-    MysticLanguage.portugueseBrazil: 'ORIENTAÇÃO DE ONTEM',
-  },
-  'yesterdayBody': {
-    MysticLanguage.english: 'Listen beneath the noise before choosing.',
-    MysticLanguage.turkish: 'Seçmeden önce gürültünün altını dinle.',
-    MysticLanguage.spanish: 'Escucha bajo el ruido antes de elegir.',
-    MysticLanguage.french: 'Écoutez sous le bruit avant de choisir.',
-    MysticLanguage.portugueseBrazil:
-        'Escute por baixo do ruído antes de escolher.',
-  },
-  'whatHappened': {
-    MysticLanguage.english: 'What actually happened?',
-    MysticLanguage.turkish: 'Gerçekte ne oldu?',
-    MysticLanguage.spanish: '¿Qué ocurrió realmente?',
-    MysticLanguage.french: 'Que s’est-il vraiment passé ?',
-    MysticLanguage.portugueseBrazil: 'O que realmente aconteceu?',
-  },
-  'matchedReality': {
-    MysticLanguage.english: 'It matched reality',
-    MysticLanguage.turkish: 'Gerçekle örtüştü',
-    MysticLanguage.spanish: 'Coincidió con la realidad',
-    MysticLanguage.french: 'Cela correspondait au réel',
-    MysticLanguage.portugueseBrazil: 'Combinou com a realidade',
-  },
-  'changedMeaning': {
-    MysticLanguage.english: 'Reality changed the meaning',
-    MysticLanguage.turkish: 'Gerçek anlamı değiştirdi',
-    MysticLanguage.spanish: 'La realidad cambió el significado',
-    MysticLanguage.french: 'Le réel a changé le sens',
-    MysticLanguage.portugueseBrazil: 'A realidade mudou o significado',
-  },
-  'stillUnfolding': {
-    MysticLanguage.english: 'Still unfolding',
-    MysticLanguage.turkish: 'Hâlâ gelişiyor',
-    MysticLanguage.spanish: 'Aún se está desarrollando',
-    MysticLanguage.french: 'Toujours en évolution',
-    MysticLanguage.portugueseBrazil: 'Ainda se desenvolvendo',
-  },
-  'pathLabel': {
-    MysticLanguage.english: 'LIVING FATE MAP',
-    MysticLanguage.turkish: 'YAŞAYAN KADER HARİTASI',
-    MysticLanguage.spanish: 'MAPA VIVO DEL DESTINO',
-    MysticLanguage.french: 'CARTE VIVANTE DU DESTIN',
-    MysticLanguage.portugueseBrazil: 'MAPA VIVO DO DESTINO',
-  },
-  'pathTitle': {
-    MysticLanguage.english: 'Your symbols become a living map.',
-    MysticLanguage.turkish: 'Sembollerin yaşayan bir haritaya dönüşür.',
-    MysticLanguage.spanish: 'Tus símbolos se convierten en un mapa vivo.',
-    MysticLanguage.french: 'Vos symboles deviennent une carte vivante.',
-    MysticLanguage.portugueseBrazil: 'Seus símbolos se tornam um mapa vivo.',
-  },
-  'pathSubtitle': {
-    MysticLanguage.english:
-        'Repeated cards, themes, and reflections reveal your private pattern.',
-    MysticLanguage.turkish:
-        'Tekrarlayan kartlar, temalar ve yansımalar özel örüntünü gösterir.',
-    MysticLanguage.spanish:
-        'Cartas, temas y reflexiones repetidos revelan tu patrón privado.',
-    MysticLanguage.french:
-        'Cartes, thèmes et retours répétés révèlent votre motif privé.',
-    MysticLanguage.portugueseBrazil:
-        'Cartas, temas e reflexões repetidas revelam seu padrão privado.',
-  },
-  'pattern': {
-    MysticLanguage.english: 'RECURRING PATTERN',
-    MysticLanguage.turkish: 'TEKRARLAYAN ÖRÜNTÜ',
-    MysticLanguage.spanish: 'PATRÓN RECURRENTE',
-    MysticLanguage.french: 'MOTIF RÉCURRENT',
-    MysticLanguage.portugueseBrazil: 'PADRÃO RECORRENTE',
-  },
-  'patternBody': {
-    MysticLanguage.english: 'Intuition appears before decisive movement.',
-    MysticLanguage.turkish: 'Sezgi, kararlı hareketten önce beliriyor.',
-    MysticLanguage.spanish:
-        'La intuición aparece antes del movimiento decisivo.',
-    MysticLanguage.french: 'L’intuition apparaît avant le mouvement décisif.',
-    MysticLanguage.portugueseBrazil:
-        'A intuição aparece antes do movimento decisivo.',
-  },
-  'plusTitle': {
-    MysticLanguage.english: 'Go deeper without losing trust.',
-    MysticLanguage.turkish: 'Güveni kaybetmeden daha derine in.',
-    MysticLanguage.spanish: 'Profundiza sin perder la confianza.',
-    MysticLanguage.french: 'Allez plus loin sans perdre confiance.',
-    MysticLanguage.portugueseBrazil: 'Aprofunde-se sem perder a confiança.',
-  },
-  'plusSubtitle': {
-    MysticLanguage.english:
-        'Deep readings and private intelligence, with official store pricing.',
-    MysticLanguage.turkish:
-        'Derin okumalar ve özel içgörüler; resmi mağaza fiyatlarıyla.',
-    MysticLanguage.spanish:
-        'Lecturas profundas e inteligencia privada con precio oficial.',
-    MysticLanguage.french:
-        'Lectures profondes et intelligence privée, au tarif officiel.',
-    MysticLanguage.portugueseBrazil:
-        'Leituras profundas e inteligência privada com preço oficial.',
-  },
-  'monthly': {
-    MysticLanguage.english: 'MONTHLY',
-    MysticLanguage.turkish: 'AYLIK',
-    MysticLanguage.spanish: 'MENSUAL',
-    MysticLanguage.french: 'MENSUEL',
-    MysticLanguage.portugueseBrazil: 'MENSAL',
-  },
-  'yearly': {
-    MysticLanguage.english: 'YEARLY',
-    MysticLanguage.turkish: 'YILLIK',
-    MysticLanguage.spanish: 'ANUAL',
-    MysticLanguage.french: 'ANNUEL',
-    MysticLanguage.portugueseBrazil: 'ANUAL',
-  },
-  'officialPrice': {
-    MysticLanguage.english: 'Official price shown by your store',
-    MysticLanguage.turkish: 'Resmi fiyat mağazan tarafından gösterilir',
-    MysticLanguage.spanish: 'Tu tienda muestra el precio oficial',
-    MysticLanguage.french: 'Le prix officiel est affiché par votre boutique',
-    MysticLanguage.portugueseBrazil: 'O preço oficial é exibido pela sua loja',
-  },
-  'deepSpreads': {
-    MysticLanguage.english: 'All deep spreads',
-    MysticLanguage.turkish: 'Tüm derin açılımlar',
-    MysticLanguage.spanish: 'Todas las tiradas profundas',
-    MysticLanguage.french: 'Tous les tirages approfondis',
-    MysticLanguage.portugueseBrazil: 'Todas as tiragens profundas',
-  },
-  'weeklyIntel': {
-    MysticLanguage.english: 'Private weekly intelligence',
-    MysticLanguage.turkish: 'Özel haftalık içgörü',
-    MysticLanguage.spanish: 'Inteligencia semanal privada',
-    MysticLanguage.french: 'Intelligence hebdomadaire privée',
-    MysticLanguage.portugueseBrazil: 'Inteligência semanal privada',
-  },
-  'restoreManage': {
-    MysticLanguage.english: 'Restore and manage anytime',
-    MysticLanguage.turkish: 'İstediğin zaman geri yükle ve yönet',
-    MysticLanguage.spanish: 'Restaura y gestiona cuando quieras',
-    MysticLanguage.french: 'Restaurez et gérez à tout moment',
-    MysticLanguage.portugueseBrazil: 'Restaure e gerencie quando quiser',
-  },
-  'continueYearly': {
-    MysticLanguage.english: 'CONTINUE WITH YEARLY',
-    MysticLanguage.turkish: 'YILLIK İLE DEVAM ET',
-    MysticLanguage.spanish: 'CONTINUAR CON ANUAL',
-    MysticLanguage.french: 'CONTINUER EN ANNUEL',
-    MysticLanguage.portugueseBrazil: 'CONTINUAR COM ANUAL',
-  },
-  'trust': {
-    MysticLanguage.english: 'PRIVATE • LOCAL-FIRST • FOR REFLECTION',
-    MysticLanguage.turkish: 'ÖZEL • YEREL ÖNCELİKLİ • YANSIMA İÇİN',
-    MysticLanguage.spanish: 'PRIVADO • LOCAL PRIMERO • PARA REFLEXIONAR',
-    MysticLanguage.french: 'PRIVÉ • LOCAL D’ABORD • POUR RÉFLÉCHIR',
-    MysticLanguage.portugueseBrazil: 'PRIVADO • LOCAL PRIMEIRO • PARA REFLEXÃO',
-  },
+String _l(
+  MysticLanguage language, {
+  required String en,
+  required String tr,
+  required String es,
+  required String fr,
+  required String pt,
+}) => switch (language) {
+  MysticLanguage.turkish => tr,
+  MysticLanguage.spanish => es,
+  MysticLanguage.french => fr,
+  MysticLanguage.portugueseBrazil => pt,
+  _ => en,
 };
-
-String _t(MysticLanguage language, String key) =>
-    _copy[key]?[language] ?? _copy[key]![MysticLanguage.english]!;
 
 class StoreShowcaseApp extends StatelessWidget {
   const StoreShowcaseApp({
@@ -459,97 +172,172 @@ class _Scene extends StatelessWidget {
   final MysticLanguage language;
   final StoreScreenshotScene scene;
 
-  @override
-  Widget build(BuildContext context) {
-    final label = switch (scene) {
-      StoreScreenshotScene.dailyGuidance => _t(language, 'dailyLabel'),
-      StoreScreenshotScene.explainableReading => _t(language, 'readingLabel'),
-      StoreScreenshotScene.mysticMirror => 'MYSTIC MIRROR',
-      StoreScreenshotScene.livingPath => _t(language, 'pathLabel'),
-      StoreScreenshotScene.mysticPlus => 'MYSTIC PLUS',
-    };
-    final title = switch (scene) {
-      StoreScreenshotScene.dailyGuidance => _t(language, 'dailyTitle'),
-      StoreScreenshotScene.explainableReading => _t(language, 'readingTitle'),
-      StoreScreenshotScene.mysticMirror => _t(language, 'mirrorTitle'),
-      StoreScreenshotScene.livingPath => _t(language, 'pathTitle'),
-      StoreScreenshotScene.mysticPlus => _t(language, 'plusTitle'),
-    };
-    final subtitle = switch (scene) {
-      StoreScreenshotScene.dailyGuidance => _t(language, 'dailySubtitle'),
-      StoreScreenshotScene.explainableReading => _t(
-        language,
-        'readingSubtitle',
-      ),
-      StoreScreenshotScene.mysticMirror => _t(language, 'mirrorSubtitle'),
-      StoreScreenshotScene.livingPath => _t(language, 'pathSubtitle'),
-      StoreScreenshotScene.mysticPlus => _t(language, 'plusSubtitle'),
-    };
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Label(label),
-        const SizedBox(height: 10),
-        Text(
-          title,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontSize: 34,
-            height: 1.04,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          subtitle,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontFamily: 'Arial',
-            fontSize: 15,
-            height: 1.42,
-            color: MysticColors.muted,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Expanded(child: _body()),
-        const SizedBox(height: 14),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_outline, size: 14, color: MysticColors.muted),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                _t(language, 'trust'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Arial',
-                  fontSize: 8,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: .7,
-                  color: MysticColors.muted,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _body() => switch (scene) {
-    StoreScreenshotScene.dailyGuidance => _daily(),
-    StoreScreenshotScene.explainableReading => _reading(),
-    StoreScreenshotScene.mysticMirror => _mirror(),
-    StoreScreenshotScene.livingPath => _path(),
-    StoreScreenshotScene.mysticPlus => _plus(),
+  String get _label => switch (scene) {
+    StoreScreenshotScene.dailyGuidance => _l(
+      language,
+      en: 'DAILY GUIDANCE',
+      tr: 'GÜNLÜK REHBERLİK',
+      es: 'GUÍA DIARIA',
+      fr: 'GUIDANCE DU JOUR',
+      pt: 'ORIENTAÇÃO DIÁRIA',
+    ),
+    StoreScreenshotScene.explainableReading => _l(
+      language,
+      en: 'EXPLAINABLE READINGS',
+      tr: 'AÇIKLANABİLİR OKUMALAR',
+      es: 'LECTURAS EXPLICABLES',
+      fr: 'LECTURES EXPLICABLES',
+      pt: 'LEITURAS EXPLICÁVEIS',
+    ),
+    StoreScreenshotScene.mysticMirror => 'MYSTIC MIRROR',
+    StoreScreenshotScene.livingPath => _l(
+      language,
+      en: 'LIVING FATE MAP',
+      tr: 'YAŞAYAN KADER HARİTASI',
+      es: 'MAPA VIVO DEL DESTINO',
+      fr: 'CARTE VIVANTE DU DESTIN',
+      pt: 'MAPA VIVO DO DESTINO',
+    ),
+    StoreScreenshotScene.mysticPlus => 'MYSTIC PLUS',
   };
 
-  Widget _daily() => Column(
+  String get _title => switch (scene) {
+    StoreScreenshotScene.dailyGuidance => _l(
+      language,
+      en: 'Your daily guidance, grounded in you.',
+      tr: 'Günlük rehberliğin, sana göre şekillenir.',
+      es: 'Tu guía diaria, conectada contigo.',
+      fr: 'Votre guidance du jour, ancrée en vous.',
+      pt: 'Sua orientação diária, conectada a você.',
+    ),
+    StoreScreenshotScene.explainableReading => _l(
+      language,
+      en: 'See how every card shaped the reading.',
+      tr: 'Her kartın yorumu nasıl şekillendirdiğini gör.',
+      es: 'Descubre cómo cada carta dio forma a la lectura.',
+      fr: 'Voyez comment chaque carte façonne la lecture.',
+      pt: 'Veja como cada carta formou a leitura.',
+    ),
+    StoreScreenshotScene.mysticMirror => _l(
+      language,
+      en: 'Return in 24 hours. Compare guidance with reality.',
+      tr: '24 saat sonra dön. Rehberliği gerçekle karşılaştır.',
+      es: 'Vuelve en 24 horas. Compara la guía con la realidad.',
+      fr: 'Revenez dans 24 heures. Comparez au réel.',
+      pt: 'Volte em 24 horas. Compare a orientação com a realidade.',
+    ),
+    StoreScreenshotScene.livingPath => _l(
+      language,
+      en: 'Your symbols become a living map.',
+      tr: 'Sembollerin yaşayan bir haritaya dönüşür.',
+      es: 'Tus símbolos se convierten en un mapa vivo.',
+      fr: 'Vos symboles deviennent une carte vivante.',
+      pt: 'Seus símbolos se tornam um mapa vivo.',
+    ),
+    StoreScreenshotScene.mysticPlus => _l(
+      language,
+      en: 'Go deeper without losing trust.',
+      tr: 'Güveni kaybetmeden daha derine in.',
+      es: 'Profundiza sin perder la confianza.',
+      fr: 'Allez plus loin sans perdre confiance.',
+      pt: 'Aprofunde-se sem perder a confiança.',
+    ),
+  };
+
+  String get _subtitle => switch (scene) {
+    StoreScreenshotScene.dailyGuidance => _l(
+      language,
+      en: 'A focused ritual built around your intention, mood, and chosen deck.',
+      tr: 'Niyetin, duygun ve seçtiğin desteye göre odaklanan bir ritüel.',
+      es: 'Un ritual enfocado en tu intención, emoción y mazo elegido.',
+      fr: 'Un rituel centré sur votre intention, votre émotion et votre jeu.',
+      pt: 'Um ritual focado na sua intenção, emoção e baralho escolhido.',
+    ),
+    StoreScreenshotScene.explainableReading => _l(
+      language,
+      en: 'Position, orientation, evidence, and next step stay visible.',
+      tr: 'Konum, yön, kanıt ve sonraki adım görünür kalır.',
+      es: 'La posición, orientación, evidencia y próximo paso son visibles.',
+      fr: 'Position, orientation, indices et prochaine étape restent visibles.',
+      pt: 'Posição, orientação, evidências e próximo passo ficam visíveis.',
+    ),
+    StoreScreenshotScene.mysticMirror => _l(
+      language,
+      en: 'Close the loop instead of collecting endless predictions.',
+      tr: 'Sonsuz tahmin biriktirmek yerine döngüyü kapat.',
+      es: 'Cierra el ciclo en vez de acumular predicciones.',
+      fr: 'Fermez la boucle au lieu d’accumuler des prédictions.',
+      pt: 'Feche o ciclo em vez de acumular previsões.',
+    ),
+    StoreScreenshotScene.livingPath => _l(
+      language,
+      en: 'Repeated cards, themes, and reflections reveal your private pattern.',
+      tr: 'Tekrarlayan kartlar, temalar ve yansımalar özel örüntünü gösterir.',
+      es: 'Cartas, temas y reflexiones repetidos revelan tu patrón privado.',
+      fr: 'Cartes, thèmes et retours répétés révèlent votre motif privé.',
+      pt: 'Cartas, temas e reflexões repetidas revelam seu padrão privado.',
+    ),
+    StoreScreenshotScene.mysticPlus => _l(
+      language,
+      en: 'Deep readings and private intelligence, with official store pricing.',
+      tr: 'Derin okumalar ve özel içgörüler; resmi mağaza fiyatlarıyla.',
+      es: 'Lecturas profundas e inteligencia privada con precio oficial.',
+      fr: 'Lectures profondes et intelligence privée, au tarif officiel.',
+      pt: 'Leituras profundas e inteligência privada com preço oficial.',
+    ),
+  };
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _Label(_label),
+      const SizedBox(height: 10),
+      Text(
+        _title,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 34,
+          height: 1.04,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      const SizedBox(height: 10),
+      Text(
+        _subtitle,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontFamily: 'Arial',
+          fontSize: 15,
+          height: 1.42,
+          color: MysticColors.muted,
+        ),
+      ),
+      const SizedBox(height: 20),
+      Expanded(child: _body()),
+      const SizedBox(height: 14),
+      _Trust(language: language),
+    ],
+  );
+
+  Widget _body() => switch (scene) {
+    StoreScreenshotScene.dailyGuidance => _Daily(language: language),
+    StoreScreenshotScene.explainableReading => _Reading(language: language),
+    StoreScreenshotScene.mysticMirror => _Mirror(language: language),
+    StoreScreenshotScene.livingPath => _Path(language: language),
+    StoreScreenshotScene.mysticPlus => _Plus(language: language),
+  };
+}
+
+class _Daily extends StatelessWidget {
+  const _Daily({required this.language});
+
+  final MysticLanguage language;
+
+  @override
+  Widget build(BuildContext context) => Column(
     children: [
       Expanded(
         child: Stack(
@@ -562,7 +350,14 @@ class _Scene extends StatelessWidget {
                 child: _Tarot(
                   symbol: tarotDeck[17].symbol,
                   number: tarotDeck[17].number,
-                  name: 'The Star',
+                  name: _l(
+                    language,
+                    en: 'The Star',
+                    tr: 'Yıldız',
+                    es: 'La Estrella',
+                    fr: 'L’Étoile',
+                    pt: 'A Estrela',
+                  ),
                   compact: true,
                 ),
               ),
@@ -574,7 +369,14 @@ class _Scene extends StatelessWidget {
                 child: _Tarot(
                   symbol: tarotDeck[8].symbol,
                   number: tarotDeck[8].number,
-                  name: 'Strength',
+                  name: _l(
+                    language,
+                    en: 'Strength',
+                    tr: 'Güç',
+                    es: 'La Fuerza',
+                    fr: 'La Force',
+                    pt: 'A Força',
+                  ),
                   compact: true,
                 ),
               ),
@@ -582,20 +384,61 @@ class _Scene extends StatelessWidget {
             _Tarot(
               symbol: tarotDeck[18].symbol,
               number: tarotDeck[18].number,
-              name: 'The Moon',
+              name: _l(
+                language,
+                en: 'The Moon',
+                tr: 'Ay',
+                es: 'La Luna',
+                fr: 'La Lune',
+                pt: 'A Lua',
+              ),
             ),
           ],
         ),
       ),
       const SizedBox(height: 14),
-      const Row(
+      Row(
         children: [
           Expanded(
-            child: _Metric(value: 'Clarity', label: 'INTENTION'),
+            child: _Metric(
+              value: _l(
+                language,
+                en: 'Clarity',
+                tr: 'Netlik',
+                es: 'Claridad',
+                fr: 'Clarté',
+                pt: 'Clareza',
+              ),
+              label: _l(
+                language,
+                en: 'INTENTION',
+                tr: 'NİYET',
+                es: 'INTENCIÓN',
+                fr: 'INTENTION',
+                pt: 'INTENÇÃO',
+              ),
+            ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
-            child: _Metric(value: 'Reflective', label: 'MOOD'),
+            child: _Metric(
+              value: _l(
+                language,
+                en: 'Reflective',
+                tr: 'Düşünceli',
+                es: 'Reflexivo',
+                fr: 'Réflexif',
+                pt: 'Reflexivo',
+              ),
+              label: _l(
+                language,
+                en: 'MOOD',
+                tr: 'DUYGU',
+                es: 'ÁNIMO',
+                fr: 'HUMEUR',
+                pt: 'HUMOR',
+              ),
+            ),
           ),
         ],
       ),
@@ -607,7 +450,14 @@ class _Scene extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _t(language, 'dailyAdvice'),
+                _l(
+                  language,
+                  en: 'Pause before naming uncertainty as fact.',
+                  tr: 'Belirsizliğe gerçek demeden önce dur.',
+                  es: 'Pausa antes de llamar hecho a la incertidumbre.',
+                  fr: 'Faites une pause avant de nommer l’incertain comme un fait.',
+                  pt: 'Pause antes de chamar a incerteza de fato.',
+                ),
                 style: const TextStyle(fontSize: 16, height: 1.35),
               ),
             ),
@@ -616,18 +466,83 @@ class _Scene extends StatelessWidget {
       ),
     ],
   );
+}
 
-  Widget _reading() => Column(
+class _Reading extends StatelessWidget {
+  const _Reading({required this.language});
+
+  final MysticLanguage language;
+
+  @override
+  Widget build(BuildContext context) => Column(
     children: [
       Row(
         children: [
-          Expanded(child: _Position('PAST', tarotDeck[12].symbol, 'New view')),
-          const SizedBox(width: 8),
           Expanded(
-            child: _Position('PRESENT', tarotDeck[17].symbol, 'Renewal'),
+            child: _Position(
+              position: _l(
+                language,
+                en: 'PAST',
+                tr: 'GEÇMİŞ',
+                es: 'PASADO',
+                fr: 'PASSÉ',
+                pt: 'PASSADO',
+              ),
+              symbol: tarotDeck[12].symbol,
+              name: _l(
+                language,
+                en: 'New view',
+                tr: 'Yeni bakış',
+                es: 'Nueva visión',
+                fr: 'Nouveau regard',
+                pt: 'Nova visão',
+              ),
+            ),
           ),
           const SizedBox(width: 8),
-          Expanded(child: _Position('NEXT', tarotDeck[7].symbol, 'Direction')),
+          Expanded(
+            child: _Position(
+              position: _l(
+                language,
+                en: 'PRESENT',
+                tr: 'ŞİMDİ',
+                es: 'PRESENTE',
+                fr: 'PRÉSENT',
+                pt: 'PRESENTE',
+              ),
+              symbol: tarotDeck[17].symbol,
+              name: _l(
+                language,
+                en: 'Renewal',
+                tr: 'Yenilenme',
+                es: 'Renovación',
+                fr: 'Renouveau',
+                pt: 'Renovação',
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _Position(
+              position: _l(
+                language,
+                en: 'NEXT',
+                tr: 'SONRAKİ',
+                es: 'SIGUIENTE',
+                fr: 'ENSUITE',
+                pt: 'PRÓXIMO',
+              ),
+              symbol: tarotDeck[7].symbol,
+              name: _l(
+                language,
+                en: 'Direction',
+                tr: 'Yön',
+                es: 'Dirección',
+                fr: 'Direction',
+                pt: 'Direção',
+              ),
+            ),
+          ),
         ],
       ),
       const SizedBox(height: 14),
@@ -638,17 +553,63 @@ class _Scene extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _Insight(
-                '01',
-                _t(language, 'coreMessage'),
-                _t(language, 'coreBody'),
+                index: '01',
+                title: _l(
+                  language,
+                  en: 'Core message',
+                  tr: 'Ana mesaj',
+                  es: 'Mensaje central',
+                  fr: 'Message central',
+                  pt: 'Mensagem central',
+                ),
+                body: _l(
+                  language,
+                  en: 'Hope becomes useful when it is paired with a named direction.',
+                  tr: 'Umut, adı konmuş bir yönle birleştiğinde işe yarar.',
+                  es: 'La esperanza sirve cuando se une a una dirección clara.',
+                  fr: 'L’espoir devient utile lorsqu’il rejoint une direction claire.',
+                  pt: 'A esperança se torna útil quando encontra uma direção clara.',
+                ),
               ),
               const Divider(height: 8),
-              _Insight('02', _t(language, 'whyCards'), _t(language, 'whyBody')),
+              _Insight(
+                index: '02',
+                title: _l(
+                  language,
+                  en: 'Why these cards',
+                  tr: 'Neden bu kartlar',
+                  es: 'Por qué estas cartas',
+                  fr: 'Pourquoi ces cartes',
+                  pt: 'Por que estas cartas',
+                ),
+                body: _l(
+                  language,
+                  en: 'The present card softens the pause; the next card turns it into movement.',
+                  tr: 'Şimdiki kart duraklamayı yumuşatır; sonraki kart onu harekete çevirir.',
+                  es: 'La carta presente suaviza la pausa; la siguiente la convierte en movimiento.',
+                  fr: 'La carte présente adoucit la pause; la suivante la transforme en mouvement.',
+                  pt: 'A carta presente suaviza a pausa; a próxima a transforma em movimento.',
+                ),
+              ),
               const Divider(height: 8),
               _Insight(
-                '03',
-                _t(language, 'nextStep'),
-                _t(language, 'nextBody'),
+                index: '03',
+                title: _l(
+                  language,
+                  en: 'Grounded next step',
+                  tr: 'Somut sonraki adım',
+                  es: 'Próximo paso concreto',
+                  fr: 'Prochaine étape concrète',
+                  pt: 'Próximo passo concreto',
+                ),
+                body: _l(
+                  language,
+                  en: 'Write one destination before increasing your speed.',
+                  tr: 'Hızını artırmadan önce tek bir varış noktası yaz.',
+                  es: 'Escribe un destino antes de aumentar la velocidad.',
+                  fr: 'Écrivez une destination avant d’accélérer.',
+                  pt: 'Escreva um destino antes de aumentar a velocidade.',
+                ),
               ),
             ],
           ),
@@ -656,10 +617,18 @@ class _Scene extends StatelessWidget {
       ),
     ],
   );
+}
 
-  Widget _mirror() => Column(
+class _Mirror extends StatelessWidget {
+  const _Mirror({required this.language});
+
+  final MysticLanguage language;
+
+  @override
+  Widget build(BuildContext context) => Column(
     children: [
       _Panel(
+        padding: const EdgeInsets.all(13),
         child: Row(
           children: [
             _Tarot(
@@ -668,16 +637,32 @@ class _Scene extends StatelessWidget {
               name: '',
               tiny: true,
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Label(_t(language, 'yesterday')),
-                  const SizedBox(height: 7),
+                  _Label(
+                    _l(
+                      language,
+                      en: 'YESTERDAY’S GUIDANCE',
+                      tr: 'DÜNÜN REHBERLİĞİ',
+                      es: 'GUÍA DE AYER',
+                      fr: 'GUIDANCE D’HIER',
+                      pt: 'ORIENTAÇÃO DE ONTEM',
+                    ),
+                  ),
+                  const SizedBox(height: 5),
                   Text(
-                    _t(language, 'yesterdayBody'),
-                    style: const TextStyle(fontSize: 17, height: 1.3),
+                    _l(
+                      language,
+                      en: 'Listen beneath the noise before choosing.',
+                      tr: 'Seçmeden önce gürültünün altını dinle.',
+                      es: 'Escucha bajo el ruido antes de elegir.',
+                      fr: 'Écoutez sous le bruit avant de choisir.',
+                      pt: 'Escute por baixo do ruído antes de escolher.',
+                    ),
+                    style: const TextStyle(fontSize: 15, height: 1.25),
                   ),
                 ],
               ),
@@ -685,64 +670,152 @@ class _Scene extends StatelessWidget {
           ],
         ),
       ),
-      const SizedBox(height: 14),
+      const SizedBox(height: 10),
       Expanded(
         child: _Panel(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _Chip(text: '24 HOURS LATER', icon: Icons.schedule),
-              const SizedBox(height: 17),
-              Text(
-                _t(language, 'whatHappened'),
-                style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w700,
+              _Chip(
+                text: _l(
+                  language,
+                  en: '24 HOURS LATER',
+                  tr: '24 SAAT SONRA',
+                  es: '24 HORAS DESPUÉS',
+                  fr: '24 HEURES PLUS TARD',
+                  pt: '24 HORAS DEPOIS',
                 ),
+                icon: Icons.schedule,
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Your reflection becomes evidence for future readings and stays private on this device.',
-                style: TextStyle(
+              const SizedBox(height: 8),
+              Text(
+                _l(
+                  language,
+                  en: 'What actually happened?',
+                  tr: 'Gerçekte ne oldu?',
+                  es: '¿Qué ocurrió realmente?',
+                  fr: 'Que s’est-il vraiment passé ?',
+                  pt: 'O que realmente aconteceu?',
+                ),
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                _l(
+                  language,
+                  en: 'Your reflection becomes evidence for future readings and stays private on this device.',
+                  tr: 'Yansıman gelecekteki okumalar için kanıta dönüşür ve bu cihazda özel kalır.',
+                  es: 'Tu reflexión se convierte en evidencia para futuras lecturas y queda privada en este dispositivo.',
+                  fr: 'Votre retour devient un indice pour les prochaines lectures et reste privé sur cet appareil.',
+                  pt: 'Sua reflexão vira evidência para leituras futuras e fica privada neste dispositivo.',
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                   fontFamily: 'Arial',
-                  fontSize: 14,
-                  height: 1.45,
+                  fontSize: 11,
+                  height: 1.25,
                   color: MysticColors.muted,
                 ),
               ),
               const Spacer(),
-              _Choice(_t(language, 'matchedReality'), selected: true),
-              const SizedBox(height: 9),
-              _Choice(_t(language, 'changedMeaning')),
-              const SizedBox(height: 9),
-              _Choice(_t(language, 'stillUnfolding')),
+              _Choice(
+                _l(
+                  language,
+                  en: 'It matched reality',
+                  tr: 'Gerçekle örtüştü',
+                  es: 'Coincidió con la realidad',
+                  fr: 'Cela correspondait au réel',
+                  pt: 'Combinou com a realidade',
+                ),
+                selected: true,
+              ),
+              const SizedBox(height: 4),
+              _Choice(
+                _l(
+                  language,
+                  en: 'Reality changed the meaning',
+                  tr: 'Gerçek anlamı değiştirdi',
+                  es: 'La realidad cambió el significado',
+                  fr: 'Le réel a changé le sens',
+                  pt: 'A realidade mudou o significado',
+                ),
+              ),
+              const SizedBox(height: 4),
+              _Choice(
+                _l(
+                  language,
+                  en: 'Still unfolding',
+                  tr: 'Hâlâ gelişiyor',
+                  es: 'Aún se está desarrollando',
+                  fr: 'Toujours en évolution',
+                  pt: 'Ainda se desenvolvendo',
+                ),
+              ),
             ],
           ),
         ),
       ),
     ],
   );
+}
 
-  Widget _path() => Column(
+class _Path extends StatelessWidget {
+  const _Path({required this.language});
+
+  final MysticLanguage language;
+
+  @override
+  Widget build(BuildContext context) => Column(
     children: [
       Expanded(
         child: _Panel(
           padding: const EdgeInsets.all(18),
           child: Column(
             children: [
-              const Row(
+              Row(
                 children: [
                   Expanded(
-                    child: _Metric(value: '12', label: 'READINGS'),
+                    child: _Metric(
+                      value: '12',
+                      label: _l(
+                        language,
+                        en: 'READINGS',
+                        tr: 'OKUMALAR',
+                        es: 'LECTURAS',
+                        fr: 'LECTURES',
+                        pt: 'LEITURAS',
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: _Metric(value: '4', label: 'MIRRORS'),
+                    child: _Metric(
+                      value: '4',
+                      label: _l(
+                        language,
+                        en: 'MIRRORS',
+                        tr: 'AYNALAR',
+                        es: 'ESPEJOS',
+                        fr: 'MIROIRS',
+                        pt: 'ESPELHOS',
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: _Metric(value: '7', label: 'DAY STREAK'),
+                    child: _Metric(
+                      value: '7',
+                      label: _l(
+                        language,
+                        en: 'DAY STREAK',
+                        tr: 'GÜNLÜK SERİ',
+                        es: 'RACHA DIARIA',
+                        fr: 'SÉRIE QUOTIDIENNE',
+                        pt: 'SEQUÊNCIA DIÁRIA',
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -766,7 +839,11 @@ class _Scene extends StatelessWidget {
                     Positioned(
                       left: 116,
                       top: 126,
-                      child: _Node(tarotDeck[18].symbol, '5×', primary: true),
+                      child: _Node(
+                        tarotDeck[18].symbol,
+                        '5×',
+                        primary: true,
+                      ),
                     ),
                     Positioned(
                       left: 24,
@@ -795,10 +872,26 @@ class _Scene extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Label(_t(language, 'pattern')),
+                  _Label(
+                    _l(
+                      language,
+                      en: 'RECURRING PATTERN',
+                      tr: 'TEKRARLAYAN ÖRÜNTÜ',
+                      es: 'PATRÓN RECURRENTE',
+                      fr: 'MOTIF RÉCURRENT',
+                      pt: 'PADRÃO RECORRENTE',
+                    ),
+                  ),
                   const SizedBox(height: 6),
                   Text(
-                    _t(language, 'patternBody'),
+                    _l(
+                      language,
+                      en: 'Intuition appears before decisive movement.',
+                      tr: 'Sezgi, kararlı hareketten önce beliriyor.',
+                      es: 'La intuición aparece antes del movimiento decisivo.',
+                      fr: 'L’intuition apparaît avant le mouvement décisif.',
+                      pt: 'A intuição aparece antes do movimento decisivo.',
+                    ),
                     style: const TextStyle(fontSize: 16, height: 1.3),
                   ),
                 ],
@@ -809,14 +902,44 @@ class _Scene extends StatelessWidget {
       ),
     ],
   );
+}
 
-  Widget _plus() => Column(
+class _Plus extends StatelessWidget {
+  const _Plus({required this.language});
+
+  final MysticLanguage language;
+
+  @override
+  Widget build(BuildContext context) => Column(
     children: [
       Row(
         children: [
-          Expanded(child: _Plan(_t(language, 'monthly'))),
+          Expanded(
+            child: _Plan(
+              _l(
+                language,
+                en: 'MONTHLY',
+                tr: 'AYLIK',
+                es: 'MENSUAL',
+                fr: 'MENSUEL',
+                pt: 'MENSAL',
+              ),
+            ),
+          ),
           const SizedBox(width: 10),
-          Expanded(child: _Plan(_t(language, 'yearly'), selected: true)),
+          Expanded(
+            child: _Plan(
+              _l(
+                language,
+                en: 'YEARLY',
+                tr: 'YILLIK',
+                es: 'ANUAL',
+                fr: 'ANNUEL',
+                pt: 'ANUAL',
+              ),
+              selected: true,
+            ),
+          ),
         ],
       ),
       const SizedBox(height: 13),
@@ -856,7 +979,14 @@ class _Scene extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          _t(language, 'officialPrice'),
+                          _l(
+                            language,
+                            en: 'Official price shown by your store',
+                            tr: 'Resmi fiyat mağazan tarafından gösterilir',
+                            es: 'Tu tienda muestra el precio oficial',
+                            fr: 'Le prix officiel est affiché par votre boutique',
+                            pt: 'O preço oficial é exibido pela sua loja',
+                          ),
                           style: const TextStyle(
                             fontFamily: 'Arial',
                             fontSize: 12,
@@ -869,11 +999,38 @@ class _Scene extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 22),
-              _Feature(_t(language, 'deepSpreads')),
+              _Feature(
+                _l(
+                  language,
+                  en: 'All deep spreads',
+                  tr: 'Tüm derin açılımlar',
+                  es: 'Todas las tiradas profundas',
+                  fr: 'Tous les tirages approfondis',
+                  pt: 'Todas as tiragens profundas',
+                ),
+              ),
               const SizedBox(height: 16),
-              _Feature(_t(language, 'weeklyIntel')),
+              _Feature(
+                _l(
+                  language,
+                  en: 'Private weekly intelligence',
+                  tr: 'Özel haftalık içgörü',
+                  es: 'Inteligencia semanal privada',
+                  fr: 'Intelligence hebdomadaire privée',
+                  pt: 'Inteligência semanal privada',
+                ),
+              ),
               const SizedBox(height: 16),
-              _Feature(_t(language, 'restoreManage')),
+              _Feature(
+                _l(
+                  language,
+                  en: 'Restore and manage anytime',
+                  tr: 'İstediğin zaman geri yükle ve yönet',
+                  es: 'Restaura y gestiona cuando quieras',
+                  fr: 'Restaurez et gérez à tout moment',
+                  pt: 'Restaure e gerencie quando quiser',
+                ),
+              ),
               const Spacer(),
               Container(
                 width: double.infinity,
@@ -886,7 +1043,14 @@ class _Scene extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  _t(language, 'continueYearly'),
+                  _l(
+                    language,
+                    en: 'CONTINUE WITH YEARLY',
+                    tr: 'YILLIK İLE DEVAM ET',
+                    es: 'CONTINUAR CON ANUAL',
+                    fr: 'CONTINUER EN ANNUEL',
+                    pt: 'CONTINUAR COM ANUAL',
+                  ),
                   style: const TextStyle(
                     fontFamily: 'Arial',
                     fontWeight: FontWeight.w900,
@@ -896,6 +1060,42 @@ class _Scene extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+class _Trust extends StatelessWidget {
+  const _Trust({required this.language});
+
+  final MysticLanguage language;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const Icon(Icons.lock_outline, size: 14, color: MysticColors.muted),
+      const SizedBox(width: 6),
+      Flexible(
+        child: Text(
+          _l(
+            language,
+            en: 'PRIVATE • LOCAL-FIRST • FOR REFLECTION',
+            tr: 'ÖZEL • YEREL ÖNCELİKLİ • YANSIMA İÇİN',
+            es: 'PRIVADO • LOCAL PRIMERO • PARA REFLEXIONAR',
+            fr: 'PRIVÉ • LOCAL D’ABORD • POUR RÉFLÉCHIR',
+            pt: 'PRIVADO • LOCAL PRIMEIRO • PARA REFLEXÃO',
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontFamily: 'Arial',
+            fontSize: 8,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .7,
+            color: MysticColors.muted,
           ),
         ),
       ),
@@ -945,39 +1145,19 @@ class _Tarot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = tiny
-        ? 62.0
-        : compact
-        ? 112.0
-        : 164.0;
-    final height = tiny
-        ? 82.0
-        : compact
-        ? 178.0
-        : 252.0;
+    final width = tiny ? 62.0 : compact ? 112.0 : 164.0;
+    final height = tiny ? 82.0 : compact ? 178.0 : 252.0;
     return Container(
       width: width,
       height: height,
-      padding: EdgeInsets.all(
-        tiny
-            ? 8
-            : compact
-            ? 12
-            : 16,
-      ),
+      padding: EdgeInsets.all(tiny ? 8 : compact ? 12 : 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFF33224F), Color(0xFF171125), Color(0xFF0E0C18)],
         ),
-        borderRadius: BorderRadius.circular(
-          tiny
-              ? 16
-              : compact
-              ? 18
-              : 24,
-        ),
+        borderRadius: BorderRadius.circular(tiny ? 16 : compact ? 18 : 24),
         border: Border.all(color: MysticColors.gold.withValues(alpha: .55)),
       ),
       child: Column(
@@ -996,11 +1176,7 @@ class _Tarot extends StatelessWidget {
           Text(
             symbol,
             style: TextStyle(
-              fontSize: tiny
-                  ? 34
-                  : compact
-                  ? 44
-                  : 68,
+              fontSize: tiny ? 34 : compact ? 44 : 68,
               color: MysticColors.gold,
             ),
           ),
@@ -1022,7 +1198,11 @@ class _Tarot extends StatelessWidget {
 }
 
 class _Position extends StatelessWidget {
-  const _Position(this.position, this.symbol, this.name);
+  const _Position({
+    required this.position,
+    required this.symbol,
+    required this.name,
+  });
 
   final String position;
   final String symbol;
@@ -1052,7 +1232,11 @@ class _Position extends StatelessWidget {
 }
 
 class _Insight extends StatelessWidget {
-  const _Insight(this.index, this.title, this.body);
+  const _Insight({
+    required this.index,
+    required this.title,
+    required this.body,
+  });
 
   final String index;
   final String title;
@@ -1063,30 +1247,34 @@ class _Insight extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       CircleAvatar(
-        radius: 17,
+        radius: 15,
         backgroundColor: MysticColors.violet.withValues(alpha: .25),
         child: Text(
           index,
           style: const TextStyle(
             fontFamily: 'Arial',
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: FontWeight.w900,
             color: MysticColors.lavender,
           ),
         ),
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 10),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 3),
             Text(
               body,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontFamily: 'Arial',
                 fontSize: 11,
@@ -1109,9 +1297,9 @@ class _Choice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(13),
       color: selected
           ? MysticColors.violet.withValues(alpha: .24)
           : Colors.white.withValues(alpha: .035),
@@ -1125,10 +1313,10 @@ class _Choice extends StatelessWidget {
       children: [
         Icon(
           selected ? Icons.check_circle_outline : Icons.circle_outlined,
-          size: 20,
+          size: 18,
           color: selected ? MysticColors.lavender : MysticColors.muted,
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 9),
         Expanded(
           child: Text(
             text,
@@ -1136,7 +1324,7 @@ class _Choice extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontFamily: 'Arial',
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1154,7 +1342,7 @@ class _Metric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(16),
       color: Colors.white.withValues(alpha: .045),
@@ -1166,7 +1354,7 @@ class _Metric extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 4),
         Text(
@@ -1175,9 +1363,9 @@ class _Metric extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontFamily: 'Arial',
-            fontSize: 8,
+            fontSize: 7,
             fontWeight: FontWeight.w900,
-            letterSpacing: .7,
+            letterSpacing: .55,
             color: MysticColors.muted,
           ),
         ),
@@ -1298,6 +1486,8 @@ class _Plan extends StatelessWidget {
         Expanded(
           child: Text(
             text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontFamily: 'Arial',
               fontSize: 12,
@@ -1328,6 +1518,8 @@ class _Feature extends StatelessWidget {
       Expanded(
         child: Text(
           text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
@@ -1354,13 +1546,17 @@ class _Chip extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: MysticColors.lavender),
         const SizedBox(width: 5),
-        Text(
-          text,
-          style: const TextStyle(
-            fontFamily: 'Arial',
-            fontSize: 9,
-            fontWeight: FontWeight.w900,
-            letterSpacing: .7,
+        Flexible(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Arial',
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .7,
+            ),
           ),
         ),
       ],
