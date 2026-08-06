@@ -80,9 +80,9 @@ void main(List<String> arguments) {
     ],
   };
   const encoder = JsonEncoder.withIndent('  ');
-  File('${root.path}/manifest.json').writeAsStringSync(
-    '${encoder.convert(manifest)}\n',
-  );
+  File(
+    '${root.path}/manifest.json',
+  ).writeAsStringSync('${encoder.convert(manifest)}\n');
 
   stdout.writeln('# Mystic Tarot Store Screenshot Audit');
   stdout.writeln();
