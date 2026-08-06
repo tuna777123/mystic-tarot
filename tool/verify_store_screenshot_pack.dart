@@ -9,6 +9,7 @@ const maximumStoreScreenshotBytes = 8 * 1024 * 1024;
 const visualSampleGridSize = 32;
 const minimumDistinctSampledColors = 16;
 const minimumSampledLuminanceRange = 12.0;
+const storeScreenshotManifestFileName = 'manifest.json';
 
 void main(List<String> arguments) {
   final root = Directory(
@@ -47,14 +48,23 @@ void main(List<String> arguments) {
     }
   }
 
-  final actualPaths = root
+  final actualFiles = root
       .listSync(recursive: true)
       .whereType<File>()
+      .toList(growable: false);
+  final actualPaths = actualFiles
       .where((file) => file.path.toLowerCase().endsWith('.png'))
       .map((file) => _relativePath(root, file))
       .toSet();
   for (final extra in actualPaths.difference(expectedPaths)) {
     errors.add('Unexpected screenshot: $extra');
+  }
+  for (final file in actualFiles) {
+    final relativePath = _relativePath(root, file);
+    if (!relativePath.toLowerCase().endsWith('.png') &&
+        relativePath != storeScreenshotManifestFileName) {
+      errors.add('Unexpected non-PNG file: $relativePath');
+    }
   }
   if (actualPaths.length != expectedStoreScreenshotCount) {
     errors.add(
@@ -95,7 +105,7 @@ void main(List<String> arguments) {
   };
   const encoder = JsonEncoder.withIndent('  ');
   File(
-    '${root.path}/manifest.json',
+    '${root.path}/$storeScreenshotManifestFileName',
   ).writeAsStringSync('${encoder.convert(manifest)}\n');
 
   stdout.writeln('# Mystic Tarot Store Screenshot Audit');
@@ -103,7 +113,7 @@ void main(List<String> arguments) {
   stdout.writeln('- Result: **PASS**');
   stdout.writeln('- Application version: `$releaseVersion`');
   stdout.writeln('- Source commit: `$sourceCommit`');
-  stdout.writeln('- Manifest: `manifest.json`');
+  stdout.writeln('- Manifest: `$storeScreenshotManifestFileName`');
   stdout.writeln('- Locales: `${storeScreenshotLocales.join(', ')}`');
   stdout.writeln(
     '- Devices: `${storeScreenshotDevices.map((item) => '${item.slug} ${item.width}x${item.height}').join(', ')}`',
