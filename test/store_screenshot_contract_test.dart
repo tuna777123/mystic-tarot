@@ -133,6 +133,9 @@ void main() {
     expect(generator, contains('RenderRepaintBoundary'));
     expect(generator, contains("package:image/image.dart' as img"));
     expect(generator, contains('ui.ImageByteFormat.rawRgba'));
+    expect(generator, contains('_verifyOpaqueRgba(rgbaBytes)'));
+    expect(generator, contains('bytes[index] != 255'));
+    expect(generator, contains('Rendered screenshot contains transparent pixels'));
     expect(generator, contains('img.ChannelOrder.rgba'));
     expect(generator, contains('.convert(numChannels: 3)'));
     expect(generator, contains('img.encodePng(rgb)'));
