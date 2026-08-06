@@ -12,6 +12,13 @@ void main() {
     expect(StoreScreenshotScene.values, hasLength(5));
     expect(expectedStoreScreenshotCount, 50);
 
+    final appleDevice = storeScreenshotDevices.firstWhere(
+      (device) => device.slug.startsWith('apple-'),
+    );
+    expect(appleDevice.slug, 'apple-6.9');
+    expect(appleDevice.width, 1290);
+    expect(appleDevice.height, 2796);
+
     final paths = <String>{};
     for (final device in storeScreenshotDevices) {
       expect(device.width, greaterThanOrEqualTo(1080));
@@ -103,6 +110,8 @@ void main() {
     expect(workflow, contains('generate-store-screenshot-partitions'));
     expect(workflow, contains('audit-and-package-store-screenshots'));
     expect(workflow, contains('matrix:'));
+    expect(workflow, contains('device: apple-6.9'));
+    expect(workflow, isNot(contains('device: apple-6.7')));
     expect(workflow, contains("GENERATE_STORE_SCREENSHOTS: '1'"));
     expect(workflow, contains('STORE_SCREENSHOT_DEVICE'));
     expect(workflow, contains('STORE_SCREENSHOT_LOCALE'));
