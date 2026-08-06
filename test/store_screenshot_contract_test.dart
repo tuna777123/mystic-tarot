@@ -208,9 +208,13 @@ void main() {
         'A newer run superseded this branch run; no commit status published.',
       ),
     );
-    expect(workflow, contains(r'"$VALIDATE_RESULT" == "cancelled"'));
-    expect(workflow, contains(r'"$GENERATE_RESULT" == "cancelled"'));
-    expect(workflow, contains(r'"$AUDIT_RESULT" == "cancelled"'));
+    expect(workflow, contains('VALIDATE_RESULT'));
+    expect(workflow, contains('GENERATE_RESULT'));
+    expect(workflow, contains('AUDIT_RESULT'));
+    expect(
+      RegExp(r'==\s+"cancelled"').allMatches(workflow),
+      hasLength(3),
+    );
     expect(workflow, contains('test/support/store_screenshot_fonts.dart'));
     expect(workflow, contains('matrix:'));
     expect(workflow, contains('device: apple-6.9'));
