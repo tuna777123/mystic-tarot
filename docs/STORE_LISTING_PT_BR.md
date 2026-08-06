@@ -77,6 +77,7 @@ Mystic Tarot foi criado para reflexão pessoal e entretenimento. Ele não oferec
 
 - Novas instalações agora abrem em inglês, turco, espanhol, francês ou português do Brasil conforme o idioma do dispositivo antes do onboarding.
 - O idioma escolhido dentro do Mystic permanece ativo durante a seleção de cartas, os resultados, o perfil, as configurações e o bloqueio privado do app.
+- Mystic Intelligence continua criando no dispositivo um relatório privado de sete dias a partir de leituras salvas e check-ins do Mystic Mirror concluídos.
 - A preparação opcional de lembretes e fuso horário não atrasa mais a primeira tela utilizável; a permissão de notificações só é solicitada quando o usuário decide.
 - A opção Reduzir movimento ou Remover animações do dispositivo é respeitada no fundo atmosférico e na seleção de cartas.
 - Foram adicionadas melhorias de estabilidade ao diário, Mystic Mirror, transferência privada criptografada e bloqueio de seis dígitos.
