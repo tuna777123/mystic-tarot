@@ -55,6 +55,17 @@ void main() {
             await tester.pumpAndSettle();
 
             expect(tester.takeException(), isNull);
+            final overflowingParagraphs = tester
+                .renderObjectList<RenderParagraph>(find.byType(RichText))
+                .where((paragraph) => paragraph.didExceedMaxLines)
+                .toList(growable: false);
+            if (overflowingParagraphs.isNotEmpty) {
+              throw StateError(
+                '${device.slug}/$locale/${scene.slug} hides localized copy '
+                'behind an ellipsis.',
+              );
+            }
+
             final boundary =
                 boundaryKey.currentContext!.findRenderObject()
                     as RenderRepaintBoundary;
