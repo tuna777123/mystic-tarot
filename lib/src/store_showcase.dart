@@ -633,17 +633,18 @@ class _Scene extends StatelessWidget {
       const SizedBox(height: 14),
       Expanded(
         child: _Panel(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(10),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _Insight(
                 '01',
                 _t(language, 'coreMessage'),
                 _t(language, 'coreBody'),
               ),
-              const Divider(height: 24),
+              const Divider(height: 8),
               _Insight('02', _t(language, 'whyCards'), _t(language, 'whyBody')),
-              const Divider(height: 24),
+              const Divider(height: 8),
               _Insight(
                 '03',
                 _t(language, 'nextStep'),
@@ -1088,8 +1089,8 @@ class _Insight extends StatelessWidget {
               body,
               style: const TextStyle(
                 fontFamily: 'Arial',
-                fontSize: 13,
-                height: 1.4,
+                fontSize: 11,
+                height: 1.25,
                 color: MysticColors.muted,
               ),
             ),
