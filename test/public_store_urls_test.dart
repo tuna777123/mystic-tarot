@@ -5,26 +5,35 @@ import 'package:flutter_test/flutter_test.dart';
 import '../tool/src/public_store_urls.dart';
 
 void main() {
-  test('public store endpoints cover the live app and store-facing pages', () {
+  const expectedEndpoints = <String, String>{
+    '': 'flutter_bootstrap.js',
+    'landing.html': 'Kartların ötesini',
+    'privacy.html': '<h1>Privacy Policy</h1>',
+    'privacy-tr.html': '<h1>Gizlilik Politikası</h1>',
+    'privacy-es.html': '<h1>Política de privacidad</h1>',
+    'privacy-fr.html': '<h1>Politique de confidentialité</h1>',
+    'privacy-pt-br.html': '<h1>Política de Privacidade</h1>',
+    'terms.html': '<h1>Terms of Use</h1>',
+    'terms-tr.html': '<h1>Kullanım Koşulları</h1>',
+    'terms-es.html': '<h1>Condiciones de uso</h1>',
+    'terms-fr.html': '<h1>Conditions d’utilisation</h1>',
+    'terms-pt-br.html': '<h1>Termos de Uso</h1>',
+    'support.html': '<h1>Support</h1>',
+    'support-tr.html': '<h1>Destek</h1>',
+    'support-es.html': '<h1>Soporte</h1>',
+    'support-fr.html': '<h1>Assistance</h1>',
+    'support-pt-br.html': '<h1>Suporte</h1>',
+  };
+
+  test('public store endpoints cover every live launch-language page', () {
+    expect(publicStoreEndpoints, hasLength(expectedEndpoints.length));
     expect(
       publicStoreEndpoints.map((endpoint) => endpoint.path).toList(),
-      <String>[
-        '',
-        'landing.html',
-        'privacy.html',
-        'terms.html',
-        'support.html',
-      ],
+      expectedEndpoints.keys.toList(),
     );
     expect(
-      publicStoreEndpoints.map((endpoint) => endpoint.marker).toSet(),
-      containsAll(<String>{
-        'flutter_bootstrap.js',
-        'Kartların ötesini',
-        '<h1>Privacy Policy</h1>',
-        '<h1>Terms of Use</h1>',
-        '<h1>Support</h1>',
-      }),
+      publicStoreEndpoints.map((endpoint) => endpoint.marker).toList(),
+      expectedEndpoints.values.toList(),
     );
   });
 

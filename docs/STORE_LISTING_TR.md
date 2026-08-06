@@ -73,21 +73,14 @@ Günlük Rehberlik ve temel 24 saatlik Mystic Ayna ücretsiz kalır. Mystic Plus
 
 Mystic Tarot kişisel düşünme ve eğlence amacıyla geliştirilmiştir. Tıbbi, ruh sağlığı, hukuki, mali veya acil durum tavsiyesi sunmaz.
 
-## Sürüm notları — 1.13.0
+## Sürüm notları — 1.22.3
 
-- Onboarding artık doğrudan ilk gerçek Günlük Rehberlik ritüelini açar
-- Kullanıcının seçtiği saatte çalışan isteğe bağlı yerel günlük hatırlatıcı
-- Okuma kaydedildikten sonra görünür özel hikâye kartı paylaşımı
-
-- Cihazda hesaplanan kişisel 7 günlük Mystic Intelligence raporu
-- Gerçekte neyin değiştiğini kaydeden beş dilli 24 saatlik Mystic Ayna
-- Açılım konumu, düz/ters yön, sembolik temel ve bağlamı açıklayan şeffaf yorumlar
-- Bekleyen Ayna kontrolleri için erişilebilir Günlük rozeti
-- 50 okuma sınırı olmadan eksiksiz, yerel ve yedekli günlük geçmişi
-- Bozuk veya kısmi kayıtları güvenli biçimde kurtaran veri dayanıklılığı
-- Türkçe karakter ve aksan farklılıklarına toleranslı günlük araması
-- Sorular, eylemler, duygu geçişleri ve Ayna notlarını içeren özel dışa aktarma
-- İngilizce, Türkçe, İspanyolca, Fransızca ve Brezilya Portekizcesinde eksiksiz deneyim
+- Temiz kurulumlar artık onboarding’den önce İngilizce, Türkçe, İspanyolca, Fransızca veya Brezilya Portekizcesi cihaz dilinde açılır.
+- Uygulama içinde seçilen dil; kart seçimi, sonuçlar, profil, ayarlar ve özel uygulama kilidi boyunca korunur.
+- Mystic Intelligence, kaydedilen okumalar ve tamamlanan Mystic Ayna kontrollerinden cihazda özel bir yedi günlük rapor oluşturmaya devam eder.
+- İsteğe bağlı hatırlatıcı ve saat dilimi hazırlığı artık ilk kullanılabilir ekranı geciktirmez; bildirim izni yalnızca kullanıcı isterse sorulur.
+- Cihazdaki Hareketi Azalt veya Animasyonları Kaldır ayarı, atmosferik arka plan ve kart seçimi hareketlerinde uygulanır.
+- Günlük, Mystic Ayna, şifreli özel aktarım ve altı haneli uygulama kilidi için ek kararlılık iyileştirmeleri yapıldı.
 
 ## Türkçe ekran görüntüsü başlıkları
 
