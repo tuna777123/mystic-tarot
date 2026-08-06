@@ -167,6 +167,12 @@ void main() {
     expect(verifier, contains('Wrong PNG bit depth'));
     expect(verifier, contains('PNG must be RGB without an alpha channel'));
     expect(verifier, contains('colorType != 2'));
+    expect(
+      verifier,
+      contains('maximumStoreScreenshotBytes = 8 * 1024 * 1024'),
+    );
+    expect(verifier, contains('bytes.length > maximumStoreScreenshotBytes'));
+    expect(verifier, contains('PNG exceeds the 8 MB store limit'));
     expect(verifier, contains('Unexpected screenshot'));
   });
 
@@ -199,6 +205,10 @@ void main() {
     expect(verifier, contains("'pngBitDepth': 8"));
     expect(verifier, contains("'pngColorType': 2"));
     expect(verifier, contains("'alphaChannel': false"));
+    expect(
+      verifier,
+      contains("'maximumPngBytes': maximumStoreScreenshotBytes"),
+    );
     expect(verifier, contains('manifest.json'));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
   });
