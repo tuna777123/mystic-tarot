@@ -163,6 +163,14 @@ void main() {
     ).readAsStringSync();
     final pubspec = File('pubspec.yaml').readAsStringSync();
 
+    expect(workflow, contains('workflow_dispatch:'));
+    expect(workflow, contains('push:'));
+    expect(workflow, contains('pull_request:'));
+    expect(
+      workflow,
+      contains('github.event.pull_request.head.ref || github.ref_name'),
+    );
+    expect(workflow, contains('cancel-in-progress: true'));
     expect(workflow, contains('validate-screenshot-source'));
     expect(workflow, contains('generate-store-screenshot-partitions'));
     expect(workflow, contains('audit-and-package-store-screenshots'));
@@ -247,6 +255,15 @@ void main() {
     expect(verifier, contains('bytes.length > maximumStoreScreenshotBytes'));
     expect(verifier, contains('PNG exceeds the 8 MB store limit'));
     expect(verifier, contains('Unexpected screenshot'));
+    expect(verifier, contains('Unexpected non-PNG file'));
+    expect(
+      verifier,
+      contains("storeScreenshotManifestFileName = 'manifest.json'"),
+    );
+    expect(
+      verifier,
+      contains('relativePath != storeScreenshotManifestFileName'),
+    );
   });
 
   test('screenshot artifacts are bound to app version and source commit', () {
@@ -313,7 +330,7 @@ void main() {
         "'minimumSampledLuminanceRange': minimumSampledLuminanceRange",
       ),
     );
-    expect(verifier, contains('manifest.json'));
+    expect(verifier, contains('storeScreenshotManifestFileName'));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
   });
 }
