@@ -236,6 +236,13 @@ jobs:
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash
         run: |
+          if [[ "$VALIDATE_RESULT" == "cancelled" || \
+                "$GENERATE_RESULT" == "cancelled" || \
+                "$AUDIT_RESULT" == "cancelled" ]]; then
+            echo "A newer run superseded this branch run; no commit status published."
+            exit 0
+          fi
+
           if [[ "$VALIDATE_RESULT" == "success" && \
                 "$GENERATE_RESULT" == "success" && \
                 "$AUDIT_RESULT" == "success" ]]; then
