@@ -77,6 +77,7 @@ Mystic Tarot kişisel düşünme ve eğlence amacıyla geliştirilmiştir. Tıbb
 
 - Temiz kurulumlar artık onboarding’den önce İngilizce, Türkçe, İspanyolca, Fransızca veya Brezilya Portekizcesi cihaz dilinde açılır.
 - Uygulama içinde seçilen dil; kart seçimi, sonuçlar, profil, ayarlar ve özel uygulama kilidi boyunca korunur.
+- Mystic Intelligence, kaydedilen okumalar ve tamamlanan Mystic Ayna kontrollerinden cihazda özel bir yedi günlük rapor oluşturmaya devam eder.
 - İsteğe bağlı hatırlatıcı ve saat dilimi hazırlığı artık ilk kullanılabilir ekranı geciktirmez; bildirim izni yalnızca kullanıcı isterse sorulur.
 - Cihazdaki Hareketi Azalt veya Animasyonları Kaldır ayarı, atmosferik arka plan ve kart seçimi hareketlerinde uygulanır.
 - Günlük, Mystic Ayna, şifreli özel aktarım ve altı haneli uygulama kilidi için ek kararlılık iyileştirmeleri yapıldı.
