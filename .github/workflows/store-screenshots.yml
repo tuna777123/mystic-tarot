@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - pubspec.yaml
       - lib/src/store_screenshot_manifest.dart
       - lib/src/store_showcase.dart
       - test/store_screenshot_generator_test.dart
@@ -138,10 +139,18 @@ jobs:
           merge-multiple: true
 
       - name: Audit complete screenshot pack
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           mkdir -p build/reports
-          dart run tool/verify_store_screenshot_pack.dart build/store_screenshots \
+          dart run tool/verify_store_screenshot_pack.dart \
+            build/store_screenshots "$SOURCE_COMMIT" \
             | tee build/reports/store-screenshot-audit.md
+          test -s build/store_screenshots/manifest.json
+          grep -Fq '"applicationVersion": "1.22.3+32"' \
+            build/store_screenshots/manifest.json
+          grep -Fq "\"sourceCommit\": \"$SOURCE_COMMIT\"" \
+            build/store_screenshots/manifest.json
           cat build/reports/store-screenshot-audit.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload complete store screenshot pack
