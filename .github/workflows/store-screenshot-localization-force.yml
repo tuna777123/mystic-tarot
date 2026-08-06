@@ -1,0 +1,332 @@
+name: Store Screenshot Localization Force
+
+on:
+  push:
+    branches:
+      - release/localized-store-screenshot-pack
+    paths:
+      - .github/workflows/store-screenshot-localization-force.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-push:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out screenshot branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/localized-store-screenshot-pack
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply complete visible-copy localization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin release/localized-store-screenshot-pack
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/store_showcase.dart')
+          text = path.read_text()
+          if "  'cardStar': {" not in text:
+              marker = "  'trust': {\n"
+              additions = """  'cardStar': {
+    MysticLanguage.english: 'The Star',
+    MysticLanguage.turkish: 'Yıldız',
+    MysticLanguage.spanish: 'La Estrella',
+    MysticLanguage.french: 'L’Étoile',
+    MysticLanguage.portugueseBrazil: 'A Estrela',
+  },
+  'cardStrength': {
+    MysticLanguage.english: 'Strength',
+    MysticLanguage.turkish: 'Güç',
+    MysticLanguage.spanish: 'La Fuerza',
+    MysticLanguage.french: 'La Force',
+    MysticLanguage.portugueseBrazil: 'A Força',
+  },
+  'cardMoon': {
+    MysticLanguage.english: 'The Moon',
+    MysticLanguage.turkish: 'Ay',
+    MysticLanguage.spanish: 'La Luna',
+    MysticLanguage.french: 'La Lune',
+    MysticLanguage.portugueseBrazil: 'A Lua',
+  },
+  'clarity': {
+    MysticLanguage.english: 'Clarity',
+    MysticLanguage.turkish: 'Netlik',
+    MysticLanguage.spanish: 'Claridad',
+    MysticLanguage.french: 'Clarté',
+    MysticLanguage.portugueseBrazil: 'Clareza',
+  },
+  'intention': {
+    MysticLanguage.english: 'INTENTION',
+    MysticLanguage.turkish: 'NİYET',
+    MysticLanguage.spanish: 'INTENCIÓN',
+    MysticLanguage.french: 'INTENTION',
+    MysticLanguage.portugueseBrazil: 'INTENÇÃO',
+  },
+  'reflective': {
+    MysticLanguage.english: 'Reflective',
+    MysticLanguage.turkish: 'Düşünceli',
+    MysticLanguage.spanish: 'Reflexivo',
+    MysticLanguage.french: 'Réflexif',
+    MysticLanguage.portugueseBrazil: 'Reflexivo',
+  },
+  'mood': {
+    MysticLanguage.english: 'MOOD',
+    MysticLanguage.turkish: 'DUYGU',
+    MysticLanguage.spanish: 'ÁNIMO',
+    MysticLanguage.french: 'HUMEUR',
+    MysticLanguage.portugueseBrazil: 'HUMOR',
+  },
+  'past': {
+    MysticLanguage.english: 'PAST',
+    MysticLanguage.turkish: 'GEÇMİŞ',
+    MysticLanguage.spanish: 'PASADO',
+    MysticLanguage.french: 'PASSÉ',
+    MysticLanguage.portugueseBrazil: 'PASSADO',
+  },
+  'present': {
+    MysticLanguage.english: 'PRESENT',
+    MysticLanguage.turkish: 'ŞİMDİ',
+    MysticLanguage.spanish: 'PRESENTE',
+    MysticLanguage.french: 'PRÉSENT',
+    MysticLanguage.portugueseBrazil: 'PRESENTE',
+  },
+  'next': {
+    MysticLanguage.english: 'NEXT',
+    MysticLanguage.turkish: 'SONRAKİ',
+    MysticLanguage.spanish: 'SIGUIENTE',
+    MysticLanguage.french: 'ENSUITE',
+    MysticLanguage.portugueseBrazil: 'PRÓXIMO',
+  },
+  'newView': {
+    MysticLanguage.english: 'New view',
+    MysticLanguage.turkish: 'Yeni bakış',
+    MysticLanguage.spanish: 'Nueva visión',
+    MysticLanguage.french: 'Nouveau regard',
+    MysticLanguage.portugueseBrazil: 'Nova visão',
+  },
+  'renewal': {
+    MysticLanguage.english: 'Renewal',
+    MysticLanguage.turkish: 'Yenilenme',
+    MysticLanguage.spanish: 'Renovación',
+    MysticLanguage.french: 'Renouveau',
+    MysticLanguage.portugueseBrazil: 'Renovação',
+  },
+  'direction': {
+    MysticLanguage.english: 'Direction',
+    MysticLanguage.turkish: 'Yön',
+    MysticLanguage.spanish: 'Dirección',
+    MysticLanguage.french: 'Direction',
+    MysticLanguage.portugueseBrazil: 'Direção',
+  },
+  'hoursLater': {
+    MysticLanguage.english: '24 HOURS LATER',
+    MysticLanguage.turkish: '24 SAAT SONRA',
+    MysticLanguage.spanish: '24 HORAS DESPUÉS',
+    MysticLanguage.french: '24 HEURES PLUS TARD',
+    MysticLanguage.portugueseBrazil: '24 HORAS DEPOIS',
+  },
+  'mirrorEvidence': {
+    MysticLanguage.english:
+        'Your reflection becomes evidence for future readings and stays private on this device.',
+    MysticLanguage.turkish:
+        'Yansıman gelecekteki okumalar için kanıta dönüşür ve bu cihazda özel kalır.',
+    MysticLanguage.spanish:
+        'Tu reflexión se convierte en evidencia para futuras lecturas y queda privada en este dispositivo.',
+    MysticLanguage.french:
+        'Votre retour devient un indice pour les prochaines lectures et reste privé sur cet appareil.',
+    MysticLanguage.portugueseBrazil:
+        'Sua reflexão vira evidência para leituras futuras e fica privada neste dispositivo.',
+  },
+  'readingsMetric': {
+    MysticLanguage.english: 'READINGS',
+    MysticLanguage.turkish: 'OKUMALAR',
+    MysticLanguage.spanish: 'LECTURAS',
+    MysticLanguage.french: 'LECTURES',
+    MysticLanguage.portugueseBrazil: 'LEITURAS',
+  },
+  'mirrorsMetric': {
+    MysticLanguage.english: 'MIRRORS',
+    MysticLanguage.turkish: 'AYNALAR',
+    MysticLanguage.spanish: 'ESPEJOS',
+    MysticLanguage.french: 'MIROIRS',
+    MysticLanguage.portugueseBrazil: 'ESPELHOS',
+  },
+  'streakMetric': {
+    MysticLanguage.english: 'DAY STREAK',
+    MysticLanguage.turkish: 'GÜNLÜK SERİ',
+    MysticLanguage.spanish: 'RACHA DIARIA',
+    MysticLanguage.french: 'SÉRIE QUOTIDIENNE',
+    MysticLanguage.portugueseBrazil: 'SEQUÊNCIA DIÁRIA',
+  },
+"""
+              if marker not in text:
+                  raise SystemExit('Translation insertion marker missing.')
+              text = text.replace(marker, additions + marker, 1)
+
+          pairs = [
+              ("name: 'The Star',", "name: _t(language, 'cardStar'),"),
+              ("name: 'Strength',", "name: _t(language, 'cardStrength'),"),
+              ("name: 'The Moon',", "name: _t(language, 'cardMoon'),"),
+              ("""      const Row(
+        children: [
+          Expanded(
+            child: _Metric(value: 'Clarity', label: 'INTENTION'),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: _Metric(value: 'Reflective', label: 'MOOD'),
+          ),
+        ],
+      ),""", """      Row(
+        children: [
+          Expanded(
+            child: _Metric(
+              value: _t(language, 'clarity'),
+              label: _t(language, 'intention'),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _Metric(
+              value: _t(language, 'reflective'),
+              label: _t(language, 'mood'),
+            ),
+          ),
+        ],
+      ),"""),
+              ("""          Expanded(child: _Position('PAST', tarotDeck[12].symbol, 'New view')),""", """          Expanded(
+            child: _Position(
+              _t(language, 'past'),
+              tarotDeck[12].symbol,
+              _t(language, 'newView'),
+            ),
+          ),"""),
+              ("""            child: _Position('PRESENT', tarotDeck[17].symbol, 'Renewal'),""", """            child: _Position(
+              _t(language, 'present'),
+              tarotDeck[17].symbol,
+              _t(language, 'renewal'),
+            ),"""),
+              ("""          Expanded(child: _Position('NEXT', tarotDeck[7].symbol, 'Direction')),""", """          Expanded(
+            child: _Position(
+              _t(language, 'next'),
+              tarotDeck[7].symbol,
+              _t(language, 'direction'),
+            ),
+          ),"""),
+              ("""              const _Chip(text: '24 HOURS LATER', icon: Icons.schedule),""", """              _Chip(
+                text: _t(language, 'hoursLater'),
+                icon: Icons.schedule,
+              ),"""),
+              ("""              const Text(
+                'Your reflection becomes evidence for future readings and stays private on this device.',
+                style: TextStyle(""", """              Text(
+                _t(language, 'mirrorEvidence'),
+                style: const TextStyle("""),
+              ("""              const Row(
+                children: [
+                  Expanded(
+                    child: _Metric(value: '12', label: 'READINGS'),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: _Metric(value: '4', label: 'MIRRORS'),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: _Metric(value: '7', label: 'DAY STREAK'),
+                  ),
+                ],
+              ),""", """              Row(
+                children: [
+                  Expanded(
+                    child: _Metric(
+                      value: '12',
+                      label: _t(language, 'readingsMetric'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _Metric(
+                      value: '4',
+                      label: _t(language, 'mirrorsMetric'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _Metric(
+                      value: '7',
+                      label: _t(language, 'streakMetric'),
+                    ),
+                  ),
+                ],
+              ),"""),
+          ]
+          for old, new in pairs:
+              if old in text:
+                  text = text.replace(old, new, 1)
+              elif new not in text:
+                  raise SystemExit('Localization replacement target missing: ' + old[:70])
+          path.write_text(text)
+
+          test_path = Path('test/store_screenshot_contract_test.dart')
+          contract = test_path.read_text()
+          if 'must not leak English labels' not in contract:
+              needle = "          expect(find.text('MYSTIC TAROT'), findsOneWidget);\n"
+              addition = """          expect(find.text('MYSTIC TAROT'), findsOneWidget);
+          if (locale != 'en') {
+            for (final englishOnlyLabel in const <String>[
+              'The Star',
+              'Strength',
+              'The Moon',
+              'Clarity',
+              'Reflective',
+              'MOOD',
+              'PAST',
+              'NEXT',
+              'New view',
+              'Renewal',
+              '24 HOURS LATER',
+              'Your reflection becomes evidence for future readings and stays private on this device.',
+              'READINGS',
+              'MIRRORS',
+              'DAY STREAK',
+            ]) {
+              expect(
+                find.text(englishOnlyLabel),
+                findsNothing,
+                reason: '$locale/${scene.slug} must not leak English labels.',
+              );
+            }
+          }
+"""
+              if needle not in contract:
+                  raise SystemExit('Localization contract marker missing.')
+              contract = contract.replace(needle, addition, 1)
+          test_path.write_text(contract)
+          PY
+
+          dart format lib/src/store_showcase.dart test/store_screenshot_contract_test.dart
+          flutter pub get
+          flutter analyze --fatal-infos
+
+      - name: Commit localized screenshot copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add lib/src/store_showcase.dart test/store_screenshot_contract_test.dart
+          git commit -m "release: localize all visible screenshot copy"
+          git push origin HEAD:release/localized-store-screenshot-pack
