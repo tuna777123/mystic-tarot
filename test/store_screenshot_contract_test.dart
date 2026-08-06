@@ -113,8 +113,14 @@ void main() {
     expect(workflow, contains('if-no-files-found: error'));
     expect(generator, contains('RenderRepaintBoundary'));
     expect(generator, contains('ui.ImageByteFormat.png'));
-    expect(generator, contains("Platform.environment['STORE_SCREENSHOT_DEVICE']"));
-    expect(generator, contains("Platform.environment['STORE_SCREENSHOT_LOCALE']"));
+    expect(
+      generator,
+      contains("Platform.environment['STORE_SCREENSHOT_DEVICE']"),
+    );
+    expect(
+      generator,
+      contains("Platform.environment['STORE_SCREENSHOT_LOCALE']"),
+    );
     expect(verifier, contains('Invalid PNG signature'));
     expect(verifier, contains('Wrong dimensions'));
     expect(verifier, contains('Unexpected screenshot'));
