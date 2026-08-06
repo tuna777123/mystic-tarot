@@ -9,7 +9,6 @@ on:
       - lib/src/store_showcase.dart
       - test/store_screenshot_generator_test.dart
       - test/store_screenshot_contract_test.dart
-      - test/support/store_screenshot_fonts.dart
       - tool/verify_store_screenshot_pack.dart
       - .github/workflows/store-screenshots.yml
   pull_request:
@@ -19,7 +18,6 @@ on:
       - lib/src/store_showcase.dart
       - test/store_screenshot_generator_test.dart
       - test/store_screenshot_contract_test.dart
-      - test/support/store_screenshot_fonts.dart
       - tool/verify_store_screenshot_pack.dart
       - .github/workflows/store-screenshots.yml
 
@@ -62,14 +60,12 @@ jobs:
             lib/src/store_showcase.dart \
             test/store_screenshot_generator_test.dart \
             test/store_screenshot_contract_test.dart \
-            test/support/store_screenshot_fonts.dart \
             tool/verify_store_screenshot_pack.dart
           git diff --exit-code -- \
             lib/src/store_screenshot_manifest.dart \
             lib/src/store_showcase.dart \
             test/store_screenshot_generator_test.dart \
             test/store_screenshot_contract_test.dart \
-            test/support/store_screenshot_fonts.dart \
             tool/verify_store_screenshot_pack.dart
 
       - name: Analyze screenshot pipeline
@@ -212,3 +208,46 @@ jobs:
           if-no-files-found: error
           overwrite: true
           retention-days: 14
+
+  report-screenshot-status:
+    if: always()
+    needs:
+      - validate-screenshot-source
+      - generate-store-screenshot-partitions
+      - audit-and-package-store-screenshots
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Publish screenshot generation status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          VALIDATE_RESULT: ${{ needs.validate-screenshot-source.result }}
+          GENERATE_RESULT: ${{ needs.generate-store-screenshot-partitions.result }}
+          AUDIT_RESULT: ${{ needs.audit-and-package-store-screenshots.result }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          if [[ "$VALIDATE_RESULT" == "success" && \
+                "$GENERATE_RESULT" == "success" && \
+                "$AUDIT_RESULT" == "success" ]]; then
+            state="success"
+            description="50 localized store screenshots passed generation and audit"
+          else
+            state="failure"
+            description="Store screenshot generation or audit failed"
+          fi
+
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/statuses/${SOURCE_COMMIT}" \
+            -f "state=${state}" \
+            -f "context=screenshots/generation" \
+            -f "description=${description}" \
+            -f "target_url=${TARGET_URL}"
+
+          if [[ "$state" != "success" ]]; then
+            exit 1
+          fi
