@@ -148,7 +148,10 @@ void main() {
     expect(verifier, contains("'schemaVersion': 1"));
     expect(verifier, contains("'applicationVersion': releaseVersion"));
     expect(verifier, contains("'sourceCommit': sourceCommit"));
-    expect(verifier, contains("'screenshotCount': expectedStoreScreenshotCount"));
+    expect(
+      verifier,
+      contains("'screenshotCount': expectedStoreScreenshotCount"),
+    );
     expect(verifier, contains("manifest.json"));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
   });
