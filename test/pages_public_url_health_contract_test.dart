@@ -4,9 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Pages deployment verifies every public store and legal URL', () {
-    final workflow = File(
-      '.github/workflows/pages.yml',
-    ).readAsStringSync();
+    final workflow = File('.github/workflows/pages.yml').readAsStringSync();
 
     expect(workflow, contains('health:'));
     expect(workflow, contains('needs: deploy'));
@@ -39,10 +37,7 @@ void main() {
     }
 
     expect(workflow, contains('needs: [build, deploy, health]'));
-    expect(
-      workflow,
-      contains(r'HEALTH_RESULT: ${{ needs.health.result }}'),
-    );
+    expect(workflow, contains(r'HEALTH_RESULT: ${{ needs.health.result }}'));
     expect(
       workflow,
       contains(
@@ -50,10 +45,7 @@ void main() {
         r'"$HEALTH_RESULT" == "success" ]]',
       ),
     );
-    expect(
-      workflow,
-      contains('Mystic Tarot Pages and public URLs are live'),
-    );
+    expect(workflow, contains('Mystic Tarot Pages and public URLs are live'));
     expect(workflow, isNot(contains('continue-on-error')));
   });
 }
