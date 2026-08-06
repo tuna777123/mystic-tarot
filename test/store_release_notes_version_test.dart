@@ -37,7 +37,8 @@ void main() {
       expect(
         headings,
         hasLength(1),
-        reason: '$path must contain exactly one versioned release-notes heading.',
+        reason:
+            '$path must contain exactly one versioned release-notes heading.',
       );
       expect(
         headings.single.group(1),
