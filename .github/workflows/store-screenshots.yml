@@ -37,7 +37,13 @@ jobs:
 
       - name: Verify screenshot source formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
+            lib/src/store_screenshot_manifest.dart \
+            lib/src/store_showcase.dart \
+            test/store_screenshot_generator_test.dart \
+            test/store_screenshot_contract_test.dart \
+            tool/verify_store_screenshot_pack.dart
+          git diff --exit-code -- \
             lib/src/store_screenshot_manifest.dart \
             lib/src/store_showcase.dart \
             test/store_screenshot_generator_test.dart \
