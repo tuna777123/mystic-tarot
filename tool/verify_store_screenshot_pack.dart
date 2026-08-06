@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:mystic_tarot/src/store_screenshot_manifest.dart';
 
+const maximumStoreScreenshotBytes = 8 * 1024 * 1024;
+
 void main(List<String> arguments) {
   final root = Directory(
     arguments.isEmpty ? 'build/store_screenshots' : arguments.first,
@@ -68,6 +70,7 @@ void main(List<String> arguments) {
     'pngBitDepth': 8,
     'pngColorType': 2,
     'alphaChannel': false,
+    'maximumPngBytes': maximumStoreScreenshotBytes,
     'locales': storeScreenshotLocales,
     'devices': <Map<String, Object>>[
       for (final device in storeScreenshotDevices)
@@ -102,8 +105,11 @@ void main(List<String> arguments) {
   );
   stdout.writeln('- Verified PNG files: `$expectedStoreScreenshotCount`');
   stdout.writeln('- PNG encoding: `8-bit RGB, no alpha channel`');
+  stdout.writeln('- Maximum PNG size: `$maximumStoreScreenshotBytes bytes`');
   stdout.writeln('- Missing or unexpected files: `none`');
-  stdout.writeln('- Dimension, signature, or color-type failures: `none`');
+  stdout.writeln(
+    '- Dimension, signature, color-type, or file-size failures: `none`',
+  );
 }
 
 String _readReleaseVersion(File pubspec) {
@@ -163,6 +169,12 @@ List<String> _validatePng(
   }
   if (bytes.length < 5000) {
     errors.add('PNG is unexpectedly small and may be blank: $relativePath');
+  }
+  if (bytes.length > maximumStoreScreenshotBytes) {
+    errors.add(
+      'PNG exceeds the 8 MB store limit for $relativePath: '
+      '${bytes.length} bytes.',
+    );
   }
   return errors;
 }
