@@ -105,12 +105,13 @@ Future<PublicStoreResponse> fetchPublicStoreUrl(Uri uri) async {
   client.userAgent = 'MysticTarotStoreReleasePreflight/1.0';
 
   try {
-    final request = await client.getUrl(uri).timeout(const Duration(seconds: 20));
+    final request = await client
+        .getUrl(uri)
+        .timeout(const Duration(seconds: 20));
     request.followRedirects = true;
     request.maxRedirects = 5;
     final response = await request.close().timeout(const Duration(seconds: 30));
-    final body = await utf8
-        .decoder
+    final body = await utf8.decoder
         .bind(response)
         .join()
         .timeout(const Duration(seconds: 30));
