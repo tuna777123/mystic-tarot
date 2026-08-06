@@ -69,11 +69,16 @@ void main() {
                 if (byteData == null) {
                   throw StateError('Flutter returned no raw screenshot bytes.');
                 }
+                final rgbaBytes = byteData.buffer.asUint8List(
+                  byteData.offsetInBytes,
+                  byteData.lengthInBytes,
+                );
+                _verifyOpaqueRgba(rgbaBytes);
                 final rgb = img.Image.fromBytes(
                   width: image.width,
                   height: image.height,
-                  bytes: byteData.buffer,
-                  bytesOffset: byteData.offsetInBytes,
+                  bytes: rgbaBytes.buffer,
+                  bytesOffset: rgbaBytes.offsetInBytes,
                   numChannels: 4,
                   order: img.ChannelOrder.rgba,
                 ).convert(numChannels: 3);
@@ -110,6 +115,17 @@ void main() {
     },
     skip: Platform.environment['GENERATE_STORE_SCREENSHOTS'] != '1',
   );
+}
+
+void _verifyOpaqueRgba(Uint8List bytes) {
+  if (bytes.length % 4 != 0) {
+    throw StateError('Rendered screenshot returned malformed RGBA bytes.');
+  }
+  for (var index = 3; index < bytes.length; index += 4) {
+    if (bytes[index] != 255) {
+      throw StateError('Rendered screenshot contains transparent pixels.');
+    }
+  }
 }
 
 Future<void> _loadStoreScreenshotFonts() async {
