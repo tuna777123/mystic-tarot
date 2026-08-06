@@ -41,7 +41,7 @@ jobs:
       - name: Disable Jekyll processing
         run: touch build/web/.nojekyll
 
-      - name: Verify application and marketing entry points
+      - name: Verify application, marketing, and store-policy entry points
         shell: bash
         run: |
           set -euo pipefail
@@ -52,6 +52,22 @@ jobs:
             landing-es.html
             landing-fr.html
             landing-pt-br.html
+            privacy.html
+            privacy-tr.html
+            privacy-es.html
+            privacy-fr.html
+            privacy-pt-br.html
+            terms.html
+            terms-tr.html
+            terms-es.html
+            terms-fr.html
+            terms-pt-br.html
+            support.html
+            support-tr.html
+            support-es.html
+            support-fr.html
+            support-pt-br.html
+            legal.css
             marketing-i18n.css
             marketing-i18n.js
             sitemap.xml
@@ -68,6 +84,9 @@ jobs:
           grep -q 'Voyez au-delà' build/web/landing-fr.html
           grep -q 'Veja além' build/web/landing-pt-br.html
           grep -q 'Mystic Mirror' build/web/landing-en.html
+          grep -q '<h1>Privacy Policy</h1>' build/web/privacy.html
+          grep -q '<h1>Terms of Use</h1>' build/web/terms.html
+          grep -q '<h1>Support</h1>' build/web/support.html
           grep -q 'hreflang="pt-BR"' build/web/sitemap.xml
           grep -q 'hreflang="x-default"' build/web/sitemap.xml
           grep -q 'mystic-tarot/sitemap.xml' build/web/robots.txt
@@ -102,19 +121,66 @@ jobs:
       contents: read
       statuses: write
     steps:
+      - name: Verify live application and store URLs
+        id: live
+        if: needs.deploy.result == 'success'
+        continue-on-error: true
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_url="${PAGE_URL%/}/"
+          paths=(
+            ""
+            "landing.html"
+            "privacy.html"
+            "terms.html"
+            "support.html"
+          )
+          markers=(
+            "flutter_bootstrap.js"
+            "Kartların ötesini"
+            "<h1>Privacy Policy</h1>"
+            "<h1>Terms of Use</h1>"
+            "<h1>Support</h1>"
+          )
+
+          for index in "${!paths[@]}"; do
+            url="${base_url}${paths[$index]}"
+            body="$(mktemp)"
+            trap 'rm -f "$body"' RETURN
+            curl \
+              --fail \
+              --location \
+              --silent \
+              --show-error \
+              --retry 6 \
+              --retry-all-errors \
+              --retry-delay 5 \
+              --connect-timeout 15 \
+              --max-time 45 \
+              "$url" \
+              --output "$body"
+            grep -Fq "${markers[$index]}" "$body"
+            rm -f "$body"
+            trap - RETURN
+          done
+
       - name: Publish deployment status
         env:
           GH_TOKEN: ${{ github.token }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
+          LIVE_RESULT: ${{ steps.live.outcome }}
           PAGE_URL: ${{ needs.deploy.outputs.page_url }}
         shell: bash
         run: |
-          if [[ "$DEPLOY_RESULT" == "success" ]]; then
+          if [[ "$DEPLOY_RESULT" == "success" && "$LIVE_RESULT" == "success" ]]; then
             state="success"
-            description="Mystic Tarot Pages deployment is live"
+            description="Mystic Tarot Pages and store URLs are live"
           else
             state="failure"
-            description="Mystic Tarot Pages deployment failed"
+            description="Mystic Tarot Pages or store URL verification failed"
           fi
 
           args=(
@@ -130,3 +196,7 @@ jobs:
           fi
 
           gh api "${args[@]}"
+
+          if [[ "$state" != "success" ]]; then
+            exit 1
+          fi
