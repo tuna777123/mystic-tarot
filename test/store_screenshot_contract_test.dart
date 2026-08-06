@@ -177,11 +177,20 @@ void main() {
       contains("Platform.environment['STORE_SCREENSHOT_LOCALE']"),
     );
 
+    expect(verifier, contains("package:image/image.dart' as img"));
     expect(verifier, contains('Invalid PNG signature'));
     expect(verifier, contains('Wrong dimensions'));
     expect(verifier, contains('Wrong PNG bit depth'));
     expect(verifier, contains('PNG must be RGB without an alpha channel'));
     expect(verifier, contains('colorType != 2'));
+    expect(verifier, contains('img.decodePng(bytes)'));
+    expect(verifier, contains('_validateVisualContent(decoded, relativePath)'));
+    expect(verifier, contains('visualSampleGridSize = 32'));
+    expect(verifier, contains('minimumDistinctSampledColors = 16'));
+    expect(verifier, contains('minimumSampledLuminanceRange = 12.0'));
+    expect(verifier, contains('pixel.rNormalized'));
+    expect(verifier, contains('pixel.gNormalized'));
+    expect(verifier, contains('pixel.bNormalized'));
     expect(
       verifier,
       contains('maximumStoreScreenshotBytes = 8 * 1024 * 1024'),
@@ -237,6 +246,23 @@ void main() {
     expect(
       verifier,
       contains("'maximumPngBytes': maximumStoreScreenshotBytes"),
+    );
+    expect(verifier, contains("'decodedPngValidation': true"));
+    expect(
+      verifier,
+      contains("'visualSampleGridSize': visualSampleGridSize"),
+    );
+    expect(
+      verifier,
+      contains(
+        "'minimumDistinctSampledColors': minimumDistinctSampledColors",
+      ),
+    );
+    expect(
+      verifier,
+      contains(
+        "'minimumSampledLuminanceRange': minimumSampledLuminanceRange",
+      ),
     );
     expect(verifier, contains('manifest.json'));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
