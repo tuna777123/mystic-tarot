@@ -65,6 +65,9 @@ void main(List<String> arguments) {
     'applicationVersion': releaseVersion,
     'sourceCommit': sourceCommit,
     'screenshotCount': expectedStoreScreenshotCount,
+    'pngBitDepth': 8,
+    'pngColorType': 2,
+    'alphaChannel': false,
     'locales': storeScreenshotLocales,
     'devices': <Map<String, Object>>[
       for (final device in storeScreenshotDevices)
@@ -98,8 +101,9 @@ void main(List<String> arguments) {
     '- Scenes per locale: `${StoreScreenshotScene.values.length}`',
   );
   stdout.writeln('- Verified PNG files: `$expectedStoreScreenshotCount`');
+  stdout.writeln('- PNG encoding: `8-bit RGB, no alpha channel`');
   stdout.writeln('- Missing or unexpected files: `none`');
-  stdout.writeln('- Dimension or PNG signature failures: `none`');
+  stdout.writeln('- Dimension, signature, or color-type failures: `none`');
 }
 
 String _readReleaseVersion(File pubspec) {
@@ -123,7 +127,7 @@ List<String> _validatePng(
 ) {
   final bytes = file.readAsBytesSync();
   final errors = <String>[];
-  if (bytes.length < 24) {
+  if (bytes.length < 26) {
     return <String>['Invalid or truncated PNG: $relativePath'];
   }
 
@@ -138,10 +142,23 @@ List<String> _validatePng(
   final data = ByteData.sublistView(Uint8List.fromList(bytes));
   final width = data.getUint32(16);
   final height = data.getUint32(20);
+  final bitDepth = bytes[24];
+  final colorType = bytes[25];
   if (width != device.width || height != device.height) {
     errors.add(
       'Wrong dimensions for $relativePath: ${width}x$height; '
       'expected ${device.width}x${device.height}.',
+    );
+  }
+  if (bitDepth != 8) {
+    errors.add(
+      'Wrong PNG bit depth for $relativePath: $bitDepth; expected 8.',
+    );
+  }
+  if (colorType != 2) {
+    errors.add(
+      'PNG must be RGB without an alpha channel for $relativePath: '
+      'color type $colorType; expected 2.',
     );
   }
   if (bytes.length < 5000) {
