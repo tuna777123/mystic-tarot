@@ -31,7 +31,7 @@ const storeScreenshotLocales = <String>['en', 'tr', 'es', 'fr', 'pt-BR'];
 
 const storeScreenshotDevices = <StoreScreenshotDevice>[
   StoreScreenshotDevice(
-    slug: 'apple-6.7',
+    slug: 'apple-6.9',
     width: 1290,
     height: 2796,
     devicePixelRatio: 3,
