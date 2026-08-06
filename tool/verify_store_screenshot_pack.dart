@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,10 +8,17 @@ void main(List<String> arguments) {
   final root = Directory(
     arguments.isEmpty ? 'build/store_screenshots' : arguments.first,
   );
+  final sourceCommit = arguments.length > 1 ? arguments[1] : 'local';
   final errors = <String>[];
 
   if (!root.existsSync()) {
     _fail(<String>['Screenshot directory does not exist: ${root.path}']);
+  }
+
+  final releaseVersion = _readReleaseVersion(File('pubspec.yaml'));
+  if (sourceCommit != 'local' &&
+      !RegExp(r'^[0-9a-f]{40}$').hasMatch(sourceCommit)) {
+    errors.add('Source commit must be a full lowercase Git SHA.');
   }
 
   final expectedPaths = <String>{};
@@ -52,9 +60,36 @@ void main(List<String> arguments) {
     _fail(errors);
   }
 
+  final manifest = <String, Object>{
+    'schemaVersion': 1,
+    'applicationVersion': releaseVersion,
+    'sourceCommit': sourceCommit,
+    'screenshotCount': expectedStoreScreenshotCount,
+    'locales': storeScreenshotLocales,
+    'devices': <Map<String, Object>>[
+      for (final device in storeScreenshotDevices)
+        <String, Object>{
+          'slug': device.slug,
+          'width': device.width,
+          'height': device.height,
+          'devicePixelRatio': device.devicePixelRatio,
+        },
+    ],
+    'scenes': <String>[
+      for (final scene in StoreScreenshotScene.values) scene.slug,
+    ],
+  };
+  const encoder = JsonEncoder.withIndent('  ');
+  File('${root.path}/manifest.json').writeAsStringSync(
+    '${encoder.convert(manifest)}\n',
+  );
+
   stdout.writeln('# Mystic Tarot Store Screenshot Audit');
   stdout.writeln();
   stdout.writeln('- Result: **PASS**');
+  stdout.writeln('- Application version: `$releaseVersion`');
+  stdout.writeln('- Source commit: `$sourceCommit`');
+  stdout.writeln('- Manifest: `manifest.json`');
   stdout.writeln('- Locales: `${storeScreenshotLocales.join(', ')}`');
   stdout.writeln(
     '- Devices: `${storeScreenshotDevices.map((item) => '${item.slug} ${item.width}x${item.height}').join(', ')}`',
@@ -65,6 +100,20 @@ void main(List<String> arguments) {
   stdout.writeln('- Verified PNG files: `$expectedStoreScreenshotCount`');
   stdout.writeln('- Missing or unexpected files: `none`');
   stdout.writeln('- Dimension or PNG signature failures: `none`');
+}
+
+String _readReleaseVersion(File pubspec) {
+  if (!pubspec.existsSync()) {
+    _fail(<String>['pubspec.yaml does not exist.']);
+  }
+  final match = RegExp(
+    r'^version:\s*(\d+\.\d+\.\d+\+\d+)\s*$',
+    multiLine: true,
+  ).firstMatch(pubspec.readAsStringSync());
+  if (match == null) {
+    _fail(<String>['pubspec.yaml must contain version x.y.z+build.']);
+  }
+  return match!.group(1)!;
 }
 
 List<String> _validatePng(
