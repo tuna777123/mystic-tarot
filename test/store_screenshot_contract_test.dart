@@ -6,7 +6,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/store_screenshot_manifest.dart';
 import 'package:mystic_tarot/src/store_showcase.dart';
 
+import 'support/store_screenshot_fonts.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await loadStoreScreenshotFonts();
+    verifyStoreScreenshotFonts();
+  });
+
   test('store screenshot manifest is complete and collision-free', () {
     expect(storeScreenshotLocales, hasLength(5));
     expect(storeScreenshotDevices, hasLength(2));
@@ -158,6 +167,9 @@ void main() {
     final generator = File(
       'test/store_screenshot_generator_test.dart',
     ).readAsStringSync();
+    final fontSupport = File(
+      'test/support/store_screenshot_fonts.dart',
+    ).readAsStringSync();
     final verifier = File(
       'tool/verify_store_screenshot_pack.dart',
     ).readAsStringSync();
@@ -174,6 +186,7 @@ void main() {
     expect(workflow, contains('validate-screenshot-source'));
     expect(workflow, contains('generate-store-screenshot-partitions'));
     expect(workflow, contains('audit-and-package-store-screenshots'));
+    expect(workflow, contains('test/support/store_screenshot_fonts.dart'));
     expect(
       RegExp(r'timeout-minutes:\s+20').allMatches(workflow),
       hasLength(3),
@@ -197,6 +210,9 @@ void main() {
     expect(pubspec, contains('image: ^4.8.0'));
     expect(generator, contains('RenderRepaintBoundary'));
     expect(generator, contains("package:image/image.dart' as img"));
+    expect(generator, contains("import 'support/store_screenshot_fonts.dart'"));
+    expect(generator, contains('setUpAll(loadStoreScreenshotFonts)'));
+    expect(generator, contains('verifyStoreScreenshotFonts'));
     expect(generator, contains('ui.ImageByteFormat.rawRgba'));
     expect(generator, contains('_verifyOpaqueRgba(rgbaBytes)'));
     expect(generator, contains('bytes[index] != 255'));
@@ -216,22 +232,16 @@ void main() {
     expect(generator, isNot(contains('capture.height')));
     expect(generator, isNot(contains('capture.bytes')));
     expect(generator, isNot(contains('ui.ImageByteFormat.png')));
-    expect(generator, contains('Roboto-Regular.ttf'));
-    expect(generator, contains('MaterialIcons-Regular.otf'));
-    expect(generator, contains("_expectProportionalFont('Roboto')"));
-    expect(generator, contains("_expectProportionalFont('Arial')"));
-    expect(generator, contains('ĞİŞÇÖÜ éèñãç'));
+
+    expect(fontSupport, contains('Roboto-Regular.ttf'));
+    expect(fontSupport, contains('MaterialIcons-Regular.otf'));
+    expect(fontSupport, contains('loadStoreScreenshotFonts'));
+    expect(fontSupport, contains('verifyStoreScreenshotFonts'));
+    expect(fontSupport, contains("['Roboto', 'Arial']"));
+    expect(fontSupport, contains('ĞİŞÇÖÜ éèñãç'));
     expect(
-      generator,
+      fontSupport,
       contains('must not fall back to Flutter test Ahem squares'),
-    );
-    expect(
-      generator,
-      contains("Platform.environment['STORE_SCREENSHOT_DEVICE']"),
-    );
-    expect(
-      generator,
-      contains("Platform.environment['STORE_SCREENSHOT_LOCALE']"),
     );
 
     expect(verifier, contains("package:image/image.dart' as img"));
