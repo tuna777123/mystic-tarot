@@ -125,4 +125,31 @@ void main() {
     expect(verifier, contains('Wrong dimensions'));
     expect(verifier, contains('Unexpected screenshot'));
   });
+
+  test('screenshot artifacts are bound to app version and source commit', () {
+    final workflow = File(
+      '.github/workflows/store-screenshots.yml',
+    ).readAsStringSync();
+    final verifier = File(
+      'tool/verify_store_screenshot_pack.dart',
+    ).readAsStringSync();
+
+    expect(workflow, contains('- pubspec.yaml'));
+    expect(
+      workflow,
+      contains(r'github.event.pull_request.head.sha || github.sha'),
+    );
+    expect(workflow, contains('expected_version='));
+    expect(workflow, contains('build/store_screenshots/manifest.json'));
+    expect(workflow, contains('applicationVersion'));
+    expect(workflow, contains('sourceCommit'));
+
+    expect(verifier, contains("File('pubspec.yaml')"));
+    expect(verifier, contains("'schemaVersion': 1"));
+    expect(verifier, contains("'applicationVersion': releaseVersion"));
+    expect(verifier, contains("'sourceCommit': sourceCommit"));
+    expect(verifier, contains("'screenshotCount': expectedStoreScreenshotCount"));
+    expect(verifier, contains("manifest.json"));
+    expect(verifier, contains(r'^[0-9a-f]{40}$'));
+  });
 }
