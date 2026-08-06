@@ -184,10 +184,27 @@ void main() {
       'tool/verify_store_screenshot_pack.dart',
     ).readAsStringSync();
 
+    const sourceExpression =
+        r'github.event.pull_request.head.sha || github.sha';
     expect(workflow, contains('- pubspec.yaml'));
+    expect(workflow, contains(sourceExpression));
+    expect(
+      RegExp(
+        r'ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}',
+      ).allMatches(workflow),
+      hasLength(3),
+    );
+    expect(
+      RegExp(r'persist-credentials:\s+false').allMatches(workflow),
+      hasLength(3),
+    );
+    expect(
+      RegExp(r'git rev-parse HEAD').allMatches(workflow),
+      hasLength(3),
+    );
     expect(
       workflow,
-      contains(r'github.event.pull_request.head.sha || github.sha'),
+      contains('test "\$(git rev-parse HEAD)" = "\$SOURCE_COMMIT"'),
     );
     expect(workflow, contains('expected_version='));
     expect(workflow, contains('build/store_screenshots/manifest.json'));
