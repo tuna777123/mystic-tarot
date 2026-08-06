@@ -180,17 +180,38 @@ void main() {
     expect(workflow, contains('pull_request:'));
     expect(
       workflow,
+      contains('types: [opened, synchronize, reopened, ready_for_review]'),
+    );
+    expect(
+      workflow,
       contains('github.event.pull_request.head.ref || github.ref_name'),
     );
     expect(workflow, contains('cancel-in-progress: true'));
     expect(workflow, contains('validate-screenshot-source'));
     expect(workflow, contains('generate-store-screenshot-partitions'));
     expect(workflow, contains('audit-and-package-store-screenshots'));
-    expect(workflow, contains('test/support/store_screenshot_fonts.dart'));
+    expect(workflow, contains('report-screenshot-status'));
+    expect(workflow, contains('if: always()'));
+    expect(workflow, contains('statuses: write'));
     expect(
       RegExp(r'timeout-minutes:\s+20').allMatches(workflow),
       hasLength(3),
     );
+    expect(
+      RegExp(r'timeout-minutes:\s+5').allMatches(workflow),
+      hasLength(1),
+    );
+    expect(workflow, contains('context=screenshots/generation'));
+    expect(
+      workflow,
+      contains(
+        'A newer run superseded this branch run; no commit status published.',
+      ),
+    );
+    expect(workflow, contains(r'"$VALIDATE_RESULT" == "cancelled"'));
+    expect(workflow, contains(r'"$GENERATE_RESULT" == "cancelled"'));
+    expect(workflow, contains(r'"$AUDIT_RESULT" == "cancelled"'));
+    expect(workflow, contains('test/support/store_screenshot_fonts.dart'));
     expect(workflow, contains('matrix:'));
     expect(workflow, contains('device: apple-6.9'));
     expect(workflow, isNot(contains('device: apple-6.7')));
