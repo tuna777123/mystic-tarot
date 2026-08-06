@@ -113,6 +113,15 @@ void main() {
     expect(workflow, contains('if-no-files-found: error'));
     expect(generator, contains('RenderRepaintBoundary'));
     expect(generator, contains('ui.ImageByteFormat.png'));
+    expect(generator, contains('Roboto-Regular.ttf'));
+    expect(generator, contains('MaterialIcons-Regular.otf'));
+    expect(generator, contains("_expectProportionalFont('Roboto')"));
+    expect(generator, contains("_expectProportionalFont('Arial')"));
+    expect(generator, contains('ĞİŞÇÖÜ éèñãç'));
+    expect(
+      generator,
+      contains('must not fall back to Flutter test Ahem squares'),
+    );
     expect(
       generator,
       contains("Platform.environment['STORE_SCREENSHOT_DEVICE']"),
