@@ -150,6 +150,14 @@ void main() {
     expect(generator, contains('img.ChannelOrder.rgba'));
     expect(generator, contains('.convert(numChannels: 3)'));
     expect(generator, contains('img.encodePng(rgb)'));
+    expect(generator, contains('final verifiedCapture ='));
+    expect(
+      generator,
+      contains('Flutter screenshot capture did not run.'),
+    );
+    expect(generator, isNot(contains('capture!.width')));
+    expect(generator, isNot(contains('capture.height')));
+    expect(generator, isNot(contains('capture.bytes')));
     expect(generator, isNot(contains('ui.ImageByteFormat.png')));
     expect(generator, contains('Roboto-Regular.ttf'));
     expect(generator, contains('MaterialIcons-Regular.otf'));
