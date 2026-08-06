@@ -34,10 +34,7 @@ void main() {
     expect(
       validatePublicStoreResponse(
         endpoint,
-        PublicStoreResponse(
-          statusCode: HttpStatus.ok,
-          body: endpoint.marker,
-        ),
+        PublicStoreResponse(statusCode: HttpStatus.ok, body: endpoint.marker),
       ),
       isEmpty,
     );
@@ -50,50 +47,60 @@ void main() {
     );
   });
 
-  test('retries transient failures and succeeds without hiding endpoints', () async {
-    final callsByUri = <Uri, int>{};
-    final errors = await verifyPublicStoreEndpoints(
-      attempts: 3,
-      retryDelay: Duration.zero,
-      fetcher: (uri) async {
-        final calls = callsByUri.update(uri, (value) => value + 1, ifAbsent: () => 1);
-        if (calls == 1) throw const SocketException('temporary failure');
-        final endpoint = publicStoreEndpoints.firstWhere(
-          (candidate) => candidate.uri == uri,
-        );
-        return PublicStoreResponse(
-          statusCode: HttpStatus.ok,
-          body: endpoint.marker,
-        );
-      },
-    );
+  test(
+    'retries transient failures and succeeds without hiding endpoints',
+    () async {
+      final callsByUri = <Uri, int>{};
+      final errors = await verifyPublicStoreEndpoints(
+        attempts: 3,
+        retryDelay: Duration.zero,
+        fetcher: (uri) async {
+          final calls = callsByUri.update(
+            uri,
+            (value) => value + 1,
+            ifAbsent: () => 1,
+          );
+          if (calls == 1) throw const SocketException('temporary failure');
+          final endpoint = publicStoreEndpoints.firstWhere(
+            (candidate) => candidate.uri == uri,
+          );
+          return PublicStoreResponse(
+            statusCode: HttpStatus.ok,
+            body: endpoint.marker,
+          );
+        },
+      );
 
-    expect(errors, isEmpty);
-    expect(callsByUri.length, publicStoreEndpoints.length);
-    expect(callsByUri.values, everyElement(2));
-  });
+      expect(errors, isEmpty);
+      expect(callsByUri.length, publicStoreEndpoints.length);
+      expect(callsByUri.values, everyElement(2));
+    },
+  );
 
-  test('reports unreachable and stale pages without exposing response bodies', () async {
-    final errors = await verifyPublicStoreEndpoints(
-      attempts: 2,
-      retryDelay: Duration.zero,
-      fetcher: (uri) async {
-        if (uri.path.endsWith('support.html')) {
-          throw const SocketException('private network detail');
-        }
-        return const PublicStoreResponse(
-          statusCode: HttpStatus.ok,
-          body: 'generic page',
-        );
-      },
-    );
+  test(
+    'reports unreachable and stale pages without exposing response bodies',
+    () async {
+      final errors = await verifyPublicStoreEndpoints(
+        attempts: 2,
+        retryDelay: Duration.zero,
+        fetcher: (uri) async {
+          if (uri.path.endsWith('support.html')) {
+            throw const SocketException('private network detail');
+          }
+          return const PublicStoreResponse(
+            statusCode: HttpStatus.ok,
+            body: 'generic page',
+          );
+        },
+      );
 
-    expect(errors, hasLength(publicStoreEndpoints.length));
-    expect(errors.join('\n'), contains('expected page marker'));
-    expect(errors.join('\n'), contains('could not be reached'));
-    expect(errors.join('\n'), isNot(contains('private network detail')));
-    expect(errors.join('\n'), isNot(contains('generic page')));
-  });
+      expect(errors, hasLength(publicStoreEndpoints.length));
+      expect(errors.join('\n'), contains('expected page marker'));
+      expect(errors.join('\n'), contains('could not be reached'));
+      expect(errors.join('\n'), isNot(contains('private network detail')));
+      expect(errors.join('\n'), isNot(contains('generic page')));
+    },
+  );
 
   test('signed Android and iOS releases require the live URL verifier', () {
     final preflight = File(
@@ -114,7 +121,9 @@ void main() {
     final androidSigning = workflow.indexOf(
       'Install and verify Android upload key',
     );
-    final iosPreflight = workflow.indexOf('Validate protected iOS release inputs');
+    final iosPreflight = workflow.indexOf(
+      'Validate protected iOS release inputs',
+    );
     final iosSigning = workflow.indexOf(
       'Install and verify Apple signing identity',
     );
