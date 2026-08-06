@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:mystic_tarot/src/store_screenshot_manifest.dart';
 import 'package:mystic_tarot/src/store_showcase.dart';
 
@@ -63,15 +64,23 @@ void main() {
               );
               try {
                 final byteData = await image.toByteData(
-                  format: ui.ImageByteFormat.png,
+                  format: ui.ImageByteFormat.rawRgba,
                 );
                 if (byteData == null) {
-                  throw StateError('Flutter returned no PNG bytes.');
+                  throw StateError('Flutter returned no raw screenshot bytes.');
                 }
+                final rgb = img.Image.fromBytes(
+                  width: image.width,
+                  height: image.height,
+                  bytes: byteData.buffer,
+                  bytesOffset: byteData.offsetInBytes,
+                  numChannels: 4,
+                  order: img.ChannelOrder.rgba,
+                ).convert(numChannels: 3);
                 return (
                   width: image.width,
                   height: image.height,
-                  bytes: byteData.buffer.asUint8List(),
+                  bytes: img.encodePng(rgb),
                 );
               } finally {
                 image.dispose();
