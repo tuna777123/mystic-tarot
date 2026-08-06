@@ -152,7 +152,7 @@ void main() {
       verifier,
       contains("'screenshotCount': expectedStoreScreenshotCount"),
     );
-    expect(verifier, contains("manifest.json"));
+    expect(verifier, contains('manifest.json'));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
   });
 }
