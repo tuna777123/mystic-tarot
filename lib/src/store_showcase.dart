@@ -698,7 +698,10 @@ class _Mirror extends StatelessWidget {
                   fr: 'Que s’est-il vraiment passé ?',
                   pt: 'O que realmente aconteceu?',
                 ),
-                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 5),
               Text(
@@ -839,11 +842,7 @@ class _Path extends StatelessWidget {
                     Positioned(
                       left: 116,
                       top: 126,
-                      child: _Node(
-                        tarotDeck[18].symbol,
-                        '5×',
-                        primary: true,
-                      ),
+                      child: _Node(tarotDeck[18].symbol, '5×', primary: true),
                     ),
                     Positioned(
                       left: 24,
@@ -1145,19 +1144,39 @@ class _Tarot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = tiny ? 62.0 : compact ? 112.0 : 164.0;
-    final height = tiny ? 82.0 : compact ? 178.0 : 252.0;
+    final width = tiny
+        ? 62.0
+        : compact
+        ? 112.0
+        : 164.0;
+    final height = tiny
+        ? 82.0
+        : compact
+        ? 178.0
+        : 252.0;
     return Container(
       width: width,
       height: height,
-      padding: EdgeInsets.all(tiny ? 8 : compact ? 12 : 16),
+      padding: EdgeInsets.all(
+        tiny
+            ? 8
+            : compact
+            ? 12
+            : 16,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFF33224F), Color(0xFF171125), Color(0xFF0E0C18)],
         ),
-        borderRadius: BorderRadius.circular(tiny ? 16 : compact ? 18 : 24),
+        borderRadius: BorderRadius.circular(
+          tiny
+              ? 16
+              : compact
+              ? 18
+              : 24,
+        ),
         border: Border.all(color: MysticColors.gold.withValues(alpha: .55)),
       ),
       child: Column(
@@ -1176,7 +1195,11 @@ class _Tarot extends StatelessWidget {
           Text(
             symbol,
             style: TextStyle(
-              fontSize: tiny ? 34 : compact ? 44 : 68,
+              fontSize: tiny
+                  ? 34
+                  : compact
+                  ? 44
+                  : 68,
               color: MysticColors.gold,
             ),
           ),
