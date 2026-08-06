@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:image/image.dart' as img;
 import 'package:mystic_tarot/src/store_screenshot_manifest.dart';
 
 const maximumStoreScreenshotBytes = 8 * 1024 * 1024;
+const visualSampleGridSize = 32;
+const minimumDistinctSampledColors = 16;
+const minimumSampledLuminanceRange = 12.0;
 
 void main(List<String> arguments) {
   final root = Directory(
@@ -71,6 +75,10 @@ void main(List<String> arguments) {
     'pngColorType': 2,
     'alphaChannel': false,
     'maximumPngBytes': maximumStoreScreenshotBytes,
+    'decodedPngValidation': true,
+    'visualSampleGridSize': visualSampleGridSize,
+    'minimumDistinctSampledColors': minimumDistinctSampledColors,
+    'minimumSampledLuminanceRange': minimumSampledLuminanceRange,
     'locales': storeScreenshotLocales,
     'devices': <Map<String, Object>>[
       for (final device in storeScreenshotDevices)
@@ -106,9 +114,13 @@ void main(List<String> arguments) {
   stdout.writeln('- Verified PNG files: `$expectedStoreScreenshotCount`');
   stdout.writeln('- PNG encoding: `8-bit RGB, no alpha channel`');
   stdout.writeln('- Maximum PNG size: `$maximumStoreScreenshotBytes bytes`');
+  stdout.writeln('- Decoded PNG validation: `enabled`');
+  stdout.writeln(
+    '- Visual sampling: `${visualSampleGridSize}x$visualSampleGridSize grid`',
+  );
   stdout.writeln('- Missing or unexpected files: `none`');
   stdout.writeln(
-    '- Dimension, signature, color-type, or file-size failures: `none`',
+    '- Dimension, signature, decode, color-type, visual-content, or file-size failures: `none`',
   );
 }
 
@@ -145,7 +157,7 @@ List<String> _validatePng(
     }
   }
 
-  final data = ByteData.sublistView(Uint8List.fromList(bytes));
+  final data = ByteData.sublistView(bytes);
   final width = data.getUint32(16);
   final height = data.getUint32(20);
   final bitDepth = bytes[24];
@@ -174,6 +186,65 @@ List<String> _validatePng(
     errors.add(
       'PNG exceeds the 8 MB store limit for $relativePath: '
       '${bytes.length} bytes.',
+    );
+  }
+
+  img.Image? decoded;
+  try {
+    decoded = img.decodePng(bytes);
+  } on Object catch (error) {
+    errors.add('PNG decode failed for $relativePath: $error');
+  }
+  if (decoded == null) {
+    errors.add('PNG decoder returned no image for $relativePath.');
+    return errors;
+  }
+  if (decoded.width != device.width || decoded.height != device.height) {
+    errors.add(
+      'Decoded dimensions for $relativePath are '
+      '${decoded.width}x${decoded.height}; expected '
+      '${device.width}x${device.height}.',
+    );
+  }
+  errors.addAll(_validateVisualContent(decoded, relativePath));
+  return errors;
+}
+
+List<String> _validateVisualContent(img.Image image, String relativePath) {
+  final colors = <int>{};
+  var minimumLuminance = 255.0;
+  var maximumLuminance = 0.0;
+
+  for (var row = 0; row < visualSampleGridSize; row++) {
+    final y = ((image.height - 1) * row / (visualSampleGridSize - 1)).round();
+    for (var column = 0; column < visualSampleGridSize; column++) {
+      final x =
+          ((image.width - 1) * column / (visualSampleGridSize - 1)).round();
+      final pixel = image.getPixel(x, y);
+      final red = (pixel.rNormalized * 255).round();
+      final green = (pixel.gNormalized * 255).round();
+      final blue = (pixel.bNormalized * 255).round();
+      colors.add((red << 16) | (green << 8) | blue);
+      final luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+      if (luminance < minimumLuminance) minimumLuminance = luminance;
+      if (luminance > maximumLuminance) maximumLuminance = luminance;
+    }
+  }
+
+  final errors = <String>[];
+  if (colors.length < minimumDistinctSampledColors) {
+    errors.add(
+      'PNG has too little sampled color variation for $relativePath: '
+      '${colors.length} distinct colors; expected at least '
+      '$minimumDistinctSampledColors.',
+    );
+  }
+  final luminanceRange = maximumLuminance - minimumLuminance;
+  if (luminanceRange < minimumSampledLuminanceRange) {
+    errors.add(
+      'PNG has too little sampled luminance variation for $relativePath: '
+      '${luminanceRange.toStringAsFixed(2)}; expected at least '
+      '$minimumSampledLuminanceRange.',
     );
   }
   return errors;
