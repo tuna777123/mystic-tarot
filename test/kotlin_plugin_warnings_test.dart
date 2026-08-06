@@ -26,13 +26,10 @@ Future versions of Flutter will fail to build.
       ),
       isEmpty,
     );
-    expect(
-      <String>{
-        ...conditionallyCompatibleLegacyKgpPlugins,
-        ...upstreamBlockedLegacyKgpPlugins,
-      },
-      expectedLegacyKgpPlugins,
-    );
+    expect(<String>{
+      ...conditionallyCompatibleLegacyKgpPlugins,
+      ...upstreamBlockedLegacyKgpPlugins,
+    }, expectedLegacyKgpPlugins);
   });
 
   test('accepts only the exact reviewed warning set', () {
@@ -78,10 +75,7 @@ Future versions of Flutter will fail to build.
       report,
       contains('Conditional compatibility warning: `flutter_timezone`'),
     );
-    expect(
-      report,
-      contains('Upstream migration pending: `purchases_flutter`'),
-    );
+    expect(report, contains('Upstream migration pending: `purchases_flutter`'));
     expect(report, contains('Any addition, removal'));
   });
 }
