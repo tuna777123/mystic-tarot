@@ -1,0 +1,95 @@
+name: Store Screenshot Mirror Patch
+
+on:
+  push:
+    branches:
+      - release/localized-store-screenshot-pack
+    paths:
+      - .github/workflows/store-screenshot-mirror-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-push:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out screenshot branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/localized-store-screenshot-pack
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Compact Mystic Mirror scene
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --rebase origin release/localized-store-screenshot-pack
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/store_showcase.dart')
+          text = path.read_text()
+          replacements = [
+              ("""        child: _Panel(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+""", """        child: _Panel(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+"""),
+              ("""              const SizedBox(height: 17),
+""", """              const SizedBox(height: 10),
+"""),
+              ("""                  fontSize: 23,
+""", """                  fontSize: 20,
+"""),
+              ("""              const SizedBox(height: 10),
+              const Text(
+""", """              const SizedBox(height: 6),
+              const Text(
+"""),
+              ("""                  fontSize: 14,
+                  height: 1.45,
+""", """                  fontSize: 12,
+                  height: 1.3,
+"""),
+          ]
+          for old, new in replacements:
+              if old in text:
+                  text = text.replace(old, new, 1)
+              elif new not in text:
+                  raise SystemExit('Mirror layout target missing: ' + old[:60])
+          # Compact only the three Mirror choice gaps and controls.
+          mirror_start = text.index('  Widget _mirror() => Column(')
+          mirror_end = text.index('  Widget _path() => Column(', mirror_start)
+          mirror = text[mirror_start:mirror_end]
+          mirror = mirror.replace('const SizedBox(height: 9)', 'const SizedBox(height: 5)')
+          text = text[:mirror_start] + mirror + text[mirror_end:]
+          path.write_text(text)
+          PY
+
+          dart format lib/src/store_showcase.dart
+          flutter pub get
+          flutter analyze --fatal-infos
+
+      - name: Commit Mirror layout fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add lib/src/store_showcase.dart
+          git commit -m "fix: fit Mystic Mirror store scene"
+          git push origin HEAD:release/localized-store-screenshot-pack
