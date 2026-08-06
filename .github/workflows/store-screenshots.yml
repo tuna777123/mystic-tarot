@@ -119,7 +119,8 @@ jobs:
           name: mystic-tarot-store-part-${{ matrix.device }}-${{ matrix.locale_slug }}
           path: build/store_screenshots
           if-no-files-found: error
-          retention-days: 1
+          overwrite: true
+          retention-days: 7
 
   audit-and-package-store-screenshots:
     needs: generate-store-screenshot-partitions
@@ -169,4 +170,5 @@ jobs:
             build/store_screenshots
             build/reports/store-screenshot-audit.md
           if-no-files-found: error
+          overwrite: true
           retention-days: 14
