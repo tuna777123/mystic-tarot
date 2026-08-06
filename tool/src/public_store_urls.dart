@@ -53,14 +53,8 @@ const publicStoreEndpoints = <PublicStoreEndpoint>[
   PublicStoreEndpoint(path: 'support.html', marker: '<h1>Support</h1>'),
   PublicStoreEndpoint(path: 'support-tr.html', marker: '<h1>Destek</h1>'),
   PublicStoreEndpoint(path: 'support-es.html', marker: '<h1>Soporte</h1>'),
-  PublicStoreEndpoint(
-    path: 'support-fr.html',
-    marker: '<h1>Assistance</h1>',
-  ),
-  PublicStoreEndpoint(
-    path: 'support-pt-br.html',
-    marker: '<h1>Suporte</h1>',
-  ),
+  PublicStoreEndpoint(path: 'support-fr.html', marker: '<h1>Assistance</h1>'),
+  PublicStoreEndpoint(path: 'support-pt-br.html', marker: '<h1>Suporte</h1>'),
 ];
 
 class PublicStoreResponse {
