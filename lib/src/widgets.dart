@@ -83,49 +83,26 @@ class _StarlightPainter extends CustomPainter {
   final double progress;
 
   static const stars = <Offset>[
-    Offset(.08, .11),
-    Offset(.22, .25),
-    Offset(.46, .08),
-    Offset(.73, .18),
-    Offset(.91, .09),
-    Offset(.84, .38),
-    Offset(.13, .53),
-    Offset(.62, .62),
-    Offset(.94, .72),
-    Offset(.35, .84),
-    Offset(.72, .93),
+    Offset(.08, .11), Offset(.22, .25), Offset(.46, .08), Offset(.73, .18), Offset(.91, .09),
+    Offset(.84, .38), Offset(.13, .53), Offset(.62, .62), Offset(.94, .72), Offset(.35, .84), Offset(.72, .93),
   ];
 
   @override
   void paint(Canvas canvas, Size size) {
     for (var i = 0; i < stars.length; i++) {
       final phase = (progress + i * .13) % 1;
-      final opacity =
-          .12 + .42 * (phase < .5 ? phase * 2 : (1 - phase) * 2);
-      final point = Offset(
-        stars[i].dx * size.width,
-        stars[i].dy * size.height,
-      );
-      canvas.drawCircle(
-        point,
-        i % 3 == 0 ? 1.6 : 1,
-        Paint()..color = MysticColors.gold.withValues(alpha: opacity),
-      );
+      final opacity = .12 + .42 * (phase < .5 ? phase * 2 : (1 - phase) * 2);
+      final point = Offset(stars[i].dx * size.width, stars[i].dy * size.height);
+      canvas.drawCircle(point, i % 3 == 0 ? 1.6 : 1, Paint()..color = MysticColors.gold.withValues(alpha: opacity));
     }
   }
 
   @override
-  bool shouldRepaint(covariant _StarlightPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _StarlightPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
 class GoldButton extends StatelessWidget {
-  const GoldButton({
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    super.key,
-  });
+  const GoldButton({required this.label, required this.onPressed, this.icon, super.key});
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
@@ -173,16 +150,7 @@ class GoldButton extends StatelessWidget {
 }
 
 class TarotCardFace extends StatelessWidget {
-  const TarotCardFace({
-    this.drawn,
-    this.displayName,
-    this.reversedLabel = 'REVERSED',
-    this.selected = false,
-    this.style = DeckStyle.midnight,
-    this.width = 116,
-    this.height = 184,
-    super.key,
-  });
+  const TarotCardFace({this.drawn, this.displayName, this.reversedLabel = 'REVERSED', this.selected = false, this.style = DeckStyle.midnight, this.width = 116, this.height = 184, super.key});
   final DrawnCard? drawn;
   final String? displayName;
   final String reversedLabel;
@@ -195,11 +163,8 @@ class TarotCardFace extends StatelessWidget {
   Widget build(BuildContext context) {
     final faceUp = drawn != null;
     final accent = _accent;
-    final animationsDisabled =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final duration = animationsDisabled
-        ? Duration.zero
-        : const Duration(milliseconds: 320);
+    final animationsDisabled = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final duration = animationsDisabled ? Duration.zero : const Duration(milliseconds: 320);
     final card = AnimatedContainer(
       duration: duration,
       width: width,
@@ -207,51 +172,21 @@ class TarotCardFace extends StatelessWidget {
       padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: faceUp ? _faceColors : _backColors,
-        ),
-        border: Border.all(
-          color: selected ? accent : accent.withValues(alpha: .48),
-          width: selected ? 2.5 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: selected
-                ? accent.withValues(alpha: .34)
-                : Colors.black38,
-            blurRadius: selected ? 24 : 10,
-          ),
-        ],
+        gradient: LinearGradient(colors: faceUp ? _faceColors : _backColors),
+        border: Border.all(color: selected ? accent : accent.withValues(alpha: .48), width: selected ? 2.5 : 1),
+        boxShadow: [BoxShadow(color: selected ? accent.withValues(alpha: .34) : Colors.black38, blurRadius: selected ? 24 : 10)],
       ),
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(11),
-          border: Border.all(color: accent.withValues(alpha: .58)),
-        ),
-        child: faceUp
-            ? _face(accent)
-            : Center(
-                child: Text(
-                  '${style.symbol}\n✦',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 34,
-                    height: 1.15,
-                    color: accent,
-                  ),
-                ),
-              ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(11), border: Border.all(color: accent.withValues(alpha: .58))),
+        child: faceUp ? _face(accent) : Center(child: Text('${style.symbol}\n✦', textAlign: TextAlign.center, style: TextStyle(fontSize: 34, height: 1.15, color: accent))),
       ),
     );
-
     if (animationsDisabled) return card;
-
     return TweenAnimationBuilder<double>(
       tween: Tween(end: selected ? 1.055 : 1),
       duration: duration,
       curve: Curves.easeOutBack,
-      builder: (context, scale, child) =>
-          Transform.scale(scale: scale, child: child),
+      builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
       child: card,
     );
   }
@@ -291,105 +226,15 @@ class TarotCardFace extends StatelessWidget {
 
   Widget _face(Color accent) {
     final card = drawn!.card;
-    final seed = card.name.codeUnits.fold<int>(
-      17,
-      (value, unit) => value * 31 + unit,
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 4, 4, 5),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                card.number,
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  color: accent,
-                  fontSize: 8,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                drawn!.reversed ? 'R' : '✦',
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  color: accent.withValues(alpha: .75),
-                  fontSize: 7,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Expanded(
-            child: Transform.rotate(
-              angle: drawn!.reversed ? pi : 0,
-              child: CustomPaint(
-                painter: _ArcanaArtworkPainter(
-                  seed: seed,
-                  accent: accent,
-                  cardName: card.name,
-                ),
-                child: Center(
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFF120D1D).withValues(alpha: .62),
-                      border: Border.all(
-                        color: accent.withValues(alpha: .36),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accent.withValues(alpha: .16),
-                          blurRadius: 18,
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      card.symbol,
-                      style: TextStyle(color: accent, fontSize: 21),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            displayName ?? card.name.toUpperCase(),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Arial',
-              fontSize: width >= 100 ? 9 : 7.5,
-              height: 1.05,
-              fontWeight: FontWeight.w800,
-              letterSpacing: .42,
-            ),
-          ),
-          if (drawn!.reversed)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                reversedLabel.toUpperCase(),
-                style: TextStyle(
-                  fontFamily: 'Arial',
-                  color: accent.withValues(alpha: .88),
-                  fontSize: width >= 100 ? 6.8 : 5.5,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: .65,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+    final seed = card.name.codeUnits.fold<int>(17, (value, unit) => value * 31 + unit);
+    return Padding(padding: const EdgeInsets.fromLTRB(4, 4, 4, 5), child: Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(card.number, style: TextStyle(fontFamily: 'Arial', color: accent, fontSize: 8, fontWeight: FontWeight.bold)), Text(drawn!.reversed ? 'R' : '✦', style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .75), fontSize: 7, fontWeight: FontWeight.w900))]),
+      const SizedBox(height: 2),
+      Expanded(child: Transform.rotate(angle: drawn!.reversed ? pi : 0, child: CustomPaint(painter: _ArcanaArtworkPainter(seed: seed, accent: accent, cardName: card.name), child: Center(child: Container(width: 34, height: 34, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF120D1D).withValues(alpha: .62), border: Border.all(color: accent.withValues(alpha: .36)), boxShadow: [BoxShadow(color: accent.withValues(alpha: .16), blurRadius: 18)]), child: Text(card.symbol, style: TextStyle(color: accent, fontSize: 21))))))),
+      const SizedBox(height: 3),
+      Text(displayName ?? card.name.toUpperCase(), maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: TextStyle(fontFamily: 'Arial', fontSize: width >= 100 ? 9 : 7.5, height: 1.05, fontWeight: FontWeight.w800, letterSpacing: .42)),
+      if (drawn!.reversed) Padding(padding: const EdgeInsets.only(top: 2), child: Text(reversedLabel.toUpperCase(), style: TextStyle(fontFamily: 'Arial', color: accent.withValues(alpha: .88), fontSize: width >= 100 ? 6.8 : 5.5, fontWeight: FontWeight.w900, letterSpacing: .65))),
+    ]));
   }
 }
 
@@ -407,20 +252,9 @@ class _ArcanaArtworkPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) * .38;
-    final faint = Paint()
-      ..color = accent.withValues(alpha: .12)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = .8;
-    final line = Paint()
-      ..color = accent.withValues(alpha: .34)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = .75;
-    final glow = Paint()
-      ..shader = RadialGradient(
-        colors: [accent.withValues(alpha: .16), Colors.transparent],
-      ).createShader(
-        Rect.fromCircle(center: center, radius: radius * 1.35),
-      );
+    final faint = Paint()..color = accent.withValues(alpha: .12)..style = PaintingStyle.stroke..strokeWidth = .8;
+    final line = Paint()..color = accent.withValues(alpha: .34)..style = PaintingStyle.stroke..strokeWidth = .75;
+    final glow = Paint()..shader = RadialGradient(colors: [accent.withValues(alpha: .16), Colors.transparent]).createShader(Rect.fromCircle(center: center, radius: radius * 1.35));
     canvas.drawCircle(center, radius * 1.35, glow);
     canvas.drawCircle(center, radius, faint);
     canvas.drawCircle(center, radius * .72, faint);
@@ -428,10 +262,7 @@ class _ArcanaArtworkPainter extends CustomPainter {
     for (var i = 0; i < rays; i++) {
       final angle = (i / rays) * pi * 2 + (seed % 19) * .017;
       final inner = center + Offset(cos(angle), sin(angle)) * radius * .54;
-      final outer = center +
-          Offset(cos(angle), sin(angle)) *
-              radius *
-              (i.isEven ? 1.18 : .98);
+      final outer = center + Offset(cos(angle), sin(angle)) * radius * (i.isEven ? 1.18 : .98);
       canvas.drawLine(inner, outer, faint);
     }
     final points = <Offset>[];
@@ -444,27 +275,14 @@ class _ArcanaArtworkPainter extends CustomPainter {
       canvas.drawLine(points[i - 1], points[i], line);
     }
     for (var i = 0; i < points.length; i++) {
-      canvas.drawCircle(
-        points[i],
-        i.isEven ? 1.6 : 1.05,
-        Paint()..color = accent.withValues(alpha: i.isEven ? .8 : .5),
-      );
+      canvas.drawCircle(points[i], i.isEven ? 1.6 : 1.05, Paint()..color = accent.withValues(alpha: i.isEven ? .8 : .5));
     }
-    final archRect = Rect.fromCenter(
-      center: Offset(center.dx, size.height * .58),
-      width: radius * 1.7,
-      height: radius * 1.9,
-    );
+    final archRect = Rect.fromCenter(center: Offset(center.dx, size.height * .58), width: radius * 1.7, height: radius * 1.9);
     canvas.drawArc(archRect, pi, pi, false, line);
     _drawCardMotif(canvas, size, center, radius);
   }
 
-  void _drawCardMotif(
-    Canvas canvas,
-    Size size,
-    Offset center,
-    double radius,
-  ) {
+  void _drawCardMotif(Canvas canvas, Size size, Offset center, double radius) {
     final name = cardName.toLowerCase();
     final strong = Paint()
       ..color = accent.withValues(alpha: .62)
@@ -500,16 +318,8 @@ class _ArcanaArtworkPainter extends CustomPainter {
         false,
         strong,
       );
-      canvas.drawLine(
-        Offset(size.width * .28, lower.dy),
-        Offset(size.width * .28, lower.dy - radius * .38),
-        strong,
-      );
-      canvas.drawLine(
-        Offset(size.width * .72, lower.dy),
-        Offset(size.width * .72, lower.dy - radius * .38),
-        strong,
-      );
+      canvas.drawLine(Offset(size.width * .28, lower.dy), Offset(size.width * .28, lower.dy - radius * .38), strong);
+      canvas.drawLine(Offset(size.width * .72, lower.dy), Offset(size.width * .72, lower.dy - radius * .38), strong);
       _drawHorizon(canvas, size, lower, strong);
       return;
     }
@@ -519,11 +329,7 @@ class _ArcanaArtworkPainter extends CustomPainter {
       return;
     }
     if (name.contains('tower')) {
-      final tower = Rect.fromCenter(
-        center: lower,
-        width: radius * .66,
-        height: radius * 1.15,
-      );
+      final tower = Rect.fromCenter(center: lower, width: radius * .66, height: radius * 1.15);
       canvas.drawRect(tower, softFill);
       canvas.drawRect(tower, strong);
       final bolt = Path()
@@ -535,22 +341,10 @@ class _ArcanaArtworkPainter extends CustomPainter {
       return;
     }
     if (name.contains('lovers')) {
-      canvas.drawCircle(
-        Offset(center.dx - radius * .32, upper.dy),
-        radius * .16,
-        strong,
-      );
-      canvas.drawCircle(
-        Offset(center.dx + radius * .32, upper.dy),
-        radius * .16,
-        strong,
-      );
+      canvas.drawCircle(Offset(center.dx - radius * .32, upper.dy), radius * .16, strong);
+      canvas.drawCircle(Offset(center.dx + radius * .32, upper.dy), radius * .16, strong);
       canvas.drawArc(
-        Rect.fromCenter(
-          center: lower,
-          width: radius * 1.25,
-          height: radius * 1.1,
-        ),
+        Rect.fromCenter(center: lower, width: radius * 1.25, height: radius * 1.1),
         pi,
         pi,
         false,
@@ -560,11 +354,7 @@ class _ArcanaArtworkPainter extends CustomPainter {
     }
     if (name.contains('world')) {
       canvas.drawOval(
-        Rect.fromCenter(
-          center: center,
-          width: radius * 1.15,
-          height: radius * 1.65,
-        ),
+        Rect.fromCenter(center: center, width: radius * 1.15, height: radius * 1.65),
         strong,
       );
       _drawStar(canvas, center, radius * .24, strong, softFill);
@@ -574,19 +364,11 @@ class _ArcanaArtworkPainter extends CustomPainter {
       canvas.save();
       canvas.translate(center.dx, center.dy);
       canvas.rotate(-.22);
-      canvas.drawLine(
-        Offset(0, -radius * .75),
-        Offset(0, radius * .75),
-        strong,
-      );
+      canvas.drawLine(Offset(0, -radius * .75), Offset(0, radius * .75), strong);
       canvas.drawCircle(Offset.zero, radius * .18, softFill);
       canvas.restore();
       canvas.drawArc(
-        Rect.fromCenter(
-          center: Offset(center.dx, size.height * .28),
-          width: radius * .4,
-          height: radius * .55,
-        ),
+        Rect.fromCenter(center: Offset(center.dx, size.height * .28), width: radius * .4, height: radius * .55),
         .15,
         pi * 1.4,
         false,
@@ -597,37 +379,15 @@ class _ArcanaArtworkPainter extends CustomPainter {
     if (name.contains('cups')) {
       final cup = Path()
         ..moveTo(center.dx - radius * .43, upper.dy)
-        ..quadraticBezierTo(
-          center.dx - radius * .34,
-          center.dy,
-          center.dx,
-          center.dy + radius * .08,
-        )
-        ..quadraticBezierTo(
-          center.dx + radius * .34,
-          center.dy,
-          center.dx + radius * .43,
-          upper.dy,
-        );
+        ..quadraticBezierTo(center.dx - radius * .34, center.dy, center.dx, center.dy + radius * .08)
+        ..quadraticBezierTo(center.dx + radius * .34, center.dy, center.dx + radius * .43, upper.dy);
       canvas.drawPath(cup, strong);
-      canvas.drawLine(
-        Offset(center.dx, center.dy + radius * .08),
-        Offset(center.dx, lower.dy),
-        strong,
-      );
-      canvas.drawLine(
-        Offset(center.dx - radius * .27, lower.dy),
-        Offset(center.dx + radius * .27, lower.dy),
-        strong,
-      );
+      canvas.drawLine(Offset(center.dx, center.dy + radius * .08), Offset(center.dx, lower.dy), strong);
+      canvas.drawLine(Offset(center.dx - radius * .27, lower.dy), Offset(center.dx + radius * .27, lower.dy), strong);
       return;
     }
     if (name.contains('swords')) {
-      canvas.drawLine(
-        Offset(center.dx, size.height * .24),
-        Offset(center.dx, size.height * .75),
-        strong,
-      );
+      canvas.drawLine(Offset(center.dx, size.height * .24), Offset(center.dx, size.height * .75), strong);
       canvas.drawLine(
         Offset(center.dx - radius * .32, size.height * .63),
         Offset(center.dx + radius * .32, size.height * .63),
@@ -645,59 +405,31 @@ class _ArcanaArtworkPainter extends CustomPainter {
     if (name.contains('pentacles')) {
       canvas.drawCircle(center, radius * .48, softFill);
       canvas.drawCircle(center, radius * .48, strong);
-      _drawStar(
-        canvas,
-        center,
-        radius * .4,
-        strong,
-        Paint()..color = Colors.transparent,
-      );
+      _drawStar(canvas, center, radius * .4, strong, Paint()..color = Colors.transparent);
       return;
     }
 
     _drawStar(canvas, upper, radius * .28, strong, softFill);
     final path = Path()
       ..moveTo(size.width * .27, lower.dy)
-      ..quadraticBezierTo(
-        center.dx,
-        lower.dy - radius * .38,
-        size.width * .73,
-        lower.dy,
-      );
+      ..quadraticBezierTo(center.dx, lower.dy - radius * .38, size.width * .73, lower.dy);
     canvas.drawPath(path, strong);
   }
 
   void _drawHorizon(Canvas canvas, Size size, Offset center, Paint paint) {
     final path = Path()
       ..moveTo(size.width * .18, center.dy)
-      ..quadraticBezierTo(
-        size.width * .36,
-        center.dy - 9,
-        size.width * .5,
-        center.dy,
-      )
-      ..quadraticBezierTo(
-        size.width * .66,
-        center.dy + 9,
-        size.width * .82,
-        center.dy,
-      );
+      ..quadraticBezierTo(size.width * .36, center.dy - 9, size.width * .5, center.dy)
+      ..quadraticBezierTo(size.width * .66, center.dy + 9, size.width * .82, center.dy);
     canvas.drawPath(path, paint);
   }
 
-  void _drawStar(
-    Canvas canvas,
-    Offset center,
-    double radius,
-    Paint line,
-    Paint fill,
-  ) {
+  void _drawStar(Canvas canvas, Offset center, double radius, Paint line, Paint fill) {
     final path = Path();
     for (var i = 0; i < 10; i++) {
       final pointRadius = i.isEven ? radius : radius * .42;
       final angle = -pi / 2 + i * pi / 5;
-      final point =
-          center + Offset(cos(angle), sin(angle)) * pointRadius;
+      final point = center + Offset(cos(angle), sin(angle)) * pointRadius;
       if (i == 0) {
         path.moveTo(point.dx, point.dy);
       } else {
