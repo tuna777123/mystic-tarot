@@ -112,6 +112,7 @@ void main() {
     final verifier = File(
       'tool/verify_store_screenshot_pack.dart',
     ).readAsStringSync();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
 
     expect(workflow, contains('validate-screenshot-source'));
     expect(workflow, contains('generate-store-screenshot-partitions'));
@@ -127,8 +128,15 @@ void main() {
     expect(workflow, contains('verify_store_screenshot_pack.dart'));
     expect(workflow, contains('actions/upload-artifact@v7'));
     expect(workflow, contains('if-no-files-found: error'));
+
+    expect(pubspec, contains('image: ^4.8.0'));
     expect(generator, contains('RenderRepaintBoundary'));
-    expect(generator, contains('ui.ImageByteFormat.png'));
+    expect(generator, contains("package:image/image.dart' as img"));
+    expect(generator, contains('ui.ImageByteFormat.rawRgba'));
+    expect(generator, contains('img.ChannelOrder.rgba'));
+    expect(generator, contains('.convert(numChannels: 3)'));
+    expect(generator, contains('img.encodePng(rgb)'));
+    expect(generator, isNot(contains('ui.ImageByteFormat.png')));
     expect(generator, contains('Roboto-Regular.ttf'));
     expect(generator, contains('MaterialIcons-Regular.otf'));
     expect(generator, contains("_expectProportionalFont('Roboto')"));
@@ -146,8 +154,12 @@ void main() {
       generator,
       contains("Platform.environment['STORE_SCREENSHOT_LOCALE']"),
     );
+
     expect(verifier, contains('Invalid PNG signature'));
     expect(verifier, contains('Wrong dimensions'));
+    expect(verifier, contains('Wrong PNG bit depth'));
+    expect(verifier, contains('PNG must be RGB without an alpha channel'));
+    expect(verifier, contains('colorType != 2'));
     expect(verifier, contains('Unexpected screenshot'));
   });
 
@@ -177,6 +189,9 @@ void main() {
       verifier,
       contains("'screenshotCount': expectedStoreScreenshotCount"),
     );
+    expect(verifier, contains("'pngBitDepth': 8"));
+    expect(verifier, contains("'pngColorType': 2"));
+    expect(verifier, contains("'alphaChannel': false"));
     expect(verifier, contains('manifest.json'));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
   });
