@@ -73,21 +73,13 @@ La Guidance Quotidienne et le Mystic Mirror de base sur 24 heures restent gratui
 
 Mystic Tarot est destiné à la réflexion personnelle et au divertissement. Il ne fournit aucun avis médical, psychologique, juridique, financier ou d’urgence.
 
-## Notes de version — 1.13.0
+## Notes de version — 1.22.3
 
-- L’onboarding ouvre directement le premier véritable rituel de Guidance Quotidienne
-- Rappel quotidien local facultatif à l’heure choisie par l’utilisateur
-- Action visible pour créer une carte privée de story après l’enregistrement d’un tirage
-
-- Rapport personnel Mystic Intelligence sur 7 jours calculé sur l’appareil
-- Mystic Mirror sur 24 heures en cinq langues pour noter ce qui a réellement changé
-- Interprétations transparentes avec position, orientation, base symbolique et contexte
-- Badge accessible dans le Journal pour les bilans Mirror en attente
-- Historique complet, local et sauvegardé sans limite de 50 tirages
-- Récupération sûre des données endommagées ou partiellement corrompues
-- Recherche du journal tolérante aux différences d’accents
-- Export privé avec questions, actions, transitions émotionnelles et notes Mirror
-- Expérience complète en anglais, turc, espagnol, français et portugais du Brésil
+- Les nouvelles installations s’ouvrent désormais en anglais, turc, espagnol, français ou portugais du Brésil selon la langue de l’appareil avant l’onboarding.
+- La langue choisie dans Mystic reste active pendant la sélection des cartes, les résultats, le profil, les réglages et le verrouillage privé de l’application.
+- La préparation facultative des rappels et du fuseau horaire ne retarde plus le premier écran utilisable ; l’autorisation de notifications n’est demandée qu’à l’initiative de l’utilisateur.
+- Le réglage Réduire les animations ou Supprimer les animations de l’appareil est respecté dans l’arrière-plan atmosphérique et la sélection des cartes.
+- Des améliorations de stabilité ont été apportées au journal, à Mystic Mirror, au transfert privé chiffré et au verrouillage à six chiffres.
 
 ## Titres des captures d’écran en français
 
