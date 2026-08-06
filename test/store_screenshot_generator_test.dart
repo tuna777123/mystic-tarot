@@ -9,8 +9,12 @@ import 'package:mystic_tarot/src/store_showcase.dart';
 
 void main() {
   testWidgets(
-    'generates the complete localized store screenshot pack',
+    'generates the requested localized store screenshot partition',
     (tester) async {
+      final requestedDevice = Platform.environment['STORE_SCREENSHOT_DEVICE'];
+      final requestedLocale = Platform.environment['STORE_SCREENSHOT_LOCALE'];
+      final devices = _selectedDevices(requestedDevice);
+      final locales = _selectedLocales(requestedLocale);
       final output = Directory('build/store_screenshots');
       if (output.existsSync()) output.deleteSync(recursive: true);
       output.createSync(recursive: true);
@@ -21,14 +25,14 @@ void main() {
       });
 
       var generated = 0;
-      for (final device in storeScreenshotDevices) {
+      for (final device in devices) {
         tester.view.physicalSize = Size(
           device.width.toDouble(),
           device.height.toDouble(),
         );
         tester.view.devicePixelRatio = device.devicePixelRatio;
 
-        for (final locale in storeScreenshotLocales) {
+        for (final locale in locales) {
           for (final scene in StoreScreenshotScene.values) {
             final boundaryKey = GlobalKey();
             await tester.pumpWidget(
@@ -67,8 +71,30 @@ void main() {
         }
       }
 
-      expect(generated, expectedStoreScreenshotCount);
+      expect(
+        generated,
+        devices.length * locales.length * StoreScreenshotScene.values.length,
+      );
     },
     skip: Platform.environment['GENERATE_STORE_SCREENSHOTS'] != '1',
   );
+}
+
+List<StoreScreenshotDevice> _selectedDevices(String? requested) {
+  if (requested == null || requested.isEmpty) return storeScreenshotDevices;
+  final matches = storeScreenshotDevices
+      .where((device) => device.slug == requested)
+      .toList(growable: false);
+  if (matches.isEmpty) {
+    throw StateError('Unknown store screenshot device: $requested');
+  }
+  return matches;
+}
+
+List<String> _selectedLocales(String? requested) {
+  if (requested == null || requested.isEmpty) return storeScreenshotLocales;
+  if (!storeScreenshotLocales.contains(requested)) {
+    throw StateError('Unknown store screenshot locale: $requested');
+  }
+  return <String>[requested];
 }
