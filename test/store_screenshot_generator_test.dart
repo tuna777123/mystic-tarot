@@ -91,9 +91,11 @@ void main() {
                 image.dispose();
               }
             });
-            expect(capture, isNotNull);
-            expect(capture!.width, device.width);
-            expect(capture.height, device.height);
+            final verifiedCapture =
+                capture ??
+                (throw StateError('Flutter screenshot capture did not run.'));
+            expect(verifiedCapture.width, device.width);
+            expect(verifiedCapture.height, device.height);
 
             final relativePath = storeScreenshotRelativePath(
               device: device,
@@ -102,7 +104,7 @@ void main() {
             );
             final file = File('${output.path}/$relativePath');
             file.parent.createSync(recursive: true);
-            file.writeAsBytesSync(capture.bytes, flush: true);
+            file.writeAsBytesSync(verifiedCapture.bytes, flush: true);
             generated++;
           }
         }
