@@ -146,8 +146,10 @@ jobs:
           dart run tool/verify_store_screenshot_pack.dart \
             build/store_screenshots "$SOURCE_COMMIT" \
             | tee build/reports/store-screenshot-audit.md
+          expected_version="$(awk '/^version:/{print $2; exit}' pubspec.yaml)"
+          test -n "$expected_version"
           test -s build/store_screenshots/manifest.json
-          grep -Fq '"applicationVersion": "1.22.3+32"' \
+          grep -Fq "\"applicationVersion\": \"$expected_version\"" \
             build/store_screenshots/manifest.json
           grep -Fq "\"sourceCommit\": \"$SOURCE_COMMIT\"" \
             build/store_screenshots/manifest.json
