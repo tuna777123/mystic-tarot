@@ -117,6 +117,10 @@ void main() {
     expect(workflow, contains('validate-screenshot-source'));
     expect(workflow, contains('generate-store-screenshot-partitions'));
     expect(workflow, contains('audit-and-package-store-screenshots'));
+    expect(
+      RegExp(r'timeout-minutes:\s+20').allMatches(workflow),
+      hasLength(3),
+    );
     expect(workflow, contains('matrix:'));
     expect(workflow, contains('device: apple-6.9'));
     expect(workflow, isNot(contains('device: apple-6.7')));
@@ -139,7 +143,10 @@ void main() {
     expect(generator, contains('ui.ImageByteFormat.rawRgba'));
     expect(generator, contains('_verifyOpaqueRgba(rgbaBytes)'));
     expect(generator, contains('bytes[index] != 255'));
-    expect(generator, contains('Rendered screenshot contains transparent pixels'));
+    expect(
+      generator,
+      contains('Rendered screenshot contains transparent pixels'),
+    );
     expect(generator, contains('img.ChannelOrder.rgba'));
     expect(generator, contains('.convert(numChannels: 3)'));
     expect(generator, contains('img.encodePng(rgb)'));
@@ -198,10 +205,7 @@ void main() {
       RegExp(r'persist-credentials:\s+false').allMatches(workflow),
       hasLength(3),
     );
-    expect(
-      RegExp(r'git rev-parse HEAD').allMatches(workflow),
-      hasLength(3),
-    );
+    expect(RegExp(r'git rev-parse HEAD').allMatches(workflow), hasLength(3));
     expect(
       workflow,
       contains('test "\$(git rev-parse HEAD)" = "\$SOURCE_COMMIT"'),
