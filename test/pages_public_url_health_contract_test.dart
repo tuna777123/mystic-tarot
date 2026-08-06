@@ -11,9 +11,9 @@ void main() {
     expect(workflow, contains('health:'));
     expect(workflow, contains('needs: deploy'));
     expect(workflow, contains('Verify public store and legal URLs'));
-    expect(workflow, contains('label="${path:-root}"'));
+    expect(workflow, contains(r'label="${path:-root}"'));
     expect(workflow, contains('--write-out \'%{http_code}\''));
-    expect(workflow, contains('[[ "$code" == "200" ]]'));
+    expect(workflow, contains(r'[[ "$code" == "200" ]]'));
     expect(workflow, contains("grep -qi '<html'"));
     expect(workflow, contains("grep -qi 'Mystic Tarot'"));
     expect(workflow, contains('for attempt in {1..10}'));
@@ -39,12 +39,15 @@ void main() {
     }
 
     expect(workflow, contains('needs: [build, deploy, health]'));
-    expect(workflow, contains('HEALTH_RESULT: ${{ needs.health.result }}'));
+    expect(
+      workflow,
+      contains(r'HEALTH_RESULT: ${{ needs.health.result }}'),
+    );
     expect(
       workflow,
       contains(
-        '[[ "$DEPLOY_RESULT" == "success" && '
-        '"$HEALTH_RESULT" == "success" ]]',
+        r'[[ "$DEPLOY_RESULT" == "success" && '
+        r'"$HEALTH_RESULT" == "success" ]]',
       ),
     );
     expect(
