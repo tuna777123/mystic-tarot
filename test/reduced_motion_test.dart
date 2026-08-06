@@ -4,26 +4,22 @@ import 'package:mystic_tarot/src/widgets.dart';
 
 void main() {
   Widget backgroundApp({required bool disableAnimations}) => MaterialApp(
-        home: MediaQuery(
-          data: MediaQueryData(disableAnimations: disableAnimations),
-          child: const MysticBackground(
-            child: Scaffold(body: Text('Mystic')),
-          ),
-        ),
-      );
+    home: MediaQuery(
+      data: MediaQueryData(disableAnimations: disableAnimations),
+      child: const MysticBackground(child: Scaffold(body: Text('Mystic'))),
+    ),
+  );
 
   Widget cardApp({required bool selected}) => MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: TarotCardFace(selected: selected),
-          ),
-        ),
-      );
+    home: Scaffold(
+      body: Center(child: TarotCardFace(selected: selected)),
+    ),
+  );
 
   Finder mysticAnimation() => find.descendant(
-        of: find.byType(MysticBackground),
-        matching: find.byType(AnimatedBuilder),
-      );
+    of: find.byType(MysticBackground),
+    matching: find.byType(AnimatedBuilder),
+  );
 
   double cardScale(WidgetTester tester) {
     final transform = tester.widget<Transform>(
