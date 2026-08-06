@@ -3,20 +3,20 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:mystic_tarot/src/store_screenshot_manifest.dart';
 import 'package:mystic_tarot/src/store_showcase.dart';
 
+import 'support/store_screenshot_fonts.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(_loadStoreScreenshotFonts);
+  setUpAll(loadStoreScreenshotFonts);
 
   test('store screenshot fonts render proportional Latin glyphs', () {
-    _expectProportionalFont('Roboto');
-    _expectProportionalFont('Arial');
+    expect(verifyStoreScreenshotFonts, returnsNormally);
   });
 
   testWidgets(
@@ -128,67 +128,6 @@ void _verifyOpaqueRgba(Uint8List bytes) {
       throw StateError('Rendered screenshot contains transparent pixels.');
     }
   }
-}
-
-Future<void> _loadStoreScreenshotFonts() async {
-  final materialFontDirectory = _flutterMaterialFontDirectory();
-  final roboto = File('${materialFontDirectory.path}/Roboto-Regular.ttf');
-  final materialIcons = File(
-    '${materialFontDirectory.path}/MaterialIcons-Regular.otf',
-  );
-
-  if (!roboto.existsSync()) {
-    throw StateError('Roboto font not found at ${roboto.path}.');
-  }
-  if (!materialIcons.existsSync()) {
-    throw StateError('Material Icons font not found at ${materialIcons.path}.');
-  }
-
-  final robotoBytes = await roboto.readAsBytes();
-  await _loadFontFamily('Roboto', robotoBytes);
-  await _loadFontFamily('Arial', robotoBytes);
-  await _loadFontFamily('MaterialIcons', await materialIcons.readAsBytes());
-}
-
-Directory _flutterMaterialFontDirectory() {
-  final configuredRoot = Platform.environment['FLUTTER_ROOT'];
-  if (configuredRoot != null && configuredRoot.trim().isNotEmpty) {
-    return Directory('$configuredRoot/bin/cache/artifacts/material_fonts');
-  }
-
-  var flutterRoot = File(Platform.resolvedExecutable).parent;
-  for (var depth = 0; depth < 4; depth++) {
-    flutterRoot = flutterRoot.parent;
-  }
-  return Directory('${flutterRoot.path}/bin/cache/artifacts/material_fonts');
-}
-
-Future<void> _loadFontFamily(String family, Uint8List bytes) async {
-  final loader = FontLoader(family)
-    ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
-  await loader.load();
-}
-
-void _expectProportionalFont(String family) {
-  double widthOf(String text) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(fontFamily: family, fontSize: 32),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return painter.width;
-  }
-
-  final narrow = widthOf('iiiiiiii');
-  final wide = widthOf('WWWWWWWW');
-  expect(
-    wide,
-    greaterThan(narrow * 1.5),
-    reason: '$family must not fall back to Flutter test Ahem squares.',
-  );
-  expect(widthOf('ĞİŞÇÖÜ éèñãç'), greaterThan(0));
 }
 
 List<StoreScreenshotDevice> _selectedDevices(String? requested) {
