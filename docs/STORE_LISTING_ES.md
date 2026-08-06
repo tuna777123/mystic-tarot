@@ -73,21 +73,14 @@ La Guía Diaria y el Mystic Mirror básico de 24 horas permanecen gratuitos. Mys
 
 Mystic Tarot está diseñado para la reflexión personal y el entretenimiento. No ofrece asesoramiento médico, psicológico, legal, financiero ni de emergencia.
 
-## Notas de la versión — 1.13.0
+## Notas de la versión — 1.22.3
 
-- El onboarding abre directamente el primer ritual real de Guía Diaria
-- Recordatorio diario local opcional a la hora elegida por el usuario
-- Acción visible para crear una tarjeta privada para historias después de guardar una lectura
-
-- Informe personal Mystic Intelligence de 7 días calculado en el dispositivo
-- Mystic Mirror de 24 horas en cinco idiomas para registrar qué cambió realmente
-- Interpretaciones transparentes con posición, orientación, base simbólica y contexto
-- Insignia accesible en el Diario para revisiones de Mirror pendientes
-- Historial completo, local y con copia de seguridad sin límite de 50 lecturas
-- Recuperación segura de registros dañados o parcialmente corruptos
-- Búsqueda del diario tolerante a diferencias de acentos
-- Exportación privada con preguntas, acciones, transiciones emocionales y notas de Mirror
-- Experiencia completa en inglés, turco, español, francés y portugués de Brasil
+- Las instalaciones nuevas ahora se abren en inglés, turco, español, francés o portugués de Brasil según el idioma del dispositivo antes del onboarding.
+- El idioma elegido dentro de Mystic se mantiene durante la selección de cartas, los resultados, el perfil, los ajustes y el bloqueo privado de la aplicación.
+- Mystic Intelligence sigue creando en el dispositivo un informe privado de siete días a partir de lecturas guardadas y revisiones de Mystic Mirror completadas.
+- La preparación opcional de recordatorios y zona horaria ya no retrasa la primera pantalla utilizable; el permiso de notificaciones solo se solicita cuando el usuario lo decide.
+- La opción Reducir movimiento o Quitar animaciones del dispositivo se respeta en el fondo atmosférico y en la selección de cartas.
+- Se añadieron mejoras de estabilidad para el diario, Mystic Mirror, la transferencia privada cifrada y el bloqueo de seis dígitos.
 
 ## Títulos para capturas en español
 
