@@ -32,7 +32,7 @@ typedef PublicStoreFetcher = Future<PublicStoreResponse> Function(Uri uri);
 
 Future<List<String>> verifyPublicStoreEndpoints({
   PublicStoreFetcher? fetcher,
-  int attempts = 4,
+  int attempts = 3,
   Duration retryDelay = const Duration(seconds: 5),
 }) async {
   if (attempts < 1) {
@@ -40,36 +40,50 @@ Future<List<String>> verifyPublicStoreEndpoints({
   }
 
   final request = fetcher ?? fetchPublicStoreUrl;
-  final errors = <String>[];
+  final endpointErrors = await Future.wait(
+    publicStoreEndpoints.map(
+      (endpoint) => _verifyPublicStoreEndpoint(
+        endpoint,
+        request: request,
+        attempts: attempts,
+        retryDelay: retryDelay,
+      ),
+    ),
+  );
+  return endpointErrors.expand((errors) => errors).toList(growable: false);
+}
 
-  for (final endpoint in publicStoreEndpoints) {
-    List<String> latestErrors = const [];
-    Object? latestFailure;
+Future<List<String>> _verifyPublicStoreEndpoint(
+  PublicStoreEndpoint endpoint, {
+  required PublicStoreFetcher request,
+  required int attempts,
+  required Duration retryDelay,
+}) async {
+  List<String> latestErrors = const [];
+  Object? latestFailure;
 
-    for (var attempt = 1; attempt <= attempts; attempt++) {
-      try {
-        final response = await request(endpoint.uri);
-        latestErrors = validatePublicStoreResponse(endpoint, response);
-        latestFailure = null;
-        if (latestErrors.isEmpty) break;
-      } catch (error) {
-        latestFailure = error;
-        latestErrors = const [];
-      }
-
-      if (attempt < attempts && retryDelay > Duration.zero) {
-        await Future<void>.delayed(retryDelay);
-      }
+  for (var attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      final response = await request(endpoint.uri);
+      latestErrors = validatePublicStoreResponse(endpoint, response);
+      latestFailure = null;
+      if (latestErrors.isEmpty) return const [];
+    } catch (error) {
+      latestFailure = error;
+      latestErrors = const [];
     }
 
-    if (latestFailure != null) {
-      errors.add('${endpoint.uri} could not be reached after $attempts attempts.');
-    } else {
-      errors.addAll(latestErrors);
+    if (attempt < attempts && retryDelay > Duration.zero) {
+      await Future<void>.delayed(retryDelay);
     }
   }
 
-  return errors;
+  if (latestFailure != null) {
+    return <String>[
+      '${endpoint.uri} could not be reached after $attempts attempts.',
+    ];
+  }
+  return latestErrors;
 }
 
 List<String> validatePublicStoreResponse(
