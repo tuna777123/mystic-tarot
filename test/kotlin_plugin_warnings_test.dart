@@ -19,7 +19,23 @@ Future versions of Flutter will fail to build.
     expect(parseLegacyKgpPlugins('Build completed successfully.'), isEmpty);
   });
 
-  test('accepts only the exact reviewed blocker set', () {
+  test('reviewed classifications are disjoint and cover the warning set', () {
+    expect(
+      conditionallyCompatibleLegacyKgpPlugins.intersection(
+        upstreamBlockedLegacyKgpPlugins,
+      ),
+      isEmpty,
+    );
+    expect(
+      <String>{
+        ...conditionallyCompatibleLegacyKgpPlugins,
+        ...upstreamBlockedLegacyKgpPlugins,
+      },
+      expectedLegacyKgpPlugins,
+    );
+  });
+
+  test('accepts only the exact reviewed warning set', () {
     final delta = compareLegacyKgpPlugins(<String>{
       'purchases_flutter',
       'flutter_timezone',
@@ -30,7 +46,7 @@ Future versions of Flutter will fail to build.
     expect(delta.unexpected, isEmpty);
   });
 
-  test('detects a disappeared blocker for explicit policy review', () {
+  test('detects a disappeared warning for explicit policy review', () {
     final delta = compareLegacyKgpPlugins(<String>{'purchases_flutter'});
 
     expect(delta.isValid, isFalse);
@@ -51,14 +67,21 @@ Future versions of Flutter will fail to build.
     expect(delta.unexpected, {'share_plus', 'unexpected_plugin'});
   });
 
-  test('report names the reviewed temporary blockers honestly', () {
+  test('report distinguishes conditional and upstream migration risk', () {
     final report = buildKotlinCompatibilityReport(<String>{
       'purchases_flutter',
       'flutter_timezone',
     });
 
     expect(report, contains('Result: **PASS**'));
-    expect(report, contains('flutter_timezone, purchases_flutter'));
+    expect(
+      report,
+      contains('Conditional compatibility warning: `flutter_timezone`'),
+    );
+    expect(
+      report,
+      contains('Upstream migration pending: `purchases_flutter`'),
+    );
     expect(report, contains('Any addition, removal'));
   });
 }
