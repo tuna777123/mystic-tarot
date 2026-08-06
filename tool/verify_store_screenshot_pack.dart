@@ -61,7 +61,9 @@ void main(List<String> arguments) {
   stdout.writeln(
     '- Devices: `${storeScreenshotDevices.map((item) => '${item.slug} ${item.width}x${item.height}').join(', ')}`',
   );
-  stdout.writeln('- Scenes per locale: `${StoreScreenshotScene.values.length}`');
+  stdout.writeln(
+    '- Scenes per locale: `${StoreScreenshotScene.values.length}`',
+  );
   stdout.writeln('- Verified PNG files: `$expectedStoreScreenshotCount`');
   stdout.writeln('- Missing or unexpected files: `none`');
   stdout.writeln('- Dimension or PNG signature failures: `none`');

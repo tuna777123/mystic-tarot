@@ -40,8 +40,9 @@ void main() {
             await tester.pumpAndSettle();
 
             expect(tester.takeException(), isNull);
-            final boundary = boundaryKey.currentContext!.findRenderObject()
-                as RenderRepaintBoundary;
+            final boundary =
+                boundaryKey.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary;
             final image = await boundary.toImage(
               pixelRatio: device.devicePixelRatio,
             );
