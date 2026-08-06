@@ -17,8 +17,50 @@ const publicStoreEndpoints = <PublicStoreEndpoint>[
   PublicStoreEndpoint(path: '', marker: 'flutter_bootstrap.js'),
   PublicStoreEndpoint(path: 'landing.html', marker: 'Kartların ötesini'),
   PublicStoreEndpoint(path: 'privacy.html', marker: '<h1>Privacy Policy</h1>'),
+  PublicStoreEndpoint(
+    path: 'privacy-tr.html',
+    marker: '<h1>Gizlilik Politikası</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'privacy-es.html',
+    marker: '<h1>Política de privacidad</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'privacy-fr.html',
+    marker: '<h1>Politique de confidentialité</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'privacy-pt-br.html',
+    marker: '<h1>Política de Privacidade</h1>',
+  ),
   PublicStoreEndpoint(path: 'terms.html', marker: '<h1>Terms of Use</h1>'),
+  PublicStoreEndpoint(
+    path: 'terms-tr.html',
+    marker: '<h1>Kullanım Koşulları</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'terms-es.html',
+    marker: '<h1>Condiciones de uso</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'terms-fr.html',
+    marker: '<h1>Conditions d’utilisation</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'terms-pt-br.html',
+    marker: '<h1>Termos de Uso</h1>',
+  ),
   PublicStoreEndpoint(path: 'support.html', marker: '<h1>Support</h1>'),
+  PublicStoreEndpoint(path: 'support-tr.html', marker: '<h1>Destek</h1>'),
+  PublicStoreEndpoint(path: 'support-es.html', marker: '<h1>Soporte</h1>'),
+  PublicStoreEndpoint(
+    path: 'support-fr.html',
+    marker: '<h1>Assistance</h1>',
+  ),
+  PublicStoreEndpoint(
+    path: 'support-pt-br.html',
+    marker: '<h1>Suporte</h1>',
+  ),
 ];
 
 class PublicStoreResponse {
