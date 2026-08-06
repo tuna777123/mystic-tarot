@@ -73,21 +73,13 @@ A Orientação Diária e o Mystic Mirror básico de 24 horas continuam gratuitos
 
 Mystic Tarot foi criado para reflexão pessoal e entretenimento. Ele não oferece orientação médica, psicológica, jurídica, financeira ou de emergência.
 
-## Notas da versão — 1.13.0
+## Notas da versão — 1.22.3
 
-- O onboarding agora abre diretamente o primeiro ritual real de Orientação Diária
-- Lembrete diário local opcional no horário escolhido pelo usuário
-- Ação visível para criar um card privado para stories após salvar uma leitura
-
-- Relatório pessoal Mystic Intelligence de 7 dias calculado no dispositivo
-- Mystic Mirror de 24 horas em cinco idiomas para registrar o que realmente mudou
-- Interpretações transparentes com posição, orientação, base simbólica e contexto
-- Badge acessível no Diário para check-ins do Mirror pendentes
-- Histórico completo, local e com backup, sem limite de 50 leituras
-- Recuperação segura de dados danificados ou parcialmente corrompidos
-- Busca no diário tolerante a diferenças de acentos
-- Exportação privada com perguntas, ações, transições emocionais e notas do Mirror
-- Experiência completa em inglês, turco, espanhol, francês e português do Brasil
+- Novas instalações agora abrem em inglês, turco, espanhol, francês ou português do Brasil conforme o idioma do dispositivo antes do onboarding.
+- O idioma escolhido dentro do Mystic permanece ativo durante a seleção de cartas, os resultados, o perfil, as configurações e o bloqueio privado do app.
+- A preparação opcional de lembretes e fuso horário não atrasa mais a primeira tela utilizável; a permissão de notificações só é solicitada quando o usuário decide.
+- A opção Reduzir movimento ou Remover animações do dispositivo é respeitada no fundo atmosférico e na seleção de cartas.
+- Foram adicionadas melhorias de estabilidade ao diário, Mystic Mirror, transferência privada criptografada e bloqueio de seis dígitos.
 
 ## Títulos para capturas de tela em português do Brasil
 
