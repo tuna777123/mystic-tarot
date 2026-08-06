@@ -2,6 +2,15 @@ name: Generate Store Screenshots
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - pubspec.yaml
+      - lib/src/store_screenshot_manifest.dart
+      - lib/src/store_showcase.dart
+      - test/store_screenshot_generator_test.dart
+      - test/store_screenshot_contract_test.dart
+      - tool/verify_store_screenshot_pack.dart
+      - .github/workflows/store-screenshots.yml
   pull_request:
     paths:
       - pubspec.yaml
