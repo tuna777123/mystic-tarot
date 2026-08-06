@@ -7,13 +7,9 @@ class KotlinPluginWarningFailure implements Exception {
   String toString() => message;
 }
 
-const conditionallyCompatibleLegacyKgpPlugins = <String>{
-  'flutter_timezone',
-};
+const conditionallyCompatibleLegacyKgpPlugins = <String>{'flutter_timezone'};
 
-const upstreamBlockedLegacyKgpPlugins = <String>{
-  'purchases_flutter',
-};
+const upstreamBlockedLegacyKgpPlugins = <String>{'purchases_flutter'};
 
 const expectedLegacyKgpPlugins = <String>{
   ...conditionallyCompatibleLegacyKgpPlugins,
