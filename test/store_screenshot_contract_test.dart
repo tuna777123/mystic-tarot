@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mystic_tarot/src/store_screenshot_manifest.dart';
 import 'package:mystic_tarot/src/store_showcase.dart';
@@ -71,6 +72,17 @@ void main() {
             reason: '${device.slug}/$locale/${scene.slug} must render cleanly.',
           );
           expect(find.text('MYSTIC TAROT'), findsOneWidget);
+
+          final overflowingParagraphs = tester
+              .renderObjectList<RenderParagraph>(find.byType(RichText))
+              .where((paragraph) => paragraph.didExceedMaxLines)
+              .toList(growable: false);
+          expect(
+            overflowingParagraphs,
+            isEmpty,
+            reason: '${device.slug}/$locale/${scene.slug} must not hide '
+                'localized copy behind an ellipsis.',
+          );
 
           if (locale != 'en') {
             for (final englishOnlyLabel in const <String>[
