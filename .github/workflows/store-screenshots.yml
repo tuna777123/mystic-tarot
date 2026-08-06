@@ -22,6 +22,7 @@ concurrency:
 jobs:
   validate-screenshot-source:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - name: Check out source commit
         uses: actions/checkout@v6
@@ -67,6 +68,7 @@ jobs:
   generate-store-screenshot-partitions:
     needs: validate-screenshot-source
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -141,6 +143,7 @@ jobs:
   audit-and-package-store-screenshots:
     needs: generate-store-screenshot-partitions
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - name: Check out source commit
         uses: actions/checkout@v6
