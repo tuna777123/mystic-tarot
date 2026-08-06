@@ -88,7 +88,7 @@ void main() {
     }
   }
 
-  test('screenshot workflow generates, audits, and uploads the pack', () {
+  test('screenshot workflow partitions, audits, and uploads the pack', () {
     final workflow = File(
       '.github/workflows/store-screenshots.yml',
     ).readAsStringSync();
@@ -99,12 +99,22 @@ void main() {
       'tool/verify_store_screenshot_pack.dart',
     ).readAsStringSync();
 
+    expect(workflow, contains('validate-screenshot-source'));
+    expect(workflow, contains('generate-store-screenshot-partitions'));
+    expect(workflow, contains('audit-and-package-store-screenshots'));
+    expect(workflow, contains('matrix:'));
     expect(workflow, contains("GENERATE_STORE_SCREENSHOTS: '1'"));
+    expect(workflow, contains('STORE_SCREENSHOT_DEVICE'));
+    expect(workflow, contains('STORE_SCREENSHOT_LOCALE'));
+    expect(workflow, contains('actions/download-artifact@v7'));
+    expect(workflow, contains('merge-multiple: true'));
     expect(workflow, contains('verify_store_screenshot_pack.dart'));
     expect(workflow, contains('actions/upload-artifact@v7'));
     expect(workflow, contains('if-no-files-found: error'));
     expect(generator, contains('RenderRepaintBoundary'));
     expect(generator, contains('ui.ImageByteFormat.png'));
+    expect(generator, contains("Platform.environment['STORE_SCREENSHOT_DEVICE']"));
+    expect(generator, contains("Platform.environment['STORE_SCREENSHOT_LOCALE']"));
     expect(verifier, contains('Invalid PNG signature'));
     expect(verifier, contains('Wrong dimensions'));
     expect(verifier, contains('Unexpected screenshot'));
