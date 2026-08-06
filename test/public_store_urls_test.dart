@@ -51,13 +51,13 @@ void main() {
   });
 
   test('retries transient failures and succeeds without hiding endpoints', () async {
-    var calls = 0;
+    final callsByUri = <Uri, int>{};
     final errors = await verifyPublicStoreEndpoints(
       attempts: 3,
       retryDelay: Duration.zero,
       fetcher: (uri) async {
-        calls++;
-        if (calls.isOdd) throw const SocketException('temporary failure');
+        final calls = callsByUri.update(uri, (value) => value + 1, ifAbsent: () => 1);
+        if (calls == 1) throw const SocketException('temporary failure');
         final endpoint = publicStoreEndpoints.firstWhere(
           (candidate) => candidate.uri == uri,
         );
@@ -69,7 +69,8 @@ void main() {
     );
 
     expect(errors, isEmpty);
-    expect(calls, publicStoreEndpoints.length * 2);
+    expect(callsByUri.length, publicStoreEndpoints.length);
+    expect(callsByUri.values, everyElement(2));
   });
 
   test('reports unreachable and stale pages without exposing response bodies', () async {
