@@ -102,6 +102,43 @@ void main() {
     }
   }
 
+  test('store screenshot copy avoids promotional and ranking claims', () {
+    final showcase = File('lib/src/store_showcase.dart').readAsStringSync();
+    final normalized = showcase.toLowerCase();
+
+    for (final forbiddenPhrase in const <String>[
+      'download now',
+      'install now',
+      'try now',
+      'limited time',
+      'discount',
+      'sale',
+      'best app',
+      'top app',
+      'million downloads',
+    ]) {
+      expect(
+        normalized,
+        isNot(contains(forbiddenPhrase)),
+        reason: 'Store screenshot copy must not contain "$forbiddenPhrase".',
+      );
+    }
+
+    for (final forbiddenPattern in <RegExp>[
+      RegExp(r'#\s*1\b'),
+      RegExp(r'\$\s*\d'),
+      RegExp(r'[€£₺¥]\s*\d'),
+      RegExp(r'\d\s*%'),
+    ]) {
+      expect(
+        forbiddenPattern.hasMatch(showcase),
+        isFalse,
+        reason: 'Store screenshot copy must not contain specific prices, '
+            'discount percentages, or ranking claims.',
+      );
+    }
+  });
+
   test('screenshot workflow partitions, audits, and uploads the pack', () {
     final workflow = File(
       '.github/workflows/store-screenshots.yml',
