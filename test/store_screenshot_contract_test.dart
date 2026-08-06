@@ -128,6 +128,10 @@ void main() {
     expect(workflow, contains('verify_store_screenshot_pack.dart'));
     expect(workflow, contains('actions/upload-artifact@v7'));
     expect(workflow, contains('if-no-files-found: error'));
+    expect(RegExp(r'overwrite:\s+true').allMatches(workflow), hasLength(2));
+    expect(workflow, contains('retention-days: 7'));
+    expect(workflow, contains('retention-days: 14'));
+    expect(workflow, isNot(contains('retention-days: 1\n')));
 
     expect(pubspec, contains('image: ^4.8.0'));
     expect(generator, contains('RenderRepaintBoundary'));
