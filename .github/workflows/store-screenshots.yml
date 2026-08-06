@@ -9,15 +9,18 @@ on:
       - lib/src/store_showcase.dart
       - test/store_screenshot_generator_test.dart
       - test/store_screenshot_contract_test.dart
+      - test/support/store_screenshot_fonts.dart
       - tool/verify_store_screenshot_pack.dart
       - .github/workflows/store-screenshots.yml
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - pubspec.yaml
       - lib/src/store_screenshot_manifest.dart
       - lib/src/store_showcase.dart
       - test/store_screenshot_generator_test.dart
       - test/store_screenshot_contract_test.dart
+      - test/support/store_screenshot_fonts.dart
       - tool/verify_store_screenshot_pack.dart
       - .github/workflows/store-screenshots.yml
 
@@ -60,12 +63,14 @@ jobs:
             lib/src/store_showcase.dart \
             test/store_screenshot_generator_test.dart \
             test/store_screenshot_contract_test.dart \
+            test/support/store_screenshot_fonts.dart \
             tool/verify_store_screenshot_pack.dart
           git diff --exit-code -- \
             lib/src/store_screenshot_manifest.dart \
             lib/src/store_showcase.dart \
             test/store_screenshot_generator_test.dart \
             test/store_screenshot_contract_test.dart \
+            test/support/store_screenshot_fonts.dart \
             tool/verify_store_screenshot_pack.dart
 
       - name: Analyze screenshot pipeline
