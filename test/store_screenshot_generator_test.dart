@@ -47,16 +47,30 @@ void main() {
             final boundary =
                 boundaryKey.currentContext!.findRenderObject()
                     as RenderRepaintBoundary;
-            final image = await boundary.toImage(
-              pixelRatio: device.devicePixelRatio,
-            );
-            expect(image.width, device.width);
-            expect(image.height, device.height);
+            final capture = await tester.runAsync(() async {
+              final image = await boundary.toImage(
+                pixelRatio: device.devicePixelRatio,
+              );
+              try {
+                final byteData = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                if (byteData == null) {
+                  throw StateError('Flutter returned no PNG bytes.');
+                }
+                return (
+                  width: image.width,
+                  height: image.height,
+                  bytes: byteData.buffer.asUint8List(),
+                );
+              } finally {
+                image.dispose();
+              }
+            });
+            expect(capture, isNotNull);
+            expect(capture!.width, device.width);
+            expect(capture.height, device.height);
 
-            final byteData = await image.toByteData(
-              format: ui.ImageByteFormat.png,
-            );
-            expect(byteData, isNotNull);
             final relativePath = storeScreenshotRelativePath(
               device: device,
               locale: locale,
@@ -64,8 +78,7 @@ void main() {
             );
             final file = File('${output.path}/$relativePath');
             file.parent.createSync(recursive: true);
-            file.writeAsBytesSync(byteData!.buffer.asUint8List(), flush: true);
-            image.dispose();
+            file.writeAsBytesSync(capture.bytes, flush: true);
             generated++;
           }
         }
