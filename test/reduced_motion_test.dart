@@ -4,18 +4,13 @@ import 'package:mystic_tarot/src/widgets.dart';
 
 void main() {
   Widget backgroundApp({required bool disableAnimations}) => MaterialApp(
-        home: MediaQuery(
-          data: MediaQueryData(disableAnimations: disableAnimations),
-          child: const MysticBackground(
-            child: Scaffold(body: Text('Mystic')),
-          ),
-        ),
-      );
+    home: MediaQuery(
+      data: MediaQueryData(disableAnimations: disableAnimations),
+      child: const MysticBackground(child: Scaffold(body: Text('Mystic'))),
+    ),
+  );
 
-  Widget cardApp({
-    required bool disableAnimations,
-    required bool selected,
-  }) =>
+  Widget cardApp({required bool disableAnimations, required bool selected}) =>
       MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(disableAnimations: disableAnimations),
@@ -26,16 +21,16 @@ void main() {
       );
 
   Finder mysticAnimation() => find.descendant(
-        of: find.byType(MysticBackground),
-        matching: find.byType(AnimatedBuilder),
-      );
+    of: find.byType(MysticBackground),
+    matching: find.byType(AnimatedBuilder),
+  );
 
   Finder cardScaleAnimation() => find.descendant(
-        of: find.byType(TarotCardFace),
-        matching: find.byWidgetPredicate(
-          (widget) => widget is TweenAnimationBuilder<double>,
-        ),
-      );
+    of: find.byType(TarotCardFace),
+    matching: find.byWidgetPredicate(
+      (widget) => widget is TweenAnimationBuilder<double>,
+    ),
+  );
 
   AnimatedContainer cardContainer(WidgetTester tester) =>
       tester.widget<AnimatedContainer>(
@@ -77,16 +72,12 @@ void main() {
   testWidgets('tarot card selection removes motion but keeps selection', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      cardApp(disableAnimations: true, selected: false),
-    );
+    await tester.pumpWidget(cardApp(disableAnimations: true, selected: false));
 
     expect(cardScaleAnimation(), findsNothing);
     expect(cardContainer(tester).duration, Duration.zero);
 
-    await tester.pumpWidget(
-      cardApp(disableAnimations: true, selected: true),
-    );
+    await tester.pumpWidget(cardApp(disableAnimations: true, selected: true));
     await tester.pump();
 
     expect(cardScaleAnimation(), findsNothing);
@@ -101,36 +92,25 @@ void main() {
   testWidgets('tarot card selection keeps the premium motion normally', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      cardApp(disableAnimations: false, selected: true),
-    );
+    await tester.pumpWidget(cardApp(disableAnimations: false, selected: true));
 
     expect(cardScaleAnimation(), findsOneWidget);
-    expect(
-      cardContainer(tester).duration,
-      const Duration(milliseconds: 320),
-    );
+    expect(cardContainer(tester).duration, const Duration(milliseconds: 320));
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('tarot cards respond when motion preference changes', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      cardApp(disableAnimations: false, selected: true),
-    );
+    await tester.pumpWidget(cardApp(disableAnimations: false, selected: true));
     expect(cardScaleAnimation(), findsOneWidget);
 
-    await tester.pumpWidget(
-      cardApp(disableAnimations: true, selected: true),
-    );
+    await tester.pumpWidget(cardApp(disableAnimations: true, selected: true));
     await tester.pump();
     expect(cardScaleAnimation(), findsNothing);
     expect(cardContainer(tester).duration, Duration.zero);
 
-    await tester.pumpWidget(
-      cardApp(disableAnimations: false, selected: true),
-    );
+    await tester.pumpWidget(cardApp(disableAnimations: false, selected: true));
     await tester.pump();
     expect(cardScaleAnimation(), findsOneWidget);
     expect(tester.takeException(), isNull);
