@@ -11,7 +11,6 @@ void main(List<String> arguments) {
 
   if (!root.existsSync()) {
     _fail(<String>['Screenshot directory does not exist: ${root.path}']);
-    return;
   }
 
   final expectedPaths = <String>{};
@@ -51,7 +50,6 @@ void main(List<String> arguments) {
 
   if (errors.isNotEmpty) {
     _fail(errors);
-    return;
   }
 
   stdout.writeln('# Mystic Tarot Store Screenshot Audit');
@@ -114,6 +112,5 @@ Never _fail(List<String> errors) {
   for (final error in errors) {
     stderr.writeln('- $error');
   }
-  exitCode = 1;
-  throw const FileSystemException('Store screenshot audit failed.');
+  exit(1);
 }

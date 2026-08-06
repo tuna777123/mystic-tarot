@@ -588,8 +588,8 @@ class _Scene extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 14),
-      Row(
-        children: const [
+      const Row(
+        children: [
           Expanded(
             child: _Metric(value: 'Clarity', label: 'INTENTION'),
           ),
