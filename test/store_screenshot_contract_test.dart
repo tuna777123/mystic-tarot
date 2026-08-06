@@ -19,6 +19,13 @@ void main() {
     expect(appleDevice.width, 1290);
     expect(appleDevice.height, 2796);
 
+    final googlePlayDevice = storeScreenshotDevices.firstWhere(
+      (device) => device.slug == 'google-play-phone',
+    );
+    expect(googlePlayDevice.width, 1080);
+    expect(googlePlayDevice.height, 1920);
+    expect(googlePlayDevice.width / googlePlayDevice.height, 9 / 16);
+
     final paths = <String>{};
     for (final device in storeScreenshotDevices) {
       expect(device.width, greaterThanOrEqualTo(1080));
