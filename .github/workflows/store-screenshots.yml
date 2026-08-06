@@ -63,19 +63,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - device: apple-6.7
+          - device: apple-6.9
             locale: en
             locale_slug: en
-          - device: apple-6.7
+          - device: apple-6.9
             locale: tr
             locale_slug: tr
-          - device: apple-6.7
+          - device: apple-6.9
             locale: es
             locale_slug: es
-          - device: apple-6.7
+          - device: apple-6.9
             locale: fr
             locale_slug: fr
-          - device: apple-6.7
+          - device: apple-6.9
             locale: pt-BR
             locale_slug: pt-br
           - device: google-play-phone
