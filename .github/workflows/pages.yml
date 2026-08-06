@@ -85,8 +85,20 @@ jobs:
           grep -q 'Veja além' build/web/landing-pt-br.html
           grep -q 'Mystic Mirror' build/web/landing-en.html
           grep -q '<h1>Privacy Policy</h1>' build/web/privacy.html
+          grep -q '<h1>Gizlilik Politikası</h1>' build/web/privacy-tr.html
+          grep -q '<h1>Política de privacidad</h1>' build/web/privacy-es.html
+          grep -q '<h1>Politique de confidentialité</h1>' build/web/privacy-fr.html
+          grep -q '<h1>Política de Privacidade</h1>' build/web/privacy-pt-br.html
           grep -q '<h1>Terms of Use</h1>' build/web/terms.html
+          grep -q '<h1>Kullanım Koşulları</h1>' build/web/terms-tr.html
+          grep -q '<h1>Condiciones de uso</h1>' build/web/terms-es.html
+          grep -q '<h1>Conditions d’utilisation</h1>' build/web/terms-fr.html
+          grep -q '<h1>Termos de Uso</h1>' build/web/terms-pt-br.html
           grep -q '<h1>Support</h1>' build/web/support.html
+          grep -q '<h1>Destek</h1>' build/web/support-tr.html
+          grep -q '<h1>Soporte</h1>' build/web/support-es.html
+          grep -q '<h1>Assistance</h1>' build/web/support-fr.html
+          grep -q '<h1>Suporte</h1>' build/web/support-pt-br.html
           grep -q 'hreflang="pt-BR"' build/web/sitemap.xml
           grep -q 'hreflang="x-default"' build/web/sitemap.xml
           grep -q 'mystic-tarot/sitemap.xml' build/web/robots.txt
@@ -121,7 +133,7 @@ jobs:
       contents: read
       statuses: write
     steps:
-      - name: Verify live application and store URLs
+      - name: Verify live application and all localized store URLs
         id: live
         if: needs.deploy.result == 'success'
         continue-on-error: true
@@ -135,16 +147,45 @@ jobs:
             ""
             "landing.html"
             "privacy.html"
+            "privacy-tr.html"
+            "privacy-es.html"
+            "privacy-fr.html"
+            "privacy-pt-br.html"
             "terms.html"
+            "terms-tr.html"
+            "terms-es.html"
+            "terms-fr.html"
+            "terms-pt-br.html"
             "support.html"
+            "support-tr.html"
+            "support-es.html"
+            "support-fr.html"
+            "support-pt-br.html"
           )
           markers=(
             "flutter_bootstrap.js"
             "Kartların ötesini"
             "<h1>Privacy Policy</h1>"
+            "<h1>Gizlilik Politikası</h1>"
+            "<h1>Política de privacidad</h1>"
+            "<h1>Politique de confidentialité</h1>"
+            "<h1>Política de Privacidade</h1>"
             "<h1>Terms of Use</h1>"
+            "<h1>Kullanım Koşulları</h1>"
+            "<h1>Condiciones de uso</h1>"
+            "<h1>Conditions d’utilisation</h1>"
+            "<h1>Termos de Uso</h1>"
             "<h1>Support</h1>"
+            "<h1>Destek</h1>"
+            "<h1>Soporte</h1>"
+            "<h1>Assistance</h1>"
+            "<h1>Suporte</h1>"
           )
+
+          if [[ "${#paths[@]}" -ne "${#markers[@]}" ]]; then
+            echo "Public URL paths and markers must remain aligned." >&2
+            exit 1
+          fi
 
           for index in "${!paths[@]}"; do
             url="${base_url}${paths[$index]}"
@@ -177,10 +218,10 @@ jobs:
         run: |
           if [[ "$DEPLOY_RESULT" == "success" && "$LIVE_RESULT" == "success" ]]; then
             state="success"
-            description="Mystic Tarot Pages and store URLs are live"
+            description="Mystic Tarot Pages and all localized store URLs are live"
           else
             state="failure"
-            description="Mystic Tarot Pages or store URL verification failed"
+            description="Mystic Tarot Pages or localized URL verification failed"
           fi
 
           args=(
