@@ -17,14 +17,11 @@ class AdRevenueService with WidgetsBindingObserver {
 
   static final AdRevenueService instance = AdRevenueService._();
 
-  static const _androidTestAppOpen =
-      'ca-app-pub-3940256099942544/9257395921';
-  static const _iosTestAppOpen =
-      'ca-app-pub-3940256099942544/5575463023';
+  static const _androidTestAppOpen = 'ca-app-pub-3940256099942544/9257395921';
+  static const _iosTestAppOpen = 'ca-app-pub-3940256099942544/5575463023';
   static const _androidTestInterstitial =
       'ca-app-pub-3940256099942544/1033173712';
-  static const _iosTestInterstitial =
-      'ca-app-pub-3940256099942544/4411468910';
+  static const _iosTestInterstitial = 'ca-app-pub-3940256099942544/4411468910';
 
   static const _androidProductionAppOpen = String.fromEnvironment(
     'ADMOB_ANDROID_APP_OPEN_ID',

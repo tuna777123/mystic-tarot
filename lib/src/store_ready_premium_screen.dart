@@ -166,9 +166,7 @@ class StoreReadyPremiumScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: MysticColors.violet.withValues(alpha: .18),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: MysticColors.lavender.withValues(alpha: .18),
-        ),
+        border: Border.all(color: MysticColors.lavender.withValues(alpha: .18)),
       ),
       child: Row(
         children: [
@@ -177,9 +175,9 @@ class StoreReadyPremiumScreen extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],

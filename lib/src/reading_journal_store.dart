@@ -35,12 +35,11 @@ class ReadingJournalCodec {
 
   static const schemaVersion = 1;
 
-  static String encode(Iterable<ReadingRecord> records) => jsonEncode(
-        <String, Object>{
-          'schemaVersion': schemaVersion,
-          'records': records.map(_encodeRecord).toList(growable: false),
-        },
-      );
+  static String encode(Iterable<ReadingRecord> records) =>
+      jsonEncode(<String, Object>{
+        'schemaVersion': schemaVersion,
+        'records': records.map(_encodeRecord).toList(growable: false),
+      });
 
   static ReadingJournalDecodeReport decode(String payload) {
     final decoded = jsonDecode(payload);
@@ -100,22 +99,23 @@ class ReadingJournalCodec {
     );
   }
 
-  static Map<String, Object> _encodeRecord(ReadingRecord record) =>
-      <String, Object>{
-        'kind': record.kind.name,
-        'question': record.question,
-        'cards': record.cards
-            .map(
-              (item) => <String, Object>{
-                'name': item.card.name,
-                'reversed': item.reversed,
-              },
-            )
-            .toList(growable: false),
-        'createdAt': record.createdAt.toUtc().toIso8601String(),
-        'emotion': record.emotion.name,
-        'action': record.alignedAction,
-      };
+  static Map<String, Object> _encodeRecord(
+    ReadingRecord record,
+  ) => <String, Object>{
+    'kind': record.kind.name,
+    'question': record.question,
+    'cards': record.cards
+        .map(
+          (item) => <String, Object>{
+            'name': item.card.name,
+            'reversed': item.reversed,
+          },
+        )
+        .toList(growable: false),
+    'createdAt': record.createdAt.toUtc().toIso8601String(),
+    'emotion': record.emotion.name,
+    'action': record.alignedAction,
+  };
 
   static ReadingRecord? _tryDecodeRecord(Object? value) {
     try {
@@ -160,8 +160,9 @@ class ReadingJournalCodec {
         cards: List<DrawnCard>.unmodifiable(cards),
         createdAt: DateTime.parse(createdAt).toLocal(),
         emotion: EmotionalState.values.byName(emotionName),
-        alignedAction:
-            action.length > 1000 ? action.substring(0, 1000) : action,
+        alignedAction: action.length > 1000
+            ? action.substring(0, 1000)
+            : action,
       );
     } catch (_) {
       return null;
@@ -176,9 +177,10 @@ class ReadingJournalStore {
   ReadingJournalStore({
     SharedPreferences? preferences,
     void Function()? onNewReadingSaved,
-  })  : _providedPreferences = preferences,
-        _onNewReadingSaved =
-            onNewReadingSaved ?? AdRevenueService.instance.recordCompletedReading;
+  }) : _providedPreferences = preferences,
+       _onNewReadingSaved =
+           onNewReadingSaved ??
+           AdRevenueService.instance.recordCompletedReading;
 
   static const primaryKey = 'reading_journal_v1';
   static const backupKey = 'reading_journal_v1_backup';
@@ -239,8 +241,7 @@ class ReadingJournalStore {
         records: backup.records,
         recoveredFromBackup: true,
         migratedFromLegacy: false,
-        rejectedItems:
-            (primary?.rejectedItems ?? 0) + backup.rejectedItems,
+        rejectedItems: (primary?.rejectedItems ?? 0) + backup.rejectedItems,
       );
     }
 
@@ -288,7 +289,10 @@ class ReadingJournalStore {
     if (currentPayload != null &&
         currentPayload.trim().isNotEmpty &&
         _isTrustworthyPayload(currentPayload)) {
-      final backupSaved = await preferences.setString(backupKey, currentPayload);
+      final backupSaved = await preferences.setString(
+        backupKey,
+        currentPayload,
+      );
       if (!backupSaved) {
         throw StateError('Could not preserve the previous journal snapshot.');
       }

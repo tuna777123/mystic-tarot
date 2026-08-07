@@ -72,9 +72,7 @@ void main() {
     );
   }
   if (hasIos) {
-    _configureIosAdMob(
-      _adMobAppId('ADMOB_IOS_APP_ID', iosAdMobTestAppId),
-    );
+    _configureIosAdMob(_adMobAppId('ADMOB_IOS_APP_ID', iosAdMobTestAppId));
   }
   if (hasAndroid || hasIos) {
     app_lock_config.configureAppLock(
