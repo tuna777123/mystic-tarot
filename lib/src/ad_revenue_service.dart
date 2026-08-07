@@ -161,7 +161,7 @@ class AdRevenueService with WidgetsBindingObserver {
     if (!_initialized || id == null || _appOpenAd != null) return;
     AppOpenAd.load(
       adUnitId: id,
-      adRequest: const AdRequest(),
+      request: const AdRequest(),
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (ad) {
           _appOpenAd = ad;
