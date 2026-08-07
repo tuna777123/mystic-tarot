@@ -70,7 +70,9 @@ jobs:
           fi
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$range" -- '*.dart')
           if (( ${#files[@]} > 0 )); then
-            dart format --output=none --set-exit-if-changed "${files[@]}"
+            dart format "${files[@]}"
+            git diff -- "${files[@]}"
+            git diff --exit-code -- "${files[@]}"
           fi
 
       - name: Verify clean diff
