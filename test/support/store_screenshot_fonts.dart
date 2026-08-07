@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+const _storeScreenshotTarotSymbols = <String>['✶', '☽', '♌', '➶', '☾', '◎'];
+
 Future<void> loadStoreScreenshotFonts() async {
   final materialFontDirectory = _flutterMaterialFontDirectory();
   final roboto = File('${materialFontDirectory.path}/Roboto-Regular.ttf');
   final materialIcons = File(
     '${materialFontDirectory.path}/MaterialIcons-Regular.otf',
   );
+  final tarotSymbols = _storeScreenshotSymbolFont();
 
   if (!roboto.existsSync()) {
     throw StateError('Roboto font not found at ${roboto.path}.');
@@ -16,11 +19,18 @@ Future<void> loadStoreScreenshotFonts() async {
   if (!materialIcons.existsSync()) {
     throw StateError('Material Icons font not found at ${materialIcons.path}.');
   }
+  if (!tarotSymbols.existsSync()) {
+    throw StateError('Tarot symbol font not found at ${tarotSymbols.path}.');
+  }
 
   final robotoBytes = await roboto.readAsBytes();
-  await _loadFontFamily('Roboto', robotoBytes);
-  await _loadFontFamily('Arial', robotoBytes);
-  await _loadFontFamily('MaterialIcons', await materialIcons.readAsBytes());
+  final tarotSymbolBytes = await tarotSymbols.readAsBytes();
+  await _loadFontFamily('Roboto', <Uint8List>[robotoBytes, tarotSymbolBytes]);
+  await _loadFontFamily('Arial', <Uint8List>[robotoBytes, tarotSymbolBytes]);
+  await _loadFontFamily(
+    'MaterialIcons',
+    <Uint8List>[await materialIcons.readAsBytes()],
+  );
 }
 
 void verifyStoreScreenshotFonts() {
@@ -34,6 +44,16 @@ void verifyStoreScreenshotFonts() {
     }
     if (_widthOf('ĞİŞÇÖÜ éèñãç', family: family) <= 0) {
       throw StateError('$family must render launch-language accents.');
+    }
+
+    final symbolWidths = <String>{
+      for (final symbol in _storeScreenshotTarotSymbols)
+        _widthOf(symbol, family: family).toStringAsFixed(2),
+    };
+    if (symbolWidths.length < 4) {
+      throw StateError(
+        '$family tarot symbols must not collapse to one missing-glyph box.',
+      );
     }
   }
 }
@@ -51,9 +71,28 @@ Directory _flutterMaterialFontDirectory() {
   return Directory('${flutterRoot.path}/bin/cache/artifacts/material_fonts');
 }
 
-Future<void> _loadFontFamily(String family, Uint8List bytes) async {
-  final loader = FontLoader(family)
-    ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+File _storeScreenshotSymbolFont() {
+  final configuredPath = Platform.environment['STORE_SCREENSHOT_SYMBOL_FONT'];
+  if (configuredPath != null && configuredPath.trim().isNotEmpty) {
+    return File(configuredPath);
+  }
+
+  for (final path in const <String>[
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+    '/usr/share/fonts/dejavu/DejaVuSans.ttf',
+  ]) {
+    final file = File(path);
+    if (file.existsSync()) return file;
+  }
+
+  return File('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
+}
+
+Future<void> _loadFontFamily(String family, List<Uint8List> fonts) async {
+  final loader = FontLoader(family);
+  for (final bytes in fonts) {
+    loader.addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+  }
   await loader.load();
 }
 
