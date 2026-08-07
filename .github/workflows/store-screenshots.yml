@@ -1,0 +1,274 @@
+name: Generate Store Screenshots
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - pubspec.yaml
+      - lib/src/app_locale.dart
+      - lib/src/flagship.dart
+      - lib/src/store_screenshot_manifest.dart
+      - lib/src/store_showcase.dart
+      - lib/src/tarot_data.dart
+      - lib/src/theme.dart
+      - test/store_screenshot_generator_test.dart
+      - test/store_screenshot_contract_test.dart
+      - test/support/store_screenshot_fonts.dart
+      - tool/verify_store_screenshot_pack.dart
+      - .github/workflows/store-screenshots.yml
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - pubspec.yaml
+      - lib/src/app_locale.dart
+      - lib/src/flagship.dart
+      - lib/src/store_screenshot_manifest.dart
+      - lib/src/store_showcase.dart
+      - lib/src/tarot_data.dart
+      - lib/src/theme.dart
+      - test/store_screenshot_generator_test.dart
+      - test/store_screenshot_contract_test.dart
+      - test/support/store_screenshot_fonts.dart
+      - tool/verify_store_screenshot_pack.dart
+      - .github/workflows/store-screenshots.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-screenshots-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  validate-screenshot-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out source commit
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify screenshot source formatting
+        run: |
+          dart format \
+            lib/src/store_screenshot_manifest.dart \
+            lib/src/store_showcase.dart \
+            test/store_screenshot_generator_test.dart \
+            test/store_screenshot_contract_test.dart \
+            test/support/store_screenshot_fonts.dart \
+            tool/verify_store_screenshot_pack.dart
+          git diff --exit-code -- \
+            lib/src/store_screenshot_manifest.dart \
+            lib/src/store_showcase.dart \
+            test/store_screenshot_generator_test.dart \
+            test/store_screenshot_contract_test.dart \
+            test/support/store_screenshot_fonts.dart \
+            tool/verify_store_screenshot_pack.dart
+
+      - name: Analyze screenshot pipeline
+        run: flutter analyze --fatal-infos
+
+      - name: Verify every device and locale layout
+        run: flutter test test/store_screenshot_contract_test.dart
+
+  generate-store-screenshot-partitions:
+    needs: validate-screenshot-source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: apple-6.9
+            locale: en
+            locale_slug: en
+          - device: apple-6.9
+            locale: tr
+            locale_slug: tr
+          - device: apple-6.9
+            locale: es
+            locale_slug: es
+          - device: apple-6.9
+            locale: fr
+            locale_slug: fr
+          - device: apple-6.9
+            locale: pt-BR
+            locale_slug: pt-br
+          - device: google-play-phone
+            locale: en
+            locale_slug: en
+          - device: google-play-phone
+            locale: tr
+            locale_slug: tr
+          - device: google-play-phone
+            locale: es
+            locale_slug: es
+          - device: google-play-phone
+            locale: fr
+            locale_slug: fr
+          - device: google-play-phone
+            locale: pt-BR
+            locale_slug: pt-br
+    steps:
+      - name: Check out source commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out source commit
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate five localized PNGs
+        env:
+          GENERATE_STORE_SCREENSHOTS: '1'
+          STORE_SCREENSHOT_DEVICE: ${{ matrix.device }}
+          STORE_SCREENSHOT_LOCALE: ${{ matrix.locale }}
+        run: flutter test test/store_screenshot_generator_test.dart
+
+      - name: Upload screenshot partition
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-store-part-${{ matrix.device }}-${{ matrix.locale_slug }}
+          path: build/store_screenshots
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+  audit-and-package-store-screenshots:
+    needs: generate-store-screenshot-partitions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify checked-out source commit
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download all screenshot partitions
+        uses: actions/download-artifact@v7
+        with:
+          pattern: mystic-tarot-store-part-*
+          path: build/store_screenshots
+          merge-multiple: true
+
+      - name: Audit complete screenshot pack
+        env:
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p build/reports
+          dart run tool/verify_store_screenshot_pack.dart \
+            build/store_screenshots "$SOURCE_COMMIT" \
+            | tee build/reports/store-screenshot-audit.md
+          expected_version="$(awk '/^version:/{print $2; exit}' pubspec.yaml)"
+          test -n "$expected_version"
+          test -s build/store_screenshots/manifest.json
+          grep -Fq "\"applicationVersion\": \"$expected_version\"" \
+            build/store_screenshots/manifest.json
+          grep -Fq "\"sourceCommit\": \"$SOURCE_COMMIT\"" \
+            build/store_screenshots/manifest.json
+          cat build/reports/store-screenshot-audit.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload complete store screenshot pack
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-store-screenshots
+          path: |
+            build/store_screenshots
+            build/reports/store-screenshot-audit.md
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 14
+
+  report-screenshot-status:
+    if: always()
+    needs:
+      - validate-screenshot-source
+      - generate-store-screenshot-partitions
+      - audit-and-package-store-screenshots
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Publish screenshot generation status
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          VALIDATE_RESULT: ${{ needs.validate-screenshot-source.result }}
+          GENERATE_RESULT: ${{ needs.generate-store-screenshot-partitions.result }}
+          AUDIT_RESULT: ${{ needs.audit-and-package-store-screenshots.result }}
+          TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          if [[ "$VALIDATE_RESULT" == "cancelled" || \
+                "$GENERATE_RESULT" == "cancelled" || \
+                "$AUDIT_RESULT" == "cancelled" ]]; then
+            echo "A newer run superseded this branch run; no commit status published."
+            exit 0
+          fi
+
+          if [[ "$VALIDATE_RESULT" == "success" && \
+                "$GENERATE_RESULT" == "success" && \
+                "$AUDIT_RESULT" == "success" ]]; then
+            state="success"
+            description="50 localized store screenshots passed generation and audit"
+          else
+            state="failure"
+            description="Store screenshot generation or audit failed"
+          fi
+
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/statuses/${SOURCE_COMMIT}" \
+            -f "state=${state}" \
+            -f "context=screenshots/generation" \
+            -f "description=${description}" \
+            -f "target_url=${TARGET_URL}"
+
+          if [[ "$state" != "success" ]]; then
+            exit 1
+          fi
