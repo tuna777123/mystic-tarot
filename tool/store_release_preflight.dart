@@ -18,17 +18,26 @@ Future<void> main(List<String> arguments) async {
         bundleIdentifier:
             environment['STORE_BUNDLE_ID'] ??
             StoreReleaseContract.bundleIdentifier,
-        entitlementId:
-            environment['REVENUECAT_ENTITLEMENT_ID'] ??
-            StoreReleaseContract.entitlementId,
       ),
     ];
 
     if (platform == StoreReleasePlatform.android) {
       errors.addAll(
-        validateRevenueCatPublicKey(
-          environment['REVENUECAT_ANDROID_API_KEY'] ?? '',
-          platform: platform,
+        validateAdMobAppId(
+          environment['ADMOB_ANDROID_APP_ID'] ?? '',
+          label: 'Android AdMob application ID',
+        ),
+      );
+      errors.addAll(
+        validateAdMobAdUnitId(
+          environment['ADMOB_ANDROID_APP_OPEN_ID'] ?? '',
+          label: 'Android app-open ad unit ID',
+        ),
+      );
+      errors.addAll(
+        validateAdMobAdUnitId(
+          environment['ADMOB_ANDROID_INTERSTITIAL_ID'] ?? '',
+          label: 'Android interstitial ad unit ID',
         ),
       );
       errors.addAll(
@@ -45,9 +54,21 @@ Future<void> main(List<String> arguments) async {
       );
     } else {
       errors.addAll(
-        validateRevenueCatPublicKey(
-          environment['REVENUECAT_IOS_API_KEY'] ?? '',
-          platform: platform,
+        validateAdMobAppId(
+          environment['ADMOB_IOS_APP_ID'] ?? '',
+          label: 'iOS AdMob application ID',
+        ),
+      );
+      errors.addAll(
+        validateAdMobAdUnitId(
+          environment['ADMOB_IOS_APP_OPEN_ID'] ?? '',
+          label: 'iOS app-open ad unit ID',
+        ),
+      );
+      errors.addAll(
+        validateAdMobAdUnitId(
+          environment['ADMOB_IOS_INTERSTITIAL_ID'] ?? '',
+          label: 'iOS interstitial ad unit ID',
         ),
       );
       errors.addAll(
@@ -89,6 +110,7 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln(
       'Verified ${publicStoreEndpoints.length} live public store endpoints.',
     );
+    stdout.writeln('Production AdMob IDs were validated without printing them.');
     stdout.writeln('No protected values were printed.');
   } on FormatException catch (error) {
     stderr.writeln(error.message);
