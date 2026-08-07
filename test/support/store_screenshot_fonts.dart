@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const _storeScreenshotLatinFamilies = <String>['Roboto', 'Arial'];
-const _storeScreenshotTarotFamily = 'Georgia';
+const _storeScreenshotFontFamilies = <String>['Roboto', 'Arial', 'Georgia'];
 const _storeScreenshotTarotSymbols = <String>['✶', '☽', '♌', '➶', '☾', '◎'];
 
 Future<void> loadStoreScreenshotFonts() async {
@@ -29,16 +28,14 @@ Future<void> loadStoreScreenshotFonts() async {
   final tarotSymbolBytes = await tarotSymbols.readAsBytes();
   await _loadFontFamily('Roboto', <Uint8List>[robotoBytes]);
   await _loadFontFamily('Arial', <Uint8List>[robotoBytes]);
-  await _loadFontFamily(_storeScreenshotTarotFamily, <Uint8List>[
-    tarotSymbolBytes,
-  ]);
+  await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
   await _loadFontFamily('MaterialIcons', <Uint8List>[
     await materialIcons.readAsBytes(),
   ]);
 }
 
 void verifyStoreScreenshotFonts() {
-  for (final family in _storeScreenshotLatinFamilies) {
+  for (final family in _storeScreenshotFontFamilies) {
     final narrow = _widthOf('iiiiiiii', family: family);
     final wide = _widthOf('WWWWWWWW', family: family);
     if (wide <= narrow * 1.5) {
@@ -53,7 +50,7 @@ void verifyStoreScreenshotFonts() {
 
   final symbolWidths = <String>{
     for (final symbol in _storeScreenshotTarotSymbols)
-      _widthOf(symbol, family: _storeScreenshotTarotFamily).toStringAsFixed(2),
+      _widthOf(symbol, family: 'Georgia').toStringAsFixed(2),
   };
   if (symbolWidths.length < 3) {
     throw StateError(
