@@ -6,6 +6,15 @@ Mystic Tarot is a private, reflection-first tarot ritual built with Flutter. A r
 
 https://tuna777123.github.io/mystic-tarot/
 
+Public marketing:
+
+- English website: https://tuna777123.github.io/mystic-tarot/landing-en.html
+- Turkish website: https://tuna777123.github.io/mystic-tarot/landing.html
+- Spanish website: https://tuna777123.github.io/mystic-tarot/landing-es.html
+- French website: https://tuna777123.github.io/mystic-tarot/landing-fr.html
+- Brazilian Portuguese website: https://tuna777123.github.io/mystic-tarot/landing-pt-br.html
+- Press & sharing kit: https://tuna777123.github.io/mystic-tarot/press-kit.html
+
 Public policies:
 
 - Privacy: https://tuna777123.github.io/mystic-tarot/privacy.html
@@ -37,6 +46,15 @@ The current public release is local-first:
 - no transmission of reading questions to the developer.
 
 Native subscriptions must not be enabled until store products, receipt validation, merchant agreements, and store disclosures are configured.
+
+## Shareable launch material
+
+- `STORE_RELEASE.md` — canonical App Store / Google Play / RevenueCat handoff.
+- `docs/MARKETING_LAUNCH_KIT.md` — paid-social copy, short-form video briefs, creator/PR copy, five-language campaign messages, UTM convention, and advertising claim guardrails.
+- `docs/FINAL_DELIVERY.md` — technical and public-facing handoff for collaborators after release verification.
+- `web/press-kit.html` — public, indexable press/share page designed to be sent directly to creators, partners, designers, or press.
+
+Marketing must not claim App Store or Google Play availability until signed native listings are actually approved and live. Do not fabricate ratings, user counts, testimonials, awards, scarcity, prices, or predictive/professional-advice claims.
 
 ## Development
 
