@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ad_revenue_service.dart';
 import 'models.dart';
 import 'tarot_data.dart';
 
@@ -172,14 +173,19 @@ String readingJournalRecordId(ReadingRecord record) =>
     '${record.createdAt.toUtc().toIso8601String()}|${record.kind.name}';
 
 class ReadingJournalStore {
-  ReadingJournalStore({SharedPreferences? preferences})
-      : _providedPreferences = preferences;
+  ReadingJournalStore({
+    SharedPreferences? preferences,
+    void Function()? onNewReadingSaved,
+  })  : _providedPreferences = preferences,
+        _onNewReadingSaved =
+            onNewReadingSaved ?? AdRevenueService.instance.recordCompletedReading;
 
   static const primaryKey = 'reading_journal_v1';
   static const backupKey = 'reading_journal_v1_backup';
   static const legacyKey = 'journal_records';
 
   final SharedPreferences? _providedPreferences;
+  final void Function() _onNewReadingSaved;
 
   Future<SharedPreferences> _preferences() async =>
       _providedPreferences ?? SharedPreferences.getInstance();
@@ -276,12 +282,13 @@ class ReadingJournalStore {
     final preferences = await _preferences();
     final nextPayload = ReadingJournalCodec.encode(records);
     final currentPayload = preferences.getString(primaryKey);
+    final previousCount = _validRecordCount(currentPayload);
+    final nextCount = _validRecordCount(nextPayload);
 
     if (currentPayload != null &&
         currentPayload.trim().isNotEmpty &&
         _isTrustworthyPayload(currentPayload)) {
-      final backupSaved =
-          await preferences.setString(backupKey, currentPayload);
+      final backupSaved = await preferences.setString(backupKey, currentPayload);
       if (!backupSaved) {
         throw StateError('Could not preserve the previous journal snapshot.');
       }
@@ -290,6 +297,19 @@ class ReadingJournalStore {
     final primarySaved = await preferences.setString(primaryKey, nextPayload);
     if (!primarySaved) {
       throw StateError('Could not save the reading journal.');
+    }
+
+    if (nextCount == previousCount + 1) {
+      _onNewReadingSaved();
+    }
+  }
+
+  int _validRecordCount(String? payload) {
+    if (payload == null || payload.trim().isEmpty) return 0;
+    try {
+      return ReadingJournalCodec.decode(payload).records.length;
+    } catch (_) {
+      return 0;
     }
   }
 
