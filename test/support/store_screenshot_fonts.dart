@@ -28,10 +28,9 @@ Future<void> loadStoreScreenshotFonts() async {
   await _loadFontFamily('Roboto', <Uint8List>[robotoBytes, tarotSymbolBytes]);
   await _loadFontFamily('Arial', <Uint8List>[robotoBytes, tarotSymbolBytes]);
   await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
-  await _loadFontFamily(
-    'MaterialIcons',
-    <Uint8List>[await materialIcons.readAsBytes()],
-  );
+  await _loadFontFamily('MaterialIcons', <Uint8List>[
+    await materialIcons.readAsBytes(),
+  ]);
 }
 
 void verifyStoreScreenshotFonts() {
