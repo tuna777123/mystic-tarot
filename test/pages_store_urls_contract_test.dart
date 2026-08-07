@@ -37,7 +37,7 @@ void main() {
     }
   });
 
-  test('Pages verifies every localized store-facing URL after deployment', () {
+  test('Pages verifies every public launch URL after deployment', () {
     final workflow = File('.github/workflows/pages.yml').readAsStringSync();
 
     for (final entry in localizedStorePages.entries) {
@@ -55,8 +55,10 @@ void main() {
 
     expect(
       workflow,
-      contains('Verify live application and all localized store URLs'),
+      contains('Verify live application, sharing, and localized store URLs'),
     );
+    expect(workflow, contains('"press-kit.html"'));
+    expect(workflow, contains('"Official press & sharing kit"'));
     expect(workflow, contains('flutter_bootstrap.js'));
     expect(workflow, contains('Kartların ötesini'));
     expect(workflow, contains(r'${#paths[@]}'));
@@ -65,7 +67,9 @@ void main() {
     expect(workflow, contains(r'LIVE_RESULT: ${{ steps.live.outcome }}'));
     expect(
       workflow,
-      contains('Mystic Tarot Pages and all localized store URLs are live'),
+      contains(
+        'Mystic Tarot Pages, press kit, and localized store URLs are live',
+      ),
     );
     expect(workflow, contains('exit 1'));
   });
