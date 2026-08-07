@@ -179,9 +179,7 @@ List<String> _validatePng(
     );
   }
   if (bitDepth != 8) {
-    errors.add(
-      'Wrong PNG bit depth for $relativePath: $bitDepth; expected 8.',
-    );
+    errors.add('Wrong PNG bit depth for $relativePath: $bitDepth; expected 8.');
   }
   if (colorType != 2) {
     errors.add(
@@ -228,8 +226,8 @@ List<String> _validateVisualContent(img.Image image, String relativePath) {
   for (var row = 0; row < visualSampleGridSize; row++) {
     final y = ((image.height - 1) * row / (visualSampleGridSize - 1)).round();
     for (var column = 0; column < visualSampleGridSize; column++) {
-      final x =
-          ((image.width - 1) * column / (visualSampleGridSize - 1)).round();
+      final x = ((image.width - 1) * column / (visualSampleGridSize - 1))
+          .round();
       final pixel = image.getPixel(x, y);
       final red = (pixel.rNormalized * 255).round();
       final green = (pixel.gNormalized * 255).round();
