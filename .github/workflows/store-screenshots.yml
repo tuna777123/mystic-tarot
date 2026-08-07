@@ -5,8 +5,12 @@ on:
   push:
     paths:
       - pubspec.yaml
+      - lib/src/app_locale.dart
+      - lib/src/flagship.dart
       - lib/src/store_screenshot_manifest.dart
       - lib/src/store_showcase.dart
+      - lib/src/tarot_data.dart
+      - lib/src/theme.dart
       - test/store_screenshot_generator_test.dart
       - test/store_screenshot_contract_test.dart
       - test/support/store_screenshot_fonts.dart
@@ -16,8 +20,12 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - pubspec.yaml
+      - lib/src/app_locale.dart
+      - lib/src/flagship.dart
       - lib/src/store_screenshot_manifest.dart
       - lib/src/store_showcase.dart
+      - lib/src/tarot_data.dart
+      - lib/src/theme.dart
       - test/store_screenshot_generator_test.dart
       - test/store_screenshot_contract_test.dart
       - test/support/store_screenshot_fonts.dart
