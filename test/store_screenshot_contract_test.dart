@@ -250,9 +250,15 @@ void main() {
 
     expect(fontSupport, contains('Roboto-Regular.ttf'));
     expect(fontSupport, contains('MaterialIcons-Regular.otf'));
+    expect(fontSupport, contains('DejaVuSans.ttf'));
+    expect(fontSupport, contains('STORE_SCREENSHOT_SYMBOL_FONT'));
     expect(fontSupport, contains('loadStoreScreenshotFonts'));
     expect(fontSupport, contains('verifyStoreScreenshotFonts'));
-    expect(fontSupport, contains("['Roboto', 'Arial']"));
+    expect(fontSupport, contains("['Roboto', 'Arial', 'Georgia']"));
+    expect(fontSupport, contains("_loadFontFamily('Georgia'"));
+    expect(fontSupport, contains('_storeScreenshotTarotSymbols'));
+    expect(fontSupport, contains("family: 'Georgia'"));
+    expect(fontSupport, contains('missing-glyph box'));
     expect(fontSupport, contains('ĞİŞÇÖÜ éèñãç'));
     expect(
       fontSupport,
