@@ -22,18 +22,8 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Format migration Dart files
-        run: |
-          dart format \
-            lib/src/ad_revenue_service.dart \
-            lib/src/reading_journal_store.dart \
-            lib/src/store_purchase_service.dart \
-            lib/src/store_ready_premium_screen.dart \
-            test/ad_supported_monetization_contract_test.dart \
-            test/android_bundle_audit_test.dart \
-            test/store_purchase_service_test.dart \
-            tool/configure_store_identifiers.dart \
-            tool/src/android_bundle_audit.dart
+      - name: Format advertising migration Dart source
+        run: dart format lib test tool
       - name: Commit formatter result
         shell: bash
         run: |
