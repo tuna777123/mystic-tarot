@@ -7,8 +7,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 /// Privacy-aware, advertising-only monetization for native Mystic Tarot builds.
 ///
 /// Revenue formats:
-/// - app-open ads when a returning user foregrounds the native app;
-/// - interstitial ads after every third newly saved reading.
+/// - app-open ads on eligible returning foreground transitions;
+/// - interstitial ads after every third genuinely new saved reading.
 ///
 /// The public web edition intentionally remains ad-free because the official
 /// Google Mobile Ads Flutter plugin supports Android and iOS, not web.
@@ -41,14 +41,17 @@ class AdRevenueService with WidgetsBindingObserver {
   );
 
   static const _maxAppOpenCacheAge = Duration(hours: 4);
+  static const _minimumAppOpenInterval = Duration(hours: 1);
 
   AppOpenAd? _appOpenAd;
   DateTime? _appOpenLoadedAt;
+  DateTime? _lastAppOpenShownAt;
   InterstitialAd? _interstitial;
   bool _initializing = false;
   bool _initialized = false;
   bool _observerAttached = false;
   bool _showingFullScreenAd = false;
+  bool _hasBackgroundedSinceInitialization = false;
   int _completedReadingsSinceAd = 0;
 
   bool get supported =>
@@ -98,9 +101,8 @@ class AdRevenueService with WidgetsBindingObserver {
           });
         },
         (_) async {
-          // If consent collection itself has a transient error, the UMP SDK can
-          // still allow ad requests based on a valid decision from a previous
-          // session. `canRequestAds()` remains the final gate.
+          // A previous valid consent decision may still permit requests after a
+          // transient refresh error. canRequestAds() remains the final gate.
           await _initializeAdsIfAllowed();
           if (!completer.isCompleted) completer.complete();
         },
@@ -127,7 +129,18 @@ class AdRevenueService with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed || !_initialized) return;
+    if (!_initialized) return;
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      _hasBackgroundedSinceInitialization = true;
+      return;
+    }
+    if (state != AppLifecycleState.resumed ||
+        !_hasBackgroundedSinceInitialization) {
+      return;
+    }
+    _hasBackgroundedSinceInitialization = false;
     _showAppOpenIfReady();
   }
 
@@ -168,8 +181,14 @@ class AdRevenueService with WidgetsBindingObserver {
     return DateTime.now().difference(loadedAt) >= _maxAppOpenCacheAge;
   }
 
+  bool get _appOpenIntervalSatisfied {
+    final shownAt = _lastAppOpenShownAt;
+    if (shownAt == null) return true;
+    return DateTime.now().difference(shownAt) >= _minimumAppOpenInterval;
+  }
+
   void _showAppOpenIfReady() {
-    if (_showingFullScreenAd) return;
+    if (_showingFullScreenAd || !_appOpenIntervalSatisfied) return;
     final ad = _appOpenAd;
     if (ad == null) {
       _loadAppOpen();
@@ -184,6 +203,7 @@ class AdRevenueService with WidgetsBindingObserver {
     }
 
     _showingFullScreenAd = true;
+    _lastAppOpenShownAt = DateTime.now();
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
