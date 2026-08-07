@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 const _storeScreenshotFontFamilies = <String>['Roboto', 'Arial', 'Georgia'];
+const _storeScreenshotTarotFamily = 'TarotSymbols';
 const _storeScreenshotTarotSymbols = <String>['✶', '☽', '♌', '➶', '☾', '◎'];
 
 Future<void> loadStoreScreenshotFonts() async {
@@ -29,6 +30,9 @@ Future<void> loadStoreScreenshotFonts() async {
   await _loadFontFamily('Roboto', <Uint8List>[robotoBytes]);
   await _loadFontFamily('Arial', <Uint8List>[robotoBytes]);
   await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
+  await _loadFontFamily(_storeScreenshotTarotFamily, <Uint8List>[
+    tarotSymbolBytes,
+  ]);
   await _loadFontFamily('MaterialIcons', <Uint8List>[
     await materialIcons.readAsBytes(),
   ]);
@@ -50,11 +54,11 @@ void verifyStoreScreenshotFonts() {
 
   final symbolWidths = <String>{
     for (final symbol in _storeScreenshotTarotSymbols)
-      _widthOf(symbol, family: 'Georgia').toStringAsFixed(2),
+      _widthOf(symbol, family: _storeScreenshotTarotFamily).toStringAsFixed(2),
   };
   if (symbolWidths.length < 3) {
     throw StateError(
-      'Georgia tarot symbols must not collapse to one missing-glyph box.',
+      'TarotSymbols glyphs must not collapse to one missing-glyph box.',
     );
   }
 }
