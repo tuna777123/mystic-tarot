@@ -27,6 +27,7 @@ Future<void> loadStoreScreenshotFonts() async {
   final tarotSymbolBytes = await tarotSymbols.readAsBytes();
   await _loadFontFamily('Roboto', <Uint8List>[robotoBytes, tarotSymbolBytes]);
   await _loadFontFamily('Arial', <Uint8List>[robotoBytes, tarotSymbolBytes]);
+  await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
   await _loadFontFamily(
     'MaterialIcons',
     <Uint8List>[await materialIcons.readAsBytes()],
@@ -34,7 +35,7 @@ Future<void> loadStoreScreenshotFonts() async {
 }
 
 void verifyStoreScreenshotFonts() {
-  for (final family in const <String>['Roboto', 'Arial']) {
+  for (final family in const <String>['Roboto', 'Arial', 'Georgia']) {
     final narrow = _widthOf('iiiiiiii', family: family);
     final wide = _widthOf('WWWWWWWW', family: family);
     if (wide <= narrow * 1.5) {
