@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'src/ad_revenue_service.dart';
 import 'src/app.dart';
 import 'src/app_locale.dart';
 import 'src/app_lock_gate.dart';
@@ -15,5 +16,6 @@ Future<void> main() async {
     await ensureInitialMysticLanguagePreference();
     runApp(const AppLockGate(child: MysticApp()));
     unawaited(RitualReminderService.instance.initialize());
+    unawaited(AdRevenueService.instance.initialize());
   });
 }
