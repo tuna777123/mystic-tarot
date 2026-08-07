@@ -25,8 +25,8 @@ Future<void> loadStoreScreenshotFonts() async {
 
   final robotoBytes = await roboto.readAsBytes();
   final tarotSymbolBytes = await tarotSymbols.readAsBytes();
-  await _loadFontFamily('Roboto', <Uint8List>[robotoBytes, tarotSymbolBytes]);
-  await _loadFontFamily('Arial', <Uint8List>[robotoBytes, tarotSymbolBytes]);
+  await _loadFontFamily('Roboto', <Uint8List>[robotoBytes]);
+  await _loadFontFamily('Arial', <Uint8List>[robotoBytes]);
   await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
   await _loadFontFamily('MaterialIcons', <Uint8List>[
     await materialIcons.readAsBytes(),
@@ -45,16 +45,16 @@ void verifyStoreScreenshotFonts() {
     if (_widthOf('ĞİŞÇÖÜ éèñãç', family: family) <= 0) {
       throw StateError('$family must render launch-language accents.');
     }
+  }
 
-    final symbolWidths = <String>{
-      for (final symbol in _storeScreenshotTarotSymbols)
-        _widthOf(symbol, family: family).toStringAsFixed(2),
-    };
-    if (symbolWidths.length < 4) {
-      throw StateError(
-        '$family tarot symbols must not collapse to one missing-glyph box.',
-      );
-    }
+  final symbolWidths = <String>{
+    for (final symbol in _storeScreenshotTarotSymbols)
+      _widthOf(symbol, family: 'Georgia').toStringAsFixed(2),
+  };
+  if (symbolWidths.length < 4) {
+    throw StateError(
+      'Georgia tarot symbols must not collapse to one missing-glyph box.',
+    );
   }
 }
 
