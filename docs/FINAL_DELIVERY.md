@@ -30,6 +30,7 @@ This document is designed to be shared directly with a developer, designer, perf
 - Five-language Privacy, Terms, and Support surfaces.
 - `robots.txt`, sitemap, canonical URLs, Open Graph, Twitter Card, structured-data metadata, branded icon set, install prompt, reduced-motion protections, and a branded 404 page.
 - Public press & sharing page for collaborators and media.
+- Post-deployment live verification for the PWA root, product landing, public press kit, and all 15 localized Privacy/Terms/Support pages.
 
 ### Store / release operations
 
@@ -55,37 +56,42 @@ This document is designed to be shared directly with a developer, designer, perf
 
 See `docs/MARKETING_LAUNCH_KIT.md`.
 
-## 2. Verified source baseline
+## 2. Verified final launch source baseline
 
-The verified pre-final-launch source baseline is Mystic Tarot `1.22.3+32` from main commit:
+Mystic Tarot `1.22.3+32` final public-launch hardening was verified on PR #133 head:
 
-`dedd420add86733169e9d2de6e0257f0a86094a8`
+`ef1714e394f5edc65814c89db7abe96ee9e4b34d`
 
-That baseline passed:
+and squash-merged to the product launch baseline on `main`:
 
-- formatting and clean-diff checks;
-- static analysis;
-- 449 automated tests;
+`63504ce4a19bb5b1c600932f4a2c26c1250007b6`
+
+The final-head release chain passed:
+
+- changed-Dart formatting and clean-diff checks;
+- public launch / SEO / advertising-claim contract;
+- static analysis with no issues;
+- the complete Flutter test suite;
 - web release build;
 - Android AAB release build;
 - unsigned iOS release and application verification;
 - strict Android jarsigner and `bundletool validate` checks;
-- package, version, ABI, sensitive-permission, advertising/analytics-class audits;
+- package, version, ABI, sensitive-permission, and advertising/analytics-class audits;
 - Built-in Kotlin exact-warning-set audit;
-- five-language screenshot validation;
-- 10/10 locale/device screenshot partitions;
-- final screenshot package audit;
-- post-merge `pages/deployment = success`;
-- post-merge `screenshots/generation = success`.
+- artifact uploads for web, AAB, Android audit, and Built-in Kotlin audit.
 
-The final-launch hardening branch adds only the public press/share surface, marketing handoff, sitemap indexing, and automated launch-surface contracts. Its CI must pass before this document is treated as the new canonical source baseline.
+Post-merge `pages/deployment = success` on `63504ce4a19bb5b1c600932f4a2c26c1250007b6` additionally proves the live Pages workflow passed `curl --fail` plus page-specific content-marker verification for **18 public endpoints**: the PWA root, product landing, public press kit, and all 15 localized Privacy/Terms/Support pages.
+
+The signed native-store preflight intentionally remains scoped to its existing 17 store-critical public URLs. The marketing press kit is not a prerequisite for signing a native candidate.
 
 ## 3. Verified QA Android artifact baseline
 
+Final verified QA artifact from the source set merged by PR #133:
+
 Package: `com.tunabozcali.mystictarot`  
 Version: `1.22.3+32`  
-Size: `61,659,967` bytes  
-SHA-256: `c3c09be0cade63a241c783b6c12b925ed6e4e062cec103559d0e67bea48dbcdd`  
+Size: `61,659,974` bytes (`58.80 MiB`)  
+SHA-256: `17356fdedcc2a61afdba9124eeda191871bf4ffbd0648185cab6db88f3d18882`  
 ABIs: `arm64-v8a`, `armeabi-v7a`, `x86_64`
 
 Verified checks:
@@ -94,16 +100,16 @@ Verified checks:
 - `bundletool validate`: PASS;
 - sensitive permission denylist: clear;
 - advertising / analytics class denylist: clear;
-- Built-in Kotlin audit: PASS with reviewed warnings exactly `flutter_timezone, purchases_flutter`.
+- Built-in Kotlin audit: PASS with reviewed warnings exactly `flutter_timezone, purchases_flutter`, unknown/regressed plugins none, policy drift none.
 
 This artifact is a QA release AAB. It is **not** the final Google Play upload-signed production candidate.
 
 ## 4. Verified screenshot baseline
 
-Canonical pre-final-launch screenshot artifact:
+The final public-launch PR did not modify screenshot generator or screenshot-product source. The canonical audited screenshot payload therefore remains the already visually reviewed main set:
 
-- App version: `1.22.3+32`
-- Source: `dedd420add86733169e9d2de6e0257f0a86094a8`
+- App version: `1.22.3+32`.
+- Screenshot-source main baseline: `dedd420add86733169e9d2de6e0257f0a86094a8`.
 - Exactly 50 PNGs.
 - 25 Apple 6.9-inch screenshots at `1290×2796`.
 - 25 Google Play phone screenshots at `1080×1920`.
@@ -178,4 +184,4 @@ Until those steps pass, do not describe the native app as publicly available in 
 
 Copy/paste this when sending the project to a collaborator:
 
-> Mystic Tarot `1.22.3+32` is a production-hardened Flutter product with a live installable web edition, five complete launch languages, public legal/support pages, verified Android/web/iOS QA pipelines, deterministic 50-image store screenshot generation, a store-release handoff, and a public press/marketing kit. Start with the public press kit for product context and `STORE_RELEASE.md` for native store operations. Native store availability must not be claimed until the account-owned signing, sandbox, real-device, and store-review steps are complete.
+> Mystic Tarot `1.22.3+32` is a production-hardened Flutter product with a live installable web edition, five complete launch languages, public legal/support pages, verified Android/web/iOS QA pipelines, deterministic 50-image store screenshot generation, a store-release handoff, a public press kit, and a five-language marketing launch kit. The final public-launch source passed Flutter and iOS release CI, and the live Pages deployment passed 18-endpoint content verification. Start with the public press kit for product context and `STORE_RELEASE.md` for native store operations. Native store availability must not be claimed until the account-owned signing, sandbox, real-device, and store-review steps are complete.
