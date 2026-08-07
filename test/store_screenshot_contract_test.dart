@@ -21,6 +21,7 @@ void main() {
     expect(storeScreenshotDevices, hasLength(2));
     expect(StoreScreenshotScene.values, hasLength(5));
     expect(expectedStoreScreenshotCount, 50);
+    expect(StoreScreenshotScene.mysticPlus.slug, '05-free-ad-supported');
 
     final appleDevice = storeScreenshotDevices.firstWhere(
       (device) => device.slug.startsWith('apple-'),
@@ -138,6 +139,9 @@ void main() {
       'best app',
       'top app',
       'million downloads',
+      'mystic plus',
+      'official store pricing',
+      'continue with yearly',
     ]) {
       expect(
         normalized,

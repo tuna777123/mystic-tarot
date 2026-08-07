@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('v1.22 revenue-ready final contract stays complete', () {
+  test('v1.22 final product remains hardened under ad-only revenue', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
-    final premium = File(
+    final access = File(
       'lib/src/store_ready_premium_screen.dart',
+    ).readAsStringSync();
+    final adService = File(
+      'lib/src/ad_revenue_service.dart',
     ).readAsStringSync();
     final identifiers = File(
       'tool/configure_store_identifiers.dart',
@@ -25,27 +28,20 @@ void main() {
     final storePack = File('STORE_RELEASE.md').readAsStringSync();
 
     expect(pubspec, contains('version: 1.22.3+32'));
-    expect(
-      premium.indexOf('..._planIds.map((id) => _productTile(context, id))'),
-      lessThan(premium.indexOf('LaunchContinuityTimeline(')),
-    );
-    expect(
-      premium.indexOf("ValueKey('premium-primary-action')"),
-      lessThan(premium.indexOf('LaunchContinuityTimeline(')),
-    );
-    expect(premium, contains("ValueKey('premium-store-retry')"));
-    expect(premium, contains("ValueKey('premium-sticky-primary-action')"));
-    expect(premium, contains('Future<void> _retryStore()'));
-    expect(premium, contains('Widget _renewalDisclosure'));
-    expect(premium, contains('Navigator.pop(context, true)'));
-    expect(
-      premium,
-      contains(
-        'Daily Guidance and your saved journal remain available without Plus.',
-      ),
-    );
-    expect(premium, isNot(contains('MOST POPULAR')));
-    expect(premium, isNot(contains('limited time')));
+    expect(pubspec, contains('google_mobile_ads: ^9.0.0'));
+    expect(access, contains('Everything is unlocked.'));
+    expect(access, contains('there is no subscription to buy'));
+    expect(access, contains('Continue free'));
+    expect(access, contains('Navigator.pop(context, true)'));
+    expect(access, isNot(contains('MOST POPULAR')));
+    expect(access, isNot(contains('limited time')));
+    expect(access, isNot(contains('Manage subscription')));
+
+    expect(adService, contains('ConsentInformation.instance.canRequestAds()'));
+    expect(adService, contains('AppOpenAd.load'));
+    expect(adService, contains('InterstitialAd.load'));
+    expect(adService, contains('_minimumAppOpenInterval'));
+    expect(adService, contains('_completedReadingsSinceAd < 3'));
 
     expect(
       identifiers,
@@ -59,24 +55,31 @@ void main() {
     );
     expect(identifiers, contains('configureRitualNotifications()'));
     expect(identifiers, contains('configureAppLock('));
-    expect(identifiers, contains('requireAndroid: hasAndroid'));
-    expect(identifiers, contains('requireIos: hasIos'));
+    expect(identifiers, contains('ADMOB_ANDROID_APP_ID'));
+    expect(identifiers, contains('ADMOB_IOS_APP_ID'));
     expect(appLock, contains('void configureAppLock({'));
     expect(reminders, contains('void configureRitualNotifications({'));
+
     expect(
       'dart run tool/configure_store_identifiers.dart'
           .allMatches(production)
           .length,
       greaterThanOrEqualTo(3),
     );
-    expect(production, contains('REVENUECAT_ANDROID_API_KEY'));
-    expect(production, contains('REVENUECAT_IOS_API_KEY'));
+    expect(production, contains('ADMOB_ANDROID_APP_ID'));
+    expect(production, contains('ADMOB_IOS_APP_ID'));
+    expect(production, contains('MYSTIC_USE_TEST_ADS=false'));
+    expect(production, isNot(contains('REVENUECAT_ANDROID_API_KEY')));
+    expect(production, isNot(contains('REVENUECAT_IOS_API_KEY')));
     expect(production, contains('Verify Android signature'));
     expect(production, contains('Verify iOS signature and identity'));
+
     expect(notes, startsWith('# Mystic Tarot 1.22.0'));
     expect(currentPatchNotes, startsWith('# Mystic Tarot 1.22.3'));
-    expect(storePack, contains('Current verified source version: `1.22.3+32`'));
-    expect(storePack, contains('No countdown, fake scarcity'));
+    expect(storePack, contains('Current source version: `1.22.3+32`'));
+    expect(storePack, contains('free and advertising-supported'));
+    expect(storePack, contains('MYSTIC_USE_TEST_ADS=false'));
+
     expect(File('tool/v122_revenue_final.py').existsSync(), isFalse);
     expect(File('tool/v122_revenue_final_v2.py').existsSync(), isFalse);
     expect(File('tool/v122_revenue_final_v3.py').existsSync(), isFalse);

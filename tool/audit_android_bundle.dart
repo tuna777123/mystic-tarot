@@ -96,6 +96,9 @@ Future<String> _audit(_AuditOptions options) async {
       '${_sorted(forbiddenPermissions).join(', ')}',
     );
   }
+  final reviewedAdPermissions = findReviewedAdvertisingPermissions(
+    manifest.permissions,
+  );
 
   final entryResult = await _runChecked('unzip', ['-Z1', bundle.path]);
   final entries = const LineSplitter()
@@ -137,12 +140,13 @@ Future<String> _audit(_AuditOptions options) async {
     if (output is! List<int>) {
       throw AuditFailure('Could not inspect binary DEX entry $dexEntry.');
     }
-    final bytes = Uint8List.fromList(output);
-    forbiddenMarkers.addAll(findForbiddenDexMarkers(bytes));
+    forbiddenMarkers.addAll(
+      findForbiddenDexMarkers(Uint8List.fromList(output)),
+    );
   }
   if (forbiddenMarkers.isNotEmpty) {
     throw AuditFailure(
-      'Forbidden analytics or advertising SDK classes detected: '
+      'Unapproved analytics or attribution SDK classes detected: '
       '${_sorted(forbiddenMarkers).join(', ')}',
     );
   }
@@ -153,6 +157,7 @@ Future<String> _audit(_AuditOptions options) async {
       .split(RegExp(r'\s+'))
       .first;
   final permissions = _sorted(manifest.permissions);
+  final sortedReviewedAdPermissions = _sorted(reviewedAdPermissions);
   final sortedAbis = _sorted(abis);
 
   return '''# Mystic Tarot Android Bundle Audit
@@ -167,11 +172,14 @@ Future<String> _audit(_AuditOptions options) async {
 - Native ABIs: `${sortedAbis.join(', ')}`
 - Declared permissions: `${permissions.isEmpty ? 'none' : permissions.join(', ')}`
 - Sensitive permission denylist: `clear`
-- Advertising/analytics class denylist: `clear`
+- Reviewed Google advertising permissions: `${sortedReviewedAdPermissions.isEmpty ? 'none' : sortedReviewedAdPermissions.join(', ')}`
+- Unapproved analytics/attribution SDK denylist: `clear`
 
-This automated audit verifies the release artifact itself. It does not replace
-Google Play pre-launch testing, production signing ownership, sandbox purchase
-testing, or real-device network inspection.
+This automated audit verifies the release artifact itself. Google Mobile Ads is an
+intentional reviewed dependency in the advertising-supported native build. The
+audit does not replace Play pre-launch testing, AdMob/UMP account configuration,
+production signing ownership, store privacy declarations, or real-device
+network and consent inspection.
 ''';
 }
 
@@ -220,9 +228,7 @@ class _AuditOptions {
   static _AuditOptions parse(List<String> arguments) {
     String? value(String name) {
       final index = arguments.indexOf(name);
-      if (index == -1) {
-        return null;
-      }
+      if (index == -1) return null;
       if (index + 1 >= arguments.length) {
         throw AuditFailure('$name requires a value.');
       }

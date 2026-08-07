@@ -20,7 +20,7 @@ enum StoreScreenshotScene {
   explainableReading('02-explainable-reading'),
   mysticMirror('03-mystic-mirror'),
   livingPath('04-living-path'),
-  mysticPlus('05-mystic-plus');
+  mysticPlus('05-free-ad-supported');
 
   const StoreScreenshotScene(this.slug);
 

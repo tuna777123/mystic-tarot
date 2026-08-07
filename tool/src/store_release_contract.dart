@@ -7,12 +7,12 @@ class StoreReleaseContract {
 
   static const appName = 'Mystic Tarot';
   static const bundleIdentifier = 'com.tunabozcali.mystictarot';
-  static const entitlementId = 'mystic_plus';
-  static const monthlyProductId = 'mystic_plus_monthly';
-  static const yearlyProductId = 'mystic_plus_yearly';
+  static const monetizationModel = 'advertising-only';
 
   static const androidRequiredEnvironment = <String>[
-    'REVENUECAT_ANDROID_API_KEY',
+    'ADMOB_ANDROID_APP_ID',
+    'ADMOB_ANDROID_APP_OPEN_ID',
+    'ADMOB_ANDROID_INTERSTITIAL_ID',
     'ANDROID_UPLOAD_KEYSTORE_BASE64',
     'ANDROID_KEY_ALIAS',
     'ANDROID_KEY_PASSWORD',
@@ -21,7 +21,9 @@ class StoreReleaseContract {
   ];
 
   static const iosRequiredEnvironment = <String>[
-    'REVENUECAT_IOS_API_KEY',
+    'ADMOB_IOS_APP_ID',
+    'ADMOB_IOS_APP_OPEN_ID',
+    'ADMOB_IOS_INTERSTITIAL_ID',
     'IOS_DISTRIBUTION_CERTIFICATE_BASE64',
     'IOS_DISTRIBUTION_CERTIFICATE_PASSWORD',
     'IOS_DISTRIBUTION_CERT_SHA256',
@@ -47,38 +49,29 @@ List<String> missingEnvironmentValues(
       .toList(growable: false);
 }
 
-List<String> validateRevenueCatPublicKey(
-  String value, {
-  required StoreReleasePlatform platform,
-}) {
-  final key = value.trim();
-  final errors = <String>[];
-  if (key.isEmpty) {
-    return const ['RevenueCat public SDK key is missing.'];
+List<String> validateAdMobAppId(String value, {required String label}) {
+  final appId = value.trim();
+  if (appId.isEmpty) return ['$label is missing.'];
+  if (!RegExp(r'^ca-app-pub-\d{16}~\d{10}$').hasMatch(appId)) {
+    return ['$label must be a valid AdMob application ID.'];
   }
-  if (key.length < 12) {
-    errors.add('RevenueCat public SDK key is unexpectedly short.');
+  if (appId == 'ca-app-pub-3940256099942544~3347511713' ||
+      appId == 'ca-app-pub-3940256099942544~1458002511') {
+    return ['$label must not use a Google demo application ID in production.'];
   }
-  if (RegExp(r'\s').hasMatch(key)) {
-    errors.add('RevenueCat public SDK key must not contain whitespace.');
-  }
+  return const [];
+}
 
-  final lower = key.toLowerCase();
-  const forbiddenPrefixes = <String>['sk_', 'secret_', 'rc_secret_', 'bearer '];
-  if (forbiddenPrefixes.any(lower.startsWith)) {
-    errors.add('A secret API key must never be embedded in a client release.');
+List<String> validateAdMobAdUnitId(String value, {required String label}) {
+  final adUnitId = value.trim();
+  if (adUnitId.isEmpty) return ['$label is missing.'];
+  if (!RegExp(r'^ca-app-pub-\d{16}/\d{10}$').hasMatch(adUnitId)) {
+    return ['$label must be a valid AdMob ad unit ID.'];
   }
-
-  final expectedPrefix = platform == StoreReleasePlatform.android
-      ? 'goog_'
-      : 'appl_';
-  if (!lower.startsWith(expectedPrefix)) {
-    errors.add(
-      'RevenueCat key does not match the expected $expectedPrefix public '
-      'application-key prefix.',
-    );
+  if (adUnitId.startsWith('ca-app-pub-3940256099942544/')) {
+    return ['$label must not use a Google demo ad unit in production.'];
   }
-  return errors;
+  return const [];
 }
 
 List<String> validateBase64Secret(String value, {required String label}) {
@@ -124,24 +117,13 @@ List<String> validateTeamIdentifier(String value) {
   return const [];
 }
 
-List<String> validateReleaseIdentity({
-  required String bundleIdentifier,
-  required String entitlementId,
-}) {
-  final errors = <String>[];
+List<String> validateReleaseIdentity({required String bundleIdentifier}) {
   if (bundleIdentifier.trim() != StoreReleaseContract.bundleIdentifier) {
-    errors.add(
-      'Bundle/application ID must remain '
-      '${StoreReleaseContract.bundleIdentifier}.',
-    );
+    return [
+      'Bundle/application ID must remain ${StoreReleaseContract.bundleIdentifier}.',
+    ];
   }
-  if (entitlementId.trim() != StoreReleaseContract.entitlementId) {
-    errors.add(
-      'RevenueCat entitlement must remain '
-      '${StoreReleaseContract.entitlementId}.',
-    );
-  }
-  return errors;
+  return const [];
 }
 
 String readPubspecVersion(String source) {

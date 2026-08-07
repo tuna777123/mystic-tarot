@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('v1.12 revenue identity and intelligence wiring are complete', () {
+  test('v1.12 intelligence wiring survives the ad-only migration', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final app = File('lib/src/app.dart').readAsStringSync();
     final releaseNotes = File('RELEASE_NOTES.md').readAsStringSync();
@@ -24,19 +24,18 @@ void main() {
     );
   });
 
-  test('official plan screen sells the accumulating weekly outcome', () {
-    final store =
-        File('lib/src/store_ready_premium_screen.dart').readAsStringSync();
-    expect(
-      store,
-      contains('A fresh private intelligence report every seven days'),
-    );
-    expect(store, contains('Her yedi günde yenilenen özel intelligence raporu'));
-    expect(store, contains('Unlimited deep readings'));
-    expect(store, contains('Premium spreads and unlimited Oracle follow-ups'));
+  test('historical plan route now explains free ad-supported access', () {
+    final store = File(
+      'lib/src/store_ready_premium_screen.dart',
+    ).readAsStringSync();
+    expect(store, contains('Everything is unlocked.'));
+    expect(store, contains('there is no subscription to buy'));
+    expect(store, contains('Continue free'));
+    expect(store, contains('advertising privacy choices'));
+    expect(store, isNot(contains('CONTINUE WITH YEARLY')));
   });
 
-  test('all localized store handoffs describe the v1.12 report', () {
+  test('all localized store handoffs keep intelligence without paid plans', () {
     const listings = <String>[
       'docs/STORE_LISTING_TR.md',
       'docs/STORE_LISTING_ES.md',
@@ -51,10 +50,26 @@ void main() {
         reason: path,
       );
       expect(content.toLowerCase(), contains('intelligence'), reason: path);
-      expect(content, isNot(contains('## Sürüm notları — 1.11.0')), reason: path);
-      expect(content, isNot(contains('## Notas de la versión — 1.11.0')), reason: path);
-      expect(content, isNot(contains('## Notes de version — 1.11.0')), reason: path);
-      expect(content, isNot(contains('## Notas da versão — 1.11.0')), reason: path);
+      expect(
+        content.toLowerCase(),
+        anyOf(
+          contains('sem assinatura'),
+          contains('sin suscripción'),
+          contains('aucun abonnement'),
+          contains('abonelik'),
+        ),
+        reason: path,
+      );
+      expect(
+        content.toLowerCase(),
+        anyOf(
+          contains('publicidad'),
+          contains('publicité'),
+          contains('publicidade'),
+          contains('reklam'),
+        ),
+        reason: path,
+      );
     }
   });
 
