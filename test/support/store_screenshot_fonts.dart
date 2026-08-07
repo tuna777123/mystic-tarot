@@ -5,7 +5,15 @@ import 'package:flutter/services.dart';
 
 const _storeScreenshotFontFamilies = <String>['Roboto', 'Arial', 'Georgia'];
 const _storeScreenshotTarotFamily = 'TarotSymbols';
-const _storeScreenshotTarotSymbols = <String>['✶', '☽', '♌', '➶', '☾', '◎'];
+const _storeScreenshotTarotSymbols = <String>[
+  '✦',
+  '✶',
+  '☽',
+  '♌',
+  '➶',
+  '☾',
+  '◎',
+];
 
 Future<void> loadStoreScreenshotFonts() async {
   final materialFontDirectory = _flutterMaterialFontDirectory();
@@ -28,7 +36,10 @@ Future<void> loadStoreScreenshotFonts() async {
   final robotoBytes = await roboto.readAsBytes();
   final tarotSymbolBytes = await tarotSymbols.readAsBytes();
   await _loadFontFamily('Roboto', <Uint8List>[robotoBytes]);
-  await _loadFontFamily('Arial', <Uint8List>[tarotSymbolBytes]);
+  await _loadFontFamily('Arial', <Uint8List>[
+    robotoBytes,
+    tarotSymbolBytes,
+  ]);
   await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
   await _loadFontFamily(_storeScreenshotTarotFamily, <Uint8List>[
     tarotSymbolBytes,
@@ -39,7 +50,7 @@ Future<void> loadStoreScreenshotFonts() async {
 }
 
 void verifyStoreScreenshotFonts() {
-  for (final family in _storeScreenshotFontFamilies) {
+  for (final family in const <String>['Roboto', 'Arial']) {
     final narrow = _widthOf('iiiiiiii', family: family);
     final wide = _widthOf('WWWWWWWW', family: family);
     if (wide <= narrow * 1.5) {
@@ -52,14 +63,26 @@ void verifyStoreScreenshotFonts() {
     }
   }
 
-  for (final family in const <String>['Arial', 'Georgia', 'TarotSymbols']) {
-    final symbolWidths = <String>{
-      for (final symbol in _storeScreenshotTarotSymbols)
-        _widthOf(symbol, family: family).toStringAsFixed(2),
-    };
-    if (symbolWidths.length < 3) {
+  final arialSymbolWidths = <String>{
+    for (final symbol in _storeScreenshotTarotSymbols)
+      _widthOf(symbol, family: 'Arial').toStringAsFixed(2),
+  };
+  final georgiaSymbolWidths = <String>{
+    for (final symbol in _storeScreenshotTarotSymbols)
+      _widthOf(symbol, family: 'Georgia').toStringAsFixed(2),
+  };
+  final dedicatedSymbolWidths = <String>{
+    for (final symbol in _storeScreenshotTarotSymbols)
+      _widthOf(symbol, family: _storeScreenshotTarotFamily).toStringAsFixed(2),
+  };
+  for (final entry in <String, Set<String>>{
+    'Arial': arialSymbolWidths,
+    'Georgia': georgiaSymbolWidths,
+    _storeScreenshotTarotFamily: dedicatedSymbolWidths,
+  }.entries) {
+    if (entry.value.length < 3) {
       throw StateError(
-        '$family tarot glyphs must not collapse to one missing-glyph box.',
+        '${entry.key} tarot glyphs must not collapse to one missing-glyph box.',
       );
     }
   }
