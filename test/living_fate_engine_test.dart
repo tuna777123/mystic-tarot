@@ -4,7 +4,8 @@ import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 
 void main() {
-  TarotCardData card(String name) => tarotDeck.firstWhere((item) => item.name == name);
+  TarotCardData card(String name) =>
+      tarotDeck.firstWhere((item) => item.name == name);
 
   ReadingRecord record({
     required DateTime at,
@@ -12,15 +13,14 @@ void main() {
     bool reversed = false,
     EmotionalState emotion = EmotionalState.curious,
     ReadingKind kind = ReadingKind.daily,
-  }) =>
-      ReadingRecord(
-        kind: kind,
-        question: 'Test question',
-        cards: [DrawnCard(card(cardName), reversed)],
-        createdAt: at,
-        emotion: emotion,
-        alignedAction: 'Test action',
-      );
+  }) => ReadingRecord(
+    kind: kind,
+    question: 'Test question',
+    cards: [DrawnCard(card(cardName), reversed)],
+    createdAt: at,
+    emotion: emotion,
+    alignedAction: 'Test action',
+  );
 
   test('sorts recurring cards and tracks reversed appearances', () {
     final snapshot = const LivingFateEngine().analyze([

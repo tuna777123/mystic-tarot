@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-typedef MysticErrorReporter = FutureOr<void> Function(
-  Object error,
-  StackTrace stackTrace, {
-  required bool fatal,
-  String? context,
-});
+typedef MysticErrorReporter =
+    FutureOr<void> Function(
+      Object error,
+      StackTrace stackTrace, {
+      required bool fatal,
+      String? context,
+    });
 
 /// Centralized error boundary for production diagnostics.
 ///
@@ -55,12 +56,7 @@ class MysticAppObservability {
     String? context,
   }) async {
     try {
-      await _reporter(
-        error,
-        stackTrace,
-        fatal: fatal,
-        context: context,
-      );
+      await _reporter(error, stackTrace, fatal: fatal, context: context);
     } catch (reportingError, reportingStackTrace) {
       if (kDebugMode) {
         debugPrint('Mystic error reporter failed: $reportingError');

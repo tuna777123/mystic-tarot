@@ -40,13 +40,11 @@ class MysticPlusIntelligenceSnapshot {
 
   int get readingsUntilReady => readingCount >= 3 ? 0 : 3 - readingCount;
 
-  double get mirrorCompletionRate => mirrorEligibleCount == 0
-      ? 0
-      : mirrorCompletedCount / mirrorEligibleCount;
+  double get mirrorCompletionRate =>
+      mirrorEligibleCount == 0 ? 0 : mirrorCompletedCount / mirrorEligibleCount;
 
-  double get mirrorShiftRate => mirrorCompletedCount == 0
-      ? 0
-      : mirrorShiftCount / mirrorCompletedCount;
+  double get mirrorShiftRate =>
+      mirrorCompletedCount == 0 ? 0 : mirrorShiftCount / mirrorCompletedCount;
 
   double get emotionalLiftRate => emotionalComparisonCount == 0
       ? 0
@@ -161,12 +159,12 @@ abstract final class MysticPlusIntelligence {
   }
 
   static int _emotionScore(EmotionalState emotion) => switch (emotion) {
-        EmotionalState.anxious => 0,
-        EmotionalState.uncertain => 0,
-        EmotionalState.curious => 1,
-        EmotionalState.hopeful => 2,
-        EmotionalState.grounded => 3,
-      };
+    EmotionalState.anxious => 0,
+    EmotionalState.uncertain => 0,
+    EmotionalState.curious => 1,
+    EmotionalState.hopeful => 2,
+    EmotionalState.grounded => 3,
+  };
 
   static String _dayKey(DateTime date) =>
       '${date.year.toString().padLeft(4, '0')}-'

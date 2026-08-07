@@ -25,82 +25,84 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  test('restore merges complete history without replacing local readings',
-      () async {
-    final preferences = await SharedPreferences.getInstance();
-    final current = _record('Keep local', DateTime.utc(2026, 8, 3, 8));
-    final imported = _record(
-      'Bring from old device',
-      DateTime.utc(2026, 8, 4, 8),
-      card: 1,
-    );
-    await ReadingJournalStore(preferences: preferences)
-        .save(<ReadingRecord>[current]);
+  test(
+    'restore merges complete history without replacing local readings',
+    () async {
+      final preferences = await SharedPreferences.getInstance();
+      final current = _record('Keep local', DateTime.utc(2026, 8, 3, 8));
+      final imported = _record(
+        'Bring from old device',
+        DateTime.utc(2026, 8, 4, 8),
+        card: 1,
+      );
+      await ReadingJournalStore(
+        preferences: preferences,
+      ).save(<ReadingRecord>[current]);
 
-    final reflection = MysticMirrorReflection(
-      recordId: readingJournalRecordId(imported),
-      outcome: MysticMirrorOutcome.shifted,
-      emotion: EmotionalState.grounded,
-      note: 'The imported reflection.',
-      completedAt: DateTime.utc(2026, 8, 5, 8),
-    );
-    final oracle = OracleConversationTurn.create(
-      record: imported,
-      question: 'What changed?',
-      answer: 'The imported Oracle answer.',
-      createdAt: DateTime.utc(2026, 8, 4, 9),
-    );
-    final code = JournalTransferCodec.encode(
-      records: <ReadingRecord>[imported],
-      reflections: <MysticMirrorReflection>[reflection],
-      oracleTurns: <OracleConversationTurn>[oracle],
-    );
-    final service = PrivateJournalTransferService(preferences: preferences);
+      final reflection = MysticMirrorReflection(
+        recordId: readingJournalRecordId(imported),
+        outcome: MysticMirrorOutcome.shifted,
+        emotion: EmotionalState.grounded,
+        note: 'The imported reflection.',
+        completedAt: DateTime.utc(2026, 8, 5, 8),
+      );
+      final oracle = OracleConversationTurn.create(
+        record: imported,
+        question: 'What changed?',
+        answer: 'The imported Oracle answer.',
+        createdAt: DateTime.utc(2026, 8, 4, 9),
+      );
+      final code = JournalTransferCodec.encode(
+        records: <ReadingRecord>[imported],
+        reflections: <MysticMirrorReflection>[reflection],
+        oracleTurns: <OracleConversationTurn>[oracle],
+      );
+      final service = PrivateJournalTransferService(preferences: preferences);
 
-    final preview = await service.preview(
-      code: code,
-      currentRecords: <ReadingRecord>[current],
-    );
-    expect(preview.addedReadings, 1);
-    expect(preview.changedReflections, 1);
-    expect(preview.addedOracleTurns, 1);
+      final preview = await service.preview(
+        code: code,
+        currentRecords: <ReadingRecord>[current],
+      );
+      expect(preview.addedReadings, 1);
+      expect(preview.changedReflections, 1);
+      expect(preview.addedOracleTurns, 1);
 
-    final result = await service.commit(
-      code: code,
-      currentRecords: <ReadingRecord>[current],
-    );
+      final result = await service.commit(
+        code: code,
+        currentRecords: <ReadingRecord>[current],
+      );
 
-    expect(
-      result.mergedRecords.map((item) => item.question),
-      <String>['Bring from old device', 'Keep local'],
-    );
-    expect(
-      (await ReadingJournalStore(preferences: preferences).load())
-          .records
-          .map((item) => item.question),
-      <String>['Bring from old device', 'Keep local'],
-    );
-    expect(
-      (await MysticMirrorStore(preferences: preferences).load())
-          .values
-          .single
-          .note,
-      'The imported reflection.',
-    );
-    expect(
-      (await OracleConversationStore(preferences: preferences).loadAll())
-          .single
-          .answer,
-      'The imported Oracle answer.',
-    );
-    expect(
-      preferences.getStringList('discovered_cards'),
-      containsAll(<String>[
-        current.cards.first.card.name,
-        imported.cards.first.card.name,
-      ]),
-    );
-  });
+      expect(result.mergedRecords.map((item) => item.question), <String>[
+        'Bring from old device',
+        'Keep local',
+      ]);
+      expect(
+        (await ReadingJournalStore(
+          preferences: preferences,
+        ).load()).records.map((item) => item.question),
+        <String>['Bring from old device', 'Keep local'],
+      );
+      expect(
+        (await MysticMirrorStore(
+          preferences: preferences,
+        ).load()).values.single.note,
+        'The imported reflection.',
+      );
+      expect(
+        (await OracleConversationStore(
+          preferences: preferences,
+        ).loadAll()).single.answer,
+        'The imported Oracle answer.',
+      );
+      expect(
+        preferences.getStringList('discovered_cards'),
+        containsAll(<String>[
+          current.cards.first.card.name,
+          imported.cards.first.card.name,
+        ]),
+      );
+    },
+  );
 
   test('duplicate imports do not create duplicate readings or turns', () async {
     final preferences = await SharedPreferences.getInstance();
@@ -111,8 +113,9 @@ void main() {
       answer: 'Same answer',
       createdAt: DateTime.utc(2026, 8, 4, 9),
     );
-    await ReadingJournalStore(preferences: preferences)
-        .save(<ReadingRecord>[record]);
+    await ReadingJournalStore(
+      preferences: preferences,
+    ).save(<ReadingRecord>[record]);
     await OracleConversationStore(preferences: preferences).saveTurn(turn);
     final code = JournalTransferCodec.encode(
       records: <ReadingRecord>[record],
@@ -133,8 +136,9 @@ void main() {
   test('invalid transfer leaves the current snapshot untouched', () async {
     final preferences = await SharedPreferences.getInstance();
     final current = _record('Untouched', DateTime.utc(2026, 8, 4, 8));
-    await ReadingJournalStore(preferences: preferences)
-        .save(<ReadingRecord>[current]);
+    await ReadingJournalStore(
+      preferences: preferences,
+    ).save(<ReadingRecord>[current]);
     final before = preferences.getString(ReadingJournalStore.primaryKey);
     final service = PrivateJournalTransferService(preferences: preferences);
 

@@ -102,10 +102,8 @@ class _MysticJourneysFeatureState extends State<MysticJourneysFeature> {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: MysticColors.night,
-      builder: (_) => _CreateJourneySheet(
-        language: widget.language,
-        now: _clock(),
-      ),
+      builder: (_) =>
+          _CreateJourneySheet(language: widget.language, now: _clock()),
     );
     if (!mounted || created == null) return;
     await _persist([..._journeys, created]);
@@ -165,14 +163,15 @@ class _MysticJourneysFeatureState extends State<MysticJourneysFeature> {
       );
     }
 
-    final visible = _journeys
-        .where((journey) => journey.status != JourneyStatus.archived)
-        .toList(growable: false)
-      ..sort((a, b) {
-        final aDate = a.lastActivityAt ?? a.createdAt;
-        final bDate = b.lastActivityAt ?? b.createdAt;
-        return bDate.compareTo(aDate);
-      });
+    final visible =
+        _journeys
+            .where((journey) => journey.status != JourneyStatus.archived)
+            .toList(growable: false)
+          ..sort((a, b) {
+            final aDate = a.lastActivityAt ?? a.createdAt;
+            final bDate = b.lastActivityAt ?? b.createdAt;
+            return bDate.compareTo(aDate);
+          });
 
     return Scaffold(
       backgroundColor: MysticColors.ink,
@@ -186,7 +185,11 @@ class _MysticJourneysFeatureState extends State<MysticJourneysFeature> {
               icon: const Icon(Icons.auto_awesome_motion_rounded),
             ),
           IconButton(
-            tooltip: _copy(widget.language, 'Create journey', 'Yolculuk oluştur'),
+            tooltip: _copy(
+              widget.language,
+              'Create journey',
+              'Yolculuk oluştur',
+            ),
             onPressed: _createJourney,
             icon: const Icon(Icons.add_rounded),
           ),
@@ -251,7 +254,9 @@ class _MysticJourneysFeatureState extends State<MysticJourneysFeature> {
           : FloatingActionButton.extended(
               onPressed: _createJourney,
               icon: const Icon(Icons.auto_awesome_rounded),
-              label: Text(_copy(widget.language, 'New journey', 'Yeni yolculuk')),
+              label: Text(
+                _copy(widget.language, 'New journey', 'Yeni yolculuk'),
+              ),
             ),
     );
   }
@@ -424,10 +429,18 @@ class _CreateJourneySheetState extends State<_CreateJourneySheet> {
                 autofocus: true,
                 maxLength: 48,
                 decoration: InputDecoration(
-                  labelText: _copy(widget.language, 'Journey name', 'Yolculuk adı'),
+                  labelText: _copy(
+                    widget.language,
+                    'Journey name',
+                    'Yolculuk adı',
+                  ),
                 ),
                 validator: (value) => value == null || value.trim().isEmpty
-                    ? _copy(widget.language, 'A name is required.', 'Bir ad gerekli.')
+                    ? _copy(
+                        widget.language,
+                        'A name is required.',
+                        'Bir ad gerekli.',
+                      )
                     : null,
               ),
               const SizedBox(height: 10),
@@ -767,7 +780,11 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
               ),
               const SizedBox(height: 12),
               Text(
-                _copy(widget.language, 'Mood (optional)', 'Ruh hâli (isteğe bağlı)'),
+                _copy(
+                  widget.language,
+                  'Mood (optional)',
+                  'Ruh hâli (isteğe bağlı)',
+                ),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -805,7 +822,11 @@ class _ReflectionSheetState extends State<_ReflectionSheet> {
                   onPressed: _submit,
                   icon: const Icon(Icons.check_rounded),
                   label: Text(
-                    _copy(widget.language, 'Save reflection', 'Düşünceyi kaydet'),
+                    _copy(
+                      widget.language,
+                      'Save reflection',
+                      'Düşünceyi kaydet',
+                    ),
                   ),
                 ),
               ),
@@ -917,7 +938,9 @@ class _EmptyJourneys extends StatelessWidget {
                 gradient: const LinearGradient(
                   colors: [Color(0xFF6948A9), Color(0xFF211735)],
                 ),
-                border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
+                border: Border.all(
+                  color: MysticColors.gold.withValues(alpha: .42),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: MysticColors.violet.withValues(alpha: .35),
@@ -959,26 +982,52 @@ class _EmptyJourneys extends StatelessWidget {
                   colors: [Color(0xFF2B2046), Color(0xFF15111F)],
                 ),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: MysticColors.lavender.withValues(alpha: .24)),
+                border: Border.all(
+                  color: MysticColors.lavender.withValues(alpha: .24),
+                ),
               ),
               child: Column(
                 children: [
                   _JourneyPromise(
                     number: '01',
-                    title: _copy(language, 'Name what matters', 'Önemli olanı adlandır'),
-                    body: _copy(language, 'Love, work, healing or your own path', 'Aşk, iş, iyileşme veya kendi yolun'),
+                    title: _copy(
+                      language,
+                      'Name what matters',
+                      'Önemli olanı adlandır',
+                    ),
+                    body: _copy(
+                      language,
+                      'Love, work, healing or your own path',
+                      'Aşk, iş, iyileşme veya kendi yolun',
+                    ),
                   ),
                   const SizedBox(height: 15),
                   _JourneyPromise(
                     number: '02',
-                    title: _copy(language, 'Connect your readings', 'Okumalarını birbirine bağla'),
-                    body: _copy(language, 'Watch one question evolve over time', 'Tek bir sorunun zamanla değişimini gör'),
+                    title: _copy(
+                      language,
+                      'Connect your readings',
+                      'Okumalarını birbirine bağla',
+                    ),
+                    body: _copy(
+                      language,
+                      'Watch one question evolve over time',
+                      'Tek bir sorunun zamanla değişimini gör',
+                    ),
                   ),
                   const SizedBox(height: 15),
                   _JourneyPromise(
                     number: '03',
-                    title: _copy(language, 'See your turning points', 'Dönüm noktalarını gör'),
-                    body: _copy(language, 'Mystic reveals the pattern behind your choices', 'Mystic seçimlerinin ardındaki örüntüyü gösterir'),
+                    title: _copy(
+                      language,
+                      'See your turning points',
+                      'Dönüm noktalarını gör',
+                    ),
+                    body: _copy(
+                      language,
+                      'Mystic reveals the pattern behind your choices',
+                      'Mystic seçimlerinin ardındaki örüntüyü gösterir',
+                    ),
                   ),
                 ],
               ),
@@ -990,7 +1039,11 @@ class _EmptyJourneys extends StatelessWidget {
                 onPressed: onCreate,
                 icon: const Icon(Icons.auto_awesome_rounded),
                 label: Text(
-                  _copy(language, 'Create first journey', 'İlk yolculuğu oluştur'),
+                  _copy(
+                    language,
+                    'Create first journey',
+                    'İlk yolculuğu oluştur',
+                  ),
                 ),
               ),
             ),
@@ -1014,39 +1067,47 @@ class _JourneyPromise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: MysticColors.gold.withValues(alpha: .12),
-              border: Border.all(color: MysticColors.gold.withValues(alpha: .36)),
-            ),
-            child: Text(
-              number,
-              style: const TextStyle(
-                fontFamily: 'Arial',
-                color: MysticColors.gold,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+    children: [
+      Container(
+        width: 38,
+        height: 38,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: MysticColors.gold.withValues(alpha: .12),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .36)),
+        ),
+        child: Text(
+          number,
+          style: const TextStyle(
+            fontFamily: 'Arial',
+            color: MysticColors.gold,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                const SizedBox(height: 3),
-                Text(body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11)),
-              ],
+        ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
             ),
-          ),
-        ],
-      );
+            const SizedBox(height: 3),
+            Text(
+              body,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontSize: 11),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _Notice extends StatelessWidget {
@@ -1084,34 +1145,34 @@ String _date(DateTime value) {
 }
 
 Color _areaColor(JourneyArea area) => switch (area) {
-      JourneyArea.relationship => const Color(0xFFFF7AA8),
-      JourneyArea.career => const Color(0xFF8DB9FF),
-      JourneyArea.wellbeing => const Color(0xFF77D9B4),
-      JourneyArea.education => const Color(0xFFFFC66D),
-      JourneyArea.creativity => const Color(0xFFD89CFF),
-      JourneyArea.confidence => const Color(0xFFFF9878),
-      JourneyArea.custom => MysticColors.lavender,
-    };
+  JourneyArea.relationship => const Color(0xFFFF7AA8),
+  JourneyArea.career => const Color(0xFF8DB9FF),
+  JourneyArea.wellbeing => const Color(0xFF77D9B4),
+  JourneyArea.education => const Color(0xFFFFC66D),
+  JourneyArea.creativity => const Color(0xFFD89CFF),
+  JourneyArea.confidence => const Color(0xFFFF9878),
+  JourneyArea.custom => MysticColors.lavender,
+};
 
 IconData _areaIcon(JourneyArea area) => switch (area) {
-      JourneyArea.relationship => Icons.favorite_rounded,
-      JourneyArea.career => Icons.work_rounded,
-      JourneyArea.wellbeing => Icons.spa_rounded,
-      JourneyArea.education => Icons.school_rounded,
-      JourneyArea.creativity => Icons.palette_rounded,
-      JourneyArea.confidence => Icons.bolt_rounded,
-      JourneyArea.custom => Icons.auto_awesome_rounded,
-    };
+  JourneyArea.relationship => Icons.favorite_rounded,
+  JourneyArea.career => Icons.work_rounded,
+  JourneyArea.wellbeing => Icons.spa_rounded,
+  JourneyArea.education => Icons.school_rounded,
+  JourneyArea.creativity => Icons.palette_rounded,
+  JourneyArea.confidence => Icons.bolt_rounded,
+  JourneyArea.custom => Icons.auto_awesome_rounded,
+};
 
 String _areaLabel(MysticLanguage language, JourneyArea area) => switch (area) {
-      JourneyArea.relationship => _copy(language, 'Relationship', 'İlişki'),
-      JourneyArea.career => _copy(language, 'Career', 'Kariyer'),
-      JourneyArea.wellbeing => _copy(language, 'Wellbeing', 'İyi oluş'),
-      JourneyArea.education => _copy(language, 'Education', 'Eğitim'),
-      JourneyArea.creativity => _copy(language, 'Creativity', 'Yaratıcılık'),
-      JourneyArea.confidence => _copy(language, 'Confidence', 'Özgüven'),
-      JourneyArea.custom => _copy(language, 'Personal', 'Kişisel'),
-    };
+  JourneyArea.relationship => _copy(language, 'Relationship', 'İlişki'),
+  JourneyArea.career => _copy(language, 'Career', 'Kariyer'),
+  JourneyArea.wellbeing => _copy(language, 'Wellbeing', 'İyi oluş'),
+  JourneyArea.education => _copy(language, 'Education', 'Eğitim'),
+  JourneyArea.creativity => _copy(language, 'Creativity', 'Yaratıcılık'),
+  JourneyArea.confidence => _copy(language, 'Confidence', 'Özgüven'),
+  JourneyArea.custom => _copy(language, 'Personal', 'Kişisel'),
+};
 
 String _statusLabel(MysticLanguage language, JourneyStatus status) =>
     switch (status) {

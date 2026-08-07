@@ -39,9 +39,9 @@ class PrivateJournalTransferPreview {
 
 class PrivateJournalTransferService {
   PrivateJournalTransferService({SharedPreferences? preferences})
-      : _providedPreferences = preferences,
-        _mirrorStore = MysticMirrorStore(preferences: preferences),
-        _oracleStore = OracleConversationStore(preferences: preferences);
+    : _providedPreferences = preferences,
+      _mirrorStore = MysticMirrorStore(preferences: preferences),
+      _oracleStore = OracleConversationStore(preferences: preferences);
 
   final SharedPreferences? _providedPreferences;
   final MysticMirrorStore _mirrorStore;
@@ -59,11 +59,12 @@ class PrivateJournalTransferService {
       throw StateError('A private transfer needs at least one saved reading.');
     }
     final recordIds = orderedRecords.map(readingJournalRecordId).toSet();
-    final reflections = (await _mirrorStore.load())
-        .values
-        .where((item) => recordIds.contains(item.recordId));
-    final oracleTurns = (await _oracleStore.loadAll())
-        .where((item) => recordIds.contains(item.recordId));
+    final reflections = (await _mirrorStore.load()).values.where(
+      (item) => recordIds.contains(item.recordId),
+    );
+    final oracleTurns = (await _oracleStore.loadAll()).where(
+      (item) => recordIds.contains(item.recordId),
+    );
     final clearCode = JournalTransferCodec.encode(
       records: orderedRecords,
       reflections: reflections,
@@ -119,10 +120,12 @@ class PrivateJournalTransferService {
     final currentIds = current.map(readingJournalRecordId).toSet();
     return PrivateJournalTransferPreview(
       mergedRecords: List<ReadingRecord>.unmodifiable(records),
-      mergedReflections:
-          Map<String, MysticMirrorReflection>.unmodifiable(reflections),
-      mergedOracleTurns:
-          List<OracleConversationTurn>.unmodifiable(orderedOracle),
+      mergedReflections: Map<String, MysticMirrorReflection>.unmodifiable(
+        reflections,
+      ),
+      mergedOracleTurns: List<OracleConversationTurn>.unmodifiable(
+        orderedOracle,
+      ),
       importedReadings: imported.records.length,
       importedReflections: imported.reflections.length,
       importedOracleTurns: imported.oracleTurns.length,
@@ -173,9 +176,9 @@ class PrivateJournalTransferService {
       await _mustWrite(
         preferences.setStringList(
           MysticMirrorStore.backupKey,
-          _orderedReflections(currentReflections.values)
-              .map((item) => item.encode())
-              .toList(growable: false),
+          _orderedReflections(
+            currentReflections.values,
+          ).map((item) => item.encode()).toList(growable: false),
         ),
       );
       await _mustWrite(
@@ -193,9 +196,9 @@ class PrivateJournalTransferService {
       await _mustWrite(
         preferences.setStringList(
           MysticMirrorStore.storageKey,
-          _orderedReflections(preview.mergedReflections.values)
-              .map((item) => item.encode())
-              .toList(growable: false),
+          _orderedReflections(
+            preview.mergedReflections.values,
+          ).map((item) => item.encode()).toList(growable: false),
         ),
       );
       await _mustWrite(
@@ -215,7 +218,9 @@ class PrivateJournalTransferService {
       return preview;
     } catch (error) {
       await _rollback(preferences, snapshot);
-      throw StateError('Private journal restore could not be committed: $error');
+      throw StateError(
+        'Private journal restore could not be committed: $error',
+      );
     }
   }
 
@@ -257,7 +262,9 @@ class PrivateJournalTransferService {
     Iterable<MysticMirrorReflection> reflections,
   ) {
     final result = reflections.toList()
-      ..sort((first, second) => second.completedAt.compareTo(first.completedAt));
+      ..sort(
+        (first, second) => second.completedAt.compareTo(first.completedAt),
+      );
     return result;
   }
 

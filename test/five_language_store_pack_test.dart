@@ -26,8 +26,16 @@ void main() {
       final file = File(entry.key);
       expect(file.existsSync(), isTrue, reason: entry.key);
       final content = file.readAsStringSync();
-      expect(content, contains('<html lang="${entry.value}">'), reason: entry.key);
-      expect(content.toLowerCase(), contains('mystic tarot'), reason: entry.key);
+      expect(
+        content,
+        contains('<html lang="${entry.value}">'),
+        reason: entry.key,
+      );
+      expect(
+        content.toLowerCase(),
+        contains('mystic tarot'),
+        reason: entry.key,
+      );
       expect(content, contains('legal.css'), reason: entry.key);
     }
   });
@@ -86,20 +94,23 @@ void main() {
     }
   });
 
-  test('localized store listing handoffs exist for every non-English language', () {
-    for (final path in <String>[
-      'docs/STORE_LISTING_TR.md',
-      'docs/STORE_LISTING_ES.md',
-      'docs/STORE_LISTING_FR.md',
-      'docs/STORE_LISTING_PT_BR.md',
-    ]) {
-      final file = File(path);
-      expect(file.existsSync(), isTrue, reason: path);
-      final content = file.readAsStringSync();
-      expect(content, contains('Mystic Tarot'), reason: path);
-      expect(content, contains('Mystic Plus'), reason: path);
-    }
-  });
+  test(
+    'localized store listing handoffs exist for every non-English language',
+    () {
+      for (final path in <String>[
+        'docs/STORE_LISTING_TR.md',
+        'docs/STORE_LISTING_ES.md',
+        'docs/STORE_LISTING_FR.md',
+        'docs/STORE_LISTING_PT_BR.md',
+      ]) {
+        final file = File(path);
+        expect(file.existsSync(), isTrue, reason: path);
+        final content = file.readAsStringSync();
+        expect(content, contains('Mystic Tarot'), reason: path);
+        expect(content, contains('Mystic Plus'), reason: path);
+      }
+    },
+  );
 
   test('canonical release pack declares the five-language launch', () {
     final releasePack = File('STORE_RELEASE.md').readAsStringSync();

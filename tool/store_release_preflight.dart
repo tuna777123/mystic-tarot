@@ -110,7 +110,9 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln(
       'Verified ${publicStoreEndpoints.length} live public store endpoints.',
     );
-    stdout.writeln('Production AdMob IDs were validated without printing them.');
+    stdout.writeln(
+      'Production AdMob IDs were validated without printing them.',
+    );
     stdout.writeln('No protected values were printed.');
   } on FormatException catch (error) {
     stderr.writeln(error.message);

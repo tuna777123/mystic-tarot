@@ -6,13 +6,13 @@ import 'package:mystic_tarot/src/mystic_mirror.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 
 ReadingRecord record() => ReadingRecord(
-      kind: ReadingKind.daily,
-      question: 'What needs my attention?',
-      cards: <DrawnCard>[DrawnCard(tarotDeck.first, true)],
-      createdAt: DateTime.utc(2026, 8, 1, 12),
-      emotion: EmotionalState.uncertain,
-      alignedAction: 'Take one reversible step.',
-    );
+  kind: ReadingKind.daily,
+  question: 'What needs my attention?',
+  cards: <DrawnCard>[DrawnCard(tarotDeck.first, true)],
+  createdAt: DateTime.utc(2026, 8, 1, 12),
+  emotion: EmotionalState.uncertain,
+  alignedAction: 'Take one reversible step.',
+);
 
 void main() {
   test('export includes the complete reading and matching Mirror evidence', () {
@@ -52,9 +52,7 @@ void main() {
 
     final export = buildMysticJournalExport(
       records: <ReadingRecord>[item],
-      mirrors: <String, MysticMirrorReflection>{
-        unrelated.recordId: unrelated,
-      },
+      mirrors: <String, MysticMirrorReflection>{unrelated.recordId: unrelated},
       language: MysticLanguage.english,
     );
 
@@ -91,10 +89,7 @@ void main() {
 
     for (final entry in expected.entries) {
       expect(
-        localizedMysticMirrorOutcome(
-          MysticMirrorOutcome.unclear,
-          entry.key,
-        ),
+        localizedMysticMirrorOutcome(MysticMirrorOutcome.unclear, entry.key),
         entry.value,
       );
     }

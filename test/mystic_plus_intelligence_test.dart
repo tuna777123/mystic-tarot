@@ -15,15 +15,14 @@ void main() {
     required ReadingKind kind,
     required EmotionalState emotion,
     required int cardIndex,
-  }) =>
-      ReadingRecord(
-        kind: kind,
-        question: 'Question $daysAgo',
-        cards: <DrawnCard>[DrawnCard(tarotDeck[cardIndex], false)],
-        createdAt: now.subtract(Duration(days: daysAgo)),
-        emotion: emotion,
-        alignedAction: 'One observable action',
-      );
+  }) => ReadingRecord(
+    kind: kind,
+    question: 'Question $daysAgo',
+    cards: <DrawnCard>[DrawnCard(tarotDeck[cardIndex], false)],
+    createdAt: now.subtract(Duration(days: daysAgo)),
+    emotion: emotion,
+    alignedAction: 'One observable action',
+  );
 
   test('builds a deterministic seven-day private intelligence report', () {
     final records = <ReadingRecord>[
@@ -152,61 +151,62 @@ void main() {
     );
   });
 
-  testWidgets('free users receive a personalized report preview without overflow', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 700);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
+  testWidgets(
+    'free users receive a personalized report preview without overflow',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
 
-    final records = <ReadingRecord>[
-      record(
-        daysAgo: 1,
-        kind: ReadingKind.love,
-        emotion: EmotionalState.uncertain,
-        cardIndex: 6,
-      ),
-      record(
-        daysAgo: 2,
-        kind: ReadingKind.love,
-        emotion: EmotionalState.hopeful,
-        cardIndex: 6,
-      ),
-      record(
-        daysAgo: 3,
-        kind: ReadingKind.career,
-        emotion: EmotionalState.curious,
-        cardIndex: 1,
-      ),
-    ];
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MysticPlusIntelligenceScreen(
-          source: 'organic',
-          language: MysticLanguage.turkish,
-          isPlus: false,
-          onContinue: () {},
-          initialRecords: records,
-          initialReflections: const <String, MysticMirrorReflection>{},
-          generatedAt: now,
+      final records = <ReadingRecord>[
+        record(
+          daysAgo: 1,
+          kind: ReadingKind.love,
+          emotion: EmotionalState.uncertain,
+          cardIndex: 6,
         ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
+        record(
+          daysAgo: 2,
+          kind: ReadingKind.love,
+          emotion: EmotionalState.hopeful,
+          cardIndex: 6,
+        ),
+        record(
+          daysAgo: 3,
+          kind: ReadingKind.career,
+          emotion: EmotionalState.curious,
+          cardIndex: 1,
+        ),
+      ];
 
-    expect(find.text('ÖNİZLEME'), findsOneWidget);
-    expect(find.text('Tam raporun kilidini aç'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MysticPlusIntelligenceScreen(
+            source: 'organic',
+            language: MysticLanguage.turkish,
+            isPlus: false,
+            onContinue: () {},
+            initialRecords: records,
+            initialReflections: const <String, MysticMirrorReflection>{},
+            generatedAt: now,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
 
-    await tester.drag(find.byType(ListView), const Offset(0, -650));
-    await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('ÖNİZLEME'), findsOneWidget);
+      expect(find.text('Tam raporun kilidini aç'), findsOneWidget);
+      expect(tester.takeException(), isNull);
 
-    expect(find.byIcon(Icons.lock_outline), findsWidgets);
-    expect(tester.takeException(), isNull);
-  });
+      await tester.drag(find.byType(ListView), const Offset(0, -650));
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byIcon(Icons.lock_outline), findsWidgets);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Plus members see the full reality and emotion report', (
     tester,

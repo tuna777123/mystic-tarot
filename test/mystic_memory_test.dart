@@ -30,9 +30,10 @@ void main() {
     );
   }
 
-  test('builds a chronological immutable timeline and explainable insights', () {
-    final snapshot = MysticMemoryEngine.build(
-      [
+  test(
+    'builds a chronological immutable timeline and explainable insights',
+    () {
+      final snapshot = MysticMemoryEngine.build([
         event(
           id: 'later',
           occurredAt: day.add(const Duration(days: 1)),
@@ -53,40 +54,37 @@ void main() {
           type: MemoryEventType.note,
           themes: const {MemoryTheme.education},
         ),
-      ],
-      generatedAt: day.add(const Duration(days: 2)),
-    );
+      ], generatedAt: day.add(const Duration(days: 2)));
 
-    expect(
-      snapshot.timeline.map((item) => item.id),
-      ['early', 'same-day-note', 'later'],
-    );
-    expect(snapshot.insights.eventCount, 3);
-    expect(snapshot.insights.activeDays, 2);
-    expect(snapshot.insights.reflectionRate, closeTo(2 / 3, 0.0001));
-    expect(snapshot.insights.topThemes.first.theme, MemoryTheme.career);
-    expect(snapshot.insights.topThemes.first.count, 2);
-    expect(snapshot.insights.repeatedCards.single.cardId, 'the-star');
-    expect(snapshot.insights.repeatedCards.single.count, 2);
-    expect(snapshot.insights.matches(snapshot.timeline), isTrue);
-  });
+      expect(snapshot.timeline.map((item) => item.id), [
+        'early',
+        'same-day-note',
+        'later',
+      ]);
+      expect(snapshot.insights.eventCount, 3);
+      expect(snapshot.insights.activeDays, 2);
+      expect(snapshot.insights.reflectionRate, closeTo(2 / 3, 0.0001));
+      expect(snapshot.insights.topThemes.first.theme, MemoryTheme.career);
+      expect(snapshot.insights.topThemes.first.count, 2);
+      expect(snapshot.insights.repeatedCards.single.cardId, 'the-star');
+      expect(snapshot.insights.repeatedCards.single.count, 2);
+      expect(snapshot.insights.matches(snapshot.timeline), isTrue);
+    },
+  );
 
   test('creates weighted theme connections with supporting event ids', () {
-    final snapshot = MysticMemoryEngine.build(
-      [
-        event(
-          id: 'one',
-          occurredAt: day,
-          themes: const {MemoryTheme.career, MemoryTheme.confidence},
-        ),
-        event(
-          id: 'two',
-          occurredAt: day.add(const Duration(days: 1)),
-          themes: const {MemoryTheme.career, MemoryTheme.confidence},
-        ),
-      ],
-      generatedAt: day,
-    );
+    final snapshot = MysticMemoryEngine.build([
+      event(
+        id: 'one',
+        occurredAt: day,
+        themes: const {MemoryTheme.career, MemoryTheme.confidence},
+      ),
+      event(
+        id: 'two',
+        occurredAt: day.add(const Duration(days: 1)),
+        themes: const {MemoryTheme.career, MemoryTheme.confidence},
+      ),
+    ], generatedAt: day);
 
     final connection = snapshot.themeGraph.connectionBetween(
       MemoryTheme.confidence,
@@ -102,10 +100,7 @@ void main() {
     final duplicate = event(id: 'duplicate', occurredAt: day);
 
     expect(
-      () => MysticMemoryEngine.build(
-        [duplicate, duplicate],
-        generatedAt: day,
-      ),
+      () => MysticMemoryEngine.build([duplicate, duplicate], generatedAt: day),
       throwsStateError,
     );
     expect(
@@ -131,14 +126,14 @@ void main() {
       themes: const {MemoryTheme.relationship},
     );
 
-    final turkishResults = MysticMemorySearch.search(
-      [relationship, career],
-      'iş',
-    );
-    final tagResults = MysticMemorySearch.search(
-      [relationship, career],
-      'promotion',
-    );
+    final turkishResults = MysticMemorySearch.search([
+      relationship,
+      career,
+    ], 'iş');
+    final tagResults = MysticMemorySearch.search([
+      relationship,
+      career,
+    ], 'promotion');
 
     expect(turkishResults.single.event.id, 'career');
     expect(
@@ -185,9 +180,6 @@ void main() {
       events.where((item) => item.type == MemoryEventType.journeyCompleted),
       hasLength(1),
     );
-    expect(
-      events.where((item) => item.journeyId == 'journey-1'),
-      hasLength(3),
-    );
+    expect(events.where((item) => item.journeyId == 'journey-1'), hasLength(3));
   });
 }

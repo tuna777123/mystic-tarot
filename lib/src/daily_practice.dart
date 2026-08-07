@@ -325,10 +325,7 @@ class _DailyPracticeSheetState extends State<DailyPracticeSheet> {
               child: Text(
                 selected.title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: MysticColors.muted,
-                  fontSize: 11,
-                ),
+                style: const TextStyle(color: MysticColors.muted, fontSize: 11),
               ),
             ),
           ],
@@ -466,10 +463,7 @@ class _BreathPractice extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Text(
-          phase,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text(phase, style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         if (!running && !complete)
           OutlinedButton.icon(

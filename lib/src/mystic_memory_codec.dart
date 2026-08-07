@@ -129,8 +129,9 @@ abstract final class MysticMemoryCodec {
     return themes;
   }
 
-  static List<String> _decodeStrings(Object? value) =>
-      value is List ? value.whereType<String>().toList(growable: false) : const [];
+  static List<String> _decodeStrings(Object? value) => value is List
+      ? value.whereType<String>().toList(growable: false)
+      : const [];
 
   static String _requiredText(Object? value, String field) {
     final text = _optionalText(value);

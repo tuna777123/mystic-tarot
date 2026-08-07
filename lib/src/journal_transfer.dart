@@ -37,8 +37,12 @@ class JournalTransferCodec {
       'product': 'Mystic Tarot',
       'kind': 'private-journal-transfer',
       'journal': ReadingJournalCodec.encode(records),
-      'mirror': reflections.map((item) => item.encode()).toList(growable: false),
-      'oracle': oracleTurns.map((item) => item.encode()).toList(growable: false),
+      'mirror': reflections
+          .map((item) => item.encode())
+          .toList(growable: false),
+      'oracle': oracleTurns
+          .map((item) => item.encode())
+          .toList(growable: false),
     });
     return '$marker\n${base64Url.encode(utf8.encode(envelope))}';
   }
@@ -69,7 +73,9 @@ class JournalTransferCodec {
 
     final journal = ReadingJournalCodec.decode(envelope['journal'] as String);
     if (journal.records.isEmpty) {
-      throw const FormatException('Journal transfer contains no valid readings.');
+      throw const FormatException(
+        'Journal transfer contains no valid readings.',
+      );
     }
 
     final validRecordIds = journal.records.map(readingJournalRecordId).toSet();
@@ -118,8 +124,9 @@ class JournalTransferCodec {
       ..sort((first, second) => first.createdAt.compareTo(second.createdAt));
     return JournalTransferResult(
       records: journal.records,
-      reflections:
-          Map<String, MysticMirrorReflection>.unmodifiable(reflections),
+      reflections: Map<String, MysticMirrorReflection>.unmodifiable(
+        reflections,
+      ),
       oracleTurns: List<OracleConversationTurn>.unmodifiable(orderedTurns),
       rejectedItems: rejected,
     );

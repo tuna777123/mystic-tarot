@@ -20,11 +20,11 @@ class EntitlementVerificationRequest {
   bool get targetsLaunchProduct => MysticProductIds.launch.contains(productId);
 
   Map<String, Object> toJson() => {
-        'platform': platform.name,
-        'productId': productId,
-        'verificationData': verificationData,
-        'purchaseId': purchaseId,
-      };
+    'platform': platform.name,
+    'productId': productId,
+    'verificationData': verificationData,
+    'purchaseId': purchaseId,
+  };
 }
 
 /// Server-authoritative response. Only a successfully verified, active

@@ -16,20 +16,21 @@ void main() {
   ];
 
   test('launch selector exposes the five complete languages', () {
-    expect(
-      launchLanguages,
-      const <MysticLanguage>[
-        MysticLanguage.english,
-        MysticLanguage.turkish,
-        MysticLanguage.spanish,
-        MysticLanguage.french,
-        MysticLanguage.portugueseBrazil,
-      ],
-    );
+    expect(launchLanguages, const <MysticLanguage>[
+      MysticLanguage.english,
+      MysticLanguage.turkish,
+      MysticLanguage.spanish,
+      MysticLanguage.french,
+      MysticLanguage.portugueseBrazil,
+    ]);
   });
 
   test('Spanish, French, and Brazilian Portuguese catalogs are complete', () {
-    expect(MysticTextCatalog.launchLanguageCodes, <String>{'ES', 'FR', 'PT-BR'});
+    expect(MysticTextCatalog.launchLanguageCodes, <String>{
+      'ES',
+      'FR',
+      'PT-BR',
+    });
     for (final code in MysticTextCatalog.launchLanguageCodes) {
       expect(MysticTextCatalog.exactTranslationCount(code), 423);
       expect(MysticTextCatalog.templateTranslationCount(code), 40);
@@ -40,10 +41,7 @@ void main() {
       );
       expect(MysticTextCatalog.hasTranslation(code, 'Read'), isTrue);
       expect(
-        MysticTextCatalog.hasTranslation(
-          code,
-          'CURRENT CHAPTER • {{p0}}',
-        ),
+        MysticTextCatalog.hasTranslation(code, 'CURRENT CHAPTER • {{p0}}'),
         isTrue,
       );
       expect(
@@ -62,7 +60,11 @@ void main() {
           languageCode: language.code,
         );
         expect(name, isNotEmpty, reason: '${language.code}: ${card.name}');
-        expect(name, isNot(card.name), reason: '${language.code}: ${card.name}');
+        expect(
+          name,
+          isNot(card.name),
+          reason: '${language.code}: ${card.name}',
+        );
 
         for (final reversed in <bool>[false, true]) {
           final drawn = DrawnCard(card, reversed);
@@ -94,32 +96,35 @@ void main() {
     }
   });
 
-  test('reading types, emotions, and deck names never fall back to English', () {
-    for (final language in globalLanguages) {
-      for (final kind in ReadingKind.values) {
-        expect(
-          localizedReadingKindTitle(kind, languageCode: language.code),
-          isNot(kind.title),
-        );
-        expect(
-          localizedReadingKindSubtitle(kind, languageCode: language.code),
-          isNot(kind.subtitle),
-        );
+  test(
+    'reading types, emotions, and deck names never fall back to English',
+    () {
+      for (final language in globalLanguages) {
+        for (final kind in ReadingKind.values) {
+          expect(
+            localizedReadingKindTitle(kind, languageCode: language.code),
+            isNot(kind.title),
+          );
+          expect(
+            localizedReadingKindSubtitle(kind, languageCode: language.code),
+            isNot(kind.subtitle),
+          );
+        }
+        for (final emotion in EmotionalState.values) {
+          expect(
+            localizedEmotionLabel(emotion, languageCode: language.code),
+            isNot(emotion.label),
+          );
+        }
+        for (final style in DeckStyle.values) {
+          expect(
+            localizedDeckStyleLabel(style, languageCode: language.code),
+            isNot(style.label),
+          );
+        }
       }
-      for (final emotion in EmotionalState.values) {
-        expect(
-          localizedEmotionLabel(emotion, languageCode: language.code),
-          isNot(emotion.label),
-        );
-      }
-      for (final style in DeckStyle.values) {
-        expect(
-          localizedDeckStyleLabel(style, languageCode: language.code),
-          isNot(style.label),
-        );
-      }
-    }
-  });
+    },
+  );
 
   test('dynamic global copy keeps translated captures', () {
     expect(
@@ -182,5 +187,4 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
-
 }

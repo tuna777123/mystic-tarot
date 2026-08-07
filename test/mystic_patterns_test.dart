@@ -17,31 +17,28 @@ void main() {
   });
 
   test('finds repeated cards, themes and reflection behavior', () {
-    final snapshot = MysticPatterns.analyze(
-      [
-        PatternReading(
-          id: '1',
-          createdAt: DateTime(2026, 7, 24, 8),
-          cardIds: const ['the_fool', 'the_star', 'the_fool'],
-          theme: ReadingTheme.growth,
-          reflection: 'A new beginning feels possible.',
-        ),
-        PatternReading(
-          id: '2',
-          createdAt: DateTime(2026, 7, 24, 20),
-          cardIds: const ['the_fool', 'two_of_cups'],
-          theme: ReadingTheme.love,
-        ),
-        PatternReading(
-          id: '3',
-          createdAt: DateTime(2026, 7, 25, 9),
-          cardIds: const ['the_star'],
-          theme: ReadingTheme.growth,
-          reflection: 'I noticed the same hope theme again.',
-        ),
-      ],
-      generatedAt: now,
-    );
+    final snapshot = MysticPatterns.analyze([
+      PatternReading(
+        id: '1',
+        createdAt: DateTime(2026, 7, 24, 8),
+        cardIds: const ['the_fool', 'the_star', 'the_fool'],
+        theme: ReadingTheme.growth,
+        reflection: 'A new beginning feels possible.',
+      ),
+      PatternReading(
+        id: '2',
+        createdAt: DateTime(2026, 7, 24, 20),
+        cardIds: const ['the_fool', 'two_of_cups'],
+        theme: ReadingTheme.love,
+      ),
+      PatternReading(
+        id: '3',
+        createdAt: DateTime(2026, 7, 25, 9),
+        cardIds: const ['the_star'],
+        theme: ReadingTheme.growth,
+        reflection: 'I noticed the same hope theme again.',
+      ),
+    ], generatedAt: now);
 
     expect(snapshot.readingCount, 3);
     expect(snapshot.uniqueCardCount, 3);

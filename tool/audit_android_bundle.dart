@@ -131,11 +131,11 @@ Future<String> _audit(_AuditOptions options) async {
       .toList(growable: false);
   final forbiddenMarkers = <String>{};
   for (final dexEntry in dexEntries) {
-    final dexResult = await _runChecked(
-      'unzip',
-      ['-p', bundle.path, dexEntry],
-      binaryStdout: true,
-    );
+    final dexResult = await _runChecked('unzip', [
+      '-p',
+      bundle.path,
+      dexEntry,
+    ], binaryStdout: true);
     final output = dexResult.stdout;
     if (output is! List<int>) {
       throw AuditFailure('Could not inspect binary DEX entry $dexEntry.');

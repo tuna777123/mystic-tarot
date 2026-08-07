@@ -7,154 +7,206 @@ String localizedStorePurchaseNotice(
 ) {
   return switch (notice) {
     StorePurchaseNotice.nativeOnly => localized(
-        language,
-        english: 'Subscriptions are available only in the iOS and Android apps.',
-        spanish: 'Las suscripciones están disponibles solo en las aplicaciones de iOS y Android.',
-        french: 'Les abonnements sont disponibles uniquement dans les applications iOS et Android.',
-        portugueseBrazil: 'As assinaturas estão disponíveis apenas nos aplicativos para iOS e Android.',
-        turkish: 'Abonelikler yalnızca iOS ve Android uygulamalarında kullanılabilir.',
-        italian: 'Gli abbonamenti sono disponibili solo nelle app iOS e Android.',
-        german: 'Abonnements sind nur in den iOS- und Android-Apps verfügbar.',
-      ),
+      language,
+      english: 'Subscriptions are available only in the iOS and Android apps.',
+      spanish:
+          'Las suscripciones están disponibles solo en las aplicaciones de iOS y Android.',
+      french:
+          'Les abonnements sont disponibles uniquement dans les applications iOS et Android.',
+      portugueseBrazil:
+          'As assinaturas estão disponíveis apenas nos aplicativos para iOS e Android.',
+      turkish:
+          'Abonelikler yalnızca iOS ve Android uygulamalarında kullanılabilir.',
+      italian: 'Gli abbonamenti sono disponibili solo nelle app iOS e Android.',
+      german: 'Abonnements sind nur in den iOS- und Android-Apps verfügbar.',
+    ),
     StorePurchaseNotice.configurationMissing => localized(
-        language,
-        english: 'Secure subscription configuration is not active in this build.',
-        spanish: 'La configuración segura de suscripciones no está activa en esta versión.',
-        french: 'La configuration sécurisée des abonnements n’est pas active dans cette version.',
-        portugueseBrazil: 'A configuração segura de assinaturas não está ativa nesta versão.',
-        turkish: 'Bu sürümde güvenli abonelik yapılandırması etkin değil.',
-        italian: 'La configurazione sicura degli abbonamenti non è attiva in questa versione.',
-        german: 'Die sichere Abo-Konfiguration ist in diesem Build nicht aktiv.',
-      ),
+      language,
+      english: 'Secure subscription configuration is not active in this build.',
+      spanish:
+          'La configuración segura de suscripciones no está activa en esta versión.',
+      french:
+          'La configuration sécurisée des abonnements n’est pas active dans cette version.',
+      portugueseBrazil:
+          'A configuração segura de assinaturas não está ativa nesta versão.',
+      turkish: 'Bu sürümde güvenli abonelik yapılandırması etkin değil.',
+      italian:
+          'La configurazione sicura degli abbonamenti non è attiva in questa versione.',
+      german: 'Die sichere Abo-Konfiguration ist in diesem Build nicht aktiv.',
+    ),
     StorePurchaseNotice.purchaseStreamUnavailable => localized(
-        language,
-        english: 'The subscription service could not be reached. Try again later.',
-        spanish: 'No se pudo acceder al servicio de suscripción. Inténtalo más tarde.',
-        french: 'Le service d’abonnement est indisponible. Réessayez plus tard.',
-        portugueseBrazil: 'Não foi possível acessar o serviço de assinatura. Tente novamente mais tarde.',
-        turkish: 'Abonelik hizmetine ulaşılamadı. Daha sonra tekrar dene.',
-        italian: 'Impossibile raggiungere il servizio di abbonamento. Riprova più tardi.',
-        german: 'Der Abonnementdienst ist nicht erreichbar. Versuche es später erneut.',
-      ),
+      language,
+      english:
+          'The subscription service could not be reached. Try again later.',
+      spanish:
+          'No se pudo acceder al servicio de suscripción. Inténtalo más tarde.',
+      french: 'Le service d’abonnement est indisponible. Réessayez plus tard.',
+      portugueseBrazil:
+          'Não foi possível acessar o serviço de assinatura. Tente novamente mais tarde.',
+      turkish: 'Abonelik hizmetine ulaşılamadı. Daha sonra tekrar dene.',
+      italian:
+          'Impossibile raggiungere il servizio di abbonamento. Riprova più tardi.',
+      german:
+          'Der Abonnementdienst ist nicht erreichbar. Versuche es später erneut.',
+    ),
     StorePurchaseNotice.storeUnavailable => localized(
-        language,
-        english: 'The App Store or Google Play is currently unavailable.',
-        spanish: 'App Store o Google Play no está disponible en este momento.',
-        french: 'L’App Store ou Google Play est momentanément indisponible.',
-        portugueseBrazil: 'A App Store ou o Google Play está indisponível no momento.',
-        turkish: 'App Store veya Google Play şu anda kullanılamıyor.',
-        italian: 'App Store o Google Play non è al momento disponibile.',
-        german: 'Der App Store oder Google Play ist derzeit nicht verfügbar.',
-      ),
+      language,
+      english: 'The App Store or Google Play is currently unavailable.',
+      spanish: 'App Store o Google Play no está disponible en este momento.',
+      french: 'L’App Store ou Google Play est momentanément indisponible.',
+      portugueseBrazil:
+          'A App Store ou o Google Play está indisponível no momento.',
+      turkish: 'App Store veya Google Play şu anda kullanılamıyor.',
+      italian: 'App Store o Google Play non è al momento disponibile.',
+      german: 'Der App Store oder Google Play ist derzeit nicht verfügbar.',
+    ),
     StorePurchaseNotice.productsNotConfigured => localized(
-        language,
-        english: 'Monthly and yearly plans are not available in the current store offering.',
-        spanish: 'Los planes mensual y anual no están disponibles en la oferta actual.',
-        french: 'Les offres mensuelle et annuelle ne sont pas disponibles actuellement.',
-        portugueseBrazil: 'Os planos mensal e anual não estão disponíveis na oferta atual.',
-        turkish: 'Aylık ve yıllık planlar mevcut mağaza teklifinde bulunmuyor.',
-        italian: 'I piani mensile e annuale non sono disponibili nell’offerta attuale.',
-        german: 'Monats- und Jahrespläne sind im aktuellen Angebot nicht verfügbar.',
-      ),
+      language,
+      english:
+          'Monthly and yearly plans are not available in the current store offering.',
+      spanish:
+          'Los planes mensual y anual no están disponibles en la oferta actual.',
+      french:
+          'Les offres mensuelle et annuelle ne sont pas disponibles actuellement.',
+      portugueseBrazil:
+          'Os planos mensal e anual não estão disponíveis na oferta atual.',
+      turkish: 'Aylık ve yıllık planlar mevcut mağaza teklifinde bulunmuyor.',
+      italian:
+          'I piani mensile e annuale non sono disponibili nell’offerta attuale.',
+      german:
+          'Monats- und Jahrespläne sind im aktuellen Angebot nicht verfügbar.',
+    ),
     StorePurchaseNotice.productsLoadFailed => localized(
-        language,
-        english: 'Subscription options could not be loaded. Try again later.',
-        spanish: 'No se pudieron cargar las opciones de suscripción. Inténtalo más tarde.',
-        french: 'Les options d’abonnement n’ont pas pu être chargées. Réessayez plus tard.',
-        portugueseBrazil: 'Não foi possível carregar as opções de assinatura. Tente novamente mais tarde.',
-        turkish: 'Abonelik seçenekleri yüklenemedi. Daha sonra tekrar dene.',
-        italian: 'Impossibile caricare le opzioni di abbonamento. Riprova più tardi.',
-        german: 'Die Abo-Optionen konnten nicht geladen werden. Versuche es später erneut.',
-      ),
+      language,
+      english: 'Subscription options could not be loaded. Try again later.',
+      spanish:
+          'No se pudieron cargar las opciones de suscripción. Inténtalo más tarde.',
+      french:
+          'Les options d’abonnement n’ont pas pu être chargées. Réessayez plus tard.',
+      portugueseBrazil:
+          'Não foi possível carregar as opções de assinatura. Tente novamente mais tarde.',
+      turkish: 'Abonelik seçenekleri yüklenemedi. Daha sonra tekrar dene.',
+      italian:
+          'Impossibile caricare le opzioni di abbonamento. Riprova più tardi.',
+      german:
+          'Die Abo-Optionen konnten nicht geladen werden. Versuche es später erneut.',
+    ),
     StorePurchaseNotice.checkoutUnavailable => localized(
-        language,
-        english: 'The official store checkout could not be opened.',
-        spanish: 'No se pudo abrir el pago de la tienda oficial.',
-        french: 'Le paiement de la boutique officielle n’a pas pu être ouvert.',
-        portugueseBrazil: 'Não foi possível abrir o pagamento da loja oficial.',
-        turkish: 'Resmi mağaza ödeme ekranı açılamadı.',
-        italian: 'Impossibile aprire il pagamento dello store ufficiale.',
-        german: 'Der offizielle Store-Checkout konnte nicht geöffnet werden.',
-      ),
+      language,
+      english: 'The official store checkout could not be opened.',
+      spanish: 'No se pudo abrir el pago de la tienda oficial.',
+      french: 'Le paiement de la boutique officielle n’a pas pu être ouvert.',
+      portugueseBrazil: 'Não foi possível abrir o pagamento da loja oficial.',
+      turkish: 'Resmi mağaza ödeme ekranı açılamadı.',
+      italian: 'Impossibile aprire il pagamento dello store ufficiale.',
+      german: 'Der offizielle Store-Checkout konnte nicht geöffnet werden.',
+    ),
     StorePurchaseNotice.restoreFailed => localized(
-        language,
-        english: 'Previous purchases could not be restored. Try again later.',
-        spanish: 'No se pudieron restaurar las compras anteriores. Inténtalo más tarde.',
-        french: 'Les achats précédents n’ont pas pu être restaurés. Réessayez plus tard.',
-        portugueseBrazil: 'Não foi possível restaurar as compras anteriores. Tente novamente mais tarde.',
-        turkish: 'Önceki satın alımlar geri yüklenemedi. Daha sonra tekrar dene.',
-        italian: 'Impossibile ripristinare gli acquisti precedenti. Riprova più tardi.',
-        german: 'Frühere Käufe konnten nicht wiederhergestellt werden. Versuche es später erneut.',
-      ),
+      language,
+      english: 'Previous purchases could not be restored. Try again later.',
+      spanish:
+          'No se pudieron restaurar las compras anteriores. Inténtalo más tarde.',
+      french:
+          'Les achats précédents n’ont pas pu être restaurés. Réessayez plus tard.',
+      portugueseBrazil:
+          'Não foi possível restaurar as compras anteriores. Tente novamente mais tarde.',
+      turkish: 'Önceki satın alımlar geri yüklenemedi. Daha sonra tekrar dene.',
+      italian:
+          'Impossibile ripristinare gli acquisti precedenti. Riprova più tardi.',
+      german:
+          'Frühere Käufe konnten nicht wiederhergestellt werden. Versuche es später erneut.',
+    ),
     StorePurchaseNotice.restoreCompleted => localized(
-        language,
-        english: 'Mystic Plus was restored and is active.',
-        spanish: 'Mystic Plus se restauró y está activo.',
-        french: 'Mystic Plus a été restauré et est actif.',
-        portugueseBrazil: 'O Mystic Plus foi restaurado e está ativo.',
-        turkish: 'Mystic Plus geri yüklendi ve etkinleştirildi.',
-        italian: 'Mystic Plus è stato ripristinato ed è attivo.',
-        german: 'Mystic Plus wurde wiederhergestellt und ist aktiv.',
-      ),
+      language,
+      english: 'Mystic Plus was restored and is active.',
+      spanish: 'Mystic Plus se restauró y está activo.',
+      french: 'Mystic Plus a été restauré et est actif.',
+      portugueseBrazil: 'O Mystic Plus foi restaurado e está ativo.',
+      turkish: 'Mystic Plus geri yüklendi ve etkinleştirildi.',
+      italian: 'Mystic Plus è stato ripristinato ed è attivo.',
+      german: 'Mystic Plus wurde wiederhergestellt und ist aktiv.',
+    ),
     StorePurchaseNotice.restoreNothing => localized(
-        language,
-        english: 'No active Mystic Plus purchase was found for this store account.',
-        spanish: 'No se encontró una compra activa de Mystic Plus en esta cuenta.',
-        french: 'Aucun achat Mystic Plus actif n’a été trouvé pour ce compte.',
-        portugueseBrazil: 'Nenhuma compra ativa do Mystic Plus foi encontrada nesta conta.',
-        turkish: 'Bu mağaza hesabında etkin bir Mystic Plus satın alımı bulunamadı.',
-        italian: 'Nessun acquisto Mystic Plus attivo è stato trovato per questo account.',
-        german: 'Für dieses Store-Konto wurde kein aktiver Mystic-Plus-Kauf gefunden.',
-      ),
+      language,
+      english:
+          'No active Mystic Plus purchase was found for this store account.',
+      spanish:
+          'No se encontró una compra activa de Mystic Plus en esta cuenta.',
+      french: 'Aucun achat Mystic Plus actif n’a été trouvé pour ce compte.',
+      portugueseBrazil:
+          'Nenhuma compra ativa do Mystic Plus foi encontrada nesta conta.',
+      turkish:
+          'Bu mağaza hesabında etkin bir Mystic Plus satın alımı bulunamadı.',
+      italian:
+          'Nessun acquisto Mystic Plus attivo è stato trovato per questo account.',
+      german:
+          'Für dieses Store-Konto wurde kein aktiver Mystic-Plus-Kauf gefunden.',
+    ),
     StorePurchaseNotice.waitingForConfirmation => localized(
-        language,
-        english: 'The store is still confirming the purchase. Plus will open automatically after approval.',
-        spanish: 'La tienda aún confirma la compra. Plus se activará automáticamente al aprobarse.',
-        french: 'La boutique confirme encore l’achat. Plus s’activera automatiquement après validation.',
-        portugueseBrazil: 'A loja ainda está confirmando a compra. O Plus será liberado após a aprovação.',
-        turkish: 'Mağaza satın alımı hâlâ onaylıyor. Onaydan sonra Plus otomatik açılacak.',
-        italian: 'Lo store sta ancora confermando l’acquisto. Plus si attiverà automaticamente.',
-        german: 'Der Store bestätigt den Kauf noch. Plus wird danach automatisch freigeschaltet.',
-      ),
+      language,
+      english:
+          'The store is still confirming the purchase. Plus will open automatically after approval.',
+      spanish:
+          'La tienda aún confirma la compra. Plus se activará automáticamente al aprobarse.',
+      french:
+          'La boutique confirme encore l’achat. Plus s’activera automatiquement après validation.',
+      portugueseBrazil:
+          'A loja ainda está confirmando a compra. O Plus será liberado após a aprovação.',
+      turkish:
+          'Mağaza satın alımı hâlâ onaylıyor. Onaydan sonra Plus otomatik açılacak.',
+      italian:
+          'Lo store sta ancora confermando l’acquisto. Plus si attiverà automaticamente.',
+      german:
+          'Der Store bestätigt den Kauf noch. Plus wird danach automatisch freigeschaltet.',
+    ),
     StorePurchaseNotice.purchaseCompleted => localized(
-        language,
-        english: 'Mystic Plus is active. Your premium paths are now open.',
-        spanish: 'Mystic Plus está activo. Tus caminos premium ya están abiertos.',
-        french: 'Mystic Plus est actif. Vos parcours premium sont maintenant ouverts.',
-        portugueseBrazil: 'O Mystic Plus está ativo. Seus caminhos premium estão liberados.',
-        turkish: 'Mystic Plus etkin. Premium yolların artık açık.',
-        italian: 'Mystic Plus è attivo. I tuoi percorsi premium sono ora disponibili.',
-        german: 'Mystic Plus ist aktiv. Deine Premium-Pfade sind jetzt geöffnet.',
-      ),
+      language,
+      english: 'Mystic Plus is active. Your premium paths are now open.',
+      spanish:
+          'Mystic Plus está activo. Tus caminos premium ya están abiertos.',
+      french:
+          'Mystic Plus est actif. Vos parcours premium sont maintenant ouverts.',
+      portugueseBrazil:
+          'O Mystic Plus está ativo. Seus caminhos premium estão liberados.',
+      turkish: 'Mystic Plus etkin. Premium yolların artık açık.',
+      italian:
+          'Mystic Plus è attivo. I tuoi percorsi premium sono ora disponibili.',
+      german: 'Mystic Plus ist aktiv. Deine Premium-Pfade sind jetzt geöffnet.',
+    ),
     StorePurchaseNotice.alreadySubscribed => localized(
-        language,
-        english: 'Mystic Plus is active on this account.',
-        spanish: 'Mystic Plus está activo en esta cuenta.',
-        french: 'Mystic Plus est actif sur ce compte.',
-        portugueseBrazil: 'O Mystic Plus está ativo nesta conta.',
-        turkish: 'Mystic Plus bu hesapta etkin.',
-        italian: 'Mystic Plus è attivo su questo account.',
-        german: 'Mystic Plus ist für dieses Konto aktiv.',
-      ),
+      language,
+      english: 'Mystic Plus is active on this account.',
+      spanish: 'Mystic Plus está activo en esta cuenta.',
+      french: 'Mystic Plus est actif sur ce compte.',
+      portugueseBrazil: 'O Mystic Plus está ativo nesta conta.',
+      turkish: 'Mystic Plus bu hesapta etkin.',
+      italian: 'Mystic Plus è attivo su questo account.',
+      german: 'Mystic Plus ist für dieses Konto aktiv.',
+    ),
     StorePurchaseNotice.purchaseFailed => localized(
-        language,
-        english: 'The purchase was not completed. No chargeable access was activated.',
-        spanish: 'La compra no se completó. No se activó ningún acceso de pago.',
-        french: 'L’achat n’a pas été finalisé. Aucun accès payant n’a été activé.',
-        portugueseBrazil: 'A compra não foi concluída. Nenhum acesso pago foi ativado.',
-        turkish: 'Satın alım tamamlanmadı. Ücretli erişim açılmadı.',
-        italian: 'L’acquisto non è stato completato. Nessun accesso a pagamento è stato attivato.',
-        german: 'Der Kauf wurde nicht abgeschlossen. Es wurde kein kostenpflichtiger Zugang aktiviert.',
-      ),
+      language,
+      english:
+          'The purchase was not completed. No chargeable access was activated.',
+      spanish: 'La compra no se completó. No se activó ningún acceso de pago.',
+      french:
+          'L’achat n’a pas été finalisé. Aucun accès payant n’a été activé.',
+      portugueseBrazil:
+          'A compra não foi concluída. Nenhum acesso pago foi ativado.',
+      turkish: 'Satın alım tamamlanmadı. Ücretli erişim açılmadı.',
+      italian:
+          'L’acquisto non è stato completato. Nessun accesso a pagamento è stato attivato.',
+      german:
+          'Der Kauf wurde nicht abgeschlossen. Es wurde kein kostenpflichtiger Zugang aktiviert.',
+    ),
     StorePurchaseNotice.purchaseCancelled => localized(
-        language,
-        english: 'The purchase was cancelled. Nothing was charged.',
-        spanish: 'La compra fue cancelada. No se realizó ningún cobro.',
-        french: 'L’achat a été annulé. Aucun montant n’a été débité.',
-        portugueseBrazil: 'A compra foi cancelada. Nenhuma cobrança foi feita.',
-        turkish: 'Satın alım iptal edildi. Herhangi bir ücret alınmadı.',
-        italian: 'L’acquisto è stato annullato. Non è stato addebitato nulla.',
-        german: 'Der Kauf wurde abgebrochen. Es wurde nichts berechnet.',
-      ),
+      language,
+      english: 'The purchase was cancelled. Nothing was charged.',
+      spanish: 'La compra fue cancelada. No se realizó ningún cobro.',
+      french: 'L’achat a été annulé. Aucun montant n’a été débité.',
+      portugueseBrazil: 'A compra foi cancelada. Nenhuma cobrança foi feita.',
+      turkish: 'Satın alım iptal edildi. Herhangi bir ücret alınmadı.',
+      italian: 'L’acquisto è stato annullato. Non è stato addebitato nulla.',
+      german: 'Der Kauf wurde abgebrochen. Es wurde nichts berechnet.',
+    ),
   };
 }

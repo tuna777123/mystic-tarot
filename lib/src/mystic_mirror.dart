@@ -22,12 +22,12 @@ class MysticMirrorReflection {
   final DateTime completedAt;
 
   Map<String, Object> toJson() => <String, Object>{
-        'recordId': recordId,
-        'outcome': outcome.name,
-        'emotion': emotion.name,
-        'note': note,
-        'completedAt': completedAt.toUtc().toIso8601String(),
-      };
+    'recordId': recordId,
+    'outcome': outcome.name,
+    'emotion': emotion.name,
+    'note': note,
+    'completedAt': completedAt.toUtc().toIso8601String(),
+  };
 
   static MysticMirrorReflection? tryDecode(String encoded) {
     try {
@@ -85,7 +85,7 @@ class _MirrorDecodeReport {
 
 class MysticMirrorStore {
   MysticMirrorStore({SharedPreferences? preferences})
-      : _providedPreferences = preferences;
+    : _providedPreferences = preferences;
 
   static const storageKey = 'mystic_mirror_reflections_v1';
   static const backupKey = 'mystic_mirror_reflections_v1_backup';
@@ -171,14 +171,17 @@ class MysticMirrorStore {
       );
 
     final currentPrimary = preferences.getStringList(storageKey);
-    final primaryIsFullyValid = currentPrimary != null &&
+    final primaryIsFullyValid =
+        currentPrimary != null &&
         currentPrimary.isNotEmpty &&
         currentPrimary.every(
           (encoded) => MysticMirrorReflection.tryDecode(encoded) != null,
         );
     if (primaryIsFullyValid) {
-      final backupSaved =
-          await preferences.setStringList(backupKey, currentPrimary);
+      final backupSaved = await preferences.setStringList(
+        backupKey,
+        currentPrimary,
+      );
       if (!backupSaved) {
         throw StateError('Could not preserve the previous Mirror snapshot.');
       }

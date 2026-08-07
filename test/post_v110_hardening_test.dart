@@ -35,8 +35,7 @@ void main() {
     final semantics = tester.ensureSemantics();
 
     try {
-      const label =
-          'Débloquer la lecture complète de compatibilité amoureuse';
+      const label = 'Débloquer la lecture complète de compatibilité amoureuse';
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

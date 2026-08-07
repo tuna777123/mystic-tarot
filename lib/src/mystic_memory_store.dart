@@ -24,7 +24,7 @@ abstract interface class MysticMemoryStore {
 /// Local-first persistence with a last-known-good backup snapshot.
 class SharedPreferencesMysticMemoryStore implements MysticMemoryStore {
   SharedPreferencesMysticMemoryStore({SharedPreferences? preferences})
-      : _preferences = preferences;
+    : _preferences = preferences;
 
   static const primaryKey = 'mystic_memory_v1';
   static const backupKey = 'mystic_memory_v1_backup';
@@ -83,7 +83,10 @@ class SharedPreferencesMysticMemoryStore implements MysticMemoryStore {
     final currentPayload = preferences.getString(primaryKey);
 
     if (currentPayload != null && currentPayload.trim().isNotEmpty) {
-      final backupSaved = await preferences.setString(backupKey, currentPayload);
+      final backupSaved = await preferences.setString(
+        backupKey,
+        currentPayload,
+      );
       if (!backupSaved) {
         throw StateError('Could not preserve the previous memory snapshot.');
       }

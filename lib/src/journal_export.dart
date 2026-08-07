@@ -17,14 +17,13 @@ String buildMysticJournalExport({
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   final recordList = records.toList(growable: false);
   final title = copy(
@@ -43,13 +42,7 @@ String buildMysticJournalExport({
   );
 
   if (recordList.isEmpty) {
-    return '$title\n\n$privacy\n\n${copy(
-      en: 'No saved readings yet.',
-      tr: 'Henüz kayıtlı okuma yok.',
-      es: 'Aún no hay lecturas guardadas.',
-      fr: 'Aucun tirage enregistré pour le moment.',
-      pt: 'Ainda não há leituras salvas.',
-    )}';
+    return '$title\n\n$privacy\n\n${copy(en: 'No saved readings yet.', tr: 'Henüz kayıtlı okuma yok.', es: 'Aún no hay lecturas guardadas.', fr: 'Aucun tirage enregistré pour le moment.', pt: 'Ainda não há leituras salvas.')}';
   }
 
   final blocks = <String>[];
@@ -58,7 +51,7 @@ String buildMysticJournalExport({
     final mirror = mirrors[mysticMirrorRecordId(record)];
     final oracleTurns =
         oracleConversations[oracleConversationRecordId(record)] ??
-            const <OracleConversationTurn>[];
+        const <OracleConversationTurn>[];
     final lines = <String>[
       '${index + 1}. ${localizedReadingKindTitle(record.kind, languageCode: language.code)}',
       '${copy(en: 'Date', tr: 'Tarih', es: 'Fecha', fr: 'Date', pt: 'Data')}: ${_formatExportDate(record.createdAt)}',
@@ -73,21 +66,7 @@ String buildMysticJournalExport({
 
     lines.add(
       '${copy(en: 'Cards', tr: 'Kartlar', es: 'Cartas', fr: 'Cartes', pt: 'Cartas')}: ${record.cards.map((item) {
-        final orientation = item.reversed
-            ? copy(
-                en: 'reversed',
-                tr: 'ters',
-                es: 'invertida',
-                fr: 'renversée',
-                pt: 'invertida',
-              )
-            : copy(
-                en: 'upright',
-                tr: 'düz',
-                es: 'al derecho',
-                fr: 'à l’endroit',
-                pt: 'normal',
-              );
+        final orientation = item.reversed ? copy(en: 'reversed', tr: 'ters', es: 'invertida', fr: 'renversée', pt: 'invertida') : copy(en: 'upright', tr: 'düz', es: 'al derecho', fr: 'à l’endroit', pt: 'normal');
         return '${localizedTarotCardName(item.card.name, languageCode: language.code)} ($orientation)';
       }).join(', ')}',
     );
@@ -157,46 +136,37 @@ String buildMysticJournalExport({
 String localizedMysticMirrorOutcome(
   MysticMirrorOutcome outcome,
   MysticLanguage language,
-) =>
-    switch ((language, outcome)) {
-      (MysticLanguage.turkish, MysticMirrorOutcome.shifted) =>
-        'Bir şey değişti',
-      (MysticLanguage.turkish, MysticMirrorOutcome.partlyShifted) =>
-        'Kısmen değişti',
-      (MysticLanguage.turkish, MysticMirrorOutcome.unchanged) =>
-        'Henüz değişmedi',
-      (MysticLanguage.turkish, MysticMirrorOutcome.unclear) =>
-        'Hâlâ belirsiz',
-      (MysticLanguage.spanish, MysticMirrorOutcome.shifted) => 'Algo cambió',
-      (MysticLanguage.spanish, MysticMirrorOutcome.partlyShifted) =>
-        'Cambió en parte',
-      (MysticLanguage.spanish, MysticMirrorOutcome.unchanged) =>
-        'Aún no cambió',
-      (MysticLanguage.spanish, MysticMirrorOutcome.unclear) =>
-        'Sigue sin estar claro',
-      (MysticLanguage.french, MysticMirrorOutcome.shifted) =>
-        'Quelque chose a changé',
-      (MysticLanguage.french, MysticMirrorOutcome.partlyShifted) =>
-        'Partiellement changé',
-      (MysticLanguage.french, MysticMirrorOutcome.unchanged) =>
-        'Rien n’a encore changé',
-      (MysticLanguage.french, MysticMirrorOutcome.unclear) =>
-        'Toujours incertain',
-      (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.shifted) =>
-        'Algo mudou',
-      (
-        MysticLanguage.portugueseBrazil,
-        MysticMirrorOutcome.partlyShifted,
-      ) =>
-        'Mudou em parte',
-      (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.unchanged) =>
-        'Ainda não mudou',
-      (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.unclear) =>
-        'Ainda não está claro',
-      (_, MysticMirrorOutcome.shifted) => 'Something shifted',
-      (_, MysticMirrorOutcome.partlyShifted) => 'Partly changed',
-      (_, MysticMirrorOutcome.unchanged) => 'Nothing changed yet',
-      (_, MysticMirrorOutcome.unclear) => 'Still unclear',
-    };
+) => switch ((language, outcome)) {
+  (MysticLanguage.turkish, MysticMirrorOutcome.shifted) => 'Bir şey değişti',
+  (MysticLanguage.turkish, MysticMirrorOutcome.partlyShifted) =>
+    'Kısmen değişti',
+  (MysticLanguage.turkish, MysticMirrorOutcome.unchanged) => 'Henüz değişmedi',
+  (MysticLanguage.turkish, MysticMirrorOutcome.unclear) => 'Hâlâ belirsiz',
+  (MysticLanguage.spanish, MysticMirrorOutcome.shifted) => 'Algo cambió',
+  (MysticLanguage.spanish, MysticMirrorOutcome.partlyShifted) =>
+    'Cambió en parte',
+  (MysticLanguage.spanish, MysticMirrorOutcome.unchanged) => 'Aún no cambió',
+  (MysticLanguage.spanish, MysticMirrorOutcome.unclear) =>
+    'Sigue sin estar claro',
+  (MysticLanguage.french, MysticMirrorOutcome.shifted) =>
+    'Quelque chose a changé',
+  (MysticLanguage.french, MysticMirrorOutcome.partlyShifted) =>
+    'Partiellement changé',
+  (MysticLanguage.french, MysticMirrorOutcome.unchanged) =>
+    'Rien n’a encore changé',
+  (MysticLanguage.french, MysticMirrorOutcome.unclear) => 'Toujours incertain',
+  (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.shifted) =>
+    'Algo mudou',
+  (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.partlyShifted) =>
+    'Mudou em parte',
+  (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.unchanged) =>
+    'Ainda não mudou',
+  (MysticLanguage.portugueseBrazil, MysticMirrorOutcome.unclear) =>
+    'Ainda não está claro',
+  (_, MysticMirrorOutcome.shifted) => 'Something shifted',
+  (_, MysticMirrorOutcome.partlyShifted) => 'Partly changed',
+  (_, MysticMirrorOutcome.unchanged) => 'Nothing changed yet',
+  (_, MysticMirrorOutcome.unclear) => 'Still unclear',
+};
 
 String _formatExportDate(DateTime value) => value.toLocal().toIso8601String();

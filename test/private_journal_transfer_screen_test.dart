@@ -14,8 +14,9 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  testWidgets('protected transfer stays usable on a narrow phone',
-      (tester) async {
+  testWidgets('protected transfer stays usable on a narrow phone', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -55,25 +56,22 @@ void main() {
     );
     await tester.tap(find.text('Unlock and validate'));
     await tester.pump();
-    for (var attempt = 0;
-        attempt < 20 &&
-            find
-                .textContaining('not a valid or supported')
-                .evaluate()
-                .isEmpty;
-        attempt++) {
+    for (
+      var attempt = 0;
+      attempt < 20 &&
+          find.textContaining('not a valid or supported').evaluate().isEmpty;
+      attempt++
+    ) {
       await tester.pump(const Duration(milliseconds: 50));
     }
 
-    expect(
-      find.textContaining('not a valid or supported'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('not a valid or supported'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('short creation passphrase is rejected before encryption',
-      (tester) async {
+  testWidgets('short creation passphrase is rejected before encryption', (
+    tester,
+  ) async {
     final record = ReadingRecord(
       kind: ReadingKind.daily,
       question: 'What matters?',

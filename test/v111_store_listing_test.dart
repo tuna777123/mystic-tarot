@@ -21,42 +21,40 @@ void main() {
     for (final path in listings) {
       final content = File(path).readAsStringSync();
       expect(content, isNot(contains('1.10.1')), reason: path);
-      expect(
-        content.toLowerCase(),
-        contains(mirrorNames[path]),
-        reason: path,
-      );
+      expect(content.toLowerCase(), contains(mirrorNames[path]), reason: path);
     }
   });
 
-  test('every listing discloses explainability and twenty-four-hour follow-up',
-      () {
-    final requiredTerms = <String, List<String>>{
-      'docs/STORE_LISTING_TR.md': <String>[
-        'Bu yorumun nedenini gör',
-        '24 saat sonra',
-      ],
-      'docs/STORE_LISTING_ES.md': <String>[
-        'COMPRENDE LA INTERPRETACIÓN',
-        'DESPUÉS DE 24 HORAS',
-      ],
-      'docs/STORE_LISTING_FR.md': <String>[
-        'COMPRENEZ L’INTERPRÉTATION',
-        'APRÈS 24 HEURES',
-      ],
-      'docs/STORE_LISTING_PT_BR.md': <String>[
-        'ENTENDA A INTERPRETAÇÃO',
-        'APÓS 24 HORAS',
-      ],
-    };
+  test(
+    'every listing discloses explainability and twenty-four-hour follow-up',
+    () {
+      final requiredTerms = <String, List<String>>{
+        'docs/STORE_LISTING_TR.md': <String>[
+          'Bu yorumun nedenini gör',
+          '24 saat sonra',
+        ],
+        'docs/STORE_LISTING_ES.md': <String>[
+          'COMPRENDE LA INTERPRETACIÓN',
+          'DESPUÉS DE 24 HORAS',
+        ],
+        'docs/STORE_LISTING_FR.md': <String>[
+          'COMPRENEZ L’INTERPRÉTATION',
+          'APRÈS 24 HEURES',
+        ],
+        'docs/STORE_LISTING_PT_BR.md': <String>[
+          'ENTENDA A INTERPRETAÇÃO',
+          'APÓS 24 HORAS',
+        ],
+      };
 
-    for (final entry in requiredTerms.entries) {
-      final content = File(entry.key).readAsStringSync();
-      for (final term in entry.value) {
-        expect(content, contains(term), reason: '${entry.key}: $term');
+      for (final entry in requiredTerms.entries) {
+        final content = File(entry.key).readAsStringSync();
+        for (final term in entry.value) {
+          expect(content, contains(term), reason: '${entry.key}: $term');
+        }
       }
-    }
-  });
+    },
+  );
 
   test('store copy keeps the free Mirror promise honest', () {
     final expected = <String, String>{

@@ -16,8 +16,7 @@ class RitualReminderService {
   Future<bool> scheduleDaily({
     required RitualReminderSettings settings,
     required MysticLanguage language,
-  }) async =>
-      false;
+  }) async => false;
 
   Future<void> cancel() async {}
 }

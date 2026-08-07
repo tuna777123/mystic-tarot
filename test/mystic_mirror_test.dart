@@ -16,27 +16,26 @@ const testCard = TarotCardData(
 );
 
 ReadingRecord testRecord(DateTime createdAt) => ReadingRecord(
-      kind: ReadingKind.daily,
-      question: 'What deserves my attention?',
-      cards: const <DrawnCard>[DrawnCard(testCard, false)],
-      createdAt: createdAt,
-      emotion: EmotionalState.uncertain,
-      alignedAction: 'Take one small reversible step.',
-    );
+  kind: ReadingKind.daily,
+  question: 'What deserves my attention?',
+  cards: const <DrawnCard>[DrawnCard(testCard, false)],
+  createdAt: createdAt,
+  emotion: EmotionalState.uncertain,
+  alignedAction: 'Take one small reversible step.',
+);
 
 MysticMirrorReflection reflection({
   required String id,
   required DateTime completedAt,
   String note = '',
   MysticMirrorOutcome outcome = MysticMirrorOutcome.shifted,
-}) =>
-    MysticMirrorReflection(
-      recordId: id,
-      outcome: outcome,
-      emotion: EmotionalState.grounded,
-      note: note,
-      completedAt: completedAt,
-    );
+}) => MysticMirrorReflection(
+  recordId: id,
+  outcome: outcome,
+  emotion: EmotionalState.grounded,
+  note: note,
+  completedAt: completedAt,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -146,95 +145,105 @@ void main() {
     expect(loaded['second']!.note, 'A real change.');
   });
 
-  test('saving a new snapshot preserves the previous primary as backup',
-      () async {
-    final store = MysticMirrorStore();
-    final first = reflection(
-      id: 'first',
-      note: 'First snapshot',
-      completedAt: DateTime.utc(2026, 8, 2, 9),
-    );
-    final second = reflection(
-      id: 'second',
-      note: 'Second snapshot',
-      completedAt: DateTime.utc(2026, 8, 2, 10),
-    );
+  test(
+    'saving a new snapshot preserves the previous primary as backup',
+    () async {
+      final store = MysticMirrorStore();
+      final first = reflection(
+        id: 'first',
+        note: 'First snapshot',
+        completedAt: DateTime.utc(2026, 8, 2, 9),
+      );
+      final second = reflection(
+        id: 'second',
+        note: 'Second snapshot',
+        completedAt: DateTime.utc(2026, 8, 2, 10),
+      );
 
-    await store.save(first);
-    await store.save(second);
-    final preferences = await SharedPreferences.getInstance();
-    final backup = preferences.getStringList(MysticMirrorStore.backupKey)!;
+      await store.save(first);
+      await store.save(second);
+      final preferences = await SharedPreferences.getInstance();
+      final backup = preferences.getStringList(MysticMirrorStore.backupKey)!;
 
-    expect(backup, hasLength(1));
-    expect(MysticMirrorReflection.tryDecode(backup.single)!.recordId, 'first');
-  });
+      expect(backup, hasLength(1));
+      expect(
+        MysticMirrorReflection.tryDecode(backup.single)!.recordId,
+        'first',
+      );
+    },
+  );
 
-  test('store recovers from backup when primary contains no valid records',
-      () async {
-    final recovered = reflection(
-      id: 'recovered',
-      note: 'Last known good',
-      completedAt: DateTime.utc(2026, 8, 2, 8),
-    );
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      MysticMirrorStore.storageKey: <String>['{broken'],
-      MysticMirrorStore.backupKey: <String>[recovered.encode()],
-    });
+  test(
+    'store recovers from backup when primary contains no valid records',
+    () async {
+      final recovered = reflection(
+        id: 'recovered',
+        note: 'Last known good',
+        completedAt: DateTime.utc(2026, 8, 2, 8),
+      );
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        MysticMirrorStore.storageKey: <String>['{broken'],
+        MysticMirrorStore.backupKey: <String>[recovered.encode()],
+      });
 
-    final loaded = await MysticMirrorStore().load();
+      final loaded = await MysticMirrorStore().load();
 
-    expect(loaded, hasLength(1));
-    expect(loaded['recovered']!.note, 'Last known good');
-  });
+      expect(loaded, hasLength(1));
+      expect(loaded['recovered']!.note, 'Last known good');
+    },
+  );
 
-  test('partial primary corruption restores missing backup reflections',
-      () async {
-    final primary = reflection(
-      id: 'primary',
-      note: 'Still valid',
-      completedAt: DateTime.utc(2026, 8, 3, 10),
-    );
-    final backup = reflection(
-      id: 'backup',
-      note: 'Recovered from backup',
-      completedAt: DateTime.utc(2026, 8, 2, 10),
-    );
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      MysticMirrorStore.storageKey: <String>[primary.encode(), '{broken'],
-      MysticMirrorStore.backupKey: <String>[backup.encode()],
-    });
+  test(
+    'partial primary corruption restores missing backup reflections',
+    () async {
+      final primary = reflection(
+        id: 'primary',
+        note: 'Still valid',
+        completedAt: DateTime.utc(2026, 8, 3, 10),
+      );
+      final backup = reflection(
+        id: 'backup',
+        note: 'Recovered from backup',
+        completedAt: DateTime.utc(2026, 8, 2, 10),
+      );
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        MysticMirrorStore.storageKey: <String>[primary.encode(), '{broken'],
+        MysticMirrorStore.backupKey: <String>[backup.encode()],
+      });
 
-    final loaded = await MysticMirrorStore().load();
+      final loaded = await MysticMirrorStore().load();
 
-    expect(loaded.keys, containsAll(<String>['primary', 'backup']));
-    expect(loaded['backup']!.note, 'Recovered from backup');
-  });
+      expect(loaded.keys, containsAll(<String>['primary', 'backup']));
+      expect(loaded['backup']!.note, 'Recovered from backup');
+    },
+  );
 
-  test('newer primary reflection wins over an older backup duplicate',
-      () async {
-    final primary = reflection(
-      id: 'same',
-      note: 'New primary',
-      completedAt: DateTime.utc(2026, 8, 3, 10),
-    );
-    final backup = reflection(
-      id: 'same',
-      note: 'Old backup',
-      completedAt: DateTime.utc(2026, 8, 2, 10),
-    );
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      MysticMirrorStore.storageKey: <String>[primary.encode(), '{broken'],
-      MysticMirrorStore.backupKey: <String>[backup.encode()],
-    });
+  test(
+    'newer primary reflection wins over an older backup duplicate',
+    () async {
+      final primary = reflection(
+        id: 'same',
+        note: 'New primary',
+        completedAt: DateTime.utc(2026, 8, 3, 10),
+      );
+      final backup = reflection(
+        id: 'same',
+        note: 'Old backup',
+        completedAt: DateTime.utc(2026, 8, 2, 10),
+      );
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        MysticMirrorStore.storageKey: <String>[primary.encode(), '{broken'],
+        MysticMirrorStore.backupKey: <String>[backup.encode()],
+      });
 
-    final loaded = await MysticMirrorStore().load();
+      final loaded = await MysticMirrorStore().load();
 
-    expect(loaded, hasLength(1));
-    expect(loaded['same']!.note, 'New primary');
-  });
+      expect(loaded, hasLength(1));
+      expect(loaded['same']!.note, 'New primary');
+    },
+  );
 
-  test('saving after corrupt primary never overwrites a good backup',
-      () async {
+  test('saving after corrupt primary never overwrites a good backup', () async {
     final backup = reflection(
       id: 'backup',
       note: 'Keep me',
@@ -253,8 +262,7 @@ void main() {
       ),
     );
     final preferences = await SharedPreferences.getInstance();
-    final backupItems =
-        preferences.getStringList(MysticMirrorStore.backupKey)!;
+    final backupItems = preferences.getStringList(MysticMirrorStore.backupKey)!;
 
     expect(backupItems, hasLength(1));
     expect(
@@ -279,14 +287,15 @@ void main() {
   testWidgets('due Mirror prompt is localized in all five launch languages', (
     tester,
   ) async {
-    final oldRecord = testRecord(DateTime.now().subtract(const Duration(days: 2)));
+    final oldRecord = testRecord(
+      DateTime.now().subtract(const Duration(days: 2)),
+    );
     const expectations = <MysticLanguage, String>{
       MysticLanguage.english: 'Twenty-four hours passed.',
       MysticLanguage.turkish: 'Yirmi dört saat geçti.',
       MysticLanguage.spanish: 'Pasaron veinticuatro horas.',
       MysticLanguage.french: 'Vingt-quatre heures ont passé.',
-      MysticLanguage.portugueseBrazil:
-          'Vinte e quatro horas se passaram.',
+      MysticLanguage.portugueseBrazil: 'Vinte e quatro horas se passaram.',
     };
 
     for (final entry in expectations.entries) {

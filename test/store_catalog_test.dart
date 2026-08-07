@@ -11,14 +11,14 @@ void main() {
     });
 
     test('launches with yearly and monthly only', () {
-      expect(
-        MysticOffer.launchCatalog.map((offer) => offer.plan),
-        [MysticPlan.yearly, MysticPlan.monthly],
-      );
-      expect(
-        MysticProductIds.launch,
-        <String>{MysticProductIds.monthly, MysticProductIds.yearly},
-      );
+      expect(MysticOffer.launchCatalog.map((offer) => offer.plan), [
+        MysticPlan.yearly,
+        MysticPlan.monthly,
+      ]);
+      expect(MysticProductIds.launch, <String>{
+        MysticProductIds.monthly,
+        MysticProductIds.yearly,
+      });
       expect(MysticProductIds.launch, isNot(contains(MysticProductIds.weekly)));
       expect(MysticProductIds.launch.difference(MysticProductIds.all), isEmpty);
     });

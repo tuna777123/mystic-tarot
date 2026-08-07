@@ -50,17 +50,16 @@ class _MysticPlusIntelligenceScreenState
     required String fr,
     required String pt,
     required String tr,
-  }) =>
-      localized(
-        _language,
-        english: en,
-        spanish: es,
-        french: fr,
-        portugueseBrazil: pt,
-        turkish: tr,
-        italian: en,
-        german: en,
-      );
+  }) => localized(
+    _language,
+    english: en,
+    spanish: es,
+    french: fr,
+    portugueseBrazil: pt,
+    turkish: tr,
+    italian: en,
+    german: en,
+  );
 
   @override
   void initState() {
@@ -70,10 +69,10 @@ class _MysticPlusIntelligenceScreenState
 
   Future<void> _load() async {
     try {
-      final records = widget.initialRecords ??
-          (await ReadingJournalStore().load()).records;
-      final mirrors = widget.initialReflections ??
-          await MysticMirrorStore().load();
+      final records =
+          widget.initialRecords ?? (await ReadingJournalStore().load()).records;
+      final mirrors =
+          widget.initialReflections ?? await MysticMirrorStore().load();
       final report = MysticPlusIntelligence.analyze(
         records: records,
         reflections: mirrors,
@@ -95,134 +94,134 @@ class _MysticPlusIntelligenceScreenState
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: MysticBackground(
-          child: SafeArea(
-            child: Column(
-              children: [
-                _header(),
-                Expanded(
-                  child: loading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: MysticColors.gold,
-                          ),
-                        )
-                      : ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 6, 20, 24),
-                          children: [
-                            _hero(context),
-                            const SizedBox(height: 14),
-                            if (loadFailed)
-                              _loadFailure(context)
-                            else if (snapshot != null)
-                              ..._report(context, snapshot!),
-                            const SizedBox(height: 14),
-                            _plusValue(context),
-                          ],
-                        ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
-                  child: Column(
-                    children: [
-                      GoldButton(
-                        label: widget.isPlus
-                            ? t(
-                                en: 'View and manage my plan',
-                                es: 'Ver y gestionar mi plan',
-                                fr: 'Voir et gérer mon offre',
-                                pt: 'Ver e gerenciar meu plano',
-                                tr: 'Planımı gör ve yönet',
-                              )
-                            : t(
-                                en: 'Unlock the full report',
-                                es: 'Desbloquear el informe completo',
-                                fr: 'Débloquer le rapport complet',
-                                pt: 'Desbloquear o relatório completo',
-                                tr: 'Tam raporun kilidini aç',
-                              ),
-                        icon: widget.isPlus
-                            ? Icons.settings_outlined
-                            : Icons.lock_open_rounded,
-                        onPressed: widget.onContinue,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        t(
-                          en: 'Calculated privately on this device. No journal text is uploaded to create this report.',
-                          es: 'Calculado de forma privada en este dispositivo. El texto del diario no se sube.',
-                          fr: 'Calculé en privé sur cet appareil. Aucun texte du journal n’est envoyé.',
-                          pt: 'Calculado de forma privada neste dispositivo. Nenhum texto do diário é enviado.',
-                          tr: 'Bu cihazda özel olarak hesaplanır. Rapor için günlük metinlerin yüklenmez.',
-                        ),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: MysticColors.muted,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-  Widget _header() => Padding(
-        padding: const EdgeInsets.fromLTRB(10, 6, 14, 4),
-        child: Row(
+    body: MysticBackground(
+      child: SafeArea(
+        child: Column(
           children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close),
-            ),
-            const Spacer(),
-            const Text(
-              'MYSTIC PLUS',
-              style: TextStyle(
-                color: MysticColors.gold,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.8,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-              decoration: BoxDecoration(
-                color: widget.isPlus
-                    ? MysticColors.gold
-                    : MysticColors.gold.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(99),
-                border: Border.all(color: MysticColors.gold),
-              ),
-              child: Text(
-                widget.isPlus
-                    ? t(
-                        en: 'ACTIVE',
-                        es: 'ACTIVO',
-                        fr: 'ACTIF',
-                        pt: 'ATIVO',
-                        tr: 'AKTİF',
-                      )
-                    : t(
-                        en: 'PREVIEW',
-                        es: 'VISTA',
-                        fr: 'APERÇU',
-                        pt: 'PRÉVIA',
-                        tr: 'ÖNİZLEME',
+            _header(),
+            Expanded(
+              child: loading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: MysticColors.gold,
                       ),
-                style: TextStyle(
-                  color: widget.isPlus ? MysticColors.ink : MysticColors.gold,
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
-                ),
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 24),
+                      children: [
+                        _hero(context),
+                        const SizedBox(height: 14),
+                        if (loadFailed)
+                          _loadFailure(context)
+                        else if (snapshot != null)
+                          ..._report(context, snapshot!),
+                        const SizedBox(height: 14),
+                        _plusValue(context),
+                      ],
+                    ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+              child: Column(
+                children: [
+                  GoldButton(
+                    label: widget.isPlus
+                        ? t(
+                            en: 'View and manage my plan',
+                            es: 'Ver y gestionar mi plan',
+                            fr: 'Voir et gérer mon offre',
+                            pt: 'Ver e gerenciar meu plano',
+                            tr: 'Planımı gör ve yönet',
+                          )
+                        : t(
+                            en: 'Unlock the full report',
+                            es: 'Desbloquear el informe completo',
+                            fr: 'Débloquer le rapport complet',
+                            pt: 'Desbloquear o relatório completo',
+                            tr: 'Tam raporun kilidini aç',
+                          ),
+                    icon: widget.isPlus
+                        ? Icons.settings_outlined
+                        : Icons.lock_open_rounded,
+                    onPressed: widget.onContinue,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    t(
+                      en: 'Calculated privately on this device. No journal text is uploaded to create this report.',
+                      es: 'Calculado de forma privada en este dispositivo. El texto del diario no se sube.',
+                      fr: 'Calculé en privé sur cet appareil. Aucun texte du journal n’est envoyé.',
+                      pt: 'Calculado de forma privada neste dispositivo. Nenhum texto do diário é enviado.',
+                      tr: 'Bu cihazda özel olarak hesaplanır. Rapor için günlük metinlerin yüklenmez.',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: MysticColors.muted),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-      );
+      ),
+    ),
+  );
+
+  Widget _header() => Padding(
+    padding: const EdgeInsets.fromLTRB(10, 6, 14, 4),
+    child: Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.close),
+        ),
+        const Spacer(),
+        const Text(
+          'MYSTIC PLUS',
+          style: TextStyle(
+            color: MysticColors.gold,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.8,
+          ),
+        ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+          decoration: BoxDecoration(
+            color: widget.isPlus
+                ? MysticColors.gold
+                : MysticColors.gold.withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(99),
+            border: Border.all(color: MysticColors.gold),
+          ),
+          child: Text(
+            widget.isPlus
+                ? t(
+                    en: 'ACTIVE',
+                    es: 'ACTIVO',
+                    fr: 'ACTIF',
+                    pt: 'ATIVO',
+                    tr: 'AKTİF',
+                  )
+                : t(
+                    en: 'PREVIEW',
+                    es: 'VISTA',
+                    fr: 'APERÇU',
+                    pt: 'PRÉVIA',
+                    tr: 'ÖNİZLEME',
+                  ),
+            style: TextStyle(
+              color: widget.isPlus ? MysticColors.ink : MysticColors.gold,
+              fontSize: 8,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _hero(BuildContext context) {
     final message = _sourceMessage();
@@ -442,69 +441,68 @@ class _MysticPlusIntelligenceScreenState
   Widget _overview(
     BuildContext context,
     MysticPlusIntelligenceSnapshot report,
-  ) =>
-      _panel(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  ) => _panel(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionLabel(
+          t(
+            en: 'SEVEN-DAY SIGNAL',
+            es: 'SEÑAL DE SIETE DÍAS',
+            fr: 'SIGNAL SUR SEPT JOURS',
+            pt: 'SINAL DE SETE DIAS',
+            tr: 'YEDİ GÜNLÜK SİNYAL',
+          ),
+        ),
+        const SizedBox(height: 13),
+        Row(
           children: [
-            _sectionLabel(
-              t(
-                en: 'SEVEN-DAY SIGNAL',
-                es: 'SEÑAL DE SIETE DÍAS',
-                fr: 'SIGNAL SUR SEPT JOURS',
-                pt: 'SINAL DE SETE DIAS',
-                tr: 'YEDİ GÜNLÜK SİNYAL',
+            Expanded(
+              child: _metric(
+                context,
+                '${report.readingCount}',
+                t(
+                  en: 'readings',
+                  es: 'lecturas',
+                  fr: 'tirages',
+                  pt: 'leituras',
+                  tr: 'okuma',
+                ),
               ),
             ),
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                Expanded(
-                  child: _metric(
-                    context,
-                    '${report.readingCount}',
-                    t(
-                      en: 'readings',
-                      es: 'lecturas',
-                      fr: 'tirages',
-                      pt: 'leituras',
-                      tr: 'okuma',
-                    ),
-                  ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _metric(
+                context,
+                '${report.activeDays}',
+                t(
+                  en: 'active days',
+                  es: 'días activos',
+                  fr: 'jours actifs',
+                  pt: 'dias ativos',
+                  tr: 'aktif gün',
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _metric(
-                    context,
-                    '${report.activeDays}',
-                    t(
-                      en: 'active days',
-                      es: 'días activos',
-                      fr: 'jours actifs',
-                      pt: 'dias ativos',
-                      tr: 'aktif gün',
-                    ),
-                  ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _metric(
+                context,
+                '${report.uniqueCardCount}',
+                t(
+                  en: 'unique cards',
+                  es: 'cartas únicas',
+                  fr: 'cartes uniques',
+                  pt: 'cartas únicas',
+                  tr: 'benzersiz kart',
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _metric(
-                    context,
-                    '${report.uniqueCardCount}',
-                    t(
-                      en: 'unique cards',
-                      es: 'cartas únicas',
-                      fr: 'cartes uniques',
-                      pt: 'cartas únicas',
-                      tr: 'benzersiz kart',
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _revealedPattern(
     BuildContext context,
@@ -643,180 +641,175 @@ class _MysticPlusIntelligenceScreenState
   Widget _nextPractice(
     BuildContext context,
     MysticPlusIntelligenceSnapshot report,
-  ) =>
-      _insight(
-        context,
-        icon: Icons.explore_outlined,
-        eyebrow: t(
-          en: 'NEXT GROUNDED PRACTICE',
-          es: 'PRÓXIMA PRÁCTICA CONCRETA',
-          fr: 'PROCHAINE PRATIQUE CONCRÈTE',
-          pt: 'PRÓXIMA PRÁTICA CONCRETA',
-          tr: 'SONRAKİ SOMUT PRATİK',
-        ),
-        title: _practiceTitle(report),
-        body: _practiceBody(report),
-      );
+  ) => _insight(
+    context,
+    icon: Icons.explore_outlined,
+    eyebrow: t(
+      en: 'NEXT GROUNDED PRACTICE',
+      es: 'PRÓXIMA PRÁCTICA CONCRETA',
+      fr: 'PROCHAINE PRATIQUE CONCRÈTE',
+      pt: 'PRÓXIMA PRÁTICA CONCRETA',
+      tr: 'SONRAKİ SOMUT PRATİK',
+    ),
+    title: _practiceTitle(report),
+    body: _practiceBody(report),
+  );
 
   Widget _lockedInsight(
     BuildContext context, {
     required IconData icon,
     required String title,
-  }) =>
-      Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .035),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white10),
+  }) => Container(
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: .035),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.white10),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 43,
+          height: 43,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: MysticColors.violet.withValues(alpha: .25),
+          ),
+          child: Icon(icon, color: MysticColors.lavender),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 43,
-              height: 43,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: MysticColors.violet.withValues(alpha: .25),
+        const SizedBox(width: 13),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              Text(
+                t(
+                  en: 'Personalized insight ready inside Mystic Plus',
+                  es: 'Información personalizada lista en Mystic Plus',
+                  fr: 'Analyse personnalisée prête dans Mystic Plus',
+                  pt: 'Insight personalizado pronto no Mystic Plus',
+                  tr: 'Kişisel içgörü Mystic Plus içinde hazır',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              child: Icon(icon, color: MysticColors.lavender),
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    t(
-                      en: 'Personalized insight ready inside Mystic Plus',
-                      es: 'Información personalizada lista en Mystic Plus',
-                      fr: 'Analyse personnalisée prête dans Mystic Plus',
-                      pt: 'Insight personalizado pronto no Mystic Plus',
-                      tr: 'Kişisel içgörü Mystic Plus içinde hazır',
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.lock_outline, color: MysticColors.gold),
-          ],
+            ],
+          ),
         ),
-      );
+        const Icon(Icons.lock_outline, color: MysticColors.gold),
+      ],
+    ),
+  );
 
   Widget _plusValue(BuildContext context) => _panel(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionLabel(
-              t(
-                en: 'MYSTIC PLUS VALUE',
-                es: 'VALOR DE MYSTIC PLUS',
-                fr: 'VALEUR DE MYSTIC PLUS',
-                pt: 'VALOR DO MYSTIC PLUS',
-                tr: 'MYSTIC PLUS DEĞERİ',
-              ),
-            ),
-            const SizedBox(height: 12),
-            _benefit(
-              Icons.insights_outlined,
-              t(
-                en: 'A fresh private intelligence report every seven days',
-                es: 'Un nuevo informe privado de inteligencia cada siete días',
-                fr: 'Un nouveau rapport privé d’intelligence tous les sept jours',
-                pt: 'Um novo relatório privado de inteligência a cada sete dias',
-                tr: 'Her yedi günde yenilenen özel intelligence raporu',
-              ),
-            ),
-            _benefit(
-              Icons.all_inclusive,
-              t(
-                en: 'Unlimited deep readings',
-                es: 'Lecturas profundas ilimitadas',
-                fr: 'Tirages approfondis illimités',
-                pt: 'Leituras profundas ilimitadas',
-                tr: 'Sınırsız derin okuma',
-              ),
-            ),
-            _benefit(
-              Icons.hub_outlined,
-              t(
-                en: 'Compatibility, Timeline, and Celtic Cross spreads',
-                es: 'Tiradas de Compatibilidad, Línea temporal y Cruz Celta',
-                fr: 'Tirages Compatibilité, Chronologie et Croix Celtique',
-                pt: 'Tiragens Compatibilidade, Linha do tempo e Cruz Celta',
-                tr: 'Uyum, Zaman Çizgisi ve Kelt Haçı açılımları',
-              ),
-            ),
-            _benefit(
-              Icons.forum_outlined,
-              t(
-                en: 'Unlimited Oracle follow-up questions',
-                es: 'Preguntas de seguimiento ilimitadas al Oráculo',
-                fr: 'Questions de suivi illimitées avec l’Oracle',
-                pt: 'Perguntas de acompanhamento ilimitadas ao Oráculo',
-                tr: 'Sınırsız Oracle devam sorusu',
-              ),
-            ),
-          ],
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionLabel(
+          t(
+            en: 'MYSTIC PLUS VALUE',
+            es: 'VALOR DE MYSTIC PLUS',
+            fr: 'VALEUR DE MYSTIC PLUS',
+            pt: 'VALOR DO MYSTIC PLUS',
+            tr: 'MYSTIC PLUS DEĞERİ',
+          ),
         ),
-      );
+        const SizedBox(height: 12),
+        _benefit(
+          Icons.insights_outlined,
+          t(
+            en: 'A fresh private intelligence report every seven days',
+            es: 'Un nuevo informe privado de inteligencia cada siete días',
+            fr: 'Un nouveau rapport privé d’intelligence tous les sept jours',
+            pt: 'Um novo relatório privado de inteligência a cada sete dias',
+            tr: 'Her yedi günde yenilenen özel intelligence raporu',
+          ),
+        ),
+        _benefit(
+          Icons.all_inclusive,
+          t(
+            en: 'Unlimited deep readings',
+            es: 'Lecturas profundas ilimitadas',
+            fr: 'Tirages approfondis illimités',
+            pt: 'Leituras profundas ilimitadas',
+            tr: 'Sınırsız derin okuma',
+          ),
+        ),
+        _benefit(
+          Icons.hub_outlined,
+          t(
+            en: 'Compatibility, Timeline, and Celtic Cross spreads',
+            es: 'Tiradas de Compatibilidad, Línea temporal y Cruz Celta',
+            fr: 'Tirages Compatibilité, Chronologie et Croix Celtique',
+            pt: 'Tiragens Compatibilidade, Linha do tempo e Cruz Celta',
+            tr: 'Uyum, Zaman Çizgisi ve Kelt Haçı açılımları',
+          ),
+        ),
+        _benefit(
+          Icons.forum_outlined,
+          t(
+            en: 'Unlimited Oracle follow-up questions',
+            es: 'Preguntas de seguimiento ilimitadas al Oráculo',
+            fr: 'Questions de suivi illimitées avec l’Oracle',
+            pt: 'Perguntas de acompanhamento ilimitadas ao Oráculo',
+            tr: 'Sınırsız Oracle devam sorusu',
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _loadFailure(BuildContext context) => _panel(
-        child: Column(
-          children: [
-            const Icon(Icons.refresh_rounded, color: MysticColors.gold),
-            const SizedBox(height: 10),
-            Text(
-              t(
-                en: 'The private report could not be calculated right now.',
-                es: 'El informe privado no pudo calcularse ahora.',
-                fr: 'Le rapport privé n’a pas pu être calculé pour le moment.',
-                pt: 'O relatório privado não pôde ser calculado agora.',
-                tr: 'Özel rapor şu anda hesaplanamadı.',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  loading = true;
-                  loadFailed = false;
-                });
-                _load();
-              },
-              icon: const Icon(Icons.refresh),
-              label: Text(
-                t(
-                  en: 'Try again',
-                  es: 'Intentar de nuevo',
-                  fr: 'Réessayer',
-                  pt: 'Tentar novamente',
-                  tr: 'Yeniden dene',
-                ),
-              ),
-            ),
-          ],
+    child: Column(
+      children: [
+        const Icon(Icons.refresh_rounded, color: MysticColors.gold),
+        const SizedBox(height: 10),
+        Text(
+          t(
+            en: 'The private report could not be calculated right now.',
+            es: 'El informe privado no pudo calcularse ahora.',
+            fr: 'Le rapport privé n’a pas pu être calculé pour le moment.',
+            pt: 'O relatório privado não pôde ser calculado agora.',
+            tr: 'Özel rapor şu anda hesaplanamadı.',
+          ),
+          textAlign: TextAlign.center,
         ),
-      );
+        const SizedBox(height: 10),
+        TextButton.icon(
+          onPressed: () {
+            setState(() {
+              loading = true;
+              loadFailed = false;
+            });
+            _load();
+          },
+          icon: const Icon(Icons.refresh),
+          label: Text(
+            t(
+              en: 'Try again',
+              es: 'Intentar de nuevo',
+              fr: 'Réessayer',
+              pt: 'Tentar novamente',
+              tr: 'Yeniden dene',
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _panel({required Widget child}) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: const Color(0xFF151120),
-          borderRadius: BorderRadius.circular(21),
-          border: Border.all(color: Colors.white.withValues(alpha: .09)),
-        ),
-        child: child,
-      );
+    width: double.infinity,
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(
+      color: const Color(0xFF151120),
+      borderRadius: BorderRadius.circular(21),
+      border: Border.all(color: Colors.white.withValues(alpha: .09)),
+    ),
+    child: child,
+  );
 
   Widget _insight(
     BuildContext context, {
@@ -824,219 +817,218 @@ class _MysticPlusIntelligenceScreenState
     required String eyebrow,
     required String title,
     required String body,
-  }) =>
-      _panel(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: MysticColors.gold.withValues(alpha: .11),
-              ),
-              child: Icon(icon, color: MysticColors.gold, size: 22),
-            ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _sectionLabel(eyebrow),
-                  const SizedBox(height: 5),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    body,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          height: 1.42,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+  }) => _panel(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: MysticColors.gold.withValues(alpha: .11),
+          ),
+          child: Icon(icon, color: MysticColors.gold, size: 22),
         ),
-      );
+        const SizedBox(width: 13),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionLabel(eyebrow),
+              const SizedBox(height: 5),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                body,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(height: 1.42),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _metric(BuildContext context, String value, String label) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 13),
-        decoration: BoxDecoration(
-          color: MysticColors.violet.withValues(alpha: .17),
-          borderRadius: BorderRadius.circular(16),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 13),
+    decoration: BoxDecoration(
+      color: MysticColors.violet.withValues(alpha: .17),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: MysticColors.gold,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                color: MysticColors.gold,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+        const SizedBox(height: 4),
+        Text(
+          label,
+          maxLines: 2,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _benefit(IconData icon, String text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: MysticColors.gold, size: 21),
-            const SizedBox(width: 11),
-            Expanded(child: Text(text)),
-          ],
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 7),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: MysticColors.gold, size: 21),
+        const SizedBox(width: 11),
+        Expanded(child: Text(text)),
+      ],
+    ),
+  );
 
   Widget _sectionLabel(String text) => Text(
-        text,
-        style: const TextStyle(
-          color: MysticColors.gold,
-          fontSize: 9,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 1.15,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      color: MysticColors.gold,
+      fontSize: 9,
+      fontWeight: FontWeight.w900,
+      letterSpacing: 1.15,
+    ),
+  );
 
   String _percent(double value) => '${(value * 100).round()}%';
 
   (String, String) _sourceMessage() => switch (widget.source) {
-        'daily_limit' => (
-            t(
-              en: 'Your free readings ended. Your pattern did not.',
-              es: 'Tus lecturas gratuitas terminaron. Tu patrón no.',
-              fr: 'Vos tirages gratuits sont terminés. Pas votre schéma.',
-              pt: 'Suas leituras gratuitas terminaram. Seu padrão não.',
-              tr: 'Ücretsiz okumaların bitti. Örüntün bitmedi.',
-            ),
-            t(
-              en: 'See the private evidence your saved readings are already building, then decide whether Plus is worth it.',
-              es: 'Mira la evidencia privada que tus lecturas ya están creando y decide si Plus vale la pena.',
-              fr: 'Voyez les preuves privées que vos tirages construisent déjà, puis décidez si Plus en vaut la peine.',
-              pt: 'Veja as evidências privadas que suas leituras já estão criando e decida se o Plus vale a pena.',
-              tr: 'Kayıtlı okumalarının oluşturduğu özel kanıtı gör; sonra Plus’ın değerli olup olmadığına karar ver.',
-            ),
-          ),
-        'premium_spread' => (
-            t(
-              en: 'A wider spread should create a deeper pattern.',
-              es: 'Una tirada más amplia debe crear un patrón más profundo.',
-              fr: 'Un tirage plus large doit créer un schéma plus profond.',
-              pt: 'Uma tiragem mais ampla deve criar um padrão mais profundo.',
-              tr: 'Daha geniş bir açılım daha derin bir örüntü oluşturmalı.',
-            ),
-            t(
-              en: 'Preview the intelligence layer that connects premium spreads across time.',
-              es: 'Previsualiza la capa de inteligencia que conecta las tiradas premium con el tiempo.',
-              fr: 'Découvrez la couche d’intelligence qui relie les tirages premium dans le temps.',
-              pt: 'Veja a camada de inteligência que conecta tiragens premium ao longo do tempo.',
-              tr: 'Premium açılımları zaman içinde birbirine bağlayan intelligence katmanını önizle.',
-            ),
-          ),
-        'oracle_dialogue' => (
-            t(
-              en: 'Do not just ask more. Learn what keeps returning.',
-              es: 'No solo preguntes más. Aprende qué sigue regresando.',
-              fr: 'Ne posez pas seulement plus de questions. Voyez ce qui revient.',
-              pt: 'Não apenas pergunte mais. Aprenda o que continua retornando.',
-              tr: 'Yalnızca daha fazla sorma. Neyin geri döndüğünü öğren.',
-            ),
-            t(
-              en: 'Mystic Plus connects follow-up questions with your seven-day private pattern report.',
-              es: 'Mystic Plus conecta las preguntas de seguimiento con tu informe privado de siete días.',
-              fr: 'Mystic Plus relie les questions de suivi à votre rapport privé sur sept jours.',
-              pt: 'O Mystic Plus conecta perguntas de acompanhamento ao seu relatório privado de sete dias.',
-              tr: 'Mystic Plus devam sorularını yedi günlük özel örüntü raporunla birleştirir.',
-            ),
-          ),
-        _ => (
-            t(
-              en: 'See what your saved readings are building.',
-              es: 'Mira lo que están construyendo tus lecturas guardadas.',
-              fr: 'Découvrez ce que construisent vos tirages enregistrés.',
-              pt: 'Veja o que suas leituras salvas estão construindo.',
-              tr: 'Kayıtlı okumalarının ne oluşturduğunu gör.',
-            ),
-            t(
-              en: 'Mystic Plus is not only more readings. It is a private intelligence layer that becomes more useful as you return.',
-              es: 'Mystic Plus no es solo más lecturas. Es una capa privada de inteligencia que mejora con cada regreso.',
-              fr: 'Mystic Plus ne signifie pas seulement plus de tirages. C’est une intelligence privée qui gagne en valeur à chaque retour.',
-              pt: 'Mystic Plus não é apenas mais leituras. É uma camada privada de inteligência que melhora a cada retorno.',
-              tr: 'Mystic Plus yalnızca daha fazla okuma değildir. Her dönüşünde değerlenen özel bir intelligence katmanıdır.',
-            ),
-          ),
-      };
+    'daily_limit' => (
+      t(
+        en: 'Your free readings ended. Your pattern did not.',
+        es: 'Tus lecturas gratuitas terminaron. Tu patrón no.',
+        fr: 'Vos tirages gratuits sont terminés. Pas votre schéma.',
+        pt: 'Suas leituras gratuitas terminaram. Seu padrão não.',
+        tr: 'Ücretsiz okumaların bitti. Örüntün bitmedi.',
+      ),
+      t(
+        en: 'See the private evidence your saved readings are already building, then decide whether Plus is worth it.',
+        es: 'Mira la evidencia privada que tus lecturas ya están creando y decide si Plus vale la pena.',
+        fr: 'Voyez les preuves privées que vos tirages construisent déjà, puis décidez si Plus en vaut la peine.',
+        pt: 'Veja as evidências privadas que suas leituras já estão criando e decida se o Plus vale a pena.',
+        tr: 'Kayıtlı okumalarının oluşturduğu özel kanıtı gör; sonra Plus’ın değerli olup olmadığına karar ver.',
+      ),
+    ),
+    'premium_spread' => (
+      t(
+        en: 'A wider spread should create a deeper pattern.',
+        es: 'Una tirada más amplia debe crear un patrón más profundo.',
+        fr: 'Un tirage plus large doit créer un schéma plus profond.',
+        pt: 'Uma tiragem mais ampla deve criar um padrão mais profundo.',
+        tr: 'Daha geniş bir açılım daha derin bir örüntü oluşturmalı.',
+      ),
+      t(
+        en: 'Preview the intelligence layer that connects premium spreads across time.',
+        es: 'Previsualiza la capa de inteligencia que conecta las tiradas premium con el tiempo.',
+        fr: 'Découvrez la couche d’intelligence qui relie les tirages premium dans le temps.',
+        pt: 'Veja a camada de inteligência que conecta tiragens premium ao longo do tempo.',
+        tr: 'Premium açılımları zaman içinde birbirine bağlayan intelligence katmanını önizle.',
+      ),
+    ),
+    'oracle_dialogue' => (
+      t(
+        en: 'Do not just ask more. Learn what keeps returning.',
+        es: 'No solo preguntes más. Aprende qué sigue regresando.',
+        fr: 'Ne posez pas seulement plus de questions. Voyez ce qui revient.',
+        pt: 'Não apenas pergunte mais. Aprenda o que continua retornando.',
+        tr: 'Yalnızca daha fazla sorma. Neyin geri döndüğünü öğren.',
+      ),
+      t(
+        en: 'Mystic Plus connects follow-up questions with your seven-day private pattern report.',
+        es: 'Mystic Plus conecta las preguntas de seguimiento con tu informe privado de siete días.',
+        fr: 'Mystic Plus relie les questions de suivi à votre rapport privé sur sept jours.',
+        pt: 'O Mystic Plus conecta perguntas de acompanhamento ao seu relatório privado de sete dias.',
+        tr: 'Mystic Plus devam sorularını yedi günlük özel örüntü raporunla birleştirir.',
+      ),
+    ),
+    _ => (
+      t(
+        en: 'See what your saved readings are building.',
+        es: 'Mira lo que están construyendo tus lecturas guardadas.',
+        fr: 'Découvrez ce que construisent vos tirages enregistrés.',
+        pt: 'Veja o que suas leituras salvas estão construindo.',
+        tr: 'Kayıtlı okumalarının ne oluşturduğunu gör.',
+      ),
+      t(
+        en: 'Mystic Plus is not only more readings. It is a private intelligence layer that becomes more useful as you return.',
+        es: 'Mystic Plus no es solo más lecturas. Es una capa privada de inteligencia que mejora con cada regreso.',
+        fr: 'Mystic Plus ne signifie pas seulement plus de tirages. C’est une intelligence privée qui gagne en valeur à chaque retour.',
+        pt: 'Mystic Plus não é apenas mais leituras. É uma camada privada de inteligência que melhora a cada retorno.',
+        tr: 'Mystic Plus yalnızca daha fazla okuma değildir. Her dönüşünde değerlenen özel bir intelligence katmanıdır.',
+      ),
+    ),
+  };
 
   String _practiceTitle(MysticPlusIntelligenceSnapshot report) =>
       switch (report.dominantStartingEmotion) {
         EmotionalState.anxious => t(
-            en: 'Reduce the next question to one controllable action',
-            es: 'Reduce la próxima pregunta a una acción controlable',
-            fr: 'Ramenez la prochaine question à une action contrôlable',
-            pt: 'Reduza a próxima pergunta a uma ação controlável',
-            tr: 'Sonraki soruyu kontrol edilebilir tek eyleme indir',
-          ),
+          en: 'Reduce the next question to one controllable action',
+          es: 'Reduce la próxima pregunta a una acción controlable',
+          fr: 'Ramenez la prochaine question à une action contrôlable',
+          pt: 'Reduza a próxima pergunta a uma ação controlável',
+          tr: 'Sonraki soruyu kontrol edilebilir tek eyleme indir',
+        ),
         EmotionalState.uncertain => t(
-            en: 'Separate facts, assumptions, and unknowns',
-            es: 'Separa hechos, suposiciones y desconocidos',
-            fr: 'Séparez les faits, les hypothèses et les inconnues',
-            pt: 'Separe fatos, suposições e desconhecidos',
-            tr: 'Gerçekleri, varsayımları ve bilinmeyenleri ayır',
-          ),
+          en: 'Separate facts, assumptions, and unknowns',
+          es: 'Separa hechos, suposiciones y desconocidos',
+          fr: 'Séparez les faits, les hypothèses et les inconnues',
+          pt: 'Separe fatos, suposições e desconhecidos',
+          tr: 'Gerçekleri, varsayımları ve bilinmeyenleri ayır',
+        ),
         EmotionalState.curious => t(
-            en: 'Follow one repeated symbol into action',
-            es: 'Lleva un símbolo repetido a la acción',
-            fr: 'Transformez un symbole répété en action',
-            pt: 'Leve um símbolo repetido para a ação',
-            tr: 'Tekrar eden bir sembolü eyleme taşı',
-          ),
+          en: 'Follow one repeated symbol into action',
+          es: 'Lleva un símbolo repetido a la acción',
+          fr: 'Transformez un symbole répété en action',
+          pt: 'Leve um símbolo repetido para a ação',
+          tr: 'Tekrar eden bir sembolü eyleme taşı',
+        ),
         EmotionalState.hopeful => t(
-            en: 'Turn hope into one observable experiment',
-            es: 'Convierte la esperanza en un experimento observable',
-            fr: 'Transformez l’espoir en une expérience observable',
-            pt: 'Transforme esperança em um experimento observável',
-            tr: 'Umudu gözlemlenebilir tek deneye dönüştür',
-          ),
+          en: 'Turn hope into one observable experiment',
+          es: 'Convierte la esperanza en un experimento observable',
+          fr: 'Transformez l’espoir en une expérience observable',
+          pt: 'Transforme esperança em um experimento observável',
+          tr: 'Umudu gözlemlenebilir tek deneye dönüştür',
+        ),
         EmotionalState.grounded => t(
-            en: 'Use stability to examine the avoided question',
-            es: 'Usa la estabilidad para mirar la pregunta evitada',
-            fr: 'Utilisez votre stabilité pour regarder la question évitée',
-            pt: 'Use a estabilidade para encarar a pergunta evitada',
-            tr: 'Dengeni kaçındığın soruya bakmak için kullan',
-          ),
+          en: 'Use stability to examine the avoided question',
+          es: 'Usa la estabilidad para mirar la pregunta evitada',
+          fr: 'Utilisez votre stabilité pour regarder la question évitée',
+          pt: 'Use a estabilidade para encarar a pergunta evitada',
+          tr: 'Dengeni kaçındığın soruya bakmak için kullan',
+        ),
         null => t(
-            en: 'Save one honest reading and return after 24 hours',
-            es: 'Guarda una lectura honesta y vuelve después de 24 horas',
-            fr: 'Enregistrez un tirage honnête et revenez après 24 heures',
-            pt: 'Salve uma leitura honesta e volte após 24 horas',
-            tr: 'Dürüst bir okuma kaydet ve 24 saat sonra geri dön',
-          ),
+          en: 'Save one honest reading and return after 24 hours',
+          es: 'Guarda una lectura honesta y vuelve después de 24 horas',
+          fr: 'Enregistrez un tirage honnête et revenez après 24 heures',
+          pt: 'Salve uma leitura honesta e volte após 24 horas',
+          tr: 'Dürüst bir okuma kaydet ve 24 saat sonra geri dön',
+        ),
       };
 
   String _practiceBody(MysticPlusIntelligenceSnapshot report) => t(
-        en: 'This suggestion comes from the starting emotions you recorded most often. Treat it as a practical reflection prompt, not an instruction or prediction.',
-        es: 'Esta sugerencia parte de las emociones iniciales que registraste con más frecuencia. Úsala como reflexión práctica, no como instrucción o predicción.',
-        fr: 'Cette suggestion vient des émotions de départ que vous avez le plus souvent enregistrées. Utilisez-la comme piste de réflexion, pas comme instruction ou prédiction.',
-        pt: 'Esta sugestão parte das emoções iniciais que você registrou com mais frequência. Use como reflexão prática, não como instrução ou previsão.',
-        tr: 'Bu öneri en sık kaydettiğin başlangıç duygularından gelir. Onu talimat veya kehanet değil, pratik düşünme sorusu olarak kullan.',
-      );
+    en: 'This suggestion comes from the starting emotions you recorded most often. Treat it as a practical reflection prompt, not an instruction or prediction.',
+    es: 'Esta sugerencia parte de las emociones iniciales que registraste con más frecuencia. Úsala como reflexión práctica, no como instrucción o predicción.',
+    fr: 'Cette suggestion vient des émotions de départ que vous avez le plus souvent enregistrées. Utilisez-la comme piste de réflexion, pas comme instruction ou prédiction.',
+    pt: 'Esta sugestão parte das emoções iniciais que você registrou com mais frequência. Use como reflexão prática, não como instrução ou previsão.',
+    tr: 'Bu öneri en sık kaydettiğin başlangıç duygularından gelir. Onu talimat veya kehanet değil, pratik düşünme sorusu olarak kullan.',
+  );
 }

@@ -9,13 +9,13 @@ import 'package:mystic_tarot/src/reading_journal_store.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 
 ReadingRecord _record(String question, DateTime createdAt) => ReadingRecord(
-      kind: ReadingKind.daily,
-      question: question,
-      cards: <DrawnCard>[DrawnCard(tarotDeck.first, false)],
-      createdAt: createdAt,
-      emotion: EmotionalState.curious,
-      alignedAction: 'Take one grounded step.',
-    );
+  kind: ReadingKind.daily,
+  question: question,
+  cards: <DrawnCard>[DrawnCard(tarotDeck.first, false)],
+  createdAt: createdAt,
+  emotion: EmotionalState.curious,
+  alignedAction: 'Take one grounded step.',
+);
 
 void main() {
   test('private transfer round-trips readings, Mirror, and Oracle history', () {

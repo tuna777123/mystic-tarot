@@ -38,7 +38,9 @@ class LanguagePreferences {
 
   static Future<void> save(AppLanguage language) async {
     final prefs = await SharedPreferences.getInstance();
-    final safeLanguage = language.isLaunchReady ? language : AppLanguage.english;
+    final safeLanguage = language.isLaunchReady
+        ? language
+        : AppLanguage.english;
     await prefs.setString(storageKey, safeLanguage.localeTag);
   }
 

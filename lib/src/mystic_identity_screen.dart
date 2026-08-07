@@ -25,17 +25,16 @@ class MysticIdentityScreen extends StatelessWidget {
     required String tr,
     required String it,
     required String de,
-  }) =>
-      localized(
-        language,
-        english: en,
-        spanish: es,
-        french: fr,
-        portugueseBrazil: pt,
-        turkish: tr,
-        italian: it,
-        german: de,
-      );
+  }) => localized(
+    language,
+    english: en,
+    spanish: es,
+    french: fr,
+    portugueseBrazil: pt,
+    turkish: tr,
+    italian: it,
+    german: de,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +88,19 @@ class MysticIdentityScreen extends StatelessWidget {
                             children: [
                               const Padding(
                                 padding: EdgeInsets.only(top: 3),
-                                child: Icon(Icons.auto_awesome, size: 15, color: MysticColors.gold),
+                                child: Icon(
+                                  Icons.auto_awesome,
+                                  size: 15,
+                                  color: MysticColors.gold,
+                                ),
                               ),
                               const SizedBox(width: 10),
-                              Expanded(child: Text(signal, style: Theme.of(context).textTheme.bodyLarge)),
+                              Expanded(
+                                child: Text(
+                                  signal,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -120,7 +128,10 @@ class MysticIdentityScreen extends StatelessWidget {
                         Expanded(
                           child: Text(
                             snapshot.nextEvolution,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                         Text(
@@ -140,7 +151,9 @@ class MysticIdentityScreen extends StatelessWidget {
                         minHeight: 10,
                         value: progress,
                         backgroundColor: Colors.white.withValues(alpha: .08),
-                        valueColor: const AlwaysStoppedAnimation(MysticColors.gold),
+                        valueColor: const AlwaysStoppedAnimation(
+                          MysticColors.gold,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -185,7 +198,12 @@ class MysticIdentityScreen extends StatelessWidget {
                   de: 'Wird privat auf diesem Gerät anhand deiner Lesemuster und deines Fortschritts berechnet.',
                 ),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: 'Arial', color: MysticColors.muted, fontSize: 9, height: 1.4),
+                style: const TextStyle(
+                  fontFamily: 'Arial',
+                  color: MysticColors.muted,
+                  fontSize: 9,
+                  height: 1.4,
+                ),
               ),
             ],
           ),
@@ -194,22 +212,26 @@ class MysticIdentityScreen extends StatelessWidget {
     );
   }
 
-  Widget _section(BuildContext context, {required String title, required Widget child}) => Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .045),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withValues(alpha: .09)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 14),
-            child,
-          ],
-        ),
-      );
+  Widget _section(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: .045),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: Colors.white.withValues(alpha: .09)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 14),
+        child,
+      ],
+    ),
+  );
 }
 
 class _IdentityHero extends StatelessWidget {
@@ -220,53 +242,80 @@ class _IdentityHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF7047A8), Color(0xFF2B1941), Color(0xFF130D1D)],
+    padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF7047A8), Color(0xFF2B1941), Color(0xFF130D1D)],
+      ),
+      borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
+      boxShadow: [
+        BoxShadow(
+          color: MysticColors.violet.withValues(alpha: .22),
+          blurRadius: 38,
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Container(
+          width: 88,
+          height: 88,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFF100A18).withValues(alpha: .72),
+            border: Border.all(color: MysticColors.gold.withValues(alpha: .6)),
+            boxShadow: [
+              BoxShadow(
+                color: MysticColors.gold.withValues(alpha: .13),
+                blurRadius: 28,
+              ),
+            ],
           ),
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: MysticColors.gold.withValues(alpha: .42)),
-          boxShadow: [BoxShadow(color: MysticColors.violet.withValues(alpha: .22), blurRadius: 38)],
+          child: Text(
+            _symbol(snapshot.primary),
+            style: const TextStyle(fontSize: 42, color: MysticColors.gold),
+          ),
         ),
-        child: Column(
-          children: [
-            Container(
-              width: 88,
-              height: 88,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF100A18).withValues(alpha: .72),
-                border: Border.all(color: MysticColors.gold.withValues(alpha: .6)),
-                boxShadow: [BoxShadow(color: MysticColors.gold.withValues(alpha: .13), blurRadius: 28)],
-              ),
-              child: Text(_symbol(snapshot.primary), style: const TextStyle(fontSize: 42, color: MysticColors.gold)),
-            ),
-            const SizedBox(height: 16),
-            Text(snapshot.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            Text(snapshot.summary, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .07),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: Colors.white.withValues(alpha: .1)),
-              ),
-              child: Text(
-                _confidenceText(snapshot.confidence, language),
-                style: const TextStyle(fontFamily: 'Arial', color: MysticColors.lavender, fontSize: 10, fontWeight: FontWeight.w900),
-              ),
-            ),
-          ],
+        const SizedBox(height: 16),
+        Text(
+          snapshot.title,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
-      );
+        const SizedBox(height: 8),
+        Text(
+          snapshot.summary,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .07),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.white.withValues(alpha: .1)),
+          ),
+          child: Text(
+            _confidenceText(snapshot.confidence, language),
+            style: const TextStyle(
+              fontFamily: 'Arial',
+              color: MysticColors.lavender,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
-  static String _confidenceText(int confidence, AppLanguage language) => localized(
+  static String _confidenceText(int confidence, AppLanguage language) =>
+      localized(
         language,
         english: '$confidence% identity confidence',
         spanish: '$confidence% de confianza de identidad',
@@ -278,10 +327,10 @@ class _IdentityHero extends StatelessWidget {
       );
 
   static String _symbol(MysticArchetype archetype) => switch (archetype) {
-        MysticArchetype.seeker => '☾',
-        MysticArchetype.alchemist => '✦',
-        MysticArchetype.sage => '◉',
-        MysticArchetype.guardian => '♜',
-        MysticArchetype.visionary => '☀',
-      };
+    MysticArchetype.seeker => '☾',
+    MysticArchetype.alchemist => '✦',
+    MysticArchetype.sage => '◉',
+    MysticArchetype.guardian => '♜',
+    MysticArchetype.visionary => '☀',
+  };
 }

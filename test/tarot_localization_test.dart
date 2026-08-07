@@ -26,10 +26,7 @@ void main() {
       localizedTarotCardName('Queen of Cups', turkish: true),
       'Kupa Kraliçesi',
     );
-    expect(
-      localizedTarotCardName('The Sun', turkish: false),
-      'The Sun',
-    );
+    expect(localizedTarotCardName('The Sun', turkish: false), 'The Sun');
   });
 
   test('reading, emotion, and deck labels remain Turkish', () {
@@ -61,8 +58,9 @@ void main() {
     }
   });
 
-  testWidgets('card artwork can render the localized display name',
-      (tester) async {
+  testWidgets('card artwork can render the localized display name', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -85,22 +83,13 @@ void main() {
 
     for (final card in tarotDeck) {
       uprightMeanings.add(
-        localizedTarotCardMeaning(
-          DrawnCard(card, false),
-          turkish: true,
-        ),
+        localizedTarotCardMeaning(DrawnCard(card, false), turkish: true),
       );
       reversedMeanings.add(
-        localizedTarotCardMeaning(
-          DrawnCard(card, true),
-          turkish: true,
-        ),
+        localizedTarotCardMeaning(DrawnCard(card, true), turkish: true),
       );
       advice.add(
-        localizedTarotCardAdvice(
-          DrawnCard(card, false),
-          turkish: true,
-        ),
+        localizedTarotCardAdvice(DrawnCard(card, false), turkish: true),
       );
     }
 

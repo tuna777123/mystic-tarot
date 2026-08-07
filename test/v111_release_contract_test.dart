@@ -8,10 +8,7 @@ void main() {
     final releaseNotes = File('RELEASE_NOTES.md').readAsStringSync();
 
     expect(pubspec, isNot(contains('version: 1.10.')));
-    expect(
-      releaseNotes,
-      contains('# Mystic Tarot 1.11.0 — Mirror & Trust'),
-    );
+    expect(releaseNotes, contains('# Mystic Tarot 1.11.0 — Mirror & Trust'));
   });
 
   test('release app wires every flagship trust feature', () {
@@ -34,8 +31,9 @@ void main() {
   });
 
   test('Living Journal keeps failed Mirror saves retryable', () {
-    final journal =
-        File('lib/src/mystic_living_journal_feature.dart').readAsStringSync();
+    final journal = File(
+      'lib/src/mystic_living_journal_feature.dart',
+    ).readAsStringSync();
 
     expect(journal, contains('onMirrorChanged'));
     expect(journal, contains('mysticSearchMatches('));
@@ -44,8 +42,9 @@ void main() {
   });
 
   test('journal and Mirror backups reject corrupt primary snapshots', () {
-    final journalStore =
-        File('lib/src/reading_journal_store.dart').readAsStringSync();
+    final journalStore = File(
+      'lib/src/reading_journal_store.dart',
+    ).readAsStringSync();
     final mirrorStore = File('lib/src/mystic_mirror.dart').readAsStringSync();
 
     expect(journalStore, contains('_isTrustworthyPayload(currentPayload)'));

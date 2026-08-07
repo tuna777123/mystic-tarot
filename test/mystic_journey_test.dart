@@ -44,10 +44,7 @@ void main() {
       title: 'Reflection',
     );
 
-    expect(
-      () => journey(entries: [entry]).addEntry(entry),
-      throwsStateError,
-    );
+    expect(() => journey(entries: [entry]).addEntry(entry), throwsStateError);
   });
 
   test('completed and archived journeys are immutable timelines', () {
@@ -68,28 +65,30 @@ void main() {
   });
 
   test('summarizes active days, reflections and normalized tags', () {
-    final subject = journey(entries: [
-      JourneyEntry(
-        id: '1',
-        createdAt: createdAt,
-        title: 'Morning',
-        reflection: 'I need to prepare carefully.',
-        tags: const {'Career', 'confidence'},
-      ),
-      JourneyEntry(
-        id: '2',
-        createdAt: createdAt.add(const Duration(hours: 4)),
-        title: 'Evening',
-        tags: const {'career'},
-      ),
-      JourneyEntry(
-        id: '3',
-        createdAt: createdAt.add(const Duration(days: 1)),
-        title: 'Next day',
-        reflection: 'The next step feels clearer.',
-        tags: const {'clarity'},
-      ),
-    ]);
+    final subject = journey(
+      entries: [
+        JourneyEntry(
+          id: '1',
+          createdAt: createdAt,
+          title: 'Morning',
+          reflection: 'I need to prepare carefully.',
+          tags: const {'Career', 'confidence'},
+        ),
+        JourneyEntry(
+          id: '2',
+          createdAt: createdAt.add(const Duration(hours: 4)),
+          title: 'Evening',
+          tags: const {'career'},
+        ),
+        JourneyEntry(
+          id: '3',
+          createdAt: createdAt.add(const Duration(days: 1)),
+          title: 'Next day',
+          reflection: 'The next step feels clearer.',
+          tags: const {'clarity'},
+        ),
+      ],
+    );
 
     final snapshot = JourneyInsights.summarize(
       subject,

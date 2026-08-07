@@ -76,25 +76,25 @@ abstract final class MysticJourneyCodec {
   }
 
   static Map<String, Object?> _encodeJourney(MysticJourney journey) => {
-        'id': journey.id,
-        'title': journey.title,
-        'area': journey.area.name,
-        'createdAt': journey.createdAt.toUtc().toIso8601String(),
-        'status': journey.status.name,
-        'intention': journey.intention,
-        'targetDate': journey.targetDate?.toUtc().toIso8601String(),
-        'entries': journey.entries.map(_encodeEntry).toList(growable: false),
-      };
+    'id': journey.id,
+    'title': journey.title,
+    'area': journey.area.name,
+    'createdAt': journey.createdAt.toUtc().toIso8601String(),
+    'status': journey.status.name,
+    'intention': journey.intention,
+    'targetDate': journey.targetDate?.toUtc().toIso8601String(),
+    'entries': journey.entries.map(_encodeEntry).toList(growable: false),
+  };
 
   static Map<String, Object?> _encodeEntry(JourneyEntry entry) => {
-        'id': entry.id,
-        'createdAt': entry.createdAt.toUtc().toIso8601String(),
-        'title': entry.title,
-        'readingId': entry.readingId,
-        'reflection': entry.reflection,
-        'mood': entry.mood,
-        'tags': (entry.tags.toList()..sort()),
-      };
+    'id': entry.id,
+    'createdAt': entry.createdAt.toUtc().toIso8601String(),
+    'title': entry.title,
+    'readingId': entry.readingId,
+    'reflection': entry.reflection,
+    'mood': entry.mood,
+    'tags': (entry.tags.toList()..sort()),
+  };
 
   static MysticJourney _decodeJourney(Map<String, dynamic> value) {
     final id = _requiredText(value['id'], 'journey.id');
@@ -121,11 +121,7 @@ abstract final class MysticJourneyCodec {
     return MysticJourney(
       id: id,
       title: title,
-      area: _enumByName(
-        JourneyArea.values,
-        value['area'],
-        JourneyArea.custom,
-      ),
+      area: _enumByName(JourneyArea.values, value['area'], JourneyArea.custom),
       createdAt: createdAt,
       status: _enumByName(
         JourneyStatus.values,
@@ -142,10 +138,10 @@ abstract final class MysticJourneyCodec {
     final tagsValue = value['tags'];
     final tags = tagsValue is List
         ? tagsValue
-            .whereType<String>()
-            .map((tag) => tag.trim().toLowerCase())
-            .where((tag) => tag.isNotEmpty)
-            .toSet()
+              .whereType<String>()
+              .map((tag) => tag.trim().toLowerCase())
+              .where((tag) => tag.isNotEmpty)
+              .toSet()
         : <String>{};
 
     return JourneyEntry(

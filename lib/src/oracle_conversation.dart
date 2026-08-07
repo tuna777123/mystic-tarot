@@ -40,12 +40,12 @@ class OracleConversationTurn {
   }
 
   Map<String, Object> toJson() => <String, Object>{
-        'turnId': turnId,
-        'recordId': recordId,
-        'question': question,
-        'answer': answer,
-        'createdAt': createdAt.toUtc().toIso8601String(),
-      };
+    'turnId': turnId,
+    'recordId': recordId,
+    'question': question,
+    'answer': answer,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+  };
 
   String encode() => jsonEncode(toJson());
 
@@ -94,7 +94,7 @@ class _OracleDecodeReport {
 
 class OracleConversationStore {
   OracleConversationStore({SharedPreferences? preferences})
-      : _providedPreferences = preferences;
+    : _providedPreferences = preferences;
 
   static const storageKey = 'oracle_conversations_v1';
   static const backupKey = 'oracle_conversations_v1_backup';
@@ -182,21 +182,23 @@ class OracleConversationStore {
   Future<Map<String, List<OracleConversationTurn>>> loadGrouped() async {
     final grouped = <String, List<OracleConversationTurn>>{};
     for (final turn in await loadAll()) {
-      grouped.putIfAbsent(turn.recordId, () => <OracleConversationTurn>[]).add(turn);
+      grouped
+          .putIfAbsent(turn.recordId, () => <OracleConversationTurn>[])
+          .add(turn);
     }
     return Map<String, List<OracleConversationTurn>>.unmodifiable(
       grouped.map(
-        (key, value) => MapEntry(
-          key,
-          List<OracleConversationTurn>.unmodifiable(value),
-        ),
+        (key, value) =>
+            MapEntry(key, List<OracleConversationTurn>.unmodifiable(value)),
       ),
     );
   }
 
   Future<void> saveTurn(OracleConversationTurn turn) async {
     if (turn.question.trim().isEmpty || turn.answer.trim().isEmpty) {
-      throw ArgumentError('Oracle turns require both a question and an answer.');
+      throw ArgumentError(
+        'Oracle turns require both a question and an answer.',
+      );
     }
     final preferences = await _preferences();
     final current = <String, OracleConversationTurn>{
@@ -207,7 +209,8 @@ class OracleConversationStore {
       ..sort((first, second) => first.createdAt.compareTo(second.createdAt));
 
     final currentPrimary = preferences.getStringList(storageKey);
-    final primaryIsFullyValid = currentPrimary != null &&
+    final primaryIsFullyValid =
+        currentPrimary != null &&
         currentPrimary.isNotEmpty &&
         currentPrimary.every(
           (encoded) => OracleConversationTurn.tryDecode(encoded) != null,

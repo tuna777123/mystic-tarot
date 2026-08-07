@@ -14,10 +14,14 @@ void main() {
     summary: 'You transform uncertainty into action.',
     nextEvolution: 'The Sage',
     progressToEvolution: .64,
-    signals: ['Transformation themes repeat.', 'A 5-day rhythm shows intention.'],
+    signals: [
+      'Transformation themes repeat.',
+      'A 5-day rhythm shows intention.',
+    ],
   );
 
-  Future<void> pumpLanguage(WidgetTester tester, AppLanguage language) => tester.pumpWidget(
+  Future<void> pumpLanguage(WidgetTester tester, AppLanguage language) =>
+      tester.pumpWidget(
         MaterialApp(
           theme: buildMysticTheme(),
           home: MysticIdentityScreen(
@@ -28,7 +32,9 @@ void main() {
         ),
       );
 
-  testWidgets('shows identity, evidence, and evolution progress', (tester) async {
+  testWidgets('shows identity, evidence, and evolution progress', (
+    tester,
+  ) async {
     await pumpLanguage(tester, AppLanguage.english);
 
     expect(find.text('The Alchemist'), findsOneWidget);

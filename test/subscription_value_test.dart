@@ -23,10 +23,7 @@ void main() {
       pricePerMonth: r'$7.00',
     );
 
-    expect(
-      yearlySavingsPercent(monthly: monthly, yearly: yearly),
-      30,
-    );
+    expect(yearlySavingsPercent(monthly: monthly, yearly: yearly), 30);
     expect(yearlyMonthlyEquivalent(yearly), r'$7.00');
   });
 
@@ -40,10 +37,7 @@ void main() {
       currencyCode: 'USD',
     );
 
-    expect(
-      yearlySavingsPercent(monthly: monthly, yearly: yearly),
-      isNull,
-    );
+    expect(yearlySavingsPercent(monthly: monthly, yearly: yearly), isNull);
   });
 
   test('does not compare prices from different currencies', () {
@@ -56,9 +50,6 @@ void main() {
       currencyCode: 'TRY',
     );
 
-    expect(
-      yearlySavingsPercent(monthly: monthly, yearly: yearly),
-      isNull,
-    );
+    expect(yearlySavingsPercent(monthly: monthly, yearly: yearly), isNull);
   });
 }

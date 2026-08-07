@@ -46,13 +46,16 @@ void main() {
     }
   });
 
-  test('stored language aliases resolve without accidental English fallback', () {
-    expect(
-      ritualReminderLanguageFromCode('pt_BR'),
-      MysticLanguage.portugueseBrazil,
-    );
-    expect(ritualReminderLanguageFromCode('tr'), MysticLanguage.turkish);
-  });
+  test(
+    'stored language aliases resolve without accidental English fallback',
+    () {
+      expect(
+        ritualReminderLanguageFromCode('pt_BR'),
+        MysticLanguage.portugueseBrazil,
+      );
+      expect(ritualReminderLanguageFromCode('tr'), MysticLanguage.turkish);
+    },
+  );
   testWidgets('French reminder offer fits a narrow phone without overflow', (
     tester,
   ) async {
@@ -107,11 +110,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Available in the iOS and Android apps'),
-      findsOneWidget,
-    );
+    expect(find.text('Available in the iOS and Android apps'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-
 }

@@ -5,10 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
-typedef AppLockKeyDeriver = Future<SecretKey> Function(
-  String pin,
-  List<int> salt,
-);
+typedef AppLockKeyDeriver =
+    Future<SecretKey> Function(String pin, List<int> salt);
 
 abstract interface class AppLockStore {
   Future<String?> read(String key);
@@ -18,7 +16,7 @@ abstract interface class AppLockStore {
 
 class SecureAppLockStore implements AppLockStore {
   const SecureAppLockStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -62,11 +60,9 @@ class AppLockState {
 }
 
 class AppLockService {
-  AppLockService({
-    AppLockStore? store,
-    AppLockKeyDeriver? keyDeriver,
-  })  : _store = store ?? const SecureAppLockStore(),
-        _keyDeriver = keyDeriver ?? _deriveProductionKey;
+  AppLockService({AppLockStore? store, AppLockKeyDeriver? keyDeriver})
+    : _store = store ?? const SecureAppLockStore(),
+      _keyDeriver = keyDeriver ?? _deriveProductionKey;
 
   static const pinLength = 6;
   static const _enabledKey = 'mystic.app-lock.enabled.v1';
@@ -96,20 +92,17 @@ class AppLockService {
     final biometrics = await _store.read(_biometricsKey) == '1';
     final failedAttempts =
         int.tryParse(await _store.read(_failedAttemptsKey) ?? '') ?? 0;
-    final lockedUntilMillis =
-        int.tryParse(await _store.read(_lockedUntilKey) ?? '');
-    final promptDismissed =
-        await _store.read(_promptDismissedKey) == '1';
+    final lockedUntilMillis = int.tryParse(
+      await _store.read(_lockedUntilKey) ?? '',
+    );
+    final promptDismissed = await _store.read(_promptDismissedKey) == '1';
     return AppLockState(
       enabled: enabled,
       biometricsEnabled: enabled && biometrics,
       failedAttempts: failedAttempts,
       lockedUntil: lockedUntilMillis == null
           ? null
-          : DateTime.fromMillisecondsSinceEpoch(
-              lockedUntilMillis,
-              isUtc: true,
-            ),
+          : DateTime.fromMillisecondsSinceEpoch(lockedUntilMillis, isUtc: true),
       promptDismissed: promptDismissed,
     );
   }
@@ -125,10 +118,7 @@ class AppLockService {
         aad: utf8.encode(_aadText),
       );
       await _store.write(_saltKey, base64UrlEncode(salt));
-      await _store.write(
-        _verifierKey,
-        base64UrlEncode(box.concatenation()),
-      );
+      await _store.write(_verifierKey, base64UrlEncode(box.concatenation()));
       await _store.write(_enabledKey, '1');
       await _store.write(_failedAttemptsKey, '0');
       await _store.delete(_lockedUntilKey);
@@ -138,10 +128,7 @@ class AppLockService {
     }
   }
 
-  Future<bool> verifyPin(
-    String pin, {
-    DateTime? now,
-  }) async {
+  Future<bool> verifyPin(String pin, {DateTime? now}) async {
     _validatePin(pin);
     final currentTime = (now ?? DateTime.now()).toUtc();
     final state = await loadState();
@@ -212,10 +199,7 @@ class AppLockService {
     await _store.write(_promptDismissedKey, '1');
   }
 
-  static Future<SecretKey> _deriveProductionKey(
-    String pin,
-    List<int> salt,
-  ) =>
+  static Future<SecretKey> _deriveProductionKey(String pin, List<int> salt) =>
       _kdf.deriveKeyFromPassword(password: pin, nonce: salt);
 
   Future<SecretKey> _deriveKey(String pin, List<int> salt) =>
@@ -270,7 +254,7 @@ abstract interface class AppLockAuthenticator {
 
 class DeviceAppLockAuthenticator implements AppLockAuthenticator {
   DeviceAppLockAuthenticator({LocalAuthentication? authentication})
-      : _authentication = authentication ?? LocalAuthentication();
+    : _authentication = authentication ?? LocalAuthentication();
 
   final LocalAuthentication _authentication;
 

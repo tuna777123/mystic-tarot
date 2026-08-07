@@ -9,11 +9,7 @@ int countDueMysticMirrors({
 }) {
   final completed = reflections.keys.toSet();
   return records.where((record) {
-    return mysticMirrorIsDue(
-      record,
-      now,
-      completedRecordIds: completed,
-    );
+    return mysticMirrorIsDue(record, now, completedRecordIds: completed);
   }).length;
 }
 

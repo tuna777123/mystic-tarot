@@ -35,11 +35,11 @@ class SubscriptionEntitlement {
   });
 
   const SubscriptionEntitlement.inactive({this.appUserId})
-      : active = false,
-        productId = null,
-        expiresAt = null,
-        managementUrl = null,
-        isSandbox = false;
+    : active = false,
+      productId = null,
+      expiresAt = null,
+      managementUrl = null,
+      isSandbox = false;
 
   final bool active;
   final String? productId;
@@ -110,9 +110,7 @@ class RevenueCatSubscriptionClient implements SubscriptionClient {
   }
 
   @override
-  Future<List<SubscriptionProduct>> loadProducts(
-    Set<String> productIds,
-  ) async {
+  Future<List<SubscriptionProduct>> loadProducts(Set<String> productIds) async {
     _packages.clear();
     _storeProducts.clear();
 
@@ -155,9 +153,7 @@ class RevenueCatSubscriptionClient implements SubscriptionClient {
   }
 
   @override
-  Future<SubscriptionEntitlement> getEntitlement(
-    String entitlementId,
-  ) async {
+  Future<SubscriptionEntitlement> getEntitlement(String entitlementId) async {
     final customerInfo = await Purchases.getCustomerInfo();
     return _snapshot(customerInfo, entitlementId);
   }

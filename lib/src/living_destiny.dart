@@ -48,9 +48,7 @@ class LivingDestinyExperience extends StatelessWidget {
             colors: [Color(0xFF2B1F45), Color(0xFF151020)],
           ),
           borderRadius: BorderRadius.circular(26),
-          border: Border.all(
-            color: MysticColors.gold.withValues(alpha: .28),
-          ),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .28)),
           boxShadow: [
             BoxShadow(
               color: MysticColors.violet.withValues(alpha: .16),
@@ -106,9 +104,9 @@ class LivingDestinyExperience extends StatelessWidget {
             const SizedBox(height: 17),
             Text(
               snapshot.returnMessage,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: MysticColors.mist,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: MysticColors.mist),
             ),
             const SizedBox(height: 18),
             Container(
@@ -177,33 +175,30 @@ class LivingDestinyExperience extends StatelessWidget {
   }
 
   VoidCallback _callbackFor(MysticNextActionType type) => switch (type) {
-        MysticNextActionType.firstReading ||
-        MysticNextActionType.dailyReading =>
-          onStartDailyReading,
-        MysticNextActionType.mirrorCheckIn ||
-        MysticNextActionType.reviewPattern =>
-          onOpenPatterns,
-        MysticNextActionType.continueJourney => onOpenJourney,
-        MysticNextActionType.explorePremiumSpread => onOpenPremium,
-      };
+    MysticNextActionType.firstReading ||
+    MysticNextActionType.dailyReading => onStartDailyReading,
+    MysticNextActionType.mirrorCheckIn ||
+    MysticNextActionType.reviewPattern => onOpenPatterns,
+    MysticNextActionType.continueJourney => onOpenJourney,
+    MysticNextActionType.explorePremiumSpread => onOpenPremium,
+  };
 
   static String _stageLabel(MysticGrowthStage stage) => switch (stage) {
-        MysticGrowthStage.newUser => 'Your story begins here',
-        MysticGrowthStage.activated => 'Your first signals are forming',
-        MysticGrowthStage.engaged => 'Your path is becoming visible',
-        MysticGrowthStage.habit => 'Your ritual has momentum',
-        MysticGrowthStage.powerUser => 'Your living pattern is awake',
-      };
+    MysticGrowthStage.newUser => 'Your story begins here',
+    MysticGrowthStage.activated => 'Your first signals are forming',
+    MysticGrowthStage.engaged => 'Your path is becoming visible',
+    MysticGrowthStage.habit => 'Your ritual has momentum',
+    MysticGrowthStage.powerUser => 'Your living pattern is awake',
+  };
 
   static IconData _actionIcon(MysticNextActionType type) => switch (type) {
-        MysticNextActionType.firstReading ||
-        MysticNextActionType.dailyReading =>
-          Icons.style,
-        MysticNextActionType.mirrorCheckIn => Icons.self_improvement,
-        MysticNextActionType.continueJourney => Icons.route,
-        MysticNextActionType.explorePremiumSpread => Icons.workspace_premium,
-        MysticNextActionType.reviewPattern => Icons.insights,
-      };
+    MysticNextActionType.firstReading ||
+    MysticNextActionType.dailyReading => Icons.style,
+    MysticNextActionType.mirrorCheckIn => Icons.self_improvement,
+    MysticNextActionType.continueJourney => Icons.route,
+    MysticNextActionType.explorePremiumSpread => Icons.workspace_premium,
+    MysticNextActionType.reviewPattern => Icons.insights,
+  };
 }
 
 class _ValueRing extends StatelessWidget {
@@ -213,27 +208,27 @@ class _ValueRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: 45,
-        height: 45,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            CircularProgressIndicator(
-              value: value / 100,
-              strokeWidth: 3,
-              backgroundColor: Colors.white10,
-              color: MysticColors.gold,
-            ),
-            Text(
-              '$value',
-              style: const TextStyle(
-                fontFamily: 'Arial',
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                color: MysticColors.gold,
-              ),
-            ),
-          ],
+    width: 45,
+    height: 45,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        CircularProgressIndicator(
+          value: value / 100,
+          strokeWidth: 3,
+          backgroundColor: Colors.white10,
+          color: MysticColors.gold,
         ),
-      );
+        Text(
+          '$value',
+          style: const TextStyle(
+            fontFamily: 'Arial',
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            color: MysticColors.gold,
+          ),
+        ),
+      ],
+    ),
+  );
 }

@@ -14,9 +14,9 @@ enum MysticPlan {
   yearly;
 
   String get productId => switch (this) {
-        MysticPlan.monthly => MysticProductIds.monthly,
-        MysticPlan.yearly => MysticProductIds.yearly,
-      };
+    MysticPlan.monthly => MysticProductIds.monthly,
+    MysticPlan.yearly => MysticProductIds.yearly,
+  };
 
   bool get includesTrial => this == MysticPlan.yearly;
   int get trialDays => includesTrial ? 7 : 0;
@@ -73,10 +73,10 @@ class MysticEntitlement {
   });
 
   const MysticEntitlement.free()
-      : isPlus = false,
-        plan = null,
-        expiresAt = null,
-        status = PurchaseStatus.idle;
+    : isPlus = false,
+      plan = null,
+      expiresAt = null,
+      status = PurchaseStatus.idle;
 
   final bool isPlus;
   final MysticPlan? plan;
@@ -119,10 +119,10 @@ class PaywallEvent {
 }
 
 PaywallSource paywallSourceFromName(String source) => switch (source) {
-      'daily_limit' => PaywallSource.dailyLimit,
-      'premium_spread' => PaywallSource.premiumSpread,
-      'oracle_dialogue' => PaywallSource.oracleDialogue,
-      'profile' => PaywallSource.profile,
-      'home_badge' => PaywallSource.homeBadge,
-      _ => PaywallSource.organic,
-    };
+  'daily_limit' => PaywallSource.dailyLimit,
+  'premium_spread' => PaywallSource.premiumSpread,
+  'oracle_dialogue' => PaywallSource.oracleDialogue,
+  'profile' => PaywallSource.profile,
+  'home_badge' => PaywallSource.homeBadge,
+  _ => PaywallSource.organic,
+};

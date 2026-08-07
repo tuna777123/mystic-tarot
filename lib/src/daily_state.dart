@@ -29,9 +29,10 @@ MysticDailyRefresh evaluateMysticDailyRefresh({
   final yesterday = mysticDayKey(now.subtract(const Duration(days: 1)));
   final dayChanged = activeDay != today;
   final resetDeepReadings = deepReadingsDay != today;
-  final clearQuestClaim = dailyQuestClaimedDay != null &&
-      dailyQuestClaimedDay != today;
-  final visibleStreak = lastActiveDay == null ||
+  final clearQuestClaim =
+      dailyQuestClaimedDay != null && dailyQuestClaimedDay != today;
+  final visibleStreak =
+      lastActiveDay == null ||
           lastActiveDay == today ||
           lastActiveDay == yesterday
       ? streak

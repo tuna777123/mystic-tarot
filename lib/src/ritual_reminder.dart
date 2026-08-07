@@ -14,11 +14,11 @@ class RitualReminderSettings {
   });
 
   const RitualReminderSettings.defaults()
-      : enabled = false,
-        hour = 20,
-        minute = 0,
-        promptCompleted = false,
-        languageCode = 'en';
+    : enabled = false,
+      hour = 20,
+      minute = 0,
+      promptCompleted = false,
+      languageCode = 'en';
 
   final bool enabled;
   final int hour;
@@ -32,14 +32,13 @@ class RitualReminderSettings {
     int? minute,
     bool? promptCompleted,
     String? languageCode,
-  }) =>
-      RitualReminderSettings(
-        enabled: enabled ?? this.enabled,
-        hour: _safeHour(hour ?? this.hour),
-        minute: _safeMinute(minute ?? this.minute),
-        promptCompleted: promptCompleted ?? this.promptCompleted,
-        languageCode: languageCode ?? this.languageCode,
-      );
+  }) => RitualReminderSettings(
+    enabled: enabled ?? this.enabled,
+    hour: _safeHour(hour ?? this.hour),
+    minute: _safeMinute(minute ?? this.minute),
+    promptCompleted: promptCompleted ?? this.promptCompleted,
+    languageCode: languageCode ?? this.languageCode,
+  );
 
   String get formattedTime =>
       '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
@@ -93,48 +92,43 @@ class RitualReminderCopy {
   final String channelName;
   final String channelDescription;
 
-  static RitualReminderCopy forLanguage(MysticLanguage language) =>
-      switch (language) {
-        MysticLanguage.turkish => const RitualReminderCopy(
-            title: 'Günlük ritüelin seni bekliyor',
-            body: 'Bir kart aç, bugünün duygusunu kaydet ve örüntünü büyüt.',
-            channelName: 'Günlük Mystic ritüeli',
-            channelDescription:
-                'Seçtiğin saatte nazik günlük tarot hatırlatıcıları.',
-          ),
-        MysticLanguage.spanish => const RitualReminderCopy(
-            title: 'Tu ritual diario te espera',
-            body:
-                'Revela una carta, registra cómo te sientes y deja crecer tu patrón.',
-            channelName: 'Ritual diario Mystic',
-            channelDescription:
-                'Recordatorios suaves de tarot a la hora que elijas.',
-          ),
-        MysticLanguage.french => const RitualReminderCopy(
-            title: 'Votre rituel quotidien vous attend',
-            body:
-                'Révélez une carte, notez votre émotion et laissez votre schéma grandir.',
-            channelName: 'Rituel quotidien Mystic',
-            channelDescription:
-                'Rappels de tarot discrets à l’heure choisie.',
-          ),
-        MysticLanguage.portugueseBrazil => const RitualReminderCopy(
-            title: 'Seu ritual diário está esperando',
-            body:
-                'Revele uma carta, registre sua emoção e deixe seu padrão crescer.',
-            channelName: 'Ritual diário Mystic',
-            channelDescription:
-                'Lembretes suaves de tarô no horário que você escolher.',
-          ),
-        _ => const RitualReminderCopy(
-            title: 'Your daily ritual is waiting',
-            body:
-                'Reveal one card, record how you feel, and let your pattern grow.',
-            channelName: 'Daily Mystic ritual',
-            channelDescription:
-                'Gentle tarot reminders at the time you choose.',
-          ),
-      };
+  static RitualReminderCopy forLanguage(
+    MysticLanguage language,
+  ) => switch (language) {
+    MysticLanguage.turkish => const RitualReminderCopy(
+      title: 'Günlük ritüelin seni bekliyor',
+      body: 'Bir kart aç, bugünün duygusunu kaydet ve örüntünü büyüt.',
+      channelName: 'Günlük Mystic ritüeli',
+      channelDescription: 'Seçtiğin saatte nazik günlük tarot hatırlatıcıları.',
+    ),
+    MysticLanguage.spanish => const RitualReminderCopy(
+      title: 'Tu ritual diario te espera',
+      body:
+          'Revela una carta, registra cómo te sientes y deja crecer tu patrón.',
+      channelName: 'Ritual diario Mystic',
+      channelDescription: 'Recordatorios suaves de tarot a la hora que elijas.',
+    ),
+    MysticLanguage.french => const RitualReminderCopy(
+      title: 'Votre rituel quotidien vous attend',
+      body:
+          'Révélez une carte, notez votre émotion et laissez votre schéma grandir.',
+      channelName: 'Rituel quotidien Mystic',
+      channelDescription: 'Rappels de tarot discrets à l’heure choisie.',
+    ),
+    MysticLanguage.portugueseBrazil => const RitualReminderCopy(
+      title: 'Seu ritual diário está esperando',
+      body: 'Revele uma carta, registre sua emoção e deixe seu padrão crescer.',
+      channelName: 'Ritual diário Mystic',
+      channelDescription:
+          'Lembretes suaves de tarô no horário que você escolher.',
+    ),
+    _ => const RitualReminderCopy(
+      title: 'Your daily ritual is waiting',
+      body: 'Reveal one card, record how you feel, and let your pattern grow.',
+      channelName: 'Daily Mystic ritual',
+      channelDescription: 'Gentle tarot reminders at the time you choose.',
+    ),
+  };
 }
 
 MysticLanguage ritualReminderLanguageFromCode(String code) {

@@ -4,15 +4,18 @@ import 'package:mystic_tarot/src/flagship.dart';
 void main() {
   test('application language model exposes all seven languages', () {
     expect(MysticLanguage.values.length, 7);
-    expect(MysticLanguage.values.map((item) => item.label), containsAll(<String>[
-      'English',
-      'Español',
-      'Français',
-      'Português (Brasil)',
-      'Türkçe',
-      'Italiano',
-      'Deutsch',
-    ]));
+    expect(
+      MysticLanguage.values.map((item) => item.label),
+      containsAll(<String>[
+        'English',
+        'Español',
+        'Français',
+        'Português (Brasil)',
+        'Türkçe',
+        'Italiano',
+        'Deutsch',
+      ]),
+    );
   });
 
   test('core launch languages render their own navigation copy', () {
@@ -20,10 +23,7 @@ void main() {
     expect(mysticText(MysticLanguage.turkish, 'Read', 'Oku'), 'Oku');
     expect(mysticText(MysticLanguage.spanish, 'Read', 'Oku'), 'Leer');
     expect(mysticText(MysticLanguage.french, 'Read', 'Oku'), 'Tirages');
-    expect(
-      mysticText(MysticLanguage.portugueseBrazil, 'Read', 'Oku'),
-      'Ler',
-    );
+    expect(mysticText(MysticLanguage.portugueseBrazil, 'Read', 'Oku'), 'Ler');
   });
 
   test('languages not yet launched continue to fall back safely', () {

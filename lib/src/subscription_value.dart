@@ -18,8 +18,8 @@ int? yearlySavingsPercent({
 
   final annualizedMonthly = monthlyPrice * 12;
   if (yearlyPrice >= annualizedMonthly) return null;
-  final percent =
-      ((annualizedMonthly - yearlyPrice) / annualizedMonthly * 100).round();
+  final percent = ((annualizedMonthly - yearlyPrice) / annualizedMonthly * 100)
+      .round();
   return percent.clamp(1, 99);
 }
 

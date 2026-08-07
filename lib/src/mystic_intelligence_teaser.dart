@@ -29,17 +29,16 @@ class MysticIntelligenceTeaser extends StatelessWidget {
     required String fr,
     required String pt,
     required String tr,
-  }) =>
-      localized(
-        language.appLanguage,
-        english: en,
-        spanish: es,
-        french: fr,
-        portugueseBrazil: pt,
-        turkish: tr,
-        italian: en,
-        german: en,
-      );
+  }) => localized(
+    language.appLanguage,
+    english: en,
+    spanish: es,
+    french: fr,
+    portugueseBrazil: pt,
+    turkish: tr,
+    italian: en,
+    german: en,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -62,22 +61,20 @@ class MysticIntelligenceTeaser extends StatelessWidget {
         );
       }
     }
-    final repeated = cardCounts.entries
-        .where((entry) => entry.value > 1)
-        .toList(growable: false)
-      ..sort((first, second) {
-        final byCount = second.value.compareTo(first.value);
-        return byCount != 0 ? byCount : first.key.compareTo(second.key);
-      });
+    final repeated =
+        cardCounts.entries
+            .where((entry) => entry.value > 1)
+            .toList(growable: false)
+          ..sort((first, second) {
+            final byCount = second.value.compareTo(first.value);
+            return byCount != 0 ? byCount : first.key.compareTo(second.key);
+          });
     final topCard = repeated.isEmpty ? null : repeated.first;
     final ready = recent.length >= 3;
     final remaining = ready ? 0 : 3 - recent.length;
     final topCardName = topCard == null
         ? null
-        : localizedTarotCardName(
-            topCard.key,
-            languageCode: language.code,
-          );
+        : localizedTarotCardName(topCard.key, languageCode: language.code);
 
     return Semantics(
       button: true,
@@ -198,20 +195,20 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                     Text(
                       ready
                           ? topCardName == null
-                              ? t(
-                                  en: 'Your seven-day pattern report is ready',
-                                  es: 'Tu informe de patrones de siete días está listo',
-                                  fr: 'Votre rapport de schémas sur sept jours est prêt',
-                                  pt: 'Seu relatório de padrões de sete dias está pronto',
-                                  tr: 'Yedi günlük örüntü raporun hazır',
-                                )
-                              : t(
-                                  en: '$topCardName has started repeating',
-                                  es: '$topCardName ha empezado a repetirse',
-                                  fr: '$topCardName commence à revenir',
-                                  pt: '$topCardName começou a se repetir',
-                                  tr: '$topCardName tekrar etmeye başladı',
-                                )
+                                ? t(
+                                    en: 'Your seven-day pattern report is ready',
+                                    es: 'Tu informe de patrones de siete días está listo',
+                                    fr: 'Votre rapport de schémas sur sept jours est prêt',
+                                    pt: 'Seu relatório de padrões de sete dias está pronto',
+                                    tr: 'Yedi günlük örüntü raporun hazır',
+                                  )
+                                : t(
+                                    en: '$topCardName has started repeating',
+                                    es: '$topCardName ha empezado a repetirse',
+                                    fr: '$topCardName commence à revenir',
+                                    pt: '$topCardName começou a se repetir',
+                                    tr: '$topCardName tekrar etmeye başladı',
+                                  )
                           : t(
                               en: 'Your private report is learning your pattern',
                               es: 'Tu informe privado está aprendiendo tu patrón',
@@ -230,20 +227,20 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                     Text(
                       ready
                           ? isPlus
-                              ? t(
-                                  en: 'Open recurring symbols, reality-loop evidence, and emotional direction.',
-                                  es: 'Abre símbolos recurrentes, evidencia de realidad y dirección emocional.',
-                                  fr: 'Ouvrez les symboles récurrents, les preuves de réalité et la direction émotionnelle.',
-                                  pt: 'Abra símbolos recorrentes, evidências da realidade e direção emocional.',
-                                  tr: 'Tekrar eden sembolleri, gerçeklik kanıtını ve duygusal yönü aç.',
-                                )
-                              : t(
-                                  en: 'Preview the real signal your saved readings have already created.',
-                                  es: 'Previsualiza la señal real que tus lecturas ya han creado.',
-                                  fr: 'Découvrez le signal réel déjà créé par vos tirages.',
-                                  pt: 'Veja o sinal real que suas leituras já criaram.',
-                                  tr: 'Kayıtlı okumalarının oluşturduğu gerçek sinyali önizle.',
-                                )
+                                ? t(
+                                    en: 'Open recurring symbols, reality-loop evidence, and emotional direction.',
+                                    es: 'Abre símbolos recurrentes, evidencia de realidad y dirección emocional.',
+                                    fr: 'Ouvrez les symboles récurrents, les preuves de réalité et la direction émotionnelle.',
+                                    pt: 'Abra símbolos recorrentes, evidências da realidade e direção emocional.',
+                                    tr: 'Tekrar eden sembolleri, gerçeklik kanıtını ve duygusal yönü aç.',
+                                  )
+                                : t(
+                                    en: 'Preview the real signal your saved readings have already created.',
+                                    es: 'Previsualiza la señal real que tus lecturas ya han creado.',
+                                    fr: 'Découvrez le signal réel déjà créé par vos tirages.',
+                                    pt: 'Veja o sinal real que suas leituras já criaram.',
+                                    tr: 'Kayıtlı okumalarının oluşturduğu gerçek sinyali önizle.',
+                                  )
                           : t(
                               en: '$remaining more saved reading${remaining == 1 ? '' : 's'} will unlock your first preview.',
                               es: '$remaining lectura(s) guardada(s) más desbloquearán tu primera vista previa.',
@@ -254,9 +251,9 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: MysticColors.mist,
-                            height: 1.35,
-                          ),
+                        color: MysticColors.mist,
+                        height: 1.35,
+                      ),
                     ),
                     const SizedBox(height: 9),
                     Row(

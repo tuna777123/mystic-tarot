@@ -4,7 +4,10 @@ import 'package:mystic_tarot/src/oracle_conversation.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-ReadingRecord _record(DateTime createdAt, {ReadingKind kind = ReadingKind.daily}) {
+ReadingRecord _record(
+  DateTime createdAt, {
+  ReadingKind kind = ReadingKind.daily,
+}) {
   return ReadingRecord(
     kind: kind,
     question: 'What should I notice?',
@@ -96,7 +99,10 @@ void main() {
     );
     SharedPreferences.setMockInitialValues(<String, Object>{
       OracleConversationStore.storageKey: <String>[first.encode(), 'broken'],
-      OracleConversationStore.backupKey: <String>[first.encode(), second.encode()],
+      OracleConversationStore.backupKey: <String>[
+        first.encode(),
+        second.encode(),
+      ],
     });
 
     final turns = await OracleConversationStore().loadForRecord(record);
@@ -105,34 +111,36 @@ void main() {
     expect(turns.last.question, 'Two?');
   });
 
-  test('saving preserves the previous valid primary snapshot as backup', () async {
-    final record = _record(DateTime.utc(2026, 8, 2, 11));
-    final first = OracleConversationTurn.create(
-      record: record,
-      question: 'Before?',
-      answer: 'Before.',
-      createdAt: DateTime.utc(2026, 8, 2, 11, 1),
-    );
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      OracleConversationStore.storageKey: <String>[first.encode()],
-    });
-    final store = OracleConversationStore();
-    await store.saveTurn(
-      OracleConversationTurn.create(
+  test(
+    'saving preserves the previous valid primary snapshot as backup',
+    () async {
+      final record = _record(DateTime.utc(2026, 8, 2, 11));
+      final first = OracleConversationTurn.create(
         record: record,
-        question: 'After?',
-        answer: 'After.',
-        createdAt: DateTime.utc(2026, 8, 2, 11, 2),
-      ),
-    );
-    final preferences = await SharedPreferences.getInstance();
+        question: 'Before?',
+        answer: 'Before.',
+        createdAt: DateTime.utc(2026, 8, 2, 11, 1),
+      );
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        OracleConversationStore.storageKey: <String>[first.encode()],
+      });
+      final store = OracleConversationStore();
+      await store.saveTurn(
+        OracleConversationTurn.create(
+          record: record,
+          question: 'After?',
+          answer: 'After.',
+          createdAt: DateTime.utc(2026, 8, 2, 11, 2),
+        ),
+      );
+      final preferences = await SharedPreferences.getInstance();
 
-    expect(
-      preferences.getStringList(OracleConversationStore.backupKey),
-      [first.encode()],
-    );
-    expect(await store.loadForRecord(record), hasLength(2));
-  });
+      expect(preferences.getStringList(OracleConversationStore.backupKey), [
+        first.encode(),
+      ]);
+      expect(await store.loadForRecord(record), hasLength(2));
+    },
+  );
 
   test('clear removes primary and backup Oracle memory', () async {
     final record = _record(DateTime.utc(2026, 8, 2, 13));
@@ -149,7 +157,10 @@ void main() {
 
     expect(await store.loadAll(), isEmpty);
     final preferences = await SharedPreferences.getInstance();
-    expect(preferences.containsKey(OracleConversationStore.storageKey), isFalse);
+    expect(
+      preferences.containsKey(OracleConversationStore.storageKey),
+      isFalse,
+    );
     expect(preferences.containsKey(OracleConversationStore.backupKey), isFalse);
   });
 }

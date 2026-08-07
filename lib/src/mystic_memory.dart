@@ -35,15 +35,15 @@ class TimelineEvent {
     String? mood,
     String? journeyId,
     String? sourceId,
-  })  : id = _requiredText(id, 'id'),
-        title = _requiredText(title, 'title'),
-        reflection = _optionalText(reflection),
-        themes = Set.unmodifiable(themes),
-        tags = Set.unmodifiable(_normalizedStrings(tags, lowercase: true)),
-        cardIds = List.unmodifiable(_normalizedStrings(cardIds)),
-        mood = _optionalText(mood),
-        journeyId = _optionalText(journeyId),
-        sourceId = _optionalText(sourceId);
+  }) : id = _requiredText(id, 'id'),
+       title = _requiredText(title, 'title'),
+       reflection = _optionalText(reflection),
+       themes = Set.unmodifiable(themes),
+       tags = Set.unmodifiable(_normalizedStrings(tags, lowercase: true)),
+       cardIds = List.unmodifiable(_normalizedStrings(cardIds)),
+       mood = _optionalText(mood),
+       journeyId = _optionalText(journeyId),
+       sourceId = _optionalText(sourceId);
 
   final String id;
   final DateTime occurredAt;
@@ -187,12 +187,16 @@ abstract final class MysticMemoryEngine {
       for (final theme in orderedThemes) {
         themeCounts.update(theme, (count) => count + 1, ifAbsent: () => 1);
       }
-      for (var firstIndex = 0;
-          firstIndex < orderedThemes.length;
-          firstIndex++) {
-        for (var secondIndex = firstIndex + 1;
-            secondIndex < orderedThemes.length;
-            secondIndex++) {
+      for (
+        var firstIndex = 0;
+        firstIndex < orderedThemes.length;
+        firstIndex++
+      ) {
+        for (
+          var secondIndex = firstIndex + 1;
+          secondIndex < orderedThemes.length;
+          secondIndex++
+        ) {
           final first = orderedThemes[firstIndex];
           final second = orderedThemes[secondIndex];
           final key = '${first.index}:${second.index}';
@@ -211,59 +215,63 @@ abstract final class MysticMemoryEngine {
       }
     }
 
-    final nodes = themeCounts.entries
-        .map(
-          (entry) => ThemeNode(theme: entry.key, eventCount: entry.value),
-        )
-        .toList(growable: false)
-      ..sort((a, b) {
-        final byCount = b.eventCount.compareTo(a.eventCount);
-        return byCount != 0
-            ? byCount
-            : a.theme.index.compareTo(b.theme.index);
-      });
+    final nodes =
+        themeCounts.entries
+            .map(
+              (entry) => ThemeNode(theme: entry.key, eventCount: entry.value),
+            )
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byCount = b.eventCount.compareTo(a.eventCount);
+            return byCount != 0
+                ? byCount
+                : a.theme.index.compareTo(b.theme.index);
+          });
 
-    final graphConnections = connections.values
-        .map(
-          (value) => ThemeConnection(
-            first: value.first,
-            second: value.second,
-            weight: value.eventIds.length,
-            sharedEventIds: List.unmodifiable(value.eventIds),
-          ),
-        )
-        .toList(growable: false)
-      ..sort((a, b) {
-        final byWeight = b.weight.compareTo(a.weight);
-        if (byWeight != 0) return byWeight;
-        final byFirst = a.first.index.compareTo(b.first.index);
-        return byFirst != 0
-            ? byFirst
-            : a.second.index.compareTo(b.second.index);
-      });
+    final graphConnections =
+        connections.values
+            .map(
+              (value) => ThemeConnection(
+                first: value.first,
+                second: value.second,
+                weight: value.eventIds.length,
+                sharedEventIds: List.unmodifiable(value.eventIds),
+              ),
+            )
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byWeight = b.weight.compareTo(a.weight);
+            if (byWeight != 0) return byWeight;
+            final byFirst = a.first.index.compareTo(b.first.index);
+            return byFirst != 0
+                ? byFirst
+                : a.second.index.compareTo(b.second.index);
+          });
 
-    final topThemes = themeCounts.entries
-        .map(
-          (entry) => ThemeFrequency(theme: entry.key, count: entry.value),
-        )
-        .toList(growable: false)
-      ..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0
-            ? byCount
-            : a.theme.index.compareTo(b.theme.index);
-      });
+    final topThemes =
+        themeCounts.entries
+            .map(
+              (entry) => ThemeFrequency(theme: entry.key, count: entry.value),
+            )
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byCount = b.count.compareTo(a.count);
+            return byCount != 0
+                ? byCount
+                : a.theme.index.compareTo(b.theme.index);
+          });
 
-    final repeatedCards = cardCounts.entries
-        .where((entry) => entry.value > 1)
-        .map(
-          (entry) => CardOccurrence(cardId: entry.key, count: entry.value),
-        )
-        .toList(growable: false)
-      ..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0 ? byCount : a.cardId.compareTo(b.cardId);
-      });
+    final repeatedCards =
+        cardCounts.entries
+            .where((entry) => entry.value > 1)
+            .map(
+              (entry) => CardOccurrence(cardId: entry.key, count: entry.value),
+            )
+            .toList(growable: false)
+          ..sort((a, b) {
+            final byCount = b.count.compareTo(a.count);
+            return byCount != 0 ? byCount : a.cardId.compareTo(b.cardId);
+          });
 
     return MysticMemorySnapshot(
       timeline: List.unmodifiable(timeline),
@@ -457,19 +465,8 @@ abstract final class MysticMemorySearch {
       'sanat',
       'proje',
     },
-    MemoryTheme.confidence: {
-      'confidence',
-      'courage',
-      'özgüven',
-      'cesaret',
-    },
-    MemoryTheme.finance: {
-      'finance',
-      'money',
-      'budget',
-      'para',
-      'bütçe',
-    },
+    MemoryTheme.confidence: {'confidence', 'courage', 'özgüven', 'cesaret'},
+    MemoryTheme.finance: {'finance', 'money', 'budget', 'para', 'bütçe'},
     MemoryTheme.spirituality: {
       'spirituality',
       'meaning',
@@ -485,12 +482,7 @@ abstract final class MysticMemorySearch {
       'değişim',
       'öğrenme',
     },
-    MemoryTheme.decision: {
-      'decision',
-      'choice',
-      'karar',
-      'seçim',
-    },
+    MemoryTheme.decision: {'decision', 'choice', 'karar', 'seçim'},
   };
 }
 

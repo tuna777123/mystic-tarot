@@ -285,31 +285,33 @@ class _RitualReminderSettingsPanelState
   void _showStatus(RitualReminderPermissionResult result) {
     final message = switch (result) {
       RitualReminderPermissionResult.denied => _copy(
-          widget.language,
-          en: 'Notifications are off. You can allow them later in device settings.',
-          tr: 'Bildirimler kapalı. Daha sonra cihaz ayarlarından izin verebilirsin.',
-          es: 'Las notificaciones están desactivadas. Puedes permitirlas más tarde en los ajustes del dispositivo.',
-          fr: 'Les notifications sont désactivées. Vous pourrez les autoriser plus tard dans les réglages de l’appareil.',
-          pt: 'As notificações estão desativadas. Você pode permiti-las depois nos ajustes do dispositivo.',
-        ),
+        widget.language,
+        en: 'Notifications are off. You can allow them later in device settings.',
+        tr: 'Bildirimler kapalı. Daha sonra cihaz ayarlarından izin verebilirsin.',
+        es: 'Las notificaciones están desactivadas. Puedes permitirlas más tarde en los ajustes del dispositivo.',
+        fr: 'Les notifications sont désactivées. Vous pourrez les autoriser plus tard dans les réglages de l’appareil.',
+        pt: 'As notificações estão desativadas. Você pode permiti-las depois nos ajustes do dispositivo.',
+      ),
       RitualReminderPermissionResult.unsupported => _copy(
-          widget.language,
-          en: 'Daily reminders are available in the iOS and Android apps.',
-          tr: 'Günlük hatırlatıcılar iOS ve Android uygulamalarında kullanılabilir.',
-          es: 'Los recordatorios diarios están disponibles en las apps de iOS y Android.',
-          fr: 'Les rappels quotidiens sont disponibles dans les apps iOS et Android.',
-          pt: 'Os lembretes diários estão disponíveis nos apps para iOS e Android.',
-        ),
+        widget.language,
+        en: 'Daily reminders are available in the iOS and Android apps.',
+        tr: 'Günlük hatırlatıcılar iOS ve Android uygulamalarında kullanılabilir.',
+        es: 'Los recordatorios diarios están disponibles en las apps de iOS y Android.',
+        fr: 'Les rappels quotidiens sont disponibles dans les apps iOS et Android.',
+        pt: 'Os lembretes diários estão disponíveis nos apps para iOS e Android.',
+      ),
       _ => _copy(
-          widget.language,
-          en: 'Mystic could not schedule the reminder. Your other data is safe.',
-          tr: 'Mystic hatırlatıcıyı planlayamadı. Diğer verilerin güvende.',
-          es: 'Mystic no pudo programar el recordatorio. Tus demás datos están seguros.',
-          fr: 'Mystic n’a pas pu programmer le rappel. Vos autres données sont en sécurité.',
-          pt: 'O Mystic não conseguiu agendar o lembrete. Seus outros dados estão seguros.',
-        ),
+        widget.language,
+        en: 'Mystic could not schedule the reminder. Your other data is safe.',
+        tr: 'Mystic hatırlatıcıyı planlayamadı. Diğer verilerin güvende.',
+        es: 'Mystic no pudo programar el recordatorio. Tus demás datos están seguros.',
+        fr: 'Mystic n’a pas pu programmer le rappel. Vos autres données sont en sécurité.',
+        pt: 'O Mystic não conseguiu agendar o lembrete. Seus outros dados estão seguros.',
+      ),
     };
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -368,22 +370,22 @@ class _RitualReminderSettingsPanelState
           subtitle: Text(
             supported
                 ? settings.enabled
-                    ? _copy(
-                        widget.language,
-                        en: 'Active every day at ${settings.formattedTime}',
-                        tr: 'Her gün ${settings.formattedTime} saatinde etkin',
-                        es: 'Activo cada día a las ${settings.formattedTime}',
-                        fr: 'Actif chaque jour à ${settings.formattedTime}',
-                        pt: 'Ativo todos os dias às ${settings.formattedTime}',
-                      )
-                    : _copy(
-                        widget.language,
-                        en: 'Off until you choose to enable it',
-                        tr: 'Sen açana kadar kapalı',
-                        es: 'Desactivado hasta que decidas activarlo',
-                        fr: 'Désactivé jusqu’à ce que vous l’activiez',
-                        pt: 'Desativado até você decidir ativar',
-                      )
+                      ? _copy(
+                          widget.language,
+                          en: 'Active every day at ${settings.formattedTime}',
+                          tr: 'Her gün ${settings.formattedTime} saatinde etkin',
+                          es: 'Activo cada día a las ${settings.formattedTime}',
+                          fr: 'Actif chaque jour à ${settings.formattedTime}',
+                          pt: 'Ativo todos os dias às ${settings.formattedTime}',
+                        )
+                      : _copy(
+                          widget.language,
+                          en: 'Off until you choose to enable it',
+                          tr: 'Sen açana kadar kapalı',
+                          es: 'Desactivado hasta que decidas activarlo',
+                          fr: 'Désactivé jusqu’à ce que vous l’activiez',
+                          pt: 'Desativado até você decidir ativar',
+                        )
                 : _copy(
                     widget.language,
                     en: 'Available in the iOS and Android apps',
@@ -419,9 +421,7 @@ class _RitualReminderSettingsPanelState
           decoration: BoxDecoration(
             color: MysticColors.gold.withValues(alpha: .07),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: MysticColors.gold.withValues(alpha: .2),
-            ),
+            border: Border.all(color: MysticColors.gold.withValues(alpha: .2)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,14 +456,13 @@ String _copy(
   required String es,
   required String fr,
   required String pt,
-}) =>
-    localized(
-      language.appLanguage,
-      english: en,
-      turkish: tr,
-      spanish: es,
-      french: fr,
-      portugueseBrazil: pt,
-      italian: en,
-      german: en,
-    );
+}) => localized(
+  language.appLanguage,
+  english: en,
+  turkish: tr,
+  spanish: es,
+  french: fr,
+  portugueseBrazil: pt,
+  italian: en,
+  german: en,
+);

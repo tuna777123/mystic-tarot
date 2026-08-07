@@ -9,13 +9,13 @@ void main() {
   final now = DateTime(2026, 8, 2, 12);
 
   ReadingRecord record(int daysAgo, int cardIndex) => ReadingRecord(
-        kind: ReadingKind.love,
-        question: 'Question',
-        cards: <DrawnCard>[DrawnCard(tarotDeck[cardIndex], false)],
-        createdAt: now.subtract(Duration(days: daysAgo)),
-        emotion: EmotionalState.curious,
-        alignedAction: 'Action',
-      );
+    kind: ReadingKind.love,
+    question: 'Question',
+    cards: <DrawnCard>[DrawnCard(tarotDeck[cardIndex], false)],
+    createdAt: now.subtract(Duration(days: daysAgo)),
+    emotion: EmotionalState.curious,
+    alignedAction: 'Action',
+  );
 
   testWidgets('shows exact report readiness before three readings', (
     tester,

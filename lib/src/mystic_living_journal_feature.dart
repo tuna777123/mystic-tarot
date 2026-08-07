@@ -77,14 +77,13 @@ class _MysticLivingJournalFeatureState
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (widget.language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (widget.language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   @override
   void initState() {
@@ -183,10 +182,8 @@ class _MysticLivingJournalFeatureState
                           'Tekrar edenleri, değişenleri ve dikkat isteyenleri gör.',
                         ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: dueCount > 0
-                            ? MysticColors.gold
-                            : MysticColors.mist,
-                      ),
+                    color: dueCount > 0 ? MysticColors.gold : MysticColors.mist,
+                  ),
                 ),
               ],
             ),
@@ -195,8 +192,10 @@ class _MysticLivingJournalFeatureState
           Column(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: MysticColors.violet.withValues(alpha: .24),
                   borderRadius: BorderRadius.circular(16),
@@ -215,8 +214,10 @@ class _MysticLivingJournalFeatureState
               if (dueCount > 0) ...[
                 const SizedBox(height: 6),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: MysticColors.gold,
                     borderRadius: BorderRadius.circular(12),
@@ -278,16 +279,16 @@ class _MysticLivingJournalFeatureState
       duration: const Duration(milliseconds: 240),
       child: switch (section) {
         _JournalSection.timeline => _buildTimeline(
-            widget.records,
-            key: const ValueKey<String>('timeline'),
-            showDueBanner: true,
-          ),
+          widget.records,
+          key: const ValueKey<String>('timeline'),
+          showDueBanner: true,
+        ),
         _JournalSection.insights => _buildInsights(),
         _JournalSection.map => MysticMemoryMapFeature(
-            key: const ValueKey<String>('memory-map'),
-            records: widget.records,
-            language: widget.language,
-          ),
+          key: const ValueKey<String>('memory-map'),
+          records: widget.records,
+          language: widget.language,
+        ),
         _JournalSection.search => _buildSearch(),
       },
     );
@@ -414,17 +415,21 @@ class _MysticLivingJournalFeatureState
   Widget _buildRecordCard(BuildContext context, ReadingRecord record) {
     final recordId = mysticMirrorRecordId(record);
     final mirror = mirrors[recordId];
-    final due = !mirrorsLoading &&
+    final due =
+        !mirrorsLoading &&
         mysticMirrorIsDue(
           record,
           DateTime.now(),
           completedRecordIds: _completedMirrorIds,
         );
-    final cards = record.cards.map((drawn) {
-      final orientation =
-          drawn.reversed ? _copy('reversed', 'ters') : _copy('upright', 'düz');
-      return '${localizedTarotCardName(drawn.card.name, languageCode: _languageCode)} · $orientation';
-    }).join('\n');
+    final cards = record.cards
+        .map((drawn) {
+          final orientation = drawn.reversed
+              ? _copy('reversed', 'ters')
+              : _copy('upright', 'düz');
+          return '${localizedTarotCardName(drawn.card.name, languageCode: _languageCode)} · $orientation';
+        })
+        .join('\n');
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -576,10 +581,7 @@ class _MysticLivingJournalFeatureState
                   ),
                 ),
               ),
-              Text(
-                mirror.emotion.symbol,
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text(mirror.emotion.symbol, style: const TextStyle(fontSize: 16)),
             ],
           ),
           const SizedBox(height: 8),
@@ -660,11 +662,7 @@ class _MysticLivingJournalFeatureState
     final hours = (minutes / 60).ceil().clamp(1, 24);
     return Row(
       children: [
-        const Icon(
-          Icons.schedule_rounded,
-          size: 16,
-          color: MysticColors.muted,
-        ),
+        const Icon(Icons.schedule_rounded, size: 16, color: MysticColors.muted),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -740,7 +738,10 @@ class _MysticLivingJournalFeatureState
                       fr: 'Regardez en arrière sans forcer un résultat positif. Une preuve honnête vaut mieux qu’une histoire parfaite.',
                       pt: 'Olhe para trás sem forçar um resultado positivo. Evidência honesta vale mais que uma história perfeita.',
                     ),
-                    style: const TextStyle(color: MysticColors.mist, height: 1.45),
+                    style: const TextStyle(
+                      color: MysticColors.mist,
+                      height: 1.45,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -855,7 +856,9 @@ class _MysticLivingJournalFeatureState
                               } catch (_) {
                                 if (sheetContext.mounted) {
                                   setSheetState(() => saving = false);
-                                  ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                  ScaffoldMessenger.of(
+                                    sheetContext,
+                                  ).showSnackBar(
                                     SnackBar(
                                       content: Text(
                                         _mirrorCopy(
@@ -1124,10 +1127,7 @@ class _MysticLivingJournalFeatureState
                 padding: const EdgeInsets.only(bottom: 11),
                 child: Row(
                   children: [
-                    const Text(
-                      '✦',
-                      style: TextStyle(color: MysticColors.gold),
-                    ),
+                    const Text('✦', style: TextStyle(color: MysticColors.gold)),
                     const SizedBox(width: 10),
                     Expanded(child: Text(row.label)),
                     Text(
@@ -1245,43 +1245,43 @@ class _MysticLivingJournalFeatureState
   }
 
   String _outcomeLabel(MysticMirrorOutcome outcome) => switch (outcome) {
-        MysticMirrorOutcome.shifted => _mirrorCopy(
-            en: 'Something shifted',
-            tr: 'Bir şey değişti',
-            es: 'Algo cambió',
-            fr: 'Quelque chose a changé',
-            pt: 'Algo mudou',
-          ),
-        MysticMirrorOutcome.partlyShifted => _mirrorCopy(
-            en: 'Partly changed',
-            tr: 'Kısmen değişti',
-            es: 'Cambió en parte',
-            fr: 'Partiellement changé',
-            pt: 'Mudou em parte',
-          ),
-        MysticMirrorOutcome.unchanged => _mirrorCopy(
-            en: 'Nothing changed yet',
-            tr: 'Henüz değişmedi',
-            es: 'Aún no cambió',
-            fr: 'Rien n’a encore changé',
-            pt: 'Ainda não mudou',
-          ),
-        MysticMirrorOutcome.unclear => _mirrorCopy(
-            en: 'Still unclear',
-            tr: 'Hâlâ belirsiz',
-            es: 'Sigue sin estar claro',
-            fr: 'Toujours incertain',
-            pt: 'Ainda não está claro',
-          ),
-      };
+    MysticMirrorOutcome.shifted => _mirrorCopy(
+      en: 'Something shifted',
+      tr: 'Bir şey değişti',
+      es: 'Algo cambió',
+      fr: 'Quelque chose a changé',
+      pt: 'Algo mudou',
+    ),
+    MysticMirrorOutcome.partlyShifted => _mirrorCopy(
+      en: 'Partly changed',
+      tr: 'Kısmen değişti',
+      es: 'Cambió en parte',
+      fr: 'Partiellement changé',
+      pt: 'Mudou em parte',
+    ),
+    MysticMirrorOutcome.unchanged => _mirrorCopy(
+      en: 'Nothing changed yet',
+      tr: 'Henüz değişmedi',
+      es: 'Aún no cambió',
+      fr: 'Rien n’a encore changé',
+      pt: 'Ainda não mudou',
+    ),
+    MysticMirrorOutcome.unclear => _mirrorCopy(
+      en: 'Still unclear',
+      tr: 'Hâlâ belirsiz',
+      es: 'Sigue sin estar claro',
+      fr: 'Toujours incertain',
+      pt: 'Ainda não está claro',
+    ),
+  };
 
   String _emotionLabel(EmotionalState emotion) => switch (emotion) {
-        EmotionalState.anxious => _copy('Anxious', 'Kaygılı'),
-        EmotionalState.hopeful => _copy('Hopeful', 'Umutlu'),
-        EmotionalState.grounded => _copy('Grounded', 'Dengeli'),
-        EmotionalState.curious => _copy('Curious', 'Meraklı'),
-        EmotionalState.uncertain => _copy('Uncertain', 'Kararsız'),
-      };
+    EmotionalState.anxious => _copy('Anxious', 'Kaygılı'),
+    EmotionalState.hopeful => _copy('Hopeful', 'Umutlu'),
+    EmotionalState.grounded => _copy('Grounded', 'Dengeli'),
+    EmotionalState.curious => _copy('Curious', 'Meraklı'),
+    EmotionalState.uncertain => _copy('Uncertain', 'Kararsız'),
+  };
 
   Widget _buildEmptyState({required Key key}) {
     return SingleChildScrollView(
@@ -1402,47 +1402,41 @@ class _MysticLivingJournalFeatureState
   }
 
   Widget _emptyPreviewRow(IconData icon, String title, String body) => Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: MysticColors.violet.withValues(alpha: .22),
-              borderRadius: BorderRadius.circular(13),
+    children: [
+      Container(
+        width: 40,
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: MysticColors.violet.withValues(alpha: .22),
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Icon(icon, size: 19, color: MysticColors.gold),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
             ),
-            child: Icon(icon, size: 19, color: MysticColors.gold),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  body,
-                  style: const TextStyle(
-                    color: MysticColors.muted,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 3),
+            Text(
+              body,
+              style: const TextStyle(color: MysticColors.muted, fontSize: 11),
             ),
-          ),
-          const Icon(
-            Icons.lock_outline_rounded,
-            size: 16,
-            color: MysticColors.lavender,
-          ),
-        ],
-      );
+          ],
+        ),
+      ),
+      const Icon(
+        Icons.lock_outline_rounded,
+        size: 16,
+        color: MysticColors.lavender,
+      ),
+    ],
+  );
 
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');

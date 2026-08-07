@@ -8,15 +8,14 @@ ReadingRecord record({
   required ReadingKind kind,
   EmotionalState emotion = EmotionalState.curious,
   bool reversed = false,
-}) =>
-    ReadingRecord(
-      kind: kind,
-      question: 'What should I notice?',
-      cards: [DrawnCard(tarotDeck.first, reversed)],
-      createdAt: DateTime(2026, 7, 24),
-      emotion: emotion,
-      alignedAction: 'Take one grounded and honest step today.',
-    );
+}) => ReadingRecord(
+  kind: kind,
+  question: 'What should I notice?',
+  cards: [DrawnCard(tarotDeck.first, reversed)],
+  createdAt: DateTime(2026, 7, 24),
+  emotion: emotion,
+  alignedAction: 'Take one grounded and honest step today.',
+);
 
 void main() {
   const engine = MysticIdentityEngine();
@@ -79,13 +78,17 @@ void main() {
 
   test('identity content is generated in the selected language', () {
     final turkish = engine.analyze(
-      records: [record(kind: ReadingKind.shadow, emotion: EmotionalState.anxious)],
+      records: [
+        record(kind: ReadingKind.shadow, emotion: EmotionalState.anxious),
+      ],
       streak: 4,
       completedArcanaDays: 0,
       language: AppLanguage.turkish,
     );
     final german = engine.analyze(
-      records: [record(kind: ReadingKind.career, emotion: EmotionalState.grounded)],
+      records: [
+        record(kind: ReadingKind.career, emotion: EmotionalState.grounded),
+      ],
       streak: 5,
       completedArcanaDays: 0,
       language: AppLanguage.german,
@@ -100,7 +103,9 @@ void main() {
   test('every supported language produces complete identity copy', () {
     for (final language in AppLanguage.values) {
       final result = engine.analyze(
-        records: [record(kind: ReadingKind.love, emotion: EmotionalState.hopeful)],
+        records: [
+          record(kind: ReadingKind.love, emotion: EmotionalState.hopeful),
+        ],
         streak: 3,
         completedArcanaDays: 2,
         language: language,

@@ -6,13 +6,13 @@ import 'package:mystic_tarot/src/mystic_mirror_due.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 
 ReadingRecord recordAt(DateTime createdAt) => ReadingRecord(
-      kind: ReadingKind.daily,
-      question: '',
-      cards: <DrawnCard>[DrawnCard(tarotDeck.first, false)],
-      createdAt: createdAt,
-      emotion: EmotionalState.curious,
-      alignedAction: 'Take one step.',
-    );
+  kind: ReadingKind.daily,
+  question: '',
+  cards: <DrawnCard>[DrawnCard(tarotDeck.first, false)],
+  createdAt: createdAt,
+  emotion: EmotionalState.curious,
+  alignedAction: 'Take one step.',
+);
 
 void main() {
   test('only incomplete readings older than twenty-four hours are counted', () {
@@ -62,7 +62,9 @@ void main() {
     final alreadyDue = recordAt(now.subtract(const Duration(hours: 30)));
     final next = recordAt(now.subtract(const Duration(hours: 23)));
     final later = recordAt(now.subtract(const Duration(hours: 20)));
-    final completedSoon = recordAt(now.subtract(const Duration(hours: 23, minutes: 30)));
+    final completedSoon = recordAt(
+      now.subtract(const Duration(hours: 23, minutes: 30)),
+    );
     final reflection = MysticMirrorReflection(
       recordId: mysticMirrorRecordId(completedSoon),
       outcome: MysticMirrorOutcome.unchanged,

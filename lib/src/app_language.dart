@@ -52,14 +52,14 @@ class LocalizedText {
   final String? german;
 
   String resolve(AppLanguage language) => switch (language) {
-        AppLanguage.english => english,
-        AppLanguage.spanish => spanish ?? english,
-        AppLanguage.french => french ?? english,
-        AppLanguage.portugueseBrazil => portugueseBrazil ?? english,
-        AppLanguage.turkish => turkish ?? english,
-        AppLanguage.italian => italian ?? english,
-        AppLanguage.german => german ?? english,
-      };
+    AppLanguage.english => english,
+    AppLanguage.spanish => spanish ?? english,
+    AppLanguage.french => french ?? english,
+    AppLanguage.portugueseBrazil => portugueseBrazil ?? english,
+    AppLanguage.turkish => turkish ?? english,
+    AppLanguage.italian => italian ?? english,
+    AppLanguage.german => german ?? english,
+  };
 }
 
 String localized(
@@ -71,13 +71,12 @@ String localized(
   String? turkish,
   String? italian,
   String? german,
-}) =>
-    LocalizedText(
-      english: english,
-      spanish: spanish,
-      french: french,
-      portugueseBrazil: portugueseBrazil,
-      turkish: turkish,
-      italian: italian,
-      german: german,
-    ).resolve(language);
+}) => LocalizedText(
+  english: english,
+  spanish: spanish,
+  french: french,
+  portugueseBrazil: portugueseBrazil,
+  turkish: turkish,
+  italian: italian,
+  german: german,
+).resolve(language);

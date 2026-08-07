@@ -26,16 +26,19 @@ void main() {
     expect(prefs.getString(LanguagePreferences.storageKey), 'tr');
   });
 
-  test('migrates incomplete German and Italian selections to English', () async {
-    for (final value in <String>['de', 'german', 'it', 'italian']) {
-      SharedPreferences.setMockInitialValues({
-        LanguagePreferences.storageKey: value,
-      });
-      expect(await LanguagePreferences.load(), AppLanguage.english);
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString(LanguagePreferences.storageKey), 'en');
-    }
-  });
+  test(
+    'migrates incomplete German and Italian selections to English',
+    () async {
+      for (final value in <String>['de', 'german', 'it', 'italian']) {
+        SharedPreferences.setMockInitialValues({
+          LanguagePreferences.storageKey: value,
+        });
+        expect(await LanguagePreferences.load(), AppLanguage.english);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString(LanguagePreferences.storageKey), 'en');
+      }
+    },
+  );
 
   test('refuses to persist an incomplete language programmatically', () async {
     await LanguagePreferences.save(AppLanguage.german);

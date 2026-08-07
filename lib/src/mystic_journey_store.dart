@@ -28,7 +28,7 @@ abstract interface class MysticJourneyStore {
 /// without exposing implementation details.
 class SharedPreferencesMysticJourneyStore implements MysticJourneyStore {
   SharedPreferencesMysticJourneyStore({SharedPreferences? preferences})
-      : _preferences = preferences;
+    : _preferences = preferences;
 
   static const primaryKey = 'mystic_journeys_v1';
   static const backupKey = 'mystic_journeys_v1_backup';
@@ -87,8 +87,10 @@ class SharedPreferencesMysticJourneyStore implements MysticJourneyStore {
     final currentPayload = preferences.getString(primaryKey);
 
     if (currentPayload != null && currentPayload.trim().isNotEmpty) {
-      final backupSaved =
-          await preferences.setString(backupKey, currentPayload);
+      final backupSaved = await preferences.setString(
+        backupKey,
+        currentPayload,
+      );
       if (!backupSaved) {
         throw StateError('Could not preserve the previous journey snapshot.');
       }

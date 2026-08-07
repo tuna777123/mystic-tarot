@@ -36,7 +36,9 @@ void main() {
     }
   });
 
-  testWidgets('new readings expose a grounded Oracle invitation', (tester) async {
+  testWidgets('new readings expose a grounded Oracle invitation', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

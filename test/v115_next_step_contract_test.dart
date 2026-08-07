@@ -25,18 +25,21 @@ void main() {
     expect(app, contains('onReading(ReadingKind.daily)'));
   });
 
-  test('personalized copy is complete and does not expose engine placeholders', () {
-    for (final marker in [
-      'TU SIGUIENTE PASO',
-      'VOTRE PROCHAINE ÉTAPE',
-      'SEU PRÓXIMO PASSO',
-      'SIRADAKİ ADIMIN',
-    ]) {
-      expect(nextStep, contains(marker));
-    }
-    expect(nextStep, isNot(contains('snapshot.nextAction.title')));
-    expect(nextStep, isNot(contains('snapshot.nextAction.cta')));
-  });
+  test(
+    'personalized copy is complete and does not expose engine placeholders',
+    () {
+      for (final marker in [
+        'TU SIGUIENTE PASO',
+        'VOTRE PROCHAINE ÉTAPE',
+        'SEU PRÓXIMO PASSO',
+        'SIRADAKİ ADIMIN',
+      ]) {
+        expect(nextStep, contains(marker));
+      }
+      expect(nextStep, isNot(contains('snapshot.nextAction.title')));
+      expect(nextStep, isNot(contains('snapshot.nextAction.cta')));
+    },
+  );
 
   test('release notes preserve verified next-action routing', () {
     expect(notes, contains('# Mystic Tarot 1.15.0 — Personal Next Step'));
@@ -45,16 +48,12 @@ void main() {
   });
 }
 
-bool _isAtLeast(
-  String pubspec, {
-  required int major,
-  required int minor,
-}) {
-  final match = RegExp(r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)')
-      .firstMatch(pubspec);
+bool _isAtLeast(String pubspec, {required int major, required int minor}) {
+  final match = RegExp(
+    r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)',
+  ).firstMatch(pubspec);
   if (match == null) return false;
   final actualMajor = int.parse(match.group(1)!);
   final actualMinor = int.parse(match.group(2)!);
-  return actualMajor > major ||
-      (actualMajor == major && actualMinor >= minor);
+  return actualMajor > major || (actualMajor == major && actualMinor >= minor);
 }

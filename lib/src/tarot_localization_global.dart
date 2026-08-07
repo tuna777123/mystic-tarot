@@ -76,16 +76,36 @@ const _majorNamesFrench = <String, String>{
 };
 
 const _rankSpanish = <String, String>{
-  'Ace': 'As', 'Two': 'Dos', 'Three': 'Tres', 'Four': 'Cuatro',
-  'Five': 'Cinco', 'Six': 'Seis', 'Seven': 'Siete', 'Eight': 'Ocho',
-  'Nine': 'Nueve', 'Ten': 'Diez', 'Page': 'Sota', 'Knight': 'Caballero',
-  'Queen': 'Reina', 'King': 'Rey',
+  'Ace': 'As',
+  'Two': 'Dos',
+  'Three': 'Tres',
+  'Four': 'Cuatro',
+  'Five': 'Cinco',
+  'Six': 'Seis',
+  'Seven': 'Siete',
+  'Eight': 'Ocho',
+  'Nine': 'Nueve',
+  'Ten': 'Diez',
+  'Page': 'Sota',
+  'Knight': 'Caballero',
+  'Queen': 'Reina',
+  'King': 'Rey',
 };
 const _rankPortuguese = <String, String>{
-  'Ace': 'Ás', 'Two': 'Dois', 'Three': 'Três', 'Four': 'Quatro',
-  'Five': 'Cinco', 'Six': 'Seis', 'Seven': 'Sete', 'Eight': 'Oito',
-  'Nine': 'Nove', 'Ten': 'Dez', 'Page': 'Pajem', 'Knight': 'Cavaleiro',
-  'Queen': 'Rainha', 'King': 'Rei',
+  'Ace': 'Ás',
+  'Two': 'Dois',
+  'Three': 'Três',
+  'Four': 'Quatro',
+  'Five': 'Cinco',
+  'Six': 'Seis',
+  'Seven': 'Sete',
+  'Eight': 'Oito',
+  'Nine': 'Nove',
+  'Ten': 'Dez',
+  'Page': 'Pajem',
+  'Knight': 'Cavaleiro',
+  'Queen': 'Rainha',
+  'King': 'Rei',
 };
 const _rankFrench = <String, String>{
   'Ace': 'As',
@@ -105,10 +125,16 @@ const _rankFrench = <String, String>{
 };
 
 const _suitSpanish = <String, String>{
-  'Wands': 'Bastos', 'Cups': 'Copas', 'Swords': 'Espadas', 'Pentacles': 'Oros',
+  'Wands': 'Bastos',
+  'Cups': 'Copas',
+  'Swords': 'Espadas',
+  'Pentacles': 'Oros',
 };
 const _suitPortuguese = <String, String>{
-  'Wands': 'Paus', 'Cups': 'Copas', 'Swords': 'Espadas', 'Pentacles': 'Ouros',
+  'Wands': 'Paus',
+  'Cups': 'Copas',
+  'Swords': 'Espadas',
+  'Pentacles': 'Ouros',
 };
 
 const _suitFrench = <String, String>{
@@ -458,37 +484,149 @@ const _majorMeaningFrench = <String, List<String>>{
 };
 
 const _minorRankSpanish = <String, List<String>>{
-  'Ace': ['Aparece una semilla de potencial puro y un comienzo todavía sin forma.', 'El impulso de empezar está bloqueado por la duda, la prisa o un objetivo equivocado.', 'Convierte el potencial en un comienzo pequeño y concreto.'],
-  'Two': ['Hace falta equilibrar dos energías y elegir una dirección consciente.', 'Posponer la decisión o sostener dos opciones opuestas está dividiendo tu energía.', 'Observa el coste de cada opción y elige la que esté alineada con tus valores.'],
-  'Three': ['La expresión, la colaboración y los primeros resultados muestran que el crecimiento ha comenzado.', 'Las contribuciones dispersas, la comunicación débil o la necesidad de aprobación pueden frenar el avance.', 'Haz visible el progreso y compártelo con las personas adecuadas.'],
-  'Four': ['Destacan la estabilidad, el descanso y la necesidad de una base firme.', 'El deseo de proteger puede haberse convertido en rigidez, cierre o resistencia al cambio.', 'Protege lo valioso dejando un pequeño espacio para el movimiento.'],
-  'Five': ['La fricción y la sensación de carencia revelan lo que de verdad importa.', 'Quedarte atrapado en el conflicto, la comparación o la pérdida impide ver los recursos disponibles.', 'Elige una lección que puedas aprender sin convertir la lucha en tu identidad.'],
-  'Six': ['Se hace visible un regreso al equilibrio, la reciprocidad y el reconocimiento.', 'Un desequilibrio entre dar y recibir o la dependencia de aprobación puede distorsionar la relación.', 'Acepta ayuda y comprueba si el intercambio es justo.'],
-  'Seven': ['Estás ante una prueba de paciencia, evaluación y convicción.', 'La duda, la defensa o forzar los resultados pueden impedirte reconocer el valor de tu esfuerzo.', 'Evalúa qué está respondiendo de verdad antes de continuar.'],
-  'Eight': ['El enfoque, la repetición y el desarrollo de habilidad pueden generar un avance rápido.', 'La prisa, el perfeccionismo o actuar en automático pueden vaciar de sentido lo que haces.', 'Fortalece una habilidad mediante una repetición consciente.'],
-  'Nine': ['La resistencia, la confianza y los límites personales se fortalecen cerca de la culminación.', 'El cansancio, la duda o cargar con todo a solas hacen más pesado el último tramo.', 'Protege tus límites y reserva energía para terminar.'],
-  'Ten': ['Todo el peso, el resultado y la recompensa de un ciclo están ahora visibles.', 'El éxito puede haber traído sobrecarga, responsabilidad excesiva o algo que ya debe soltarse.', 'Reconoce lo completado y deja la carga que ya no necesitas llevar.'],
-  'Page': ['Se acerca un mensaje curioso, una oportunidad de aprender o una mirada nueva.', 'La inexperiencia, la curiosidad dispersa o hablar sin actuar pueden limitar el crecimiento.', 'Conserva la mente de principiante y prueba lo aprendido con un pequeño experimento.'],
-  'Knight': ['La dedicación se convierte rápidamente en acción y trae un fuerte impulso de avance.', 'La precipitación, una mirada unilateral o ignorar el entorno por el resultado pueden crear problemas.', 'Avanza, pero revisa tu velocidad junto con tu intención y su impacto.'],
-  'Queen': ['Una autoridad interior madura, la intuición y la receptividad pueden sostener esta situación.', 'Dar hasta olvidarte de ti o usar el poder emocional para controlar puede romper el equilibrio.', 'Encierra primero en ti la cualidad que necesitas.'],
-  'King': ['La experiencia, la responsabilidad y la capacidad de orientar están listas para liderar.', 'La rigidez, el control basado en el ego o creer que ya lo sabes todo pueden ocultar la verdadera maestría.', 'Usa tu poder para ofrecer una dirección fiable, no para imponer.'],
+  'Ace': [
+    'Aparece una semilla de potencial puro y un comienzo todavía sin forma.',
+    'El impulso de empezar está bloqueado por la duda, la prisa o un objetivo equivocado.',
+    'Convierte el potencial en un comienzo pequeño y concreto.',
+  ],
+  'Two': [
+    'Hace falta equilibrar dos energías y elegir una dirección consciente.',
+    'Posponer la decisión o sostener dos opciones opuestas está dividiendo tu energía.',
+    'Observa el coste de cada opción y elige la que esté alineada con tus valores.',
+  ],
+  'Three': [
+    'La expresión, la colaboración y los primeros resultados muestran que el crecimiento ha comenzado.',
+    'Las contribuciones dispersas, la comunicación débil o la necesidad de aprobación pueden frenar el avance.',
+    'Haz visible el progreso y compártelo con las personas adecuadas.',
+  ],
+  'Four': [
+    'Destacan la estabilidad, el descanso y la necesidad de una base firme.',
+    'El deseo de proteger puede haberse convertido en rigidez, cierre o resistencia al cambio.',
+    'Protege lo valioso dejando un pequeño espacio para el movimiento.',
+  ],
+  'Five': [
+    'La fricción y la sensación de carencia revelan lo que de verdad importa.',
+    'Quedarte atrapado en el conflicto, la comparación o la pérdida impide ver los recursos disponibles.',
+    'Elige una lección que puedas aprender sin convertir la lucha en tu identidad.',
+  ],
+  'Six': [
+    'Se hace visible un regreso al equilibrio, la reciprocidad y el reconocimiento.',
+    'Un desequilibrio entre dar y recibir o la dependencia de aprobación puede distorsionar la relación.',
+    'Acepta ayuda y comprueba si el intercambio es justo.',
+  ],
+  'Seven': [
+    'Estás ante una prueba de paciencia, evaluación y convicción.',
+    'La duda, la defensa o forzar los resultados pueden impedirte reconocer el valor de tu esfuerzo.',
+    'Evalúa qué está respondiendo de verdad antes de continuar.',
+  ],
+  'Eight': [
+    'El enfoque, la repetición y el desarrollo de habilidad pueden generar un avance rápido.',
+    'La prisa, el perfeccionismo o actuar en automático pueden vaciar de sentido lo que haces.',
+    'Fortalece una habilidad mediante una repetición consciente.',
+  ],
+  'Nine': [
+    'La resistencia, la confianza y los límites personales se fortalecen cerca de la culminación.',
+    'El cansancio, la duda o cargar con todo a solas hacen más pesado el último tramo.',
+    'Protege tus límites y reserva energía para terminar.',
+  ],
+  'Ten': [
+    'Todo el peso, el resultado y la recompensa de un ciclo están ahora visibles.',
+    'El éxito puede haber traído sobrecarga, responsabilidad excesiva o algo que ya debe soltarse.',
+    'Reconoce lo completado y deja la carga que ya no necesitas llevar.',
+  ],
+  'Page': [
+    'Se acerca un mensaje curioso, una oportunidad de aprender o una mirada nueva.',
+    'La inexperiencia, la curiosidad dispersa o hablar sin actuar pueden limitar el crecimiento.',
+    'Conserva la mente de principiante y prueba lo aprendido con un pequeño experimento.',
+  ],
+  'Knight': [
+    'La dedicación se convierte rápidamente en acción y trae un fuerte impulso de avance.',
+    'La precipitación, una mirada unilateral o ignorar el entorno por el resultado pueden crear problemas.',
+    'Avanza, pero revisa tu velocidad junto con tu intención y su impacto.',
+  ],
+  'Queen': [
+    'Una autoridad interior madura, la intuición y la receptividad pueden sostener esta situación.',
+    'Dar hasta olvidarte de ti o usar el poder emocional para controlar puede romper el equilibrio.',
+    'Encierra primero en ti la cualidad que necesitas.',
+  ],
+  'King': [
+    'La experiencia, la responsabilidad y la capacidad de orientar están listas para liderar.',
+    'La rigidez, el control basado en el ego o creer que ya lo sabes todo pueden ocultar la verdadera maestría.',
+    'Usa tu poder para ofrecer una dirección fiable, no para imponer.',
+  ],
 };
 
 const _minorRankPortuguese = <String, List<String>>{
-  'Ace': ['Surge uma semente de potencial puro e um começo ainda sem forma.', 'A vontade de começar está bloqueada por dúvida, pressa ou um objetivo errado.', 'Transforme o potencial em um começo pequeno e concreto.'],
-  'Two': ['É preciso equilibrar duas energias e escolher uma direção consciente.', 'Adiar a decisão ou sustentar opções opostas está dividindo sua energia.', 'Veja o custo de cada opção e escolha a que combina com seus valores.'],
-  'Three': ['Expressão, colaboração e primeiros resultados mostram que o crescimento começou.', 'Contribuições dispersas, comunicação fraca ou necessidade de aprovação podem desacelerar o avanço.', 'Torne o progresso visível e compartilhe com as pessoas certas.'],
-  'Four': ['Estabilidade, descanso e a necessidade de uma base firme ganham destaque.', 'O desejo de proteger pode ter virado rigidez, fechamento ou resistência à mudança.', 'Proteja o que é valioso deixando um pequeno espaço para o movimento.'],
-  'Five': ['Atrito e sensação de falta revelam o que realmente importa.', 'Ficar preso ao conflito, à comparação ou à perda impede você de ver os recursos disponíveis.', 'Escolha uma lição que possa aprender sem fazer da luta sua identidade.'],
-  'Six': ['Um retorno ao equilíbrio, à reciprocidade e ao reconhecimento se torna visível.', 'Um desequilíbrio entre dar e receber ou dependência de aprovação pode distorcer a relação.', 'Aceite ajuda e verifique se a troca é justa.'],
-  'Seven': ['Você está diante de um teste de paciência, avaliação e convicção.', 'Dúvida, defesa ou tentar forçar resultados podem impedir você de reconhecer o valor do esforço.', 'Avalie o que está realmente respondendo antes de continuar.'],
-  'Eight': ['Foco, repetição e desenvolvimento de habilidade podem criar avanço rápido.', 'Pressa, perfeccionismo ou agir no automático podem tirar o sentido do que você faz.', 'Fortaleça uma habilidade por meio de repetição consciente.'],
-  'Nine': ['Resistência, confiança e limites pessoais se fortalecem perto da conclusão.', 'Cansaço, dúvida ou carregar tudo sozinho tornam a etapa final mais pesada.', 'Proteja seus limites e guarde energia para terminar.'],
-  'Ten': ['Todo o peso, o resultado e a recompensa de um ciclo estão agora visíveis.', 'O sucesso pode ter trazido sobrecarga, responsabilidade excessiva ou algo que precisa ser solto.', 'Reconheça o que foi concluído e deixe a carga que já não precisa levar.'],
-  'Page': ['Uma mensagem curiosa, uma oportunidade de aprender ou uma nova perspectiva se aproxima.', 'Inexperiência, curiosidade dispersa ou falar sem agir podem limitar o crescimento.', 'Mantenha a mente de iniciante e teste o aprendizado com um pequeno experimento.'],
-  'Knight': ['A dedicação rapidamente vira ação e traz um forte impulso para avançar.', 'Pressa, visão unilateral ou ignorar o entorno pelo resultado podem criar problemas.', 'Avance, mas revise sua velocidade junto com a intenção e o impacto.'],
-  'Queen': ['Autoridade interior madura, intuição e receptividade podem sustentar esta situação.', 'Dar até se esquecer ou usar poder emocional para controlar pode romper o equilíbrio.', 'Incorpore primeiro em você a qualidade de que precisa.'],
-  'King': ['Experiência, responsabilidade e capacidade de orientar estão prontas para liderar.', 'Rigidez, controle baseado no ego ou achar que já sabe tudo podem esconder a verdadeira maestria.', 'Use seu poder para oferecer uma direção confiável, não para impor.'],
+  'Ace': [
+    'Surge uma semente de potencial puro e um começo ainda sem forma.',
+    'A vontade de começar está bloqueada por dúvida, pressa ou um objetivo errado.',
+    'Transforme o potencial em um começo pequeno e concreto.',
+  ],
+  'Two': [
+    'É preciso equilibrar duas energias e escolher uma direção consciente.',
+    'Adiar a decisão ou sustentar opções opostas está dividindo sua energia.',
+    'Veja o custo de cada opção e escolha a que combina com seus valores.',
+  ],
+  'Three': [
+    'Expressão, colaboração e primeiros resultados mostram que o crescimento começou.',
+    'Contribuições dispersas, comunicação fraca ou necessidade de aprovação podem desacelerar o avanço.',
+    'Torne o progresso visível e compartilhe com as pessoas certas.',
+  ],
+  'Four': [
+    'Estabilidade, descanso e a necessidade de uma base firme ganham destaque.',
+    'O desejo de proteger pode ter virado rigidez, fechamento ou resistência à mudança.',
+    'Proteja o que é valioso deixando um pequeno espaço para o movimento.',
+  ],
+  'Five': [
+    'Atrito e sensação de falta revelam o que realmente importa.',
+    'Ficar preso ao conflito, à comparação ou à perda impede você de ver os recursos disponíveis.',
+    'Escolha uma lição que possa aprender sem fazer da luta sua identidade.',
+  ],
+  'Six': [
+    'Um retorno ao equilíbrio, à reciprocidade e ao reconhecimento se torna visível.',
+    'Um desequilíbrio entre dar e receber ou dependência de aprovação pode distorcer a relação.',
+    'Aceite ajuda e verifique se a troca é justa.',
+  ],
+  'Seven': [
+    'Você está diante de um teste de paciência, avaliação e convicção.',
+    'Dúvida, defesa ou tentar forçar resultados podem impedir você de reconhecer o valor do esforço.',
+    'Avalie o que está realmente respondendo antes de continuar.',
+  ],
+  'Eight': [
+    'Foco, repetição e desenvolvimento de habilidade podem criar avanço rápido.',
+    'Pressa, perfeccionismo ou agir no automático podem tirar o sentido do que você faz.',
+    'Fortaleça uma habilidade por meio de repetição consciente.',
+  ],
+  'Nine': [
+    'Resistência, confiança e limites pessoais se fortalecem perto da conclusão.',
+    'Cansaço, dúvida ou carregar tudo sozinho tornam a etapa final mais pesada.',
+    'Proteja seus limites e guarde energia para terminar.',
+  ],
+  'Ten': [
+    'Todo o peso, o resultado e a recompensa de um ciclo estão agora visíveis.',
+    'O sucesso pode ter trazido sobrecarga, responsabilidade excessiva ou algo que precisa ser solto.',
+    'Reconheça o que foi concluído e deixe a carga que já não precisa levar.',
+  ],
+  'Page': [
+    'Uma mensagem curiosa, uma oportunidade de aprender ou uma nova perspectiva se aproxima.',
+    'Inexperiência, curiosidade dispersa ou falar sem agir podem limitar o crescimento.',
+    'Mantenha a mente de iniciante e teste o aprendizado com um pequeno experimento.',
+  ],
+  'Knight': [
+    'A dedicação rapidamente vira ação e traz um forte impulso para avançar.',
+    'Pressa, visão unilateral ou ignorar o entorno pelo resultado podem criar problemas.',
+    'Avance, mas revise sua velocidade junto com a intenção e o impacto.',
+  ],
+  'Queen': [
+    'Autoridade interior madura, intuição e receptividade podem sustentar esta situação.',
+    'Dar até se esquecer ou usar poder emocional para controlar pode romper o equilíbrio.',
+    'Incorpore primeiro em você a qualidade de que precisa.',
+  ],
+  'King': [
+    'Experiência, responsabilidade e capacidade de orientar estão prontas para liderar.',
+    'Rigidez, controle baseado no ego ou achar que já sabe tudo podem esconder a verdadeira maestria.',
+    'Use seu poder para oferecer uma direção confiável, não para impor.',
+  ],
 };
 
 const _minorRankFrench = <String, List<String>>{
@@ -565,17 +703,41 @@ const _minorRankFrench = <String, List<String>>{
 };
 
 const _minorSuitSpanish = <String, List<String>>{
-  'Wands': ['Esta energía actúa en la motivación, la creatividad, el valor y la iniciativa.', 'Dirige tu fuego hacia algo significativo sin abandonar otras necesidades por entusiasmo.'],
-  'Cups': ['Esta energía actúa en las emociones, las relaciones, la intimidad y la conexión intuitiva.', 'Reconoce con sinceridad lo que sientes sin tratar la emoción como la única verdad.'],
-  'Swords': ['Esta energía actúa en los pensamientos, la comunicación, la verdad y las decisiones.', 'No elijas la frase más cortante, sino la que realmente aporte claridad.'],
-  'Pentacles': ['Esta energía actúa en el dinero, el trabajo, el cuerpo, la seguridad y el valor duradero.', 'Construye hoy algo estable mediante un paso medible y sostenible.'],
+  'Wands': [
+    'Esta energía actúa en la motivación, la creatividad, el valor y la iniciativa.',
+    'Dirige tu fuego hacia algo significativo sin abandonar otras necesidades por entusiasmo.',
+  ],
+  'Cups': [
+    'Esta energía actúa en las emociones, las relaciones, la intimidad y la conexión intuitiva.',
+    'Reconoce con sinceridad lo que sientes sin tratar la emoción como la única verdad.',
+  ],
+  'Swords': [
+    'Esta energía actúa en los pensamientos, la comunicación, la verdad y las decisiones.',
+    'No elijas la frase más cortante, sino la que realmente aporte claridad.',
+  ],
+  'Pentacles': [
+    'Esta energía actúa en el dinero, el trabajo, el cuerpo, la seguridad y el valor duradero.',
+    'Construye hoy algo estable mediante un paso medible y sostenible.',
+  ],
 };
 
 const _minorSuitPortuguese = <String, List<String>>{
-  'Wands': ['Esta energia atua na motivação, criatividade, coragem e iniciativa.', 'Direcione seu fogo para algo significativo sem abandonar outras necessidades pelo entusiasmo.'],
-  'Cups': ['Esta energia atua nas emoções, relações, intimidade e conexão intuitiva.', 'Reconheça com sinceridade o que sente sem tratar a emoção como a única verdade.'],
-  'Swords': ['Esta energia atua nos pensamentos, comunicação, verdade e decisões.', 'Não escolha a frase mais cortante, mas a que realmente traz clareza.'],
-  'Pentacles': ['Esta energia atua em dinheiro, trabalho, corpo, segurança e valor duradouro.', 'Construa hoje algo estável com um passo mensurável e sustentável.'],
+  'Wands': [
+    'Esta energia atua na motivação, criatividade, coragem e iniciativa.',
+    'Direcione seu fogo para algo significativo sem abandonar outras necessidades pelo entusiasmo.',
+  ],
+  'Cups': [
+    'Esta energia atua nas emoções, relações, intimidade e conexão intuitiva.',
+    'Reconheça com sinceridade o que sente sem tratar a emoção como a única verdade.',
+  ],
+  'Swords': [
+    'Esta energia atua nos pensamentos, comunicação, verdade e decisões.',
+    'Não escolha a frase mais cortante, mas a que realmente traz clareza.',
+  ],
+  'Pentacles': [
+    'Esta energia atua em dinheiro, trabalho, corpo, segurança e valor duradouro.',
+    'Construa hoje algo estável com um passo mensurável e sustentável.',
+  ],
 };
 
 const _minorSuitFrench = <String, List<String>>{
@@ -733,7 +895,8 @@ String? globalReadingKindSubtitle(ReadingKind kind, String languageCode) {
       ReadingKind.shadow => 'Encuéntrate con lo que pide sanar',
       ReadingKind.compatibility => 'Lee la dinámica entre dos corazones',
       ReadingKind.timeline => 'Pasado, presente y tres capítulos posibles',
-      ReadingKind.celticCross => 'Una lectura profunda y completa de diez cartas',
+      ReadingKind.celticCross =>
+        'Una lectura profunda y completa de diez cartas',
     };
   }
   if (languageCode == 'FR') {
@@ -761,7 +924,8 @@ String? globalReadingKindSubtitle(ReadingKind kind, String languageCode) {
       ReadingKind.shadow => 'Encontre o que está pedindo cura',
       ReadingKind.compatibility => 'Leia a dinâmica entre dois corações',
       ReadingKind.timeline => 'Passado, presente e três capítulos possíveis',
-      ReadingKind.celticCross => 'Uma leitura profunda e completa de dez cartas',
+      ReadingKind.celticCross =>
+        'Uma leitura profunda e completa de dez cartas',
     };
   }
   return null;

@@ -18,8 +18,7 @@ class MysticMemoryMapFeature extends StatefulWidget {
   final MysticLanguage language;
 
   @override
-  State<MysticMemoryMapFeature> createState() =>
-      _MysticMemoryMapFeatureState();
+  State<MysticMemoryMapFeature> createState() => _MysticMemoryMapFeatureState();
 }
 
 class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
@@ -41,15 +40,22 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.hub_outlined,
-                  size: 52, color: MysticColors.gold),
+              const Icon(
+                Icons.hub_outlined,
+                size: 52,
+                color: MysticColors.gold,
+              ),
               const SizedBox(height: 14),
               Text(
-                _copy('Your memory map is waiting.',
-                    'Hafıza haritan seni bekliyor.'),
+                _copy(
+                  'Your memory map is waiting.',
+                  'Hafıza haritan seni bekliyor.',
+                ),
                 textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -139,8 +145,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                 ),
               ),
               Text(
-                _copy('${graph.nodes.length} themes',
-                    '${graph.nodes.length} tema'),
+                _copy(
+                  '${graph.nodes.length} themes',
+                  '${graph.nodes.length} tema',
+                ),
                 style: const TextStyle(
                   color: MysticColors.lavender,
                   fontSize: 12,
@@ -154,7 +162,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
             height: 310,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final positions = _positionsFor(graph.nodes, constraints.biggest);
+                final positions = _positionsFor(
+                  graph.nodes,
+                  constraints.biggest,
+                );
                 return Stack(
                   children: [
                     Positioned.fill(
@@ -186,10 +197,7 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
     );
   }
 
-  Map<_MemoryTheme, Offset> _positionsFor(
-    List<_MemoryNode> nodes,
-    Size size,
-  ) {
+  Map<_MemoryTheme, Offset> _positionsFor(List<_MemoryNode> nodes, Size size) {
     final result = <_MemoryTheme, Offset>{};
     final center = Offset(size.width / 2, size.height / 2);
     final radiusX = math.max(70.0, size.width * .34);
@@ -263,14 +271,16 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
   }
 
   Widget _buildThemeDetail(_MemoryGraph graph, _MemoryTheme theme) {
-    final relatedRecords = widget.records
-        .where((record) => _themeFor(record.kind) == theme)
-        .toList(growable: false)
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final strongest = graph.connections
-        .where((connection) => connection.includes(theme))
-        .toList(growable: false)
-      ..sort((a, b) => b.weight.compareTo(a.weight));
+    final relatedRecords =
+        widget.records
+            .where((record) => _themeFor(record.kind) == theme)
+            .toList(growable: false)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final strongest =
+        graph.connections
+            .where((connection) => connection.includes(theme))
+            .toList(growable: false)
+          ..sort((a, b) => b.weight.compareTo(a.weight));
 
     return Container(
       padding: const EdgeInsets.all(17),
@@ -296,8 +306,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
                 ),
               ),
               Text(
-                _copy('${relatedRecords.length} readings',
-                    '${relatedRecords.length} okuma'),
+                _copy(
+                  '${relatedRecords.length} readings',
+                  '${relatedRecords.length} okuma',
+                ),
                 style: const TextStyle(color: MysticColors.lavender),
               ),
             ],
@@ -322,14 +334,18 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
             ),
           ],
           const SizedBox(height: 12),
-          ...relatedRecords.take(3).map(
+          ...relatedRecords
+              .take(3)
+              .map(
                 (record) => Padding(
                   padding: const EdgeInsets.only(bottom: 9),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(record.kind.symbol,
-                          style: const TextStyle(color: MysticColors.gold)),
+                      Text(
+                        record.kind.symbol,
+                        style: const TextStyle(color: MysticColors.gold),
+                      ),
                       const SizedBox(width: 9),
                       Expanded(
                         child: Text(
@@ -391,8 +407,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
             const SizedBox(height: 14),
             if (results.isEmpty)
               Text(
-                _copy('No connected memory found yet.',
-                    'Henüz bağlantılı bir anı bulunamadı.'),
+                _copy(
+                  'No connected memory found yet.',
+                  'Henüz bağlantılı bir anı bulunamadı.',
+                ),
                 style: const TextStyle(color: MysticColors.mist),
               )
             else
@@ -415,8 +433,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(record.kind.symbol,
-              style: const TextStyle(color: MysticColors.gold, fontSize: 18)),
+          Text(
+            record.kind.symbol,
+            style: const TextStyle(color: MysticColors.gold, fontSize: 18),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -463,7 +483,10 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
   ) {
     final normalized = _normalize(rawQuery);
     if (normalized.isEmpty) return const <_ScoredRecord>[];
-    final terms = normalized.split(' ').where((term) => term.isNotEmpty).toSet();
+    final terms = normalized
+        .split(' ')
+        .where((term) => term.isNotEmpty)
+        .toSet();
     final expandedTerms = <String>{...terms};
     for (final entry in _semanticAliases.entries) {
       if (entry.value.any(terms.contains)) {
@@ -484,7 +507,8 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
       );
       final action = _normalize(record.alignedAction);
       final cards = record.cards.map((drawn) => _normalize(drawn.card.name));
-      final themeTerms = _semanticAliases[_themeFor(record.kind).name] ?? const <String>{};
+      final themeTerms =
+          _semanticAliases[_themeFor(record.kind).name] ?? const <String>{};
       var score = 0;
 
       for (final term in expandedTerms) {
@@ -511,15 +535,15 @@ class _MysticMemoryMapFeatureState extends State<MysticMemoryMapFeature> {
   }
 
   String _themeLabel(_MemoryTheme theme) => switch (theme) {
-        _MemoryTheme.daily => _copy('Daily', 'Günlük'),
-        _MemoryTheme.relationship => _copy('Love', 'Aşk'),
-        _MemoryTheme.career => _copy('Career', 'Kariyer'),
-        _MemoryTheme.finance => _copy('Money', 'Para'),
-        _MemoryTheme.decision => _copy('Decision', 'Karar'),
-        _MemoryTheme.spirituality => _copy('Spirit', 'Ruh'),
-        _MemoryTheme.shadow => _copy('Shadow', 'Gölge'),
-        _MemoryTheme.future => _copy('Future', 'Gelecek'),
-      };
+    _MemoryTheme.daily => _copy('Daily', 'Günlük'),
+    _MemoryTheme.relationship => _copy('Love', 'Aşk'),
+    _MemoryTheme.career => _copy('Career', 'Kariyer'),
+    _MemoryTheme.finance => _copy('Money', 'Para'),
+    _MemoryTheme.decision => _copy('Decision', 'Karar'),
+    _MemoryTheme.spirituality => _copy('Spirit', 'Ruh'),
+    _MemoryTheme.shadow => _copy('Shadow', 'Gölge'),
+    _MemoryTheme.future => _copy('Future', 'Gelecek'),
+  };
 }
 
 enum _MemoryTheme {
@@ -534,15 +558,15 @@ enum _MemoryTheme {
 }
 
 _MemoryTheme _themeFor(ReadingKind kind) => switch (kind) {
-      ReadingKind.daily => _MemoryTheme.daily,
-      ReadingKind.love || ReadingKind.compatibility => _MemoryTheme.relationship,
-      ReadingKind.career => _MemoryTheme.career,
-      ReadingKind.money => _MemoryTheme.finance,
-      ReadingKind.decision => _MemoryTheme.decision,
-      ReadingKind.spiritual => _MemoryTheme.spirituality,
-      ReadingKind.shadow => _MemoryTheme.shadow,
-      ReadingKind.timeline || ReadingKind.celticCross => _MemoryTheme.future,
-    };
+  ReadingKind.daily => _MemoryTheme.daily,
+  ReadingKind.love || ReadingKind.compatibility => _MemoryTheme.relationship,
+  ReadingKind.career => _MemoryTheme.career,
+  ReadingKind.money => _MemoryTheme.finance,
+  ReadingKind.decision => _MemoryTheme.decision,
+  ReadingKind.spiritual => _MemoryTheme.spirituality,
+  ReadingKind.shadow => _MemoryTheme.shadow,
+  ReadingKind.timeline || ReadingKind.celticCross => _MemoryTheme.future,
+};
 
 class _MemoryNode {
   const _MemoryNode(this.theme, this.count);
@@ -580,25 +604,29 @@ class _MemoryGraph {
       final secondary = _secondaryTheme(record);
       if (secondary != primary) {
         counts.update(secondary, (value) => value + 1, ifAbsent: () => 1);
-        final ordered = [primary, secondary]..sort((a, b) => a.index.compareTo(b.index));
+        final ordered = [primary, secondary]
+          ..sort((a, b) => a.index.compareTo(b.index));
         final key = '${ordered.first.index}:${ordered.last.index}';
         pairCounts.update(key, (value) => value + 1, ifAbsent: () => 1);
       }
     }
 
-    final nodes = counts.entries
-        .map((entry) => _MemoryNode(entry.key, entry.value))
-        .toList(growable: false)
-      ..sort((a, b) => b.count.compareTo(a.count));
+    final nodes =
+        counts.entries
+            .map((entry) => _MemoryNode(entry.key, entry.value))
+            .toList(growable: false)
+          ..sort((a, b) => b.count.compareTo(a.count));
 
     final connections = <_MemoryConnection>[];
     for (final entry in pairCounts.entries) {
       final parts = entry.key.split(':').map(int.parse).toList();
-      connections.add(_MemoryConnection(
-        _MemoryTheme.values[parts.first],
-        _MemoryTheme.values[parts.last],
-        entry.value,
-      ));
+      connections.add(
+        _MemoryConnection(
+          _MemoryTheme.values[parts.first],
+          _MemoryTheme.values[parts.last],
+          entry.value,
+        ),
+      );
     }
     return _MemoryGraph(nodes, connections);
   }
@@ -607,7 +635,9 @@ class _MemoryGraph {
     final text = _normalize('${record.question} ${record.alignedAction}');
     for (final entry in _semanticAliases.entries) {
       if (entry.value.any(text.contains)) {
-        final match = _MemoryTheme.values.where((theme) => theme.name == entry.key);
+        final match = _MemoryTheme.values.where(
+          (theme) => theme.name == entry.key,
+        );
         if (match.isNotEmpty) return match.first;
       }
     }
@@ -639,7 +669,8 @@ class _MemoryConnectionsPainter extends CustomPainter {
       final start = positions[connection.first];
       final end = positions[connection.second];
       if (start == null || end == null) continue;
-      final highlighted = selectedTheme == null || connection.includes(selectedTheme!);
+      final highlighted =
+          selectedTheme == null || connection.includes(selectedTheme!);
       final paint = Paint()
         ..color = MysticColors.lavender.withValues(
           alpha: highlighted ? .18 + math.min(connection.weight, 4) * .08 : .05,
@@ -674,35 +705,89 @@ String _normalize(String value) {
 
 const Map<String, Set<String>> _semanticAliases = {
   'relationship': {
-    'love', 'relationship', 'partner', 'dating', 'heart',
-    'ask', 'iliski', 'sevgili', 'kalp',
+    'love',
+    'relationship',
+    'partner',
+    'dating',
+    'heart',
+    'ask',
+    'iliski',
+    'sevgili',
+    'kalp',
   },
   'career': {
-    'career', 'work', 'job', 'boss', 'success',
-    'kariyer', 'is', 'mudur', 'basari',
+    'career',
+    'work',
+    'job',
+    'boss',
+    'success',
+    'kariyer',
+    'is',
+    'mudur',
+    'basari',
   },
   'finance': {
-    'money', 'finance', 'budget', 'salary', 'income',
-    'para', 'butce', 'maas', 'gelir',
+    'money',
+    'finance',
+    'budget',
+    'salary',
+    'income',
+    'para',
+    'butce',
+    'maas',
+    'gelir',
   },
   'decision': {
-    'decision', 'choice', 'option', 'direction',
-    'karar', 'secim', 'yon',
+    'decision',
+    'choice',
+    'option',
+    'direction',
+    'karar',
+    'secim',
+    'yon',
   },
   'spirituality': {
-    'spirit', 'meaning', 'soul', 'purpose', 'faith',
-    'ruh', 'anlam', 'amac', 'inanc',
+    'spirit',
+    'meaning',
+    'soul',
+    'purpose',
+    'faith',
+    'ruh',
+    'anlam',
+    'amac',
+    'inanc',
   },
   'shadow': {
-    'shadow', 'fear', 'anxious', 'anxiety', 'healing',
-    'golge', 'korku', 'kaygi', 'iyilesme',
+    'shadow',
+    'fear',
+    'anxious',
+    'anxiety',
+    'healing',
+    'golge',
+    'korku',
+    'kaygi',
+    'iyilesme',
   },
   'future': {
-    'future', 'change', 'growth', 'next', 'possibility',
-    'gelecek', 'degisim', 'gelisim', 'sonraki', 'ihtimal',
+    'future',
+    'change',
+    'growth',
+    'next',
+    'possibility',
+    'gelecek',
+    'degisim',
+    'gelisim',
+    'sonraki',
+    'ihtimal',
   },
   'daily': {
-    'daily', 'today', 'energy', 'guidance',
-    'gunluk', 'bugun', 'enerji', 'rehberlik',
+    'daily',
+    'today',
+    'energy',
+    'guidance',
+    'gunluk',
+    'bugun',
+    'enerji',
+    'rehberlik',
   },
 };

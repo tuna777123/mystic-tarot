@@ -4,8 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final app = File('lib/src/app.dart').readAsStringSync();
-  final journal =
-      File('lib/src/mystic_living_journal_feature.dart').readAsStringSync();
+  final journal = File(
+    'lib/src/mystic_living_journal_feature.dart',
+  ).readAsStringSync();
   final export = File('lib/src/journal_export.dart').readAsStringSync();
   final store = File('lib/src/oracle_conversation.dart').readAsStringSync();
   final notes = File('RELEASE_NOTES.md').readAsStringSync();
@@ -50,16 +51,12 @@ void main() {
   });
 }
 
-bool _isAtLeast(
-  String pubspec, {
-  required int major,
-  required int minor,
-}) {
-  final match = RegExp(r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)')
-      .firstMatch(pubspec);
+bool _isAtLeast(String pubspec, {required int major, required int minor}) {
+  final match = RegExp(
+    r'version:\s+(\d+)\.(\d+)\.(\d+)\+(\d+)',
+  ).firstMatch(pubspec);
   if (match == null) return false;
   final actualMajor = int.parse(match.group(1)!);
   final actualMinor = int.parse(match.group(2)!);
-  return actualMajor > major ||
-      (actualMajor == major && actualMinor >= minor);
+  return actualMajor > major || (actualMajor == major && actualMinor >= minor);
 }

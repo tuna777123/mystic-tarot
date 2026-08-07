@@ -1,11 +1,4 @@
-enum ReadingTheme {
-  love,
-  career,
-  wellbeing,
-  growth,
-  decision,
-  general,
-}
+enum ReadingTheme { love, career, wellbeing, growth, decision, general }
 
 class PatternReading {
   const PatternReading({
@@ -96,21 +89,29 @@ abstract final class MysticPatterns {
       if (reading.reflection?.trim().isNotEmpty ?? false) reflected++;
     }
 
-    final topCards = cardCounts.entries
-        .map((entry) => CardFrequency(cardId: entry.key, count: entry.value))
-        .toList()
-      ..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0 ? byCount : a.cardId.compareTo(b.cardId);
-      });
+    final topCards =
+        cardCounts.entries
+            .map(
+              (entry) => CardFrequency(cardId: entry.key, count: entry.value),
+            )
+            .toList()
+          ..sort((a, b) {
+            final byCount = b.count.compareTo(a.count);
+            return byCount != 0 ? byCount : a.cardId.compareTo(b.cardId);
+          });
 
-    final topThemes = themeCounts.entries
-        .map((entry) => ThemeFrequency(theme: entry.key, count: entry.value))
-        .toList()
-      ..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0 ? byCount : a.theme.index.compareTo(b.theme.index);
-      });
+    final topThemes =
+        themeCounts.entries
+            .map(
+              (entry) => ThemeFrequency(theme: entry.key, count: entry.value),
+            )
+            .toList()
+          ..sort((a, b) {
+            final byCount = b.count.compareTo(a.count);
+            return byCount != 0
+                ? byCount
+                : a.theme.index.compareTo(b.theme.index);
+          });
 
     return MysticPatternSnapshot(
       readingCount: history.length,

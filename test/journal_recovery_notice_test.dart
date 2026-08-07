@@ -7,13 +7,12 @@ ReadingJournalLoadResult result({
   bool recovered = false,
   bool migrated = false,
   int rejected = 0,
-}) =>
-    ReadingJournalLoadResult(
-      records: const [],
-      recoveredFromBackup: recovered,
-      migratedFromLegacy: migrated,
-      rejectedItems: rejected,
-    );
+}) => ReadingJournalLoadResult(
+  records: const [],
+  recoveredFromBackup: recovered,
+  migratedFromLegacy: migrated,
+  rejectedItems: rejected,
+);
 
 void main() {
   test('clean load produces no distracting notice', () {

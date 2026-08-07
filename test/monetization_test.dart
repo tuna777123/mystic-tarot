@@ -56,7 +56,10 @@ void main() {
 
   test('paywall source mapping is deterministic', () {
     expect(paywallSourceFromName('daily_limit'), PaywallSource.dailyLimit);
-    expect(paywallSourceFromName('premium_spread'), PaywallSource.premiumSpread);
+    expect(
+      paywallSourceFromName('premium_spread'),
+      PaywallSource.premiumSpread,
+    );
     expect(paywallSourceFromName('unknown'), PaywallSource.organic);
   });
 }

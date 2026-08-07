@@ -6,14 +6,18 @@ import '../tool/configure_app_lock.dart' as configurator;
 
 void main() {
   test('Android manifest and activity configuration is idempotent', () {
-    final root = Directory.systemTemp.createTempSync('mystic-app-lock-android-');
+    final root = Directory.systemTemp.createTempSync(
+      'mystic-app-lock-android-',
+    );
     addTearDown(() => root.deleteSync(recursive: true));
     final manifest = File('${root.path}/AndroidManifest.xml')
-      ..writeAsStringSync('''<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+      ..writeAsStringSync(
+        '''<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application android:label="mystic_tarot">
     </application>
 </manifest>
-''');
+''',
+      );
     final activity = File('${root.path}/MainActivity.kt')
       ..writeAsStringSync('''package com.tunabozcali.mystictarot
 
@@ -71,10 +75,7 @@ class MainActivity : FlutterActivity()
       'NSFaceIDUsageDescription'.allMatches(info.readAsStringSync()).length,
       1,
     );
-    expect(
-      entitlements.readAsStringSync(),
-      contains('keychain-access-groups'),
-    );
+    expect(entitlements.readAsStringSync(), contains('keychain-access-groups'));
     expect(
       'CODE_SIGN_ENTITLEMENTS'.allMatches(project.readAsStringSync()).length,
       1,

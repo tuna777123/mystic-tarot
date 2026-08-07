@@ -36,20 +36,20 @@ class SubscriptionEnvironment {
 
     return switch (defaultTargetPlatform) {
       TargetPlatform.iOS => SubscriptionEnvironment(
-          supported: true,
-          apiKey: _cleanKey(iosKey),
-          entitlementId: entitlement,
-        ),
+        supported: true,
+        apiKey: _cleanKey(iosKey),
+        entitlementId: entitlement,
+      ),
       TargetPlatform.android => SubscriptionEnvironment(
-          supported: true,
-          apiKey: _cleanKey(androidKey),
-          entitlementId: entitlement,
-        ),
+        supported: true,
+        apiKey: _cleanKey(androidKey),
+        entitlementId: entitlement,
+      ),
       _ => const SubscriptionEnvironment(
-          supported: false,
-          apiKey: null,
-          entitlementId: entitlement,
-        ),
+        supported: false,
+        apiKey: null,
+        entitlementId: entitlement,
+      ),
     };
   }
 

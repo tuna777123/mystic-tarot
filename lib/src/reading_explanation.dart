@@ -46,14 +46,13 @@ ReadingExplanation buildReadingExplanation({
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   final position = localizedReadingPosition(
     kind: kind,
@@ -166,101 +165,98 @@ String _localizedExplanationIntention(
 }
 
 class ReadingExplanationPanel extends StatelessWidget {
-  const ReadingExplanationPanel({
-    required this.explanation,
-    super.key,
-  });
+  const ReadingExplanationPanel({required this.explanation, super.key});
 
   final ReadingExplanation explanation;
 
   @override
   Widget build(BuildContext context) => Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
-          leading: Container(
-            width: 34,
-            height: 34,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: MysticColors.violet.withValues(alpha: .22),
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: const Icon(
-              Icons.menu_book_outlined,
-              size: 18,
-              color: MysticColors.gold,
-            ),
+    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+    child: ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
+      leading: Container(
+        width: 34,
+        height: 34,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: MysticColors.violet.withValues(alpha: .22),
+          borderRadius: BorderRadius.circular(11),
+        ),
+        child: const Icon(
+          Icons.menu_book_outlined,
+          size: 18,
+          color: MysticColors.gold,
+        ),
+      ),
+      title: Text(
+        explanation.title,
+        style: const TextStyle(
+          color: MysticColors.lavender,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .04),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white10),
           ),
-          title: Text(
-            explanation.title,
-            style: const TextStyle(
-              color: MysticColors.lavender,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: .04),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _ExplanationRow(
+                icon: Icons.filter_1_outlined,
+                text: explanation.positionLabel,
               ),
-              child: Column(
+              _ExplanationRow(
+                icon: Icons.screen_rotation_alt_outlined,
+                text: explanation.orientationLabel,
+              ),
+              _ExplanationRow(
+                icon: Icons.auto_stories_outlined,
+                text: explanation.symbolicBasis,
+              ),
+              _ExplanationRow(
+                icon: Icons.directions_walk_outlined,
+                text: explanation.practicalBridge,
+              ),
+              _ExplanationRow(
+                icon: Icons.tune_rounded,
+                text: explanation.contextLabel,
+              ),
+              const Divider(height: 20, color: Colors.white10),
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _ExplanationRow(
-                    icon: Icons.filter_1_outlined,
-                    text: explanation.positionLabel,
+                  const Icon(
+                    Icons.shield_outlined,
+                    size: 16,
+                    color: MysticColors.gold,
                   ),
-                  _ExplanationRow(
-                    icon: Icons.screen_rotation_alt_outlined,
-                    text: explanation.orientationLabel,
-                  ),
-                  _ExplanationRow(
-                    icon: Icons.auto_stories_outlined,
-                    text: explanation.symbolicBasis,
-                  ),
-                  _ExplanationRow(
-                    icon: Icons.directions_walk_outlined,
-                    text: explanation.practicalBridge,
-                  ),
-                  _ExplanationRow(
-                    icon: Icons.tune_rounded,
-                    text: explanation.contextLabel,
-                  ),
-                  const Divider(height: 20, color: Colors.white10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.shield_outlined,
-                        size: 16,
-                        color: MysticColors.gold,
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      explanation.boundary,
+                      style: const TextStyle(
+                        color: MysticColors.muted,
+                        fontSize: 10,
+                        height: 1.4,
                       ),
-                      const SizedBox(width: 9),
-                      Expanded(
-                        child: Text(
-                          explanation.boundary,
-                          style: const TextStyle(
-                            color: MysticColors.muted,
-                            fontSize: 10,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }
 
 class _ExplanationRow extends StatelessWidget {
@@ -271,23 +267,23 @@ class _ExplanationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 16, color: MysticColors.lavender),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  color: MysticColors.mist,
-                  fontSize: 11,
-                  height: 1.45,
-                ),
-              ),
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: MysticColors.lavender),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: MysticColors.mist,
+              fontSize: 11,
+              height: 1.45,
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }

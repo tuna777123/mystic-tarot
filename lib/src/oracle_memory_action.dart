@@ -21,14 +21,13 @@ class OracleMemoryAction extends StatelessWidget {
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   @override
   Widget build(BuildContext context) {

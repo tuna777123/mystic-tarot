@@ -25,13 +25,17 @@ void main() {
   });
 
   test('official plan screen sells the accumulating weekly outcome', () {
-    final store =
-        File('lib/src/store_ready_premium_screen.dart').readAsStringSync();
+    final store = File(
+      'lib/src/store_ready_premium_screen.dart',
+    ).readAsStringSync();
     expect(
       store,
       contains('A fresh private intelligence report every seven days'),
     );
-    expect(store, contains('Her yedi günde yenilenen özel intelligence raporu'));
+    expect(
+      store,
+      contains('Her yedi günde yenilenen özel intelligence raporu'),
+    );
     expect(store, contains('Unlimited deep readings'));
     expect(store, contains('Premium spreads and unlimited Oracle follow-ups'));
   });
@@ -51,10 +55,26 @@ void main() {
         reason: path,
       );
       expect(content.toLowerCase(), contains('intelligence'), reason: path);
-      expect(content, isNot(contains('## Sürüm notları — 1.11.0')), reason: path);
-      expect(content, isNot(contains('## Notas de la versión — 1.11.0')), reason: path);
-      expect(content, isNot(contains('## Notes de version — 1.11.0')), reason: path);
-      expect(content, isNot(contains('## Notas da versão — 1.11.0')), reason: path);
+      expect(
+        content,
+        isNot(contains('## Sürüm notları — 1.11.0')),
+        reason: path,
+      );
+      expect(
+        content,
+        isNot(contains('## Notas de la versión — 1.11.0')),
+        reason: path,
+      );
+      expect(
+        content,
+        isNot(contains('## Notes de version — 1.11.0')),
+        reason: path,
+      );
+      expect(
+        content,
+        isNot(contains('## Notas da versão — 1.11.0')),
+        reason: path,
+      );
     }
   });
 

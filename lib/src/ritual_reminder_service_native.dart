@@ -49,7 +49,8 @@ class RitualReminderService {
       if (Platform.isAndroid) {
         final granted = await _plugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.requestNotificationsPermission();
         return granted == true
             ? RitualReminderPermissionResult.granted
@@ -57,7 +58,8 @@ class RitualReminderService {
       }
       final granted = await _plugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: false, sound: true);
       return granted == true
           ? RitualReminderPermissionResult.granted

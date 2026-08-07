@@ -37,9 +37,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'French reading flow fits a phone without English fallback',
-    (tester) async {
+  testWidgets('French reading flow fits a phone without English fallback', (
+    tester,
+  ) async {
     await usePhone(tester);
     SharedPreferences.setMockInitialValues(<String, Object>{
       'allow_reversals': true,
@@ -70,7 +70,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('French premium preview remains localized and responsive', (tester) async {
+  testWidgets('French premium preview remains localized and responsive', (
+    tester,
+  ) async {
     await usePhone(tester);
 
     await tester.pumpWidget(
@@ -98,7 +100,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('French profile and settings stay readable on a phone', (tester) async {
+  testWidgets('French profile and settings stay readable on a phone', (
+    tester,
+  ) async {
     await usePhone(tester);
     SharedPreferences.setMockInitialValues(<String, Object>{
       'allow_reversals': true,
