@@ -76,6 +76,9 @@ jobs:
       - name: Verify clean diff
         run: git diff --check
 
+      - name: Verify public launch surface
+        run: bash tool/verify_launch_surface.sh
+
       - name: Analyze
         run: flutter analyze --fatal-infos
 
