@@ -89,7 +89,8 @@ void main() {
           expect(
             overflowingParagraphs,
             isEmpty,
-            reason: '${device.slug}/$locale/${scene.slug} must not hide '
+            reason:
+                '${device.slug}/$locale/${scene.slug} must not hide '
                 'localized copy behind an ellipsis.',
           );
 
@@ -154,7 +155,8 @@ void main() {
       expect(
         forbiddenPattern.hasMatch(showcase),
         isFalse,
-        reason: 'Store screenshot copy must not contain specific prices, '
+        reason:
+            'Store screenshot copy must not contain specific prices, '
             'discount percentages, or ranking claims.',
       );
     }
@@ -193,14 +195,8 @@ void main() {
     expect(workflow, contains('report-screenshot-status'));
     expect(workflow, contains('if: always()'));
     expect(workflow, contains('statuses: write'));
-    expect(
-      RegExp(r'timeout-minutes:\s+20').allMatches(workflow),
-      hasLength(3),
-    );
-    expect(
-      RegExp(r'timeout-minutes:\s+5').allMatches(workflow),
-      hasLength(1),
-    );
+    expect(RegExp(r'timeout-minutes:\s+20').allMatches(workflow), hasLength(3));
+    expect(RegExp(r'timeout-minutes:\s+5').allMatches(workflow), hasLength(1));
     expect(workflow, contains('context=screenshots/generation'));
     expect(
       workflow,
@@ -211,10 +207,7 @@ void main() {
     expect(workflow, contains('VALIDATE_RESULT'));
     expect(workflow, contains('GENERATE_RESULT'));
     expect(workflow, contains('AUDIT_RESULT'));
-    expect(
-      RegExp(r'==\s+"cancelled"').allMatches(workflow),
-      hasLength(3),
-    );
+    expect(RegExp(r'==\s+"cancelled"').allMatches(workflow), hasLength(3));
     expect(workflow, contains('test/support/store_screenshot_fonts.dart'));
     expect(workflow, contains('matrix:'));
     expect(workflow, contains('device: apple-6.9'));
@@ -249,10 +242,7 @@ void main() {
     expect(generator, contains('.convert(numChannels: 3)'));
     expect(generator, contains('img.encodePng(rgb)'));
     expect(generator, contains('final verifiedCapture ='));
-    expect(
-      generator,
-      contains('Flutter screenshot capture did not run.'),
-    );
+    expect(generator, contains('Flutter screenshot capture did not run.'));
     expect(generator, isNot(contains('capture!.width')));
     expect(generator, isNot(contains('capture.height')));
     expect(generator, isNot(contains('capture.bytes')));
@@ -283,10 +273,7 @@ void main() {
     expect(verifier, contains('pixel.rNormalized'));
     expect(verifier, contains('pixel.gNormalized'));
     expect(verifier, contains('pixel.bNormalized'));
-    expect(
-      verifier,
-      contains('maximumStoreScreenshotBytes = 8 * 1024 * 1024'),
-    );
+    expect(verifier, contains('maximumStoreScreenshotBytes = 8 * 1024 * 1024'));
     expect(verifier, contains('bytes.length > maximumStoreScreenshotBytes'));
     expect(verifier, contains('PNG exceeds the 8 MB store limit'));
     expect(verifier, contains('Unexpected screenshot'));
@@ -349,21 +336,14 @@ void main() {
       contains("'maximumPngBytes': maximumStoreScreenshotBytes"),
     );
     expect(verifier, contains("'decodedPngValidation': true"));
+    expect(verifier, contains("'visualSampleGridSize': visualSampleGridSize"));
     expect(
       verifier,
-      contains("'visualSampleGridSize': visualSampleGridSize"),
+      contains("'minimumDistinctSampledColors': minimumDistinctSampledColors"),
     );
     expect(
       verifier,
-      contains(
-        "'minimumDistinctSampledColors': minimumDistinctSampledColors",
-      ),
-    );
-    expect(
-      verifier,
-      contains(
-        "'minimumSampledLuminanceRange': minimumSampledLuminanceRange",
-      ),
+      contains("'minimumSampledLuminanceRange': minimumSampledLuminanceRange"),
     );
     expect(verifier, contains('storeScreenshotManifestFileName'));
     expect(verifier, contains(r'^[0-9a-f]{40}$'));
