@@ -1,204 +1,162 @@
 # Mystic Tarot — Store Release Pack
 
-This is the canonical launch handoff for App Store Connect, Google Play Console, and RevenueCat.
+Current source version: `1.22.3+32`.
 
-Current verified source version: `1.22.3+32`. Android, web, and unsigned iOS release builds must pass before signing and submission.
+## Business model
 
-## Positioning
+Mystic Tarot is **free and advertising-supported**. There is no paid subscription, no consumable purchase, no paid unlock, and no required account.
 
-**Category:** Lifestyle
-**Primary promise:** A private reading that becomes tomorrow’s reality check and, with enough evidence, an explainable personal pattern.
-**Differentiator:** Mystic connects cinematic readings, transparent interpretation, the 24-hour Mystic Mirror, weekly pattern evidence, and optional whole-app PIN and supported-device biometric protection instead of delivering one disposable prediction or generic AI fortune.
+Revenue comes only from Google Mobile Ads in the native Android and iOS apps. The public web edition stays ad-free.
 
-## Final conversion and billing controls
+### Native ad formats
 
-- The official yearly and monthly plans and purchase action appear before long-form proof so users can understand the offer without scrolling through multiple promotional sections.
-- Yearly is the default value path, but savings appear only when official monthly and yearly prices share the same currency and the yearly total is genuinely lower.
-- The selected plan discloses the full store price, charge period, and automatic renewal cadence next to the purchase action.
-- The paywall states that Daily Guidance and the saved journal remain available without Mystic Plus.
-- Store connection failures provide a localized retry; verified purchases return users to the product instead of subscription-management settings.
-- No countdown, fake scarcity, invented popularity claim, hidden trial conversion, or hardcoded price is used.
+- App-open ad: eligible returning foreground transitions.
+- Interstitial ad: at most after every third genuinely new saved reading, and only when a preloaded ad is ready.
+- No banner is pinned over the tarot interface.
+- No rewarded feature lock: core product functionality never requires watching an ad.
 
-## Permanent identifiers
+Ads are requested only after the Google User Messaging Platform (UMP) consent flow says advertising requests are allowed.
+
+## Permanent application identifiers
 
 - iOS bundle ID: `com.tunabozcali.mystictarot`
 - Android application ID: `com.tunabozcali.mystictarot`
-- RevenueCat entitlement: `mystic_plus`
-- Monthly product: `mystic_plus_monthly`
-- Yearly product: `mystic_plus_yearly`
 - iOS SKU: `mystic-tarot-ios-001`
 
-Changing the bundle/application IDs after the first store upload is disruptive. Confirm ownership before submission.
+Changing bundle/application IDs after first store upload is disruptive. Confirm ownership before submission.
+
+## AdMob production configuration
+
+Create the same application in AdMob for Android and iOS and create one app-open and one interstitial unit per platform.
+
+Required production values:
+
+- `ADMOB_ANDROID_APP_ID`
+- `ADMOB_IOS_APP_ID`
+- `ADMOB_ANDROID_APP_OPEN_ID`
+- `ADMOB_IOS_APP_OPEN_ID`
+- `ADMOB_ANDROID_INTERSTITIAL_ID`
+- `ADMOB_IOS_INTERSTITIAL_ID`
+
+QA builds may use Google-provided demo app/ad-unit IDs. Production builds must set `MYSTIC_USE_TEST_ADS=false` and provide the four production ad-unit IDs through `--dart-define` plus the two native application IDs through the protected build environment.
+
+Never publish a store candidate that still uses Google demo ad units.
+
+## Ad privacy / consent
+
+The native app integrates Google Mobile Ads and UMP.
+
+On each app launch the app requests current consent information. If a form is required, UMP presents it. Advertising requests remain gated by `ConsentInformation.canRequestAds()`.
+
+Configure the appropriate Privacy & messaging message in the AdMob dashboard before production submission. If UMP says a privacy-options entry point is required, the app exposes an advertising privacy choice action on its ad-supported access surface.
+
+The app does not add Firebase Analytics, AppsFlyer, Adjust, Facebook App Events, Mixpanel, Amplitude, OneSignal, or Sentry as advertising/analytics companions. The Android bundle audit continues to fail closed on those unapproved SDK markers.
 
 ## App Store metadata
 
-**Name (30 characters max)**
+**Name**  
 Mystic Tarot: Daily Ritual
 
-**Subtitle (30 characters max)**
+**Subtitle**  
 Tarot, Journal & Patterns
 
-**Promotional text**
-Reveal the cards, notice what returns, and turn each reading into a private ritual that grows more meaningful over time.
+**Promotional text**  
+Reveal the cards, return after 24 hours, and turn each reading into a private reflection that becomes more meaningful over time.
 
-**Keywords (100 characters max)**
+**Keywords**  
 tarot,daily card,journal,oracle,reflection,spiritual,arcana,mindfulness,horoscope,self care
 
-**Primary category:** Lifestyle
+**Primary category:** Lifestyle  
 **Secondary category:** Entertainment
 
-**Privacy policy URL**
+**Privacy policy URL**  
 https://tuna777123.github.io/mystic-tarot/privacy.html
 
-**Support URL**
+**Support URL**  
 https://tuna777123.github.io/mystic-tarot/support.html
 
-**Marketing URL**
+**Marketing URL**  
 https://tuna777123.github.io/mystic-tarot/
 
-Localized store metadata:
+Localized metadata remains in:
 
-- Turkish: `docs/STORE_LISTING_TR.md`
-- Neutral international Spanish: `docs/STORE_LISTING_ES.md`
-- French: `docs/STORE_LISTING_FR.md`
-- Brazilian Portuguese: `docs/STORE_LISTING_PT_BR.md`
+- `docs/STORE_LISTING_TR.md`
+- `docs/STORE_LISTING_ES.md`
+- `docs/STORE_LISTING_FR.md`
+- `docs/STORE_LISTING_PT_BR.md`
 
 ## Google Play metadata
 
-**App name (30 characters max)**
+**App name**  
 Mystic Tarot: Daily Ritual
 
-**Short description (80 characters max)**
+**Short description**  
 Private tarot readings, pattern memory, a journal, and a daily ritual.
 
-**Full description**
+**Core store description**
 
-Your patterns are already speaking.
+Mystic Tarot turns a card reading into a private daily practice. Choose the cards that call to you, receive reflection-first guidance grounded in traditional symbolism, return after 24 hours for Mystic Mirror, and notice what repeats over time.
 
-Mystic Tarot turns a card reading into a private daily practice. Choose the cards that call to you, open the seal, and receive reflection-first guidance grounded in traditional tarot symbolism.
-
-RETURN FOR DAILY GUIDANCE
-
-Begin each day with one clear card, a practical aligned action, and a 24-hour Mystic Mirror that asks what actually changed.
-
-NOTICE WHAT REPEATS
-
-Mystic remembers recurring cards, emotional shifts, and previous readings stored on your device, helping you compare patterns instead of forgetting them.
-
-EXPLORE THE COMPLETE ARCANA
-
-Awaken all 78 cards, unlock visual decks, build your Inner Constellation, earn XP, complete rituals, and collect achievements along your Mystic Path.
-
-ASK A BETTER FOLLOW-UP
-
-Use Oracle Dialogue to explore what you may not be seeing, which card carries the most weight, or what belongs in your next 24 hours.
-
-PRIVATE BY DESIGN
-
-Your journal, profile, progress, collection, and preferences stay on your device. Native subscription purchase history and entitlement status are processed by Apple or Google and RevenueCat so Mystic Plus can be verified securely.
+All readings, the Living Journal, Oracle dialogue, patterns, Mystic Path and the Arcana experience are available without a paid subscription. The native app is supported by occasional advertising.
 
 Mystic Tarot is made for personal reflection and entertainment. It does not provide medical, mental-health, legal, financial, or emergency advice.
 
 ## Screenshot sequence
 
-Use a consistent 9:16 device frame and only show subscription states produced by a signed sandbox or production build. Capture a complete set for English, Turkish, Spanish, French, and Brazilian Portuguese.
+The canonical QA pack remains five locales × two device profiles × five scenes = 50 screenshots. Do not show subscription prices or purchase CTAs. If an ad-supported disclosure appears in store screenshots, it must match the actual signed build.
 
-1. **Your patterns are already speaking** — onboarding portal.
-2. **Choose the cards that call to you** — interactive card selection.
-3. **Open the seal** — cinematic Reveal Ritual.
-4. **Guidance that becomes action** — interpretation and aligned action.
-5. **Mystic remembers what returns** — recurring-card pattern.
-6. **Build your Inner Constellation** — Path, XP, rituals, and Arcana Vault.
-7. **A journal that stays yours** — local journal and privacy controls.
-8. **Go deeper with Mystic Plus** — official localized monthly/yearly products.
+Suggested sequence:
+
+1. Daily Guidance
+2. Explainable Reading
+3. Mystic Mirror
+4. Living Path
+5. Complete free experience / ad-supported disclosure
 
 ## App review notes
 
-Mystic Tarot is a reflection and entertainment product. It does not claim factual prediction and states that readings are not professional advice.
-
-The native release:
+Mystic Tarot:
 
 - does not require an account;
-- stores journal and progress locally;
-- does not include advertising or cross-app tracking SDKs;
-- provides in-app local export and deletion;
+- stores journal/profile/progress primarily on-device;
+- has no subscription or in-app-purchase revenue model;
+- uses Google Mobile Ads for native advertising;
+- uses Google UMP for applicable advertising privacy choices;
+- keeps the public web edition ad-free;
+- provides local export and deletion controls;
 - exposes Privacy Policy, Terms, and Support;
-- uses RevenueCat to validate App Store and Google Play purchases;
-- uses anonymous RevenueCat App User IDs because no authentication identity is supplied;
-- disables automatic device-identifier collection and RevenueCat diagnostics;
-- unlocks `mystic_plus` only for active entitlements with a trusted verification result;
-- returns users to free limits after expiration, refund, or revocation.
+- does not claim factual prediction or professional advice.
 
-The public web build does not process native subscriptions.
+The repository still contains `purchases_flutter` compatibility code from the previous architecture, but the advertising-only runtime does not initialize RevenueCat or sell/restore products. Do not describe purchases as part of the live business model.
 
 ## App review test path
 
 1. Complete onboarding.
-2. Open Daily Guidance, select a card, open the seal, and save the reading.
+2. Open Daily Guidance, select a card, reveal it, and save the reading.
 3. Open Path and Journal to inspect local persistence.
-4. Open Profile → Privacy & data to test local export and deletion.
-5. Open Mystic Plus and confirm official localized monthly/yearly prices.
-6. Purchase with a sandbox account and confirm Plus unlocks.
-7. Reinstall or use a clean test device, choose Restore, and confirm Plus returns.
-8. Expire or revoke the sandbox entitlement and confirm free limits return.
-9. Repeat the pricing, legal-link, and narrow-screen checks in all five launch languages.
-
-Provide Apple review credentials only if Apple requires a sandbox account for the review flow. The app itself has no login.
+4. Open Profile → Privacy & data to test local export/deletion.
+5. Confirm formerly gated content is usable without payment.
+6. Confirm there is no subscription checkout or restore requirement.
+7. Test UMP consent behavior on an applicable test geography/device.
+8. Confirm test ads are used during QA.
+9. With production AdMob IDs in the signed store candidate, verify app-open and frequency-capped interstitial behavior on real devices.
+10. Repeat legal-link and narrow-screen checks in EN, TR, ES, FR and PT-BR.
 
 ## Privacy declarations
 
-The final native package contains `shared_preferences`, `purchases_flutter`, sharing, and audio dependencies. Recheck the generated dependency graph before every submission.
+Store forms must be completed from the exact final signed dependency/runtime behavior, not from assumptions.
 
 ### Apple App Privacy
 
-At minimum for the RevenueCat configuration used by Mystic Tarot:
+The native app contains an advertising SDK. Review the final Google Mobile Ads/UMP behavior and declare advertising-related data types and purposes required by the App Store form. Do not claim “Data Not Collected” for the native advertising build unless Apple’s current questionnaire and the final runtime evidence genuinely support it.
 
-- **Purchases → Purchase History:** Collected.
-- **Purpose:** App Functionality and Analytics.
-- **Linked to identity:** No, provided the app continues using RevenueCat-generated anonymous App User IDs and does not add login/contact identifiers.
-- **Used for tracking:** No.
-- **Other local journal/profile data:** Not collected by Mystic Tarot; it remains on-device.
-
-Do not select “Data Not Collected” for the native paid build.
+The app itself does not upload private tarot journal text, profile content, PIN data, or local reflection history to Mystic servers.
 
 ### Google Play Data Safety
 
-At minimum:
+The final declaration must reflect Google Mobile Ads and any advertising identifiers present in the signed artifact. The Android artifact audit explicitly distinguishes reviewed Google advertising permissions from unrelated sensitive permissions.
 
-- The app collects data: **Yes**.
-- **Financial info → Purchase history:** Collected by RevenueCat.
-- Encrypted in transit: **Yes**.
-- Processed ephemerally: **No**.
-- Required or optional: **Required** for subscription functionality.
-- Purpose: **App functionality** and **Analytics**.
-- Shared: **No**, unless a non-service-provider RevenueCat integration is later enabled.
-- Advertising/tracking identifiers: **Not collected by the current app configuration**.
-
-A monitored private support channel must be configured before claiming that users can request deletion of RevenueCat records. Local in-app deletion does not erase Apple, Google, or RevenueCat transaction records.
-
-## RevenueCat production configuration
-
-Follow `docs/REVENUECAT_SETUP.md`.
-
-Required dashboard structure:
-
-1. Add the iOS and Android apps to one RevenueCat project.
-2. Connect App Store Connect credentials and Google Play service credentials.
-3. Import `mystic_plus_monthly` and `mystic_plus_yearly` from both stores.
-4. Attach all store products to entitlement `mystic_plus`.
-5. Put monthly and yearly packages in the current offering.
-6. Add each platform's public RevenueCat SDK key to the protected release build environment.
-7. Never commit RevenueCat secret keys, App Store private keys, Play service-account JSON, keystores, or passwords.
-
-## Launch offer
-
-- Daily Guidance remains free.
-- Free users receive three deep readings per day.
-- Mystic Plus unlocks a private seven-day intelligence report, unlimited deep readings, premium spreads, and unlimited Oracle Dialogue follow-ups.
-- Launch with monthly and yearly plans.
-- Offer a seven-day trial only on yearly after trial eligibility is confirmed in both stores.
-
-Prices must be selected in the store consoles and displayed from the official store response. Do not hardcode price text in screenshots or product copy.
+Do not claim that advertising/tracking identifiers are absent after AdMob integration.
 
 ## Launch languages
 
@@ -210,45 +168,40 @@ Version 1 launches with five complete product languages:
 - French
 - Brazilian Portuguese
 
-All five must remain complete across onboarding, navigation, readings, card content, reveal, results, Oracle Dialogue, Living Journal, Memory Map, Mystic Path, Arcana Vault, premium, profile, settings, export, deletion, privacy, terms, support, store metadata, screenshots, and purchase/restore QA. German and Italian remain hidden until complete end-to-end localization and release testing pass.
-
-Localized legal pages:
-
-- English: `privacy.html`, `terms.html`, `support.html`
-- Turkish: `privacy-tr.html`, `terms-tr.html`, `support-tr.html`
-- Spanish: `privacy-es.html`, `terms-es.html`, `support-es.html`
-- French: `privacy-fr.html`, `terms-fr.html`, `support-fr.html`
-- Brazilian Portuguese: `privacy-pt-br.html`, `terms-pt-br.html`, `support-pt-br.html`
+German and Italian remain hidden until complete end-to-end localization and release testing pass.
 
 ## Account-owned actions before submission
 
-These cannot be completed from the source repository alone:
+These cannot be completed from source code alone:
 
-1. Enroll in Apple Developer and Google Play Console.
-2. Approve tax, banking, trader/business, and paid-app agreements.
+1. Enroll in / verify Apple Developer and Google Play Console ownership.
+2. Complete tax, banking, trader/business and store agreements.
 3. Confirm ownership of `com.tunabozcali.mystictarot` on both platforms.
-4. Create monthly/yearly subscriptions and their names, descriptions, prices, and trial rules in all five launch languages.
-5. Create the RevenueCat project, connect store credentials, products, offering, and `mystic_plus` entitlement.
-6. Add public RevenueCat SDK keys to protected release secrets.
-7. Create Apple certificates/provisioning and the Android upload key; configure protected signing secrets.
-8. Establish a monitored private customer-support email or support system for billing and privacy requests.
-9. Capture localized screenshots from final signed builds.
-10. Complete age rating, content rating, App Privacy, Data Safety, trader, and subscription questionnaires.
-11. Run sandbox and real-device QA.
-12. Upload signed builds and submit them for review.
+4. Create Android and iOS apps in AdMob.
+5. Create app-open + interstitial units for Android and iOS.
+6. Configure AdMob Privacy & messaging / UMP messages.
+7. Add the six production AdMob IDs to the protected production build configuration.
+8. Set `MYSTIC_USE_TEST_ADS=false` in production.
+9. Create Apple signing/provisioning and Android upload signing materials.
+10. Produce genuinely signed candidates.
+11. Test consent, ad loading, frequency cap, app foreground behavior and no-ad failure paths on a real iPhone and Android phone.
+12. Complete App Privacy and Google Play Data Safety from final runtime evidence.
+13. Run TestFlight / Play closed testing and Play pre-launch report.
+14. Submit for store review.
 
 ## Release gate
 
-A native build is eligible for submission only when:
+A native build is eligible for production submission only when:
 
-- analysis and the complete automated test suite pass;
-- signed release builds are generated with protected RevenueCat public SDK keys;
-- real-device QA passes on one current iPhone and one current Android device;
-- both store products load localized prices in all five launch languages;
-- purchase, pending, cancellation, failure, renewal, expiration, refund/revocation, and restore are tested;
-- only trusted, active `mystic_plus` entitlements unlock paid features;
-- Privacy Policy and store disclosures match every integrated SDK;
-- every localized privacy, terms, support, and marketing URL returns HTTP 200;
-- a private billing/privacy support channel is monitored;
-- no preview checkout, placeholder claim, fake price, or inactive control remains;
+- formatting, analysis and the complete test suite pass;
+- web, Android and unsigned iOS release builds pass;
+- production AdMob app IDs and ad-unit IDs are configured;
+- Google demo IDs are absent from the final store candidate;
+- UMP privacy behavior is configured and real-device tested;
+- every formerly paid feature is usable without purchase;
+- no live purchase/restore CTA remains;
+- Android bundle audit allows only reviewed Google advertising permissions while still blocking sensitive permissions and unknown tracking SDKs;
+- Privacy Policy, App Privacy and Data Safety match the signed runtime;
+- real-device ad/no-ad/error paths pass;
+- all public legal/support/marketing URLs remain live;
 - the uploaded package is signed with the permanent production identifiers.
