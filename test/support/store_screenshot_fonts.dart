@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const _storeScreenshotLatinFamilies = <String>['Roboto', 'Arial'];
+const _storeScreenshotFontFamilies = <String>['Roboto', 'Arial', 'Georgia'];
 const _storeScreenshotTarotFamily = 'TarotSymbols';
 const _storeScreenshotTarotSymbols = <String>[
   '✦',
@@ -36,7 +36,7 @@ Future<void> loadStoreScreenshotFonts() async {
   final robotoBytes = await roboto.readAsBytes();
   final tarotSymbolBytes = await tarotSymbols.readAsBytes();
   await _loadFontFamily('Roboto', <Uint8List>[robotoBytes]);
-  await _loadFontFamily('Arial', <Uint8List>[robotoBytes]);
+  await _loadFontFamily('Arial', <Uint8List>[tarotSymbolBytes]);
   await _loadFontFamily('Georgia', <Uint8List>[tarotSymbolBytes]);
   await _loadFontFamily(_storeScreenshotTarotFamily, <Uint8List>[
     tarotSymbolBytes,
@@ -47,7 +47,7 @@ Future<void> loadStoreScreenshotFonts() async {
 }
 
 void verifyStoreScreenshotFonts() {
-  for (final family in _storeScreenshotLatinFamilies) {
+  for (final family in _storeScreenshotFontFamilies) {
     final narrow = _widthOf('iiiiiiii', family: family);
     final wide = _widthOf('WWWWWWWW', family: family);
     if (wide <= narrow * 1.5) {
@@ -60,14 +60,28 @@ void verifyStoreScreenshotFonts() {
     }
   }
 
-  final symbolWidths = <String>{
+  final arialSymbolWidths = <String>{
+    for (final symbol in _storeScreenshotTarotSymbols)
+      _widthOf(symbol, family: 'Arial').toStringAsFixed(2),
+  };
+  final georgiaSymbolWidths = <String>{
+    for (final symbol in _storeScreenshotTarotSymbols)
+      _widthOf(symbol, family: 'Georgia').toStringAsFixed(2),
+  };
+  final dedicatedSymbolWidths = <String>{
     for (final symbol in _storeScreenshotTarotSymbols)
       _widthOf(symbol, family: _storeScreenshotTarotFamily).toStringAsFixed(2),
   };
-  if (symbolWidths.length < 3) {
-    throw StateError(
-      'TarotSymbols glyphs must not collapse to one missing-glyph box.',
-    );
+  for (final entry in <String, Set<String>>{
+    'Arial': arialSymbolWidths,
+    'Georgia': georgiaSymbolWidths,
+    _storeScreenshotTarotFamily: dedicatedSymbolWidths,
+  }.entries) {
+    if (entry.value.length < 3) {
+      throw StateError(
+        '${entry.key} tarot glyphs must not collapse to one missing-glyph box.',
+      );
+    }
   }
 }
 
@@ -91,6 +105,8 @@ File _storeScreenshotSymbolFont() {
   }
 
   for (final path in const <String>[
+    '/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed.ttf',
+    '/usr/share/fonts/dejavu/DejaVuSansCondensed.ttf',
     '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
     '/usr/share/fonts/dejavu/DejaVuSans.ttf',
   ]) {
