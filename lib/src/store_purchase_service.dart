@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import 'monetization.dart' show MysticProductIds;
 import 'subscription_client.dart';
 import 'subscription_config.dart';
 export 'monetization.dart' show MysticProductIds;

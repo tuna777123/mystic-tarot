@@ -1507,52 +1507,6 @@ class _PathLines extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _Plan extends StatelessWidget {
-  const _Plan(this.text, {this.selected = false});
-
-  final String text;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 72,
-    padding: const EdgeInsets.symmetric(horizontal: 15),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(19),
-      color: selected
-          ? MysticColors.violet.withValues(alpha: .26)
-          : const Color(0xFF171329),
-      border: Border.all(
-        color: selected
-            ? MysticColors.gold.withValues(alpha: .68)
-            : Colors.white.withValues(alpha: .08),
-      ),
-    ),
-    child: Row(
-      children: [
-        Icon(
-          selected ? Icons.radio_button_checked : Icons.radio_button_off,
-          color: selected ? MysticColors.gold : MysticColors.muted,
-        ),
-        const SizedBox(width: 9),
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: 'Arial',
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .8,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 class _Feature extends StatelessWidget {
   const _Feature(this.text);
 
