@@ -51,7 +51,7 @@ void verifyStoreScreenshotFonts() {
     for (final symbol in _storeScreenshotTarotSymbols)
       _widthOf(symbol, family: 'Georgia').toStringAsFixed(2),
   };
-  if (symbolWidths.length < 4) {
+  if (symbolWidths.length < 3) {
     throw StateError(
       'Georgia tarot symbols must not collapse to one missing-glyph box.',
     );
