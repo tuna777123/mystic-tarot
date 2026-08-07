@@ -1,94 +1,74 @@
 # Mystic Tarot — Pack boutique en français
 
-Ces textes sont prêts à être saisis directement dans les localisations françaises d’App Store Connect et de Google Play Console.
+Textes pour App Store Connect et Google Play Console.
 
 ## App Store
 
-**Nom (30 caractères maximum)**  
+**Nom**  
 Mystic Tarot : Rituel du Jour
 
-**Sous-titre (30 caractères maximum)**  
-Tarot, journal et motifs
+**Sous-titre**  
+Tarot, Journal & Motifs
 
 **Texte promotionnel**  
-Révélez les cartes, comprenez chaque interprétation et notez ce qui a réellement changé 24 heures plus tard.
+Révélez les cartes, comprenez l’interprétation et revenez 24 heures plus tard pour la comparer à ce qui s’est réellement passé.
 
-**Mots-clés (100 caractères maximum)**  
-tarot,carte du jour,journal,oracle,réflexion,arcane,rituel,bien-être,introspection
-
-**Catégorie principale**  
-Style de vie
-
-**Catégorie secondaire**  
-Divertissement
-
-**Politique de confidentialité**  
-https://tuna777123.github.io/mystic-tarot/privacy-fr.html
-
-**Assistance**  
-https://tuna777123.github.io/mystic-tarot/support-fr.html
-
-**Marketing**  
-https://tuna777123.github.io/mystic-tarot/
+**Confidentialité :** https://tuna777123.github.io/mystic-tarot/privacy-fr.html  
+**Assistance :** https://tuna777123.github.io/mystic-tarot/support-fr.html  
+**Marketing :** https://tuna777123.github.io/mystic-tarot/
 
 ## Google Play
 
-**Nom de l’application (30 caractères maximum)**  
+**Nom**  
 Mystic Tarot : Rituel du Jour
 
-**Description courte (80 caractères maximum)**  
+**Description courte**  
 Tarot explicable, Mystic Mirror sur 24 h et journal privé.
 
 **Description complète**
 
 Vos motifs parlent déjà.
 
-Mystic Tarot transforme un tirage de cartes en une pratique quotidienne et privée. Choisissez les cartes qui vous appellent, ouvrez le sceau et recevez une guidance tournée vers la réflexion, inspirée du symbolisme traditionnel du tarot.
+Mystic Tarot transforme un tirage en pratique privée qui continue après la révélation des cartes.
 
-COMPRENEZ L’INTERPRÉTATION
+### COMPRENEZ L’INTERPRÉTATION
 
-Pour chaque carte, consultez sa position dans le tirage, l’effet de son orientation droite ou renversée, sa base symbolique traditionnelle et l’action concrète proposée. Mystic indique l’émotion et l’intention utilisées comme contexte et ne présente jamais l’interprétation comme une preuve, un diagnostic, une certitude ou un score prédictif.
+Voyez comment la position, l’orientation, le symbolisme et la prochaine étape de chaque carte façonnent le tirage. Mystic ne présente pas ses réflexions comme un diagnostic, une certitude ou une prédiction garantie.
 
-REVENEZ À LA RÉALITÉ APRÈS 24 HEURES
+### APRÈS 24 HEURES
 
-Lorsque Mystic Mirror est prêt, notez ce qui a réellement changé, votre émotion actuelle et une réflexion privée facultative. Vous pouvez ainsi comparer la guidance aux événements et construire un historique fondé sur votre propre expérience.
+Quand Mystic Mirror est prêt, revenez noter ce qui a réellement changé. Daily Guidance et le Mystic Mirror de base sur 24 heures restent gratuits ; désormais les lectures approfondies, Oracle, le journal et les fonctions de motifs ne demandent pas non plus de paiement.
 
-REMARQUEZ CE QUI REVIENT
+### OBSERVEZ CE QUI REVIENT
 
-Mystic compare les cartes récurrentes, les transitions émotionnelles, les tirages précédents et les bilans Mirror enregistrés sur votre appareil. La recherche du journal tolère les différences d’accents afin que vos souvenirs restent faciles à retrouver.
+Comparez les cartes récurrentes, les changements émotionnels et les retours Mystic Mirror dans votre historique privé. Mystic Intelligence peut résumer l’évidence accumulée sans en faire une affirmation clinique ou factuelle.
 
-EXPLOREZ LES 78 ARCANES
+### 78 CARTES ET PROGRESSION
 
-Éveillez toutes les cartes, débloquez des jeux visuels, construisez votre Constellation Intérieure, gagnez des XP, accomplissez des rituels et collectionnez des réussites sur votre Chemin Mystic.
+Explorez les Arcanes, activez les cartes, accomplissez des rituels, développez votre Mystic Path et consultez votre Living Journal.
 
-LA CONFIDENTIALITÉ PAR CONCEPTION
+### GRATUIT ET FINANCÉ PAR LA PUBLICITÉ
 
-Vos questions, tirages, notes Mirror, profil, progression et préférences restent sur votre appareil. L’historique complet du journal est conservé localement avec une sauvegarde du dernier état valide. Vous pouvez exporter votre historique privé uniquement lorsque vous lancez l’action ou supprimer toutes les données Mystic.
+Aucun abonnement payant ni déverrouillage payant. Les revenus des apps Android/iOS proviennent de publicités occasionnelles via Google Mobile Ads, soumises aux choix de confidentialité applicables de User Messaging Platform. La version web publique reste sans publicité.
 
-L’historique des achats et le statut de l’abonnement natif sont traités par Apple ou Google et RevenueCat afin de vérifier Mystic Plus de manière sécurisée.
+### CONFIDENTIALITÉ LOCAL-FIRST
 
-ALLEZ PLUS LOIN AVEC MYSTIC PLUS
+Vos questions, tirages, notes Mystic Mirror, profil et progression restent principalement sur votre appareil. Vous pouvez exporter ou supprimer votre historique local dans le produit. Les données traitées indépendamment par un fournisseur publicitaire relèvent de ses propres politiques.
 
-La Guidance Quotidienne et le Mystic Mirror de base sur 24 heures restent gratuits. Mystic Plus débloque les tirages approfondis illimités, les tirages premium et les questions de suivi illimitées dans le Dialogue de l’Oracle. La boutique affiche le prix localisé, la période, l’éligibilité à l’essai et les conditions de renouvellement avant l’achat.
-
-Mystic Tarot est destiné à la réflexion personnelle et au divertissement. Il ne fournit aucun avis médical, psychologique, juridique, financier ou d’urgence.
+Mystic Tarot est destiné à la réflexion et au divertissement ; il ne fournit aucun conseil médical, psychologique, juridique, financier ou d’urgence.
 
 ## Notes de version — 1.22.3
 
-- Les nouvelles installations s’ouvrent désormais en anglais, turc, espagnol, français ou portugais du Brésil selon la langue de l’appareil avant l’onboarding.
-- La langue choisie dans Mystic reste active pendant la sélection des cartes, les résultats, le profil, les réglages et le verrouillage privé de l’application.
-- Mystic Intelligence continue de créer sur l’appareil un rapport privé sur sept jours à partir des tirages enregistrés et des bilans Mystic Mirror terminés.
-- La préparation facultative des rappels et du fuseau horaire ne retarde plus le premier écran utilisable ; l’autorisation de notifications n’est demandée qu’à l’initiative de l’utilisateur.
-- Le réglage Réduire les animations ou Supprimer les animations de l’appareil est respecté dans l’arrière-plan atmosphérique et la sélection des cartes.
-- Des améliorations de stabilité ont été apportées au journal, à Mystic Mirror, au transfert privé chiffré et au verrouillage à six chiffres.
+- Toutes les fonctions sont disponibles sans abonnement payant.
+- La monétisation native est prête pour Google Mobile Ads avec consentement applicable.
+- Mystic Intelligence continue à créer des rapports privés à partir des lectures enregistrées et des retours Mystic Mirror.
+- Démarrage et persistance linguistique améliorés pour EN, TR, ES, FR et PT-BR.
+- Les protections de réduction des animations et de confidentialité locale restent actives.
 
-## Titres des captures d’écran en français
+## Captures recommandées
 
-1. **Vos motifs parlent déjà**
-2. **Choisissez les cartes qui vous appellent**
-3. **Ouvrez le sceau**
-4. **Comprenez pourquoi cette interprétation apparaît**
-5. **Qu’est-ce qui a vraiment changé après 24 heures ?**
-6. **Mystic se souvient de ce qui revient**
-7. **Un journal qui reste le vôtre**
-8. **Allez plus loin avec Mystic Plus**
+1. Guidance du jour
+2. **COMPRENEZ L’INTERPRÉTATION**
+3. **APRÈS 24 HEURES**
+4. Carte vivante de vos motifs
+5. Tout est débloqué — aucun abonnement
