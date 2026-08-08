@@ -2,6 +2,8 @@
 
 Mystic Tarot's native Android and iOS editions are free products funded only by advertising. There is no paid subscription, paid Plus tier, purchase flow, restore flow, or feature paywall in the production business model.
 
+The normal profile experience states this directly as a free, advertising-supported product rather than presenting a subscription-management state.
+
 ## Revenue surfaces
 
 - **Interstitial:** eligible after every third genuinely new saved reading, at the natural completion boundary.
