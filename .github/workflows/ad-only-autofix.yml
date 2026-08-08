@@ -1,0 +1,66 @@
+name: Ad-only release autofix
+
+on:
+  push:
+    branches:
+      - release/ad-supported-monetization
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/ad-supported-monetization
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Align ad-only screenshot copy and Dart formatting
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/src/store_showcase.dart')
+          text = path.read_text()
+          replacements = {
+              "Deep readings and private intelligence, with official store pricing.": "All features stay free; native ads support the mobile app.",
+              "Derin okumalar ve özel içgörüler; resmi mağaza fiyatlarıyla.": "Tüm özellikler ücretsiz; mobil uygulamayı reklamlar destekler.",
+              "Lecturas profundas e inteligencia privada con precio oficial.": "Todo sigue gratis; los anuncios sostienen la app móvil.",
+              "Lectures profondes et intelligence privée, au tarif officiel.": "Tout reste gratuit ; les pubs soutiennent l’app mobile.",
+              "Leituras profundas e inteligência privada com preço oficial.": "Tudo segue grátis; anúncios sustentam o app móvel.",
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'missing expected stale copy: {old}')
+              text = text.replace(old, new)
+          path.write_text(text)
+          PY
+
+          dart format \
+            lib/src/ad_revenue_service.dart \
+            test/ad_supported_monetization_contract_test.dart \
+            lib/src/store_showcase.dart
+
+          rm .github/workflows/ad-only-autofix.yml
+          git diff --check
+
+      - name: Commit clean release fixes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/ad_revenue_service.dart test/ad_supported_monetization_contract_test.dart lib/src/store_showcase.dart .github/workflows/ad-only-autofix.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix ad-only release gates"
+          git push origin HEAD:release/ad-supported-monetization
