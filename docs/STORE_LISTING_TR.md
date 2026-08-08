@@ -63,14 +63,15 @@ Soruların, okumaların, Mystic Ayna notların, profilin ve ilerlemen öncelikle
 
 Mystic Tarot kişisel düşünme ve eğlence amacıyla geliştirilmiştir. Tıbbi, ruh sağlığı, hukuki, mali veya acil durum tavsiyesi sunmaz.
 
-## Sürüm notları — 1.22.3
+## Sürüm notları — 1.23.0
 
-- Tüm ürün özellikleri ücretli abonelik olmadan kullanılabilir.
-- Android ve iOS gelir modeli, izin durumuna bağlı Google Mobile Ads reklamcılığına hazırlanmıştır.
+- Mystic Tarot artık ücretli abonelik olmadan tamamen açıktır; Android ve iOS gelir modeli gizlilik durumuna bağlı Google Mobile Ads reklamcılığına hazırlanmıştır.
+- Temiz kurulumlar onboarding’den önce İngilizce, Türkçe, İspanyolca, Fransızca veya Brezilya Portekizcesi cihaz dilinde açılır.
+- Uygulama içinde seçilen dil kart seçimi, sonuçlar, profil, ayarlar ve özel uygulama kilidi boyunca korunur.
 - Mystic Intelligence, kaydedilen okumalar ve tamamlanan Mystic Ayna kontrollerinden cihazda özel bir rapor oluşturmaya devam eder.
-- Temiz kurulumlarda EN, TR, ES, FR ve PT-BR cihaz dili başlangıçta desteklenir.
 - İsteğe bağlı hatırlatıcı hazırlığı ilk kullanılabilir ekranı geciktirmez.
-- Hareketi Azalt / Animasyonları Kaldır ayarları korunur.
+- Cihazdaki Hareketi Azalt veya Animasyonları Kaldır ayarları korunur.
+- Günlük, Mystic Ayna, şifreli özel aktarım ve altı haneli uygulama kilidi dayanıklılıkları korunur.
 
 ## Türkçe ekran görüntüsü başlıkları
 
