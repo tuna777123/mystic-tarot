@@ -94,8 +94,9 @@ class DisabledSubscriptionClient implements SubscriptionClient {
   Future<void> configure(String apiKey) async {}
 
   @override
-  Future<List<SubscriptionProduct>> loadProducts(Set<String> productIds) async =>
-      const <SubscriptionProduct>[];
+  Future<List<SubscriptionProduct>> loadProducts(
+    Set<String> productIds,
+  ) async => const <SubscriptionProduct>[];
 
   @override
   Future<SubscriptionEntitlement> getEntitlement(String entitlementId) async =>
