@@ -14,7 +14,7 @@ Core access never depends on watching an ad. Rewarded ads are intentionally not 
 
 Native advertising uses Google Mobile Ads with Google's UMP consent flow. Consent information is refreshed before ad initialization, required consent UI is shown when applicable, and ad requests remain gated by `ConsentInformation.instance.canRequestAds()`.
 
-A privacy-options entry is exposed when UMP reports that privacy options are required. Store privacy disclosures must match the final AdMob/UMP configuration used in the signed production binaries.
+A privacy-options entry is exposed from the normal profile/settings experience when UMP reports that privacy options are required, so users do not need to discover a legacy monetization route to revisit advertising consent choices. Store privacy disclosures must match the final AdMob/UMP configuration used in the signed production binaries.
 
 ## QA versus production
 
