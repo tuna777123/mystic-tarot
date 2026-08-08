@@ -96,10 +96,10 @@ void materializeAdOnlyUi() {
           ),
         ),
         const Spacer(),''',
-    '''        Expanded(
+    '''        const Expanded(
           child: FittedBox(
             fit: BoxFit.scaleDown,
-            child: const Text(
+            child: Text(
               'MYSTIC INTELLIGENCE',
               style: TextStyle(
                 color: MysticColors.gold,
