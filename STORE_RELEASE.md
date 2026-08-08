@@ -2,7 +2,8 @@
 
 Current source version: `1.23.0+33`  
 Application / bundle ID: `com.tunabozcali.mystictarot`  
-Launch languages: **EN, TR, ES, FR, PT-BR**
+Launch languages: **EN, TR, ES, FR, PT-BR**  
+Launch set: **English, Turkish, Spanish, French, Brazilian Portuguese**
 
 This is the canonical native-store operator handoff.
 
