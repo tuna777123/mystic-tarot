@@ -38,6 +38,10 @@ Real production IDs must never be substituted into ordinary repository QA runs.
 
 RevenueCat and in-app subscription commerce are not part of the runtime revenue path. Historical compatibility code may remain temporarily where the repository's upstream/plugin audit explicitly depends on it, but it must not initialize checkout, sell a product, restore a purchase, or lock a user-facing feature.
 
+## Automated runtime-copy gate
+
+`test/ad_only_user_copy_contract_test.dart` fails the build if the main application or Mystic Intelligence surface reintroduces user-facing `Mystic Plus`, subscription-management, or paid-plan messaging. Technical compatibility identifiers may remain where needed, but they cannot leak back into the runtime product copy.
+
 ## Release gate
 
 A native release is production-ready only after all repository CI is green **and** the owner-controlled external steps are complete: AdMob app/unit creation, UMP configuration, production IDs/secrets, native signing, physical-device consent/ad QA, Play Internal Testing/TestFlight validation, store privacy/data forms, and final store approval.
