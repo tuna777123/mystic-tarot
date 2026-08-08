@@ -42,6 +42,7 @@ void materializeAdOnlyUi() {
                       ),''',
     'deep-reading paid badge',
   );
+  appSource = appSource.replaceAll("'PLUS'", "'OPEN'");
   appSource = _replaceRequired(
     appSource,
     "'\${kind.cardCount}-card premium spread'",
