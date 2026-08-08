@@ -15,15 +15,14 @@ void main() {
     required ReadingKind kind,
     required EmotionalState emotion,
     required int cardIndex,
-  }) =>
-      ReadingRecord(
-        kind: kind,
-        question: 'Question $daysAgo',
-        cards: <DrawnCard>[DrawnCard(tarotDeck[cardIndex], false)],
-        createdAt: now.subtract(Duration(days: daysAgo)),
-        emotion: emotion,
-        alignedAction: 'One observable action',
-      );
+  }) => ReadingRecord(
+    kind: kind,
+    question: 'Question $daysAgo',
+    cards: <DrawnCard>[DrawnCard(tarotDeck[cardIndex], false)],
+    createdAt: now.subtract(Duration(days: daysAgo)),
+    emotion: emotion,
+    alignedAction: 'One observable action',
+  );
 
   test('builds a deterministic seven-day private intelligence report', () {
     final records = <ReadingRecord>[
@@ -152,7 +151,7 @@ void main() {
     );
   });
 
-  testWidgets('free users receive a personalized report preview without overflow', (
+  testWidgets('unlocked Intelligence stays responsive on a 320px phone', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(320, 700);
@@ -186,7 +185,7 @@ void main() {
         home: MysticPlusIntelligenceScreen(
           source: 'organic',
           language: MysticLanguage.turkish,
-          isPlus: false,
+          isPlus: true,
           onContinue: () {},
           initialRecords: records,
           initialReflections: const <String, MysticMirrorReflection>{},
@@ -197,18 +196,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.text('ÖNİZLEME'), findsOneWidget);
-    expect(find.text('Tam raporun kilidini aç'), findsOneWidget);
+    expect(find.text('AKTİF'), findsOneWidget);
+    expect(find.text('Raporuma devam et'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.drag(find.byType(ListView), const Offset(0, -650));
     await tester.pump(const Duration(milliseconds: 250));
-
-    expect(find.byIcon(Icons.lock_outline), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Plus members see the full reality and emotion report', (
+  testWidgets('unlocked users see the full reality and emotion report', (
     tester,
   ) async {
     final first = record(
