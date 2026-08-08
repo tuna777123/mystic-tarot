@@ -1,0 +1,62 @@
+name: Ad-only user copy PR migration
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.head_ref == 'release/ad-supported-monetization' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/ad-supported-monetization
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Execute reviewed migration body
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          source = Path('.github/workflows/ad-only-user-copy-migration.yml').read_text()
+          start_token = "          python3 - <<'PY'\n"
+          end_token = "\n          PY\n"
+          start = source.find(start_token)
+          end = source.find(end_token, start + len(start_token))
+          if start < 0 or end < 0:
+              raise SystemExit('embedded migration body not found')
+          body = source[start + len(start_token):end]
+          exec(compile(textwrap.dedent(body), 'ad-only-user-copy-migration', 'exec'))
+          PY
+          dart format \
+            lib/src/app.dart \
+            lib/src/mystic_plus_intelligence_screen.dart \
+            test/ad_only_user_copy_contract_test.dart
+          rm -f \
+            .github/workflows/ad-only-user-copy-migration.yml \
+            .github/workflows/ad-only-user-copy-pr-migration.yml
+          git diff --check
+      - name: Commit cleaned runtime UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            lib/src/app.dart \
+            lib/src/mystic_plus_intelligence_screen.dart \
+            test/ad_only_user_copy_contract_test.dart \
+            .github/workflows/ad-only-user-copy-migration.yml \
+            .github/workflows/ad-only-user-copy-pr-migration.yml
+          git commit -m "Remove legacy paid messaging from runtime UI"
+          git push origin HEAD:release/ad-supported-monetization
