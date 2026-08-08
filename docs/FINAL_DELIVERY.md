@@ -47,7 +47,7 @@ Native ad design:
 - no permanent banner covering the tarot interface;
 - no rewarded-ad requirement for a core feature.
 
-The repository deliberately keeps dormant compatibility code from the old subscription architecture to avoid a risky full product rewrite, but the ad-only runtime does not initialize a purchase provider or sell products.
+`purchases_flutter` and RevenueCat are removed from the production dependency graph and runtime source. Only small pure-Dart historical compatibility DTO/interface shapes remain, backed by a fail-closed no-op client with no store SDK, network purchase provider, checkout, restore or paid entitlement behavior.
 
 ## 3. Public web / website
 
@@ -100,6 +100,8 @@ Delivered source-side release machinery includes:
 - Kotlin warning policy;
 - localized store metadata/release-note handoff;
 - deterministic localized screenshot generation/audit.
+
+Verified builds also run the fail-closed advertising-only UI materializer before analysis, tests and packaging so legacy paid-tier labels cannot leak into delivered builds.
 
 Canonical operator instructions: `STORE_RELEASE.md`.
 
@@ -185,12 +187,14 @@ Until those steps pass, do not describe native App Store / Google Play availabil
 - Owner guide: `docs/OWNER_GUIDE_A_TO_Z.md`
 - Store handoff: `STORE_RELEASE.md`
 - Marketing kit: `docs/MARKETING_LAUNCH_KIT.md`
+- Advertising model: `docs/AD_REVENUE_MODEL.md`
 - Production signing guidance: `docs/PRODUCTION_SIGNING_FINGERPRINTS.md`
 - Native ad service: `lib/src/ad_revenue_service.dart`
+- Advertising-only UI materializer: `tool/materialize_ad_only_ui.dart`
 - Public launch verifier: `tool/verify_launch_surface.sh`
 
 ## 12. Handoff message
 
 Copy/paste this when sending the project to a collaborator:
 
-> Mystic Tarot `1.23.0+33` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Start with `docs/OWNER_GUIDE_A_TO_Z.md` for the entire product and `STORE_RELEASE.md` for the native release path. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, real-device QA and store approvals are complete.
+> Mystic Tarot `1.23.0+33` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. RevenueCat and the billing SDK are removed, and there is no paid subscription business model. Start with `docs/OWNER_GUIDE_A_TO_Z.md` for the entire product and `STORE_RELEASE.md` for the native release path. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, real-device QA and store approvals are complete.
