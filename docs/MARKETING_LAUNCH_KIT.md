@@ -1,6 +1,6 @@
 # Mystic Tarot — Marketing & Advertising Launch Kit
 
-Version: `1.22.3+32`  
+Version: `1.23.0+33`  
 Primary public URL: `https://tuna777123.github.io/mystic-tarot/`  
 English landing: `https://tuna777123.github.io/mystic-tarot/landing-en.html`  
 Public press kit: `https://tuna777123.github.io/mystic-tarot/press-kit.html`
@@ -166,13 +166,13 @@ Use the landing page matching the ad language:
 
 ### UTM convention
 
-`?utm_source=<platform>&utm_medium=<format>&utm_campaign=launch_1_22_3&utm_content=<creative>`
+`?utm_source=<platform>&utm_medium=<format>&utm_campaign=launch_1_23_0&utm_content=<creative>`
 
 Examples:
 
-- `?utm_source=instagram&utm_medium=paid_social&utm_campaign=launch_1_22_3&utm_content=mirror_15s`
-- `?utm_source=tiktok&utm_medium=paid_social&utm_campaign=launch_1_22_3&utm_content=pattern_20s`
-- `?utm_source=youtube&utm_medium=creator&utm_campaign=launch_1_22_3&utm_content=creator_review`
+- `?utm_source=instagram&utm_medium=paid_social&utm_campaign=launch_1_23_0&utm_content=mirror_15s`
+- `?utm_source=tiktok&utm_medium=paid_social&utm_campaign=launch_1_23_0&utm_content=pattern_20s`
+- `?utm_source=youtube&utm_medium=creator&utm_campaign=launch_1_23_0&utm_content=creator_review`
 
 Do not add third-party tracking scripts to the public web product merely to read these parameters. Campaign attribution and in-app advertising are separate concerns.
 
@@ -184,8 +184,9 @@ Current native monetization design:
 
 - Google Mobile Ads only;
 - Google User Messaging Platform before eligible ad requests;
-- app-open advertising on eligible returning foreground transitions;
+- app-open advertising only after at least three completed readings, after 30+ seconds in background, with a two-hour minimum interval;
 - interstitial opportunity after every third genuinely new saved reading;
+- cadence persists across process restarts;
 - no permanent banner covering tarot content;
 - no rewarded ad needed to unlock a core feature;
 - no paid subscription;
