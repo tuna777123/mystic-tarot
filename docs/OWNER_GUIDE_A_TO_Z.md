@@ -1,6 +1,6 @@
 # Mystic Tarot — Owner Guide A to Z
 
-Product version: `1.22.3+32`  
+Product version: `1.23.0+33`  
 Application ID / bundle ID: `com.tunabozcali.mystictarot`  
 Launch languages: **EN, TR, ES, FR, PT-BR**  
 Public web app: `https://tuna777123.github.io/mystic-tarot/`  
@@ -148,11 +148,11 @@ Current formats:
 
 ### App-open
 
-An app-open ad can be preloaded for eligible returning foreground transitions. The app does not deliberately block the initial product bootstrap waiting for an ad. Cached app-open ads are treated as stale after four hours.
+An app-open ad is preloaded but is eligible only after the user has completed at least three readings. It is considered only after the app has spent at least 30 seconds in the background, and there is a two-hour minimum interval between app-open impressions. Cached app-open ads expire after four hours. The app does not block cold-start bootstrap waiting for an ad.
 
 ### Interstitial
 
-An interstitial opportunity is created after every **third genuinely new saved reading**. The first two new readings remain uninterrupted. If an ad is not ready, the product continues rather than blocking the user.
+An interstitial opportunity is created after every **third genuinely new saved reading**. The first two new readings remain uninterrupted. The cadence persists across process restarts. If an ad is not ready, the product continues rather than blocking the user.
 
 ### Intentionally not used
 
@@ -188,7 +188,7 @@ The native app requests current Google UMP consent information on launch. Where 
 
 The owner must configure the correct Privacy & messaging message in the AdMob dashboard before the production store release.
 
-If privacy options are required, the native app exposes an advertising privacy choices entry point.
+The native UI exposes the advertising privacy choices entry point only when UMP reports `PrivacyOptionsRequirementStatus.required`. The current source does not add a custom ATT/IDFA request flow; if the owner later enables an IDFA/ATT message in AdMob, the corresponding iOS usage description and final privacy declarations must be added and retested before release.
 
 ## Q — Quality gates
 
@@ -326,7 +326,7 @@ Recommended sequence:
 
 When handing Mystic Tarot to another developer, agency, advertiser or operator, tell them:
 
-> Mystic Tarot `1.22.3+32` is a free, local-first, five-language Flutter tarot product. Its core differentiator is Mystic Mirror: a reading returns after 24 hours as a reality check and contributes to private pattern history. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Production revenue is not considered live until the owner configures real AdMob IDs, privacy messaging, signed store candidates and real-device QA.
+> Mystic Tarot `1.23.0+33` is a free, local-first, five-language Flutter tarot product. Its core differentiator is Mystic Mirror: a reading returns after 24 hours as a reality check and contributes to private pattern history. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Production revenue is not considered live until the owner configures real AdMob IDs, privacy messaging, signed store candidates and real-device QA.
 
 ---
 
@@ -336,7 +336,7 @@ Important files:
 
 - `lib/main.dart` — bootstrap; keeps optional services non-blocking.
 - `lib/src/app.dart` — primary application shell and routing.
-- `lib/src/ad_revenue_service.dart` — native advertising / UMP / frequency cap.
+- `lib/src/ad_revenue_service.dart` — native advertising / UMP / persistent frequency cap.
 - `lib/src/reading_journal_store.dart` — local journal persistence and genuine-new-reading ad trigger.
 - `lib/src/store_purchase_service.dart` — dormant compatibility shim; no active subscription revenue.
 - `lib/src/store_ready_premium_screen.dart` — legacy route converted to free/ad-supported explanation.
@@ -359,8 +359,9 @@ Important files:
 - app lock and accessibility protections;
 - public PWA/site/legal/support surfaces;
 - ad-only native architecture;
-- UMP consent gate;
+- UMP consent gate and conditional privacy-options entry point;
 - app-open + frequency-capped interstitial logic;
+- persisted advertising cadence;
 - test AdMob configuration for QA;
 - build/audit/CI infrastructure;
 - store and marketing handoffs.
