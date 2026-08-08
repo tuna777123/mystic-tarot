@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Privacy-aware, advertising-only monetization for native Mystic Tarot builds.
 ///
@@ -40,18 +41,25 @@ class AdRevenueService with WidgetsBindingObserver {
     defaultValue: true,
   );
 
+  static const _completedReadingsKey = 'ad_completed_readings_total_v1';
+  static const _lastAppOpenShownKey = 'ad_last_app_open_shown_v1';
   static const _maxAppOpenCacheAge = Duration(hours: 4);
-  static const _minimumAppOpenInterval = Duration(hours: 1);
+  static const _minimumAppOpenInterval = Duration(hours: 2);
+  static const _minimumBackgroundDuration = Duration(seconds: 30);
+  static const _minimumReadingsBeforeAppOpen = 3;
+  static const _interstitialEveryReadings = 3;
 
   AppOpenAd? _appOpenAd;
   DateTime? _appOpenLoadedAt;
   DateTime? _lastAppOpenShownAt;
+  DateTime? _backgroundedAt;
   InterstitialAd? _interstitial;
   bool _initializing = false;
   bool _initialized = false;
   bool _observerAttached = false;
   bool _showingFullScreenAd = false;
-  bool _hasBackgroundedSinceInitialization = false;
+  bool _privacyOptionsRequired = false;
+  int _completedReadingsTotal = 0;
   int _completedReadingsSinceAd = 0;
 
   bool get supported =>
@@ -59,7 +67,9 @@ class AdRevenueService with WidgetsBindingObserver {
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS);
 
-  bool get privacyOptionsAvailable => supported;
+  bool get privacyOptionsAvailable => supported && _privacyOptionsRequired;
+
+  bool get usingTestAds => _useTestAds;
 
   String? get _appOpenId {
     if (!supported) return null;
@@ -91,11 +101,13 @@ class AdRevenueService with WidgetsBindingObserver {
     if (!supported || _initialized || _initializing) return;
     _initializing = true;
     try {
+      await _restoreCadence();
       final completer = Completer<void>();
       ConsentInformation.instance.requestConsentInfoUpdate(
         ConsentRequestParameters(),
         () {
           ConsentForm.loadAndShowConsentFormIfRequired((_) async {
+            await _refreshPrivacyOptionsRequirement();
             await _initializeAdsIfAllowed();
             if (!completer.isCompleted) completer.complete();
           });
@@ -103,6 +115,7 @@ class AdRevenueService with WidgetsBindingObserver {
         (_) async {
           // A previous valid consent decision may still permit requests after a
           // transient refresh error. canRequestAds() remains the final gate.
+          await _refreshPrivacyOptionsRequirement();
           await _initializeAdsIfAllowed();
           if (!completer.isCompleted) completer.complete();
         },
@@ -111,6 +124,26 @@ class AdRevenueService with WidgetsBindingObserver {
     } finally {
       _initializing = false;
     }
+  }
+
+  Future<void> _restoreCadence() async {
+    final preferences = await SharedPreferences.getInstance();
+    _completedReadingsTotal = preferences.getInt(_completedReadingsKey) ?? 0;
+    _completedReadingsSinceAd =
+        _completedReadingsTotal % _interstitialEveryReadings;
+    final lastShownMillis = preferences.getInt(_lastAppOpenShownKey);
+    if (lastShownMillis != null) {
+      _lastAppOpenShownAt = DateTime.fromMillisecondsSinceEpoch(
+        lastShownMillis,
+      );
+    }
+  }
+
+  Future<void> _refreshPrivacyOptionsRequirement() async {
+    if (!supported) return;
+    final status = await ConsentInformation.instance
+        .getPrivacyOptionsRequirementStatus();
+    _privacyOptionsRequired = status == PrivacyOptionsRequirementStatus.required;
   }
 
   Future<void> _initializeAdsIfAllowed() async {
@@ -133,25 +166,37 @@ class AdRevenueService with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.hidden) {
-      _hasBackgroundedSinceInitialization = true;
+      _backgroundedAt ??= DateTime.now();
       return;
     }
-    if (state != AppLifecycleState.resumed ||
-        !_hasBackgroundedSinceInitialization) {
+    if (state != AppLifecycleState.resumed) return;
+    final backgroundedAt = _backgroundedAt;
+    _backgroundedAt = null;
+    if (backgroundedAt == null) return;
+    if (DateTime.now().difference(backgroundedAt) < _minimumBackgroundDuration) {
       return;
     }
-    _hasBackgroundedSinceInitialization = false;
     _showAppOpenIfReady();
   }
 
   /// Called only when a genuinely new reading is persisted.
   ///
   /// The first two new readings remain uninterrupted; the third may show a
-  /// preloaded interstitial at the natural completion boundary.
+  /// preloaded interstitial at the natural completion boundary. Counts persist
+  /// across launches so app-open eligibility and interstitial cadence do not
+  /// reset when the process is restarted.
   void recordCompletedReading() {
-    if (!_initialized || _showingFullScreenAd) return;
+    unawaited(_recordCompletedReading());
+  }
+
+  Future<void> _recordCompletedReading() async {
+    _completedReadingsTotal += 1;
     _completedReadingsSinceAd += 1;
-    if (_completedReadingsSinceAd < 3) return;
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setInt(_completedReadingsKey, _completedReadingsTotal);
+
+    if (!_initialized || _showingFullScreenAd) return;
+    if (_completedReadingsSinceAd < _interstitialEveryReadings) return;
     _completedReadingsSinceAd = 0;
     _showInterstitialIfReady();
   }
@@ -188,7 +233,11 @@ class AdRevenueService with WidgetsBindingObserver {
   }
 
   void _showAppOpenIfReady() {
-    if (_showingFullScreenAd || !_appOpenIntervalSatisfied) return;
+    if (_showingFullScreenAd ||
+        _completedReadingsTotal < _minimumReadingsBeforeAppOpen ||
+        !_appOpenIntervalSatisfied) {
+      return;
+    }
     final ad = _appOpenAd;
     if (ad == null) {
       _loadAppOpen();
@@ -204,6 +253,7 @@ class AdRevenueService with WidgetsBindingObserver {
 
     _showingFullScreenAd = true;
     _lastAppOpenShownAt = DateTime.now();
+    unawaited(_persistLastAppOpenShown());
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
@@ -222,6 +272,16 @@ class AdRevenueService with WidgetsBindingObserver {
     );
     _appOpenAd = null;
     ad.show();
+  }
+
+  Future<void> _persistLastAppOpenShown() async {
+    final shownAt = _lastAppOpenShownAt;
+    if (shownAt == null) return;
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setInt(
+      _lastAppOpenShownKey,
+      shownAt.millisecondsSinceEpoch,
+    );
   }
 
   void _loadInterstitial() {
@@ -269,7 +329,7 @@ class AdRevenueService with WidgetsBindingObserver {
   }
 
   void showPrivacyOptions() {
-    if (!supported) return;
+    if (!privacyOptionsAvailable) return;
     ConsentForm.showPrivacyOptionsForm((_) {});
   }
 
