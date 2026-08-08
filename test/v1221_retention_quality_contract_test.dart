@@ -48,10 +48,7 @@ void main() {
       expect(previousPatchNotes, contains('Version `1.22.3+32`'));
       expect(currentReleaseNotes, startsWith('# Mystic Tarot 1.23.0'));
       expect(currentReleaseNotes, contains('1.23.0+33'));
-      expect(
-        storePack,
-        contains('Current verified source version: `1.23.0+33`'),
-      );
+      expect(storePack, contains('Current source version: `1.23.0+33`'));
       expect(File('.github/workflows/v1221-format.yml').existsSync(), isFalse);
       expect(
         File('.github/workflows/v1221-finalize.yml').existsSync(),
