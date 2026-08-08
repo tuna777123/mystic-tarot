@@ -36,7 +36,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Continue free'),
       180,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.byType(ListView),
     );
     expect(find.text('Continue free'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -74,16 +74,17 @@ void main() {
     );
 
     await tester.tap(find.text('Open'));
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListView), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Continue free'),
       180,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.byType(ListView),
     );
     expect(find.text('Continue free'), findsOneWidget);
 
     await tester.tap(find.text('Continue free'));
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
     expect(find.text('Open'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -116,7 +117,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Ücretsiz devam et'),
       180,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.byType(ListView),
     );
     expect(find.text('Ücretsiz devam et'), findsOneWidget);
     expect(tester.takeException(), isNull);
