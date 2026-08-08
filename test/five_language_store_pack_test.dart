@@ -86,7 +86,7 @@ void main() {
     }
   });
 
-  test('localized store listing handoffs exist for every non-English language', () {
+  test('localized store listing handoffs are advertising-only', () {
     for (final path in <String>[
       'docs/STORE_LISTING_TR.md',
       'docs/STORE_LISTING_ES.md',
@@ -97,7 +97,17 @@ void main() {
       expect(file.existsSync(), isTrue, reason: path);
       final content = file.readAsStringSync();
       expect(content, contains('Mystic Tarot'), reason: path);
-      expect(content, contains('Mystic Plus'), reason: path);
+      expect(content, isNot(contains('Mystic Plus')), reason: path);
+      expect(
+        content.toLowerCase(),
+        anyOf(
+          contains('reklam'),
+          contains('publicidad'),
+          contains('publicité'),
+          contains('publicidade'),
+        ),
+        reason: path,
+      );
     }
   });
 
