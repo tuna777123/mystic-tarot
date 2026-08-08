@@ -57,13 +57,14 @@ Suas perguntas, leituras, notas do Mystic Mirror, perfil e progresso permanecem 
 
 Mystic Tarot é feito para reflexão e entretenimento; não oferece aconselhamento médico, de saúde mental, jurídico, financeiro ou de emergência.
 
-## Notas da versão — 1.22.3
+## Notas da versão — 1.23.0
 
-- Todos os recursos ficam disponíveis sem assinatura paga.
-- A monetização nativa está preparada para Google Mobile Ads com consentimento aplicável.
+- Todos os recursos estão disponíveis sem assinatura paga e a monetização nativa está preparada para Google Mobile Ads com consentimento aplicável.
+- Novas instalações abrem em inglês, turco, espanhol, francês ou português do Brasil conforme o idioma do dispositivo antes do onboarding.
+- O idioma escolhido dentro do Mystic permanece ativo durante seleção de cartas, resultados, perfil, configurações e bloqueio privado.
 - Mystic Intelligence continua criando relatórios privados a partir de leituras salvas e verificações do Mystic Mirror.
-- Inicialização e persistência de idioma aprimoradas para EN, TR, ES, FR e PT-BR.
-- As proteções de redução de movimento e privacidade local permanecem ativas.
+- As proteções Reduce Motion e de privacidade local permanecem ativas.
+- A transferência privada criptografada continua protegida junto com o diário, Mystic Mirror e o bloqueio do app.
 
 ## Capturas recomendadas
 
