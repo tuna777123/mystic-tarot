@@ -38,10 +38,7 @@ void main() {
     expect(adService, contains('ConsentInformation.instance.canRequestAds()'));
     expect(adService, contains('AppOpenAd.load'));
     expect(adService, contains('InterstitialAd.load'));
-    expect(
-      adService,
-      contains('_minimumAppOpenInterval = Duration(hours: 2)'),
-    );
+    expect(adService, contains('_minimumAppOpenInterval = Duration(hours: 2)'));
     expect(
       adService,
       contains('_minimumBackgroundDuration = Duration(seconds: 30)'),
