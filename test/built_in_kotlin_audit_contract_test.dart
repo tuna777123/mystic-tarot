@@ -68,7 +68,7 @@ void main() {
 
     expect(policy, contains('expectedLegacyKgpPlugins'));
     expect(policy, contains("'flutter_timezone'"));
-    expect(policy, contains("'purchases_flutter'"));
+    expect(policy, isNot(contains("'purchases_flutter',")));
     expect(policy, isNot(contains("'share_plus',")));
     expect(policy, contains('expectedLegacyKgpPlugins.difference(observed)'));
     expect(policy, contains('observed.difference(expectedLegacyKgpPlugins)'));
