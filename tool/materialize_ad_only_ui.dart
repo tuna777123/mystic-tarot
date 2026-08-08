@@ -44,14 +44,14 @@ void materializeAdOnlyUi() {
   );
   appSource = _replaceRequired(
     appSource,
-    r"'${kind.cardCount}-card premium spread'",
-    r"'${kind.cardCount}-card deep spread'",
+    "'\${kind.cardCount}-card premium spread'",
+    "'\${kind.cardCount}-card deep spread'",
     'English premium-spread copy',
   );
   appSource = _replaceRequired(
     appSource,
-    r"'${kind.cardCount} kartlık premium açılım'",
-    r"'${kind.cardCount} kartlık derin açılım'",
+    "'\${kind.cardCount} kartlık premium açılım'",
+    "'\${kind.cardCount} kartlık derin açılım'",
     'Turkish premium-spread copy',
   );
   appSource = _replaceRequired(
