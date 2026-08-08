@@ -91,7 +91,19 @@ jobs:
         run: flutter analyze --fatal-infos
 
       - name: Test
-        run: flutter test
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build/reports
+          set +e
+          flutter test 2>&1 | tee build/reports/flutter-test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if (( test_status != 0 )); then
+            echo 'Concise Flutter test failure summary:' >&2
+            grep -E '(^| )FAILED|Expected:|Actual:|Test failed|Some tests failed|test/.+\.dart|\[[Ee]\]' build/reports/flutter-test.log | tail -n 240 >&2 || true
+            exit "$test_status"
+          fi
 
       - name: Build web release
         run: flutter build web --release
