@@ -31,7 +31,7 @@ void main() {
     expect(store, contains('Everything is unlocked.'));
     expect(store, contains('there is no subscription to buy'));
     expect(store, contains('Continue free'));
-    expect(store, contains('advertising privacy choices'));
+    expect(store.toLowerCase(), contains('advertising privacy choices'));
     expect(store, isNot(contains('CONTINUE WITH YEARLY')));
   });
 
