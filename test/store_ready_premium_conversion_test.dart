@@ -25,13 +25,20 @@ void main() {
       find.textContaining('there is no subscription to buy'),
       findsOneWidget,
     );
-    expect(find.text('Continue free'), findsOneWidget);
     expect(find.text('All readings and spreads'), findsOneWidget);
     expect(find.text('Mystic Mirror · 24h reality check'), findsOneWidget);
     expect(find.textContaining('Living Journal'), findsOneWidget);
     expect(find.textContaining(r'$39.99'), findsNothing);
     expect(find.textContaining('Manage subscription'), findsNothing);
     expect(find.textContaining('Restore'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.scrollUntilVisible(
+      find.text('Continue free'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Continue free'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -67,11 +74,16 @@ void main() {
     );
 
     await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.scrollUntilVisible(
+      find.text('Continue free'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Continue free'), findsOneWidget);
 
     await tester.tap(find.text('Continue free'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Open'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -101,6 +113,11 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('reklamlardan gelir'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Ücretsiz devam et'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Ücretsiz devam et'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
