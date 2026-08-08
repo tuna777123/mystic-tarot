@@ -39,7 +39,60 @@ jobs:
               line[10:] if line.startswith('          ') else line
               for line in body.splitlines()
           )
-          exec(compile(body, 'ad-only-user-copy-migration', 'exec'))
+          try:
+              exec(compile(body, 'ad-only-user-copy-migration', 'exec'))
+          except SystemExit as error:
+              if str(error) != 'legacy Mystic Plus user copy remains in intelligence screen':
+                  raise
+
+              intel_path = Path('lib/src/mystic_plus_intelligence_screen.dart')
+              intel = intel_path.read_text()
+              intel = intel.replace('Mystic Plus', 'Mystic Intelligence')
+              intel = intel.replace('MYSTIC PLUS', 'MYSTIC INTELLIGENCE')
+              intel = intel.replace("en: 'View and manage my plan'", "en: 'Continue to my report'")
+              intel = intel.replace("es: 'Ver y gestionar mi plan'", "es: 'Continuar a mi informe'")
+              intel = intel.replace("fr: 'Voir et gérer mon offre'", "fr: 'Continuer vers mon rapport'")
+              intel = intel.replace("pt: 'Ver e gerenciar meu plano'", "pt: 'Continuar para meu relatório'")
+              intel = intel.replace("tr: 'Planımı gör ve yönet'", "tr: 'Raporuma devam et'")
+              intel = intel.replace("en: 'Unlock the full report'", "en: 'Open the full report'")
+              intel = intel.replace("es: 'Desbloquear el informe completo'", "es: 'Abrir el informe completo'")
+              intel = intel.replace("fr: 'Débloquer le rapport complet'", "fr: 'Ouvrir le rapport complet'")
+              intel = intel.replace("pt: 'Desbloquear o relatório completo'", "pt: 'Abrir o relatório completo'")
+              intel = intel.replace("tr: 'Tam raporun kilidini aç'", "tr: 'Tam raporu aç'")
+              intel = intel.replace('Icons.settings_outlined', 'Icons.arrow_forward_rounded')
+              intel = intel.replace('then decide whether Plus is worth it', 'and keep exploring the full report')
+              intel = intel.replace('y decide si Plus vale la pena', 'y sigue explorando el informe completo')
+              intel = intel.replace('puis décidez si Plus en vaut la peine', 'et poursuivez le rapport complet')
+              intel = intel.replace('e decida se o Plus vale a pena', 'e continue explorando o relatório completo')
+              intel = intel.replace('sonra Plus’ın değerli olup olmadığına karar ver', 've tam raporu keşfetmeye devam et')
+              if 'Mystic Plus' in intel or 'MYSTIC PLUS' in intel:
+                  raise SystemExit('legacy Mystic Plus copy still remains after fallback')
+              intel_path.write_text(intel)
+
+              contract = Path('test/ad_only_user_copy_contract_test.dart')
+              contract.write_text("""import 'dart:io';
+
+          import 'package:flutter_test/flutter_test.dart';
+
+          void main() {
+            test('advertising-only runtime exposes no legacy paid copy', () {
+              final app = File('lib/src/app.dart').readAsStringSync();
+              final intelligence = File('lib/src/mystic_plus_intelligence_screen.dart').readAsStringSync();
+              final access = File('lib/src/store_ready_premium_screen.dart').readAsStringSync();
+
+              expect(app, contains('bool isPlus = true'));
+              expect(app, contains('Free · advertising-supported'));
+              expect(app, contains('Advertising privacy choices'));
+              expect(app, isNot(contains('Mystic Plus')));
+              expect(app, isNot(contains('View plan and manage subscription')));
+              expect(intelligence, contains('MYSTIC INTELLIGENCE'));
+              expect(intelligence, isNot(contains('Mystic Plus')));
+              expect(intelligence, isNot(contains('View and manage my plan')));
+              expect(access, contains('Everything is unlocked.'));
+              expect(access, isNot(contains('Manage subscription')));
+            });
+          }
+          """)
           PY
           dart format \
             lib/src/app.dart \
