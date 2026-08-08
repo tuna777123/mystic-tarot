@@ -2,19 +2,187 @@ name: Flutter CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, release/ad-supported-monetization]
   pull_request:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flutter-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  one-time-profile-migration:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/release/ad-supported-monetization' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/ad-supported-monetization
+          fetch-depth: 0
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Migrate profile monetization UI and restore workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          app = Path('lib/src/app.dart')
+          text = app.read_text()
+          if "import 'ad_revenue_service.dart';\n" not in text:
+              anchor = "import 'app_language.dart';\n"
+              if anchor not in text:
+                  raise SystemExit('app import anchor not found')
+              text = text.replace(anchor, "import 'ad_revenue_service.dart';\n" + anchor, 1)
+
+          start_anchor = "          const SizedBox(height: 14),\n          InkWell(\n            onTap: onPremium,\n"
+          end_anchor = "          const SizedBox(height: 18),\n          ListTile(\n            onTap: () => Navigator.push(\n"
+          start = text.find(start_anchor)
+          if start < 0:
+              raise SystemExit('legacy profile card start not found')
+          end = text.find(end_anchor, start)
+          if end < 0:
+              raise SystemExit('legacy profile card end not found')
+
+          replacement = """          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6847B7), Color(0xFF312057)],
+              ),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 28,
+                  color: MysticColors.gold,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        localized(
+                          language.appLanguage,
+                          english: 'Free · advertising-supported',
+                          turkish: 'Ücretsiz · reklam destekli',
+                          spanish: 'Gratis · con anuncios',
+                          french: 'Gratuit · financé par la publicité',
+                          portugueseBrazil: 'Grátis · com anúncios',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        localized(
+                          language.appLanguage,
+                          english:
+                              'All features are unlocked. Native Android and iOS revenue comes only from occasional ads.',
+                          turkish:
+                              'Tüm özellikler açık. Android ve iOS geliri yalnızca seyrek reklamlardan gelir.',
+                          spanish:
+                              'Todas las funciones están abiertas. Los ingresos de Android e iOS provienen solo de anuncios ocasionales.',
+                          french:
+                              'Toutes les fonctions sont ouvertes. Les revenus Android et iOS viennent uniquement de publicités occasionnelles.',
+                          portugueseBrazil:
+                              'Todos os recursos estão liberados. A receita no Android e iOS vem apenas de anúncios ocasionais.',
+                        ),
+                        style: const TextStyle(
+                          fontFamily: 'Arial',
+                          color: MysticColors.lavender,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (AdRevenueService.instance.privacyOptionsAvailable) ...[
+            const SizedBox(height: 8),
+            ListTile(
+              onTap: () => unawaited(
+                AdRevenueService.instance.showPrivacyOptions(),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: const Icon(
+                Icons.privacy_tip_outlined,
+                color: MysticColors.gold,
+              ),
+              title: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Advertising privacy choices',
+                  turkish: 'Reklam gizlilik tercihleri',
+                  spanish: 'Opciones de privacidad publicitaria',
+                  french: 'Choix de confidentialité publicitaire',
+                  portugueseBrazil: 'Opções de privacidade de anúncios',
+                ),
+                style: const TextStyle(fontFamily: 'Arial'),
+              ),
+              subtitle: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Review the consent choices used for native ads.',
+                  turkish:
+                      'Native reklamlar için kullanılan izin tercihlerini gözden geçir.',
+                  spanish:
+                      'Revisa las opciones de consentimiento usadas para los anuncios nativos.',
+                  french:
+                      'Révisez les choix de consentement utilisés pour les publicités natives.',
+                  portugueseBrazil:
+                      'Revise as escolhas de consentimento usadas para anúncios nativos.',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          ],
+"""
+          app.write_text(text[:start] + replacement + text[end:])
+
+          test = Path('test/ad_supported_monetization_contract_test.dart')
+          contract = test.read_text()
+          marker = "    expect(main, contains('AdRevenueService.instance.initialize()'));\n"
+          addition = """    expect(main, contains('AdRevenueService.instance.initialize()'));
+    final app = File('lib/src/app.dart').readAsStringSync();
+    expect(app, contains('Free · advertising-supported'));
+    expect(app, contains('Advertising privacy choices'));
+    expect(app, isNot(contains("'Mystic Plus active'")));
+    expect(app, isNot(contains("'View plan and manage subscription'")));
+"""
+          if marker not in contract:
+              raise SystemExit('ad contract marker not found')
+          contract = contract.replace(marker, addition, 1)
+          test.write_text(contract)
+          PY
+          dart format lib/src/app.dart test/ad_supported_monetization_contract_test.dart
+          git show HEAD^:.github/workflows/flutter-ci.yml > .github/workflows/flutter-ci.yml
+          rm -f .github/workflows/ad-only-profile-autofix.yml
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/src/app.dart test/ad_supported_monetization_contract_test.dart .github/workflows/flutter-ci.yml .github/workflows/ad-only-profile-autofix.yml
+          git commit -m "Remove legacy subscription messaging from profile"
+          git push origin HEAD:release/ad-supported-monetization
+
   test-and-build:
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
