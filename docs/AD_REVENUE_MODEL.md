@@ -36,11 +36,13 @@ Real production IDs must never be substituted into ordinary repository QA runs.
 
 ## Retired subscription path
 
-RevenueCat and in-app subscription commerce are not part of the runtime revenue path. Historical compatibility code may remain temporarily where the repository's upstream/plugin audit explicitly depends on it, but it must not initialize checkout, sell a product, restore a purchase, or lock a user-facing feature.
+RevenueCat and `purchases_flutter` are removed from the production dependency graph and runtime source. The repository retains only small pure-Dart historical DTO/interface shapes plus a fail-closed `DisabledSubscriptionClient` for compatibility with older internal call sites. That compatibility layer has no store SDK, network purchase provider, checkout, restore, product sale, or paid entitlement path.
 
 ## Automated runtime-copy gate
 
-`test/ad_only_user_copy_contract_test.dart` fails the build if the main application or Mystic Intelligence surface reintroduces user-facing `Mystic Plus`, subscription-management, or paid-plan messaging. Technical compatibility identifiers may remain where needed, but they cannot leak back into the runtime product copy.
+Verified builds run `tool/materialize_ad_only_ui.dart` before analysis, tests and packaging. It deterministically removes the final historical paid-tier labels from the legacy source structure, hardens the narrow-screen Mystic Intelligence header, and fails closed if a known paid-plan anchor changes unexpectedly.
+
+`test/ad_only_user_copy_contract_test.dart` then fails the build if the materialized main application or Mystic Intelligence surface reintroduces user-facing `Mystic Plus`, subscription-management, paid-plan or premium-spread messaging. Technical historical class/file names may remain where renaming would add needless migration risk, but they cannot leak back into the runtime product copy.
 
 ## Release gate
 
