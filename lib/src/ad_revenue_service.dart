@@ -143,7 +143,8 @@ class AdRevenueService with WidgetsBindingObserver {
     if (!supported) return;
     final status = await ConsentInformation.instance
         .getPrivacyOptionsRequirementStatus();
-    _privacyOptionsRequired = status == PrivacyOptionsRequirementStatus.required;
+    _privacyOptionsRequired =
+        status == PrivacyOptionsRequirementStatus.required;
   }
 
   Future<void> _initializeAdsIfAllowed() async {
