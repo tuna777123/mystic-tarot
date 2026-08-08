@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'configure_app_lock.dart' as app_lock_config;
 import 'configure_ritual_notifications.dart' as ritual_config;
+import 'materialize_ad_only_ui.dart' as ad_only_ui;
 
 const permanentIdentifier = 'com.tunabozcali.mystictarot';
 const androidAdMobTestAppId = 'ca-app-pub-3940256099942544~3347511713';
@@ -14,6 +15,8 @@ const generatedIdentifiers = <String>[
 ];
 
 void main() {
+  ad_only_ui.materializeAdOnlyUi();
+
   final roots = <Directory>[
     Directory('android'),
     Directory('ios'),
