@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('v1.22 final product remains hardened under ad-only revenue', () {
+  test('v1.23 product remains hardened under advertising-only revenue', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final access = File(
       'lib/src/store_ready_premium_screen.dart',
@@ -21,13 +21,11 @@ void main() {
     final production = File(
       '.github/workflows/store-release.yml',
     ).readAsStringSync();
-    final notes = File('RELEASE_NOTES_1.22.md').readAsStringSync();
-    final currentPatchNotes = File(
-      'RELEASE_NOTES_1.22.3.md',
-    ).readAsStringSync();
+    final historicalNotes = File('RELEASE_NOTES_1.22.md').readAsStringSync();
+    final currentNotes = File('RELEASE_NOTES_1.23.0.md').readAsStringSync();
     final storePack = File('STORE_RELEASE.md').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.22.3+32'));
+    expect(pubspec, contains('version: 1.23.0+33'));
     expect(pubspec, contains('google_mobile_ads: ^9.0.0'));
     expect(access, contains('Everything is unlocked.'));
     expect(access, contains('there is no subscription to buy'));
@@ -40,8 +38,11 @@ void main() {
     expect(adService, contains('ConsentInformation.instance.canRequestAds()'));
     expect(adService, contains('AppOpenAd.load'));
     expect(adService, contains('InterstitialAd.load'));
-    expect(adService, contains('_minimumAppOpenInterval'));
-    expect(adService, contains('_completedReadingsSinceAd < 3'));
+    expect(adService, contains('_minimumAppOpenInterval = Duration(hours: 2)'));
+    expect(adService, contains('_minimumBackgroundDuration = Duration(seconds: 30)'));
+    expect(adService, contains('_minimumReadingsBeforeAppOpen = 3'));
+    expect(adService, contains('_interstitialEveryReadings = 3'));
+    expect(adService, contains('SharedPreferences.getInstance()'));
 
     expect(
       identifiers,
@@ -74,9 +75,10 @@ void main() {
     expect(production, contains('Verify Android signature'));
     expect(production, contains('Verify iOS signature and identity'));
 
-    expect(notes, startsWith('# Mystic Tarot 1.22.0'));
-    expect(currentPatchNotes, startsWith('# Mystic Tarot 1.22.3'));
-    expect(storePack, contains('Current source version: `1.22.3+32`'));
+    expect(historicalNotes, startsWith('# Mystic Tarot 1.22.0'));
+    expect(currentNotes, startsWith('# Mystic Tarot 1.23.0'));
+    expect(currentNotes, contains('advertising-supported'));
+    expect(storePack, contains('Current source version: `1.23.0+33`'));
     expect(storePack, contains('free and advertising-supported'));
     expect(storePack, contains('MYSTIC_USE_TEST_ADS=false'));
 
