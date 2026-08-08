@@ -174,7 +174,8 @@ class AdRevenueService with WidgetsBindingObserver {
     final backgroundedAt = _backgroundedAt;
     _backgroundedAt = null;
     if (backgroundedAt == null) return;
-    if (DateTime.now().difference(backgroundedAt) < _minimumBackgroundDuration) {
+    if (DateTime.now().difference(backgroundedAt) <
+        _minimumBackgroundDuration) {
       return;
     }
     _showAppOpenIfReady();

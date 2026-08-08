@@ -27,10 +27,7 @@ void main() {
       service,
       contains('_minimumBackgroundDuration = Duration(seconds: 30)'),
     );
-    expect(
-      service,
-      contains('_minimumAppOpenInterval = Duration(hours: 2)'),
-    );
+    expect(service, contains('_minimumAppOpenInterval = Duration(hours: 2)'));
     expect(service, contains('SharedPreferences.getInstance()'));
     expect(service, contains('MYSTIC_USE_TEST_ADS'));
     expect(service, contains('ADMOB_ANDROID_APP_OPEN_ID'));

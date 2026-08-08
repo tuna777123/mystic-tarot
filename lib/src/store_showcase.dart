@@ -286,11 +286,11 @@ class _Scene extends StatelessWidget {
     ),
     StoreScreenshotScene.mysticPlus => _l(
       language,
-      en: 'Deep readings and private intelligence, with official store pricing.',
-      tr: 'Derin okumalar ve özel içgörüler; resmi mağaza fiyatlarıyla.',
-      es: 'Lecturas profundas e inteligencia privada con precio oficial.',
-      fr: 'Lectures profondes et intelligence privée, au tarif officiel.',
-      pt: 'Leituras profundas e inteligência privada com preço oficial.',
+      en: 'All features stay free; native ads support the mobile app.',
+      tr: 'Tüm özellikler ücretsiz; mobil uygulamayı reklamlar destekler.',
+      es: 'Todo sigue gratis; los anuncios sostienen la app móvil.',
+      fr: 'Tout reste gratuit ; les pubs soutiennent l’app mobile.',
+      pt: 'Tudo segue grátis; anúncios sustentam o app móvel.',
     ),
   };
 
