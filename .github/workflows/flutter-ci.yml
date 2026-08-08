@@ -105,6 +105,14 @@ jobs:
             exit "$test_status"
           fi
 
+      - name: Upload Flutter test log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-flutter-test-log
+          path: build/reports/flutter-test.log
+          if-no-files-found: error
+
       - name: Build web release
         run: flutter build web --release
 
