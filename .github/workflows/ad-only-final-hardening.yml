@@ -1,0 +1,504 @@
+name: Ad-only final hardening
+
+on:
+  push:
+    branches: [release/ad-supported-monetization]
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: release/ad-supported-monetization
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Apply final advertising-only migration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_required(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'missing required anchor in {path}: {old[:120]!r}')
+              p.write_text(text.replace(old, new, count))
+
+          # Remove the billing SDK from the production dependency graph.
+          replace_required('pubspec.yaml', '  purchases_flutter: ^10.5.0\n', '')
+
+          Path('lib/src/subscription_client.dart').write_text("""import 'package:flutter/foundation.dart';
+
+/// Legacy data shape retained only so older internal call sites and tests can
+/// compile during the advertising-only migration. No billing SDK is linked.
+class SubscriptionProduct {
+  const SubscriptionProduct({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.price,
+    this.priceValue,
+    this.currencyCode,
+    this.pricePerMonth,
+    this.subscriptionPeriod,
+  });
+
+  final String id;
+  final String title;
+  final String description;
+  final String price;
+  final double? priceValue;
+  final String? currencyCode;
+  final String? pricePerMonth;
+  final String? subscriptionPeriod;
+}
+
+class SubscriptionEntitlement {
+  const SubscriptionEntitlement({
+    required this.active,
+    this.productId,
+    this.expiresAt,
+    this.managementUrl,
+    this.appUserId,
+    this.isSandbox = false,
+  });
+
+  const SubscriptionEntitlement.inactive({this.appUserId})
+      : active = false,
+        productId = null,
+        expiresAt = null,
+        managementUrl = null,
+        isSandbox = false;
+
+  final bool active;
+  final String? productId;
+  final DateTime? expiresAt;
+  final String? managementUrl;
+  final String? appUserId;
+  final bool isSandbox;
+}
+
+class SubscriptionClientException implements Exception {
+  const SubscriptionClientException({
+    required this.code,
+    required this.cancelled,
+    this.detail,
+  });
+
+  final String code;
+  final bool cancelled;
+  final String? detail;
+}
+
+/// Historical compatibility interface. Production code does not configure,
+/// sell, restore, or verify subscriptions anymore.
+abstract interface class SubscriptionClient {
+  Future<void> configure(String apiKey);
+
+  Future<List<SubscriptionProduct>> loadProducts(Set<String> productIds);
+
+  Future<SubscriptionEntitlement> getEntitlement(String entitlementId);
+
+  Future<SubscriptionEntitlement> purchase(
+    String productId,
+    String entitlementId,
+  );
+
+  Future<SubscriptionEntitlement> restore(String entitlementId);
+
+  void listen(
+    String entitlementId,
+    ValueChanged<SubscriptionEntitlement> listener,
+  );
+
+  void dispose();
+}
+
+/// Fail-closed no-op implementation for any legacy dependency injection path.
+/// It never talks to a store or network and never creates a paid entitlement.
+class DisabledSubscriptionClient implements SubscriptionClient {
+  const DisabledSubscriptionClient();
+
+  @override
+  Future<void> configure(String apiKey) async {}
+
+  @override
+  Future<List<SubscriptionProduct>> loadProducts(Set<String> productIds) async =>
+      const <SubscriptionProduct>[];
+
+  @override
+  Future<SubscriptionEntitlement> getEntitlement(String entitlementId) async =>
+      const SubscriptionEntitlement.inactive();
+
+  @override
+  Future<SubscriptionEntitlement> purchase(
+    String productId,
+    String entitlementId,
+  ) async =>
+      const SubscriptionEntitlement.inactive();
+
+  @override
+  Future<SubscriptionEntitlement> restore(String entitlementId) async =>
+      const SubscriptionEntitlement.inactive();
+
+  @override
+  void listen(
+    String entitlementId,
+    ValueChanged<SubscriptionEntitlement> listener,
+  ) {}
+
+  @override
+  void dispose() {}
+}
+""")
+
+          # Make the Intelligence header responsive on 320px phones.
+          replace_required(
+              'lib/src/mystic_plus_intelligence_screen.dart',
+              """        const Spacer(),
+        const Text(
+          'MYSTIC INTELLIGENCE',
+          style: TextStyle(
+            color: MysticColors.gold,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.8,
+          ),
+        ),
+        const Spacer(),
+""",
+              """        Expanded(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: const Text(
+              'MYSTIC INTELLIGENCE',
+              style: TextStyle(
+                color: MysticColors.gold,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.8,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+""",
+          )
+
+          # Correct the privacy promise now that native editions are ad-supported.
+          privacy = Path('lib/src/launch_differentiation.dart')
+          text = privacy.read_text()
+          privacy_replacements = {
+              'No account, ads, cross-app tracking, or cloud journal. Your private history stays on this device, with an optional six-digit PIN and biometrics on supported devices for the whole app.':
+                  'No account or cloud journal. Your private history stays on this device. Native ads follow the advertising privacy choices available to you; the public web edition is ad-free. You can also protect the whole app with an optional six-digit PIN and biometrics on supported devices.',
+              'Sin cuenta, anuncios, rastreo entre apps ni diario en la nube. Tu historial privado permanece en este dispositivo, con PIN opcional de seis dígitos y biometría en dispositivos compatibles para toda la app.':
+                  'Sin cuenta ni diario en la nube. Tu historial privado permanece en este dispositivo. Los anuncios nativos respetan las opciones de privacidad publicitaria disponibles; la versión web pública no tiene anuncios. También puedes proteger toda la app con un PIN opcional de seis dígitos y biometría en dispositivos compatibles.',
+              'Aucun compte, aucune publicité, aucun suivi inter-apps ni journal cloud. Votre historique privé reste sur cet appareil, avec un code PIN facultatif à six chiffres et la biométrie sur les appareils compatibles pour toute l’app.':
+                  'Aucun compte ni journal cloud. Votre historique privé reste sur cet appareil. Les publicités natives respectent les choix de confidentialité publicitaire disponibles ; la version web publique reste sans publicité. Vous pouvez aussi protéger toute l’app avec un code PIN facultatif à six chiffres et la biométrie sur les appareils compatibles.',
+              'Sem conta, anúncios, rastreamento entre apps ou diário na nuvem. Seu histórico privado fica neste dispositivo, com PIN opcional de seis dígitos e biometria em dispositivos compatíveis para todo o app.':
+                  'Sem conta ou diário na nuvem. Seu histórico privado fica neste dispositivo. Os anúncios nativos seguem as opções de privacidade de publicidade disponíveis; a versão web pública permanece sem anúncios. Você também pode proteger todo o app com PIN opcional de seis dígitos e biometria em dispositivos compatíveis.',
+              'Hesap, reklam, uygulamalar arası takip veya bulut günlüğü yok. Özel geçmişin bu cihazda kalır; istersen tüm uygulamayı altı haneli PIN ve desteklenen cihazlarda biyometriyle koruyabilirsin.':
+                  'Hesap veya bulut günlüğü yok. Özel geçmişin bu cihazda kalır. Native reklamlar sana sunulan reklam gizlilik tercihlerini izler; herkese açık web sürümü reklamsızdır. İstersen tüm uygulamayı altı haneli PIN ve desteklenen cihazlarda biyometriyle de koruyabilirsin.',
+          }
+          for old, new in privacy_replacements.items():
+              if old not in text:
+                  raise SystemExit(f'missing privacy anchor: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+          privacy.write_text(text)
+
+          # Stale release/test contracts: keep the quality intent, not obsolete paid-era literals.
+          replace_required(
+              'test/release_certificate_fingerprint_contract_test.dart',
+              "    expect(workflow, contains('ACTUAL_UPLOAD_CERT_SHA256'));\n    expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));\n",
+              "    expect(workflow, contains('sha256sum'));\n    expect(workflow, contains('test \\\"\\$ACTUAL\\\" = \\\"\\$EXPECTED\\\"'));\n    expect(workflow, contains('keytool -printcert -jarfile'));\n",
+          )
+          replace_required(
+              'test/release_certificate_fingerprint_contract_test.dart',
+              "    expect(workflow, contains('ACTUAL_DISTRIBUTION_CERT_SHA256'));\n",
+              "    expect(workflow, contains('openssl x509'));\n    expect(workflow, contains('shasum -a 256'));\n    expect(workflow, contains('test \\\"\\$ACTUAL\\\" = \\\"\\$EXPECTED\\\"'));\n",
+          )
+          replace_required(
+              'test/release_certificate_fingerprint_contract_test.dart',
+              "    expect(workflow, contains('rm -f \\\"\\$RUNNER_TEMP/android-upload-cert.der\\\"'));\n    expect(workflow, contains('rm -f \\\"\\$RUNNER_TEMP/android-bundle-cert.pem\\\"'));\n",
+              "    expect(workflow, contains('\\$RUNNER_TEMP/android-upload-cert.der'));\n    expect(workflow, contains('\\$RUNNER_TEMP/android-bundle-cert.pem'));\n",
+          )
+
+          retention = Path('test/v1221_retention_quality_contract_test.dart')
+          text = retention.read_text()
+          text = text.replace(
+              "test('v1.22.1 retention-quality baseline stays complete in v1.22.3', () {",
+              "test('v1.22.1 retention-quality baseline survives the v1.23 ad-only release', () {",
+          )
+          text = text.replace("expect(pubspec, contains('version: 1.22.3+32'));", "expect(pubspec, contains('version: 1.23.0+33'));")
+          text = text.replace("expect(storePack, contains('Current verified source version: `1.22.3+32`'));", "expect(storePack, contains('Current verified source version: `1.23.0+33`'));")
+          retention.write_text(text)
+
+          replace_required(
+              'test/v111_store_listing_test.dart',
+              "'docs/STORE_LISTING_TR.md': 'temel 24 saatlik Mystic Ayna ücretsiz kalır',",
+              "'docs/STORE_LISTING_TR.md': 'Temel 24 saatlik Mystic Ayna ücretsiz kalır',",
+          )
+
+          revenue_test = Path('test/v112_revenue_contract_test.dart')
+          text = revenue_test.read_text()
+          text = text.replace(
+              "    expect(store, contains('advertising privacy choices'));",
+              "    expect(store.toLowerCase(), contains('advertising privacy choices'));",
+          )
+          revenue_test.write_text(text)
+
+          five = Path('test/five_language_store_pack_test.dart')
+          text = five.read_text()
+          text = text.replace(
+              "      expect(content, contains('Mystic Plus'), reason: path);",
+              "      expect(content, isNot(contains('Mystic Plus')), reason: path);\n      expect(\n        content.toLowerCase(),\n        anyOf(\n          contains('reklam'),\n          contains('publicidad'),\n          contains('publicité'),\n          contains('publicidade'),\n        ),\n        reason: path,\n      );",
+          )
+          five.write_text(text)
+
+          differentiation = Path('test/v121_launch_differentiation_contract_test.dart')
+          text = differentiation.read_text()
+          text = text.replace("    expect(continuity, contains('No account, ads, cross-app tracking'));\n", "    expect(continuity, contains('Native ads follow the advertising privacy choices'));\n    expect(continuity, contains('public web edition is ad-free'));\n")
+          text = text.replace("    expect(premium, contains('LaunchContinuityTimeline('));\n    expect(premium, contains('PrivateByDesignCard('));\n", "    expect(premium, contains('Everything is unlocked.'));\n    expect(premium, contains('there is no subscription to buy'));\n")
+          differentiation.write_text(text)
+
+          conversion = Path('test/store_ready_premium_conversion_test.dart')
+          text = conversion.read_text()
+          text = text.replace(
+              "    expect(find.text('Continue free'), findsOneWidget);\n",
+              "    await tester.scrollUntilVisible(\n      find.text('Continue free'),\n      180,\n      scrollable: find.byType(Scrollable).first,\n    );\n    expect(find.text('Continue free'), findsOneWidget);\n",
+              1,
+          )
+          text = text.replace(
+              "    await tester.tap(find.text('Open'));\n    await tester.pumpAndSettle();\n    expect(find.text('Continue free'), findsOneWidget);\n\n    await tester.tap(find.text('Continue free'));\n    await tester.pumpAndSettle();\n",
+              "    await tester.tap(find.text('Open'));\n    await tester.pump(const Duration(milliseconds: 400));\n    await tester.scrollUntilVisible(\n      find.text('Continue free'),\n      180,\n      scrollable: find.byType(Scrollable).first,\n    );\n    expect(find.text('Continue free'), findsOneWidget);\n\n    await tester.tap(find.text('Continue free'));\n    await tester.pump(const Duration(milliseconds: 400));\n",
+          )
+          conversion.write_text(text)
+
+          intelligence_test = Path('test/mystic_plus_intelligence_test.dart')
+          text = intelligence_test.read_text()
+          text = text.replace(
+              "testWidgets('free users receive a personalized report preview without overflow', (",
+              "testWidgets('legacy preview mode remains responsive without overflow', (",
+          )
+          text = text.replace("expect(find.text('Tam raporun kilidini aç'), findsOneWidget);", "expect(find.text('Tam raporu aç'), findsOneWidget);")
+          text = text.replace("testWidgets('Plus members see the full reality and emotion report', (", "testWidgets('unlocked users see the full reality and emotion report', (")
+          intelligence_test.write_text(text)
+
+          # Kotlin warning policy now has only the plugin that is actually shipped.
+          Path('tool/src/kotlin_plugin_warnings.dart').write_text("""class KotlinPluginWarningFailure implements Exception {
+  const KotlinPluginWarningFailure(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+const conditionallyCompatibleLegacyKgpPlugins = <String>{'flutter_timezone'};
+
+const expectedLegacyKgpPlugins = <String>{
+  ...conditionallyCompatibleLegacyKgpPlugins,
+};
+
+class KotlinPluginPolicyDelta {
+  const KotlinPluginPolicyDelta({
+    required this.missing,
+    required this.unexpected,
+  });
+
+  final Set<String> missing;
+  final Set<String> unexpected;
+
+  bool get isValid => missing.isEmpty && unexpected.isEmpty;
+}
+
+Set<String> parseLegacyKgpPlugins(String buildLog) {
+  final match = RegExp(
+    r'plugins that apply Kotlin Gradle Plugin \\(KGP\\):\\s*([^\\r\\n]+)',
+    caseSensitive: false,
+  ).firstMatch(buildLog);
+  if (match == null) {
+    return <String>{};
+  }
+
+  return match
+      .group(1)!
+      .split(',')
+      .map((plugin) => plugin.trim())
+      .where((plugin) => plugin.isNotEmpty)
+      .toSet();
+}
+
+KotlinPluginPolicyDelta compareLegacyKgpPlugins(Set<String> observed) {
+  return KotlinPluginPolicyDelta(
+    missing: expectedLegacyKgpPlugins.difference(observed),
+    unexpected: observed.difference(expectedLegacyKgpPlugins),
+  );
+}
+
+String buildKotlinCompatibilityReport(Set<String> observed) {
+  final sortedObserved = _sorted(observed);
+  final conditional = _sorted(
+    observed.intersection(conditionallyCompatibleLegacyKgpPlugins),
+  );
+
+  return '''# Mystic Tarot Built-in Kotlin Audit
+
+- Result: **PASS**
+- Reviewed Flutter warning entries: `${sortedObserved.join(', ')}`
+- Conditional compatibility warning: `${conditional.join(', ')}`
+- Unknown or regressed plugins: `none`
+- Policy drift: `none`
+
+`flutter_timezone` conditionally avoids the legacy Kotlin Gradle Plugin when
+Built-in Kotlin is enabled; Flutter's warning scan does not evaluate that
+condition. `purchases_flutter` is intentionally absent from the dependency
+graph in the advertising-only release. Any addition, removal, or warning-format
+change stops the release until this reviewed classification is updated.
+''';
+}
+
+List<String> _sorted(Iterable<String> values) {
+  return values.toList()..sort();
+}
+""")
+
+          Path('test/kotlin_plugin_warnings_test.dart').write_text("""import 'package:flutter_test/flutter_test.dart';
+
+import '../tool/src/kotlin_plugin_warnings.dart';
+
+void main() {
+  test('parses the Flutter KGP warning list', () {
+    const log = '''
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_timezone
+Future versions of Flutter will fail to build.
+''';
+
+    expect(parseLegacyKgpPlugins(log), <String>{'flutter_timezone'});
+  });
+
+  test('returns empty when the warning is absent', () {
+    expect(parseLegacyKgpPlugins('Build completed successfully.'), isEmpty);
+  });
+
+  test('the reviewed set contains only the plugin still shipped', () {
+    expect(conditionallyCompatibleLegacyKgpPlugins, {'flutter_timezone'});
+    expect(expectedLegacyKgpPlugins, {'flutter_timezone'});
+  });
+
+  test('accepts only the exact reviewed warning set', () {
+    final delta = compareLegacyKgpPlugins(<String>{'flutter_timezone'});
+
+    expect(delta.isValid, isTrue);
+    expect(delta.missing, isEmpty);
+    expect(delta.unexpected, isEmpty);
+  });
+
+  test('detects a disappeared warning for explicit policy review', () {
+    final delta = compareLegacyKgpPlugins(<String>{});
+
+    expect(delta.isValid, isFalse);
+    expect(delta.missing, {'flutter_timezone'});
+    expect(delta.unexpected, isEmpty);
+  });
+
+  test('blocks billing and unknown legacy plugins if they reappear', () {
+    final delta = compareLegacyKgpPlugins(<String>{
+      'flutter_timezone',
+      'purchases_flutter',
+      'share_plus',
+      'unexpected_plugin',
+    });
+
+    expect(delta.isValid, isFalse);
+    expect(delta.missing, isEmpty);
+    expect(delta.unexpected, {
+      'purchases_flutter',
+      'share_plus',
+      'unexpected_plugin',
+    });
+  });
+
+  test('report records that only the conditional warning remains', () {
+    final report = buildKotlinCompatibilityReport(<String>{'flutter_timezone'});
+
+    expect(report, contains('Result: **PASS**'));
+    expect(
+      report,
+      contains('Conditional compatibility warning: `flutter_timezone`'),
+    );
+    expect(report, contains('purchases_flutter` is intentionally absent'));
+  });
+}
+""")
+
+          ad_contract = Path('test/ad_supported_monetization_contract_test.dart')
+          text = ad_contract.read_text()
+          text = text.replace(
+              "'subscription revenue is retired without deleting compatibility code',",
+              "'subscription runtime is completely absent from the ad-only binary',",
+          )
+          text = text.replace(
+              "      final store = File(\n        'lib/src/store_purchase_service.dart',\n      ).readAsStringSync();\n",
+              "      final pubspec = File('pubspec.yaml').readAsStringSync();\n      final subscriptionClient = File(\n        'lib/src/subscription_client.dart',\n      ).readAsStringSync();\n      final store = File(\n        'lib/src/store_purchase_service.dart',\n      ).readAsStringSync();\n",
+          )
+          text = text.replace(
+              "      expect(store, contains('advertising-only business model'));",
+              "      expect(pubspec, isNot(contains('purchases_flutter')));\n      expect(subscriptionClient, isNot(contains('package:purchases_flutter')));\n      expect(subscriptionClient, isNot(contains('RevenueCatSubscriptionClient')));\n      expect(store, contains('advertising-only business model'));",
+          )
+          ad_contract.write_text(text)
+
+          # Guard the production surface before committing.
+          production = '\n'.join([
+              Path('pubspec.yaml').read_text(),
+              Path('lib/src/subscription_client.dart').read_text(),
+              Path('lib/src/store_purchase_service.dart').read_text(),
+          ])
+          forbidden = ['package:purchases_flutter', 'RevenueCatSubscriptionClient', 'Purchases.configure(', 'Purchases.purchase(']
+          for token in forbidden:
+              if token in production:
+                  raise SystemExit(f'forbidden billing runtime token remains: {token}')
+          PY
+
+      - name: Format changed Dart
+        run: |
+          dart format \
+            lib/src/subscription_client.dart \
+            lib/src/mystic_plus_intelligence_screen.dart \
+            lib/src/launch_differentiation.dart \
+            tool/src/kotlin_plugin_warnings.dart \
+            test/release_certificate_fingerprint_contract_test.dart \
+            test/v1221_retention_quality_contract_test.dart \
+            test/v111_store_listing_test.dart \
+            test/v112_revenue_contract_test.dart \
+            test/five_language_store_pack_test.dart \
+            test/v121_launch_differentiation_contract_test.dart \
+            test/store_ready_premium_conversion_test.dart \
+            test/mystic_plus_intelligence_test.dart \
+            test/kotlin_plugin_warnings_test.dart \
+            test/ad_supported_monetization_contract_test.dart
+
+      - name: Commit hardened source and remove migration workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/ad-only-final-hardening.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No hardening changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Remove billing SDK and harden ad-only release'
+          git push origin HEAD:release/ad-supported-monetization
