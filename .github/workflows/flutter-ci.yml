@@ -70,7 +70,11 @@ jobs:
           fi
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$range" -- '*.dart')
           if (( ${#files[@]} > 0 )); then
-            dart format --output=none --set-exit-if-changed "${files[@]}"
+            if ! dart format --output=none --set-exit-if-changed "${files[@]}"; then
+              echo 'Dart formatting changed the following source. Apply this exact diff:' >&2
+              git --no-pager diff -- "${files[@]}" >&2
+              exit 1
+            fi
           fi
 
       - name: Verify clean diff
