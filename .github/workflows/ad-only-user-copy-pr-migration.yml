@@ -26,7 +26,6 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import textwrap
 
           source = Path('.github/workflows/ad-only-user-copy-migration.yml').read_text()
           start_token = "          python3 - <<'PY'\n"
@@ -36,7 +35,11 @@ jobs:
           if start < 0 or end < 0:
               raise SystemExit('embedded migration body not found')
           body = source[start + len(start_token):end]
-          exec(compile(textwrap.dedent(body), 'ad-only-user-copy-migration', 'exec'))
+          body = '\n'.join(
+              line[10:] if line.startswith('          ') else line
+              for line in body.splitlines()
+          )
+          exec(compile(body, 'ad-only-user-copy-migration', 'exec'))
           PY
           dart format \
             lib/src/app.dart \
