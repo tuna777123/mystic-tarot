@@ -86,6 +86,8 @@ void main() {
       scrollable: scrollable,
     );
     expect(find.text('Continue free'), findsOneWidget);
+    await tester.ensureVisible(find.text('Continue free'));
+    await tester.pump();
 
     await tester.tap(find.text('Continue free'));
     await tester.pump();
