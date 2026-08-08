@@ -164,7 +164,9 @@ String _replaceRequired(
     return source.replaceAll(oldValue, newValue);
   }
   if (source.contains(newValue)) return source;
-  throw StateError('Unable to materialize $label: expected source anchor missing.');
+  throw StateError(
+    'Unable to materialize $label: expected source anchor missing.',
+  );
 }
 
 void _rejectLegacyUserCopy(String source, String path) {
