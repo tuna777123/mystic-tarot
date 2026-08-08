@@ -27,7 +27,7 @@ forbid_contains() {
 
 version="$(awk '/^version:[[:space:]]*/ {print $2; exit}' pubspec.yaml)"
 [[ -n "$version" ]] || fail "could not read version from pubspec.yaml"
-[[ "$version" == "1.22.3+32" ]] || fail "unexpected product version: $version"
+[[ "$version" == "1.23.0+33" ]] || fail "unexpected product version: $version"
 
 required=(
   web/index.html
@@ -60,6 +60,7 @@ required=(
   web/support-pt-br.html
   docs/MARKETING_LAUNCH_KIT.md
   docs/FINAL_DELIVERY.md
+  docs/OWNER_GUIDE_A_TO_Z.md
   STORE_RELEASE.md
 )
 
@@ -91,9 +92,13 @@ press='web/press-kit.html'
 require_contains "$press" '<meta name="robots" content="index,follow'
 require_contains "$press" '<link rel="canonical" href="https://tuna777123.github.io/mystic-tarot/press-kit.html">'
 require_contains "$press" 'Mystic Tarot — Official Press Kit'
+require_contains "$press" '"softwareVersion":"1.23.0"'
+require_contains "$press" 'Official press & sharing kit · v1.23.0'
 require_contains "$press" 'Public web edition available now'
 require_contains "$press" 'Native iOS and Android store candidates'
-require_contains "$press" 'No advertising SDK'
+require_contains "$press" 'Native apps are advertising-supported'
+require_contains "$press" 'public web edition remains ad-free'
+require_contains "$press" 'No paid subscription'
 require_contains "$press" 'No account is required for the public web experience'
 require_contains "$press" 'navigator.share'
 require_contains "$press" 'navigator.clipboard'
@@ -108,6 +113,9 @@ for forbidden in \
   '#1 tarot app' \
   'guaranteed prediction' \
   'guaranteed future' \
+  'RevenueCat' \
+  'monthly subscription' \
+  'yearly subscription' \
   'googletagmanager.com' \
   'connect.facebook.net' \
   'analytics.tiktok.com'; do
@@ -127,35 +135,61 @@ for landing in \
   require_contains "web/$landing" 'twitter:card'
 done
 
+for privacy in \
+  privacy.html \
+  privacy-tr.html \
+  privacy-es.html \
+  privacy-fr.html \
+  privacy-pt-br.html; do
+  require_contains "web/$privacy" 'Google Mobile Ads'
+  require_contains "web/$privacy" 'User Messaging Platform'
+done
+
 kit='docs/MARKETING_LAUNCH_KIT.md'
-require_contains "$kit" 'Version: `1.22.3+32`'
+require_contains "$kit" 'Version: `1.23.0+33`'
 require_contains "$kit" '### English'
 require_contains "$kit" '### Turkish'
 require_contains "$kit" '### Spanish'
 require_contains "$kit" '### French'
 require_contains "$kit" '### Brazilian Portuguese'
-require_contains "$kit" 'utm_campaign=launch_1_22_3'
+require_contains "$kit" 'utm_campaign=launch_1_23_0'
 require_contains "$kit" 'Creative guardrails'
 require_contains "$kit" 'fabricated testimonials'
 require_contains "$kit" 'fake user counts'
 require_contains "$kit" 'App Store / Google Play badges before'
 require_contains "$kit" 'Do not add third-party tracking scripts'
-require_contains "$kit" 'hardcoded subscription prices'
+require_contains "$kit" 'advertising-supported'
+require_contains "$kit" 'no paid subscription'
 
 handoff='docs/FINAL_DELIVERY.md'
-require_contains "$handoff" 'Product version: `1.22.3+32`'
+require_contains "$handoff" 'Product version: `1.23.0+33`'
 require_contains "$handoff" 'com.tunabozcali.mystictarot'
 require_contains "$handoff" 'Public press kit:'
-require_contains "$handoff" 'Safe advertising claims'
+require_contains "$handoff" 'advertising-only'
+require_contains "$handoff" 'OWNER_GUIDE_A_TO_Z.md'
 require_contains "$handoff" 'What is intentionally not represented as complete'
 require_contains "$handoff" 'App Store or Google Play availability claims before'
 
-require_contains STORE_RELEASE.md 'mystic_plus'
-require_contains STORE_RELEASE.md 'mystic_plus_monthly'
-require_contains STORE_RELEASE.md 'mystic_plus_yearly'
-require_contains STORE_RELEASE.md 'Do not hardcode price text'
+owner='docs/OWNER_GUIDE_A_TO_Z.md'
+require_contains "$owner" 'Product version: `1.23.0+33`'
+require_contains "$owner" 'Advertising-only business model'
+require_contains "$owner" 'ADMOB_ANDROID_APP_ID'
+require_contains "$owner" 'ADMOB_IOS_APP_ID'
+require_contains "$owner" 'MYSTIC_USE_TEST_ADS=false'
+require_contains "$owner" 'Mystic Mirror'
+require_contains "$owner" 'EN, TR, ES, FR, PT-BR'
 
-for path in "$kit" "$handoff"; do
+require_contains STORE_RELEASE.md 'Current source version: `1.23.0+33`'
+require_contains STORE_RELEASE.md 'ADMOB_ANDROID_APP_ID'
+require_contains STORE_RELEASE.md 'ADMOB_IOS_APP_ID'
+require_contains STORE_RELEASE.md 'ADMOB_ANDROID_APP_OPEN_ID'
+require_contains STORE_RELEASE.md 'ADMOB_IOS_APP_OPEN_ID'
+require_contains STORE_RELEASE.md 'ADMOB_ANDROID_INTERSTITIAL_ID'
+require_contains STORE_RELEASE.md 'ADMOB_IOS_INTERSTITIAL_ID'
+require_contains STORE_RELEASE.md 'MYSTIC_USE_TEST_ADS=false'
+require_contains STORE_RELEASE.md 'no paid subscription'
+
+for path in "$kit" "$handoff" "$owner"; do
   forbid_contains "$path" 'googletagmanager.com'
   forbid_contains "$path" 'connect.facebook.net'
   forbid_contains "$path" 'analytics.tiktok.com'

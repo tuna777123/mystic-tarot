@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'ad_revenue_service.dart';
 import 'app_language.dart';
 import 'app_locale.dart';
 import 'daily_practice.dart';
@@ -86,7 +87,7 @@ class _MysticAppState extends State<MysticApp> with WidgetsBindingObserver {
   String _activeDayKey = mysticDayKey(DateTime.now());
   int mirrorDueCount = 0;
   String? journalRecoveryMessage;
-  bool isPlus = false;
+  bool isPlus = true;
   bool ready = false;
   bool onboarded = false;
   int tab = 0;
@@ -2108,8 +2109,8 @@ class HomeScreen extends StatelessWidget {
                         child: Text(
                           mysticText(
                             language,
-                            'Mystic Plus readings',
-                            'Mystic Plus okumaları',
+                            'Deep readings',
+                            'Derin okumalar',
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -2661,14 +2662,14 @@ class _ReadingAllowance extends StatelessWidget {
                     plus
                         ? mysticText(
                             language,
-                            'Your verified Mystic Plus entitlement is active.',
-                            'Doğrulanmış Mystic Plus hakkın etkin.',
+                            'All features are unlocked.',
+                            'Tüm özellikler açık.',
                           )
                         : empty
                         ? mysticText(
                             language,
-                            'Unlock unlimited readings with Mystic Plus.',
-                            'Mystic Plus ile sınırsız okumaları aç.',
+                            'All readings are available without payment.',
+                            'Tüm okumalar ödeme olmadan kullanılabilir.',
                           )
                         : mysticText(
                             language,
@@ -4059,8 +4060,8 @@ class _ReadingFlowState extends State<ReadingFlow> {
                       : oracleQuestionUsed
                       ? mysticText(
                           widget.language,
-                          'Your free answer is complete. Continue the dialogue with Mystic Plus.',
-                          'Ücretsiz cevabın tamamlandı. Diyaloğa Mystic Plus ile devam et.',
+                          'Your answer is complete. Keep the private dialogue going.',
+                          'Cevabın tamamlandı. Özel diyaloğa devam et.',
                         )
                       : mysticText(
                           widget.language,
@@ -4844,8 +4845,8 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
                       Text(
                         mysticText(
                           widget.language,
-                          'Ask unlimited follow-ups, revisit saved conversations, and unlock every deep spread with Mystic Plus.',
-                          'Sınırsız devam sorusu sor, kayıtlı sohbetlere dön ve Mystic Plus ile tüm derin açılımları aç.',
+                          'Ask unlimited follow-ups, revisit saved conversations, and explore every deep spread.',
+                          'Sınırsız devam sorusu sor, kayıtlı sohbetlere dön ve tüm derin açılımları keşfet.',
                         ),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
@@ -4998,22 +4999,22 @@ class _OracleDialogueScreenState extends State<OracleDialogueScreen> {
         const SizedBox(height: 7),
         Text(
           _oracleCopy(
-            en: 'You can revisit it here at any time. Mystic Plus continues the same private conversation.',
-            tr: 'Buraya istediğin zaman dönebilirsin. Mystic Plus aynı özel konuşmayı sürdürür.',
-            es: 'Puedes volver aquí cuando quieras. Mystic Plus continúa la misma conversación privada.',
-            fr: 'Vous pouvez la relire ici à tout moment. Mystic Plus poursuit la même conversation privée.',
-            pt: 'Você pode voltar aqui quando quiser. O Mystic Plus continua a mesma conversa privada.',
+            en: 'You can revisit it here at any time and continue the same private conversation.',
+            tr: 'Buraya istediğin zaman dönebilir ve aynı özel konuşmayı sürdürebilirsin.',
+            es: 'Puedes volver aquí cuando quieras y continuar la misma conversación privada.',
+            fr: 'Vous pouvez la relire ici à tout moment et poursuivre la même conversation privée.',
+            pt: 'Você pode voltar aqui quando quiser e continuar a mesma conversa privada.',
           ),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 14),
         GoldButton(
           label: _oracleCopy(
-            en: 'Continue with Mystic Plus',
-            tr: 'Mystic Plus ile devam et',
-            es: 'Continuar con Mystic Plus',
-            fr: 'Continuer avec Mystic Plus',
-            pt: 'Continuar com Mystic Plus',
+            en: 'Continue conversation',
+            tr: 'Sohbete devam et',
+            es: 'Continuar conversación',
+            fr: 'Continuer la conversation',
+            pt: 'Continuar conversa',
           ),
           icon: Icons.lock_open_rounded,
           onPressed: widget.onPremium,
@@ -7361,74 +7362,104 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          InkWell(
-            onTap: onPremium,
-            borderRadius: BorderRadius.circular(22),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF6847B7), Color(0xFF312057)],
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6847B7), Color(0xFF312057)],
+              ),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 28,
+                  color: MysticColors.gold,
                 ),
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    isPlus ? '✓' : '✦',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      color: MysticColors.gold,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isPlus
-                              ? mysticText(
-                                  language,
-                                  'Mystic Plus active',
-                                  'Mystic Plus etkin',
-                                )
-                              : mysticText(
-                                  language,
-                                  'Unlock Mystic Plus',
-                                  'Mystic Plus’ı aç',
-                                ),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        localized(
+                          language.appLanguage,
+                          english: 'Free · advertising-supported',
+                          turkish: 'Ücretsiz · reklam destekli',
+                          spanish: 'Gratis · con anuncios',
+                          french: 'Gratuit · financé par la publicité',
+                          portugueseBrazil: 'Grátis · com anúncios',
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          isPlus
-                              ? mysticText(
-                                  language,
-                                  'View plan and manage subscription',
-                                  'Planını gör ve aboneliğini yönet',
-                                )
-                              : mysticText(
-                                  language,
-                                  'Go deeper with unlimited readings',
-                                  'Sınırsız okumalarla daha derine in',
-                                ),
-                          style: const TextStyle(
-                            fontFamily: 'Arial',
-                            color: MysticColors.lavender,
-                          ),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        localized(
+                          language.appLanguage,
+                          english:
+                              'All features are unlocked. Native Android and iOS revenue comes only from occasional ads.',
+                          turkish:
+                              'Tüm özellikler açık. Android ve iOS geliri yalnızca seyrek reklamlardan gelir.',
+                          spanish:
+                              'Todas las funciones están abiertas. Los ingresos de Android e iOS provienen solo de anuncios ocasionales.',
+                          french:
+                              'Toutes les fonctions sont ouvertes. Les revenus Android et iOS viennent uniquement de publicités occasionnelles.',
+                          portugueseBrazil:
+                              'Todos os recursos estão liberados. A receita no Android e iOS vem apenas de anúncios ocasionais.',
+                        ),
+                        style: const TextStyle(
+                          fontFamily: 'Arial',
+                          color: MysticColors.lavender,
+                        ),
+                      ),
+                    ],
                   ),
-                  const Icon(Icons.arrow_forward),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
+          if (AdRevenueService.instance.privacyOptionsAvailable) ...[
+            const SizedBox(height: 8),
+            ListTile(
+              onTap: AdRevenueService.instance.showPrivacyOptions,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: const Icon(
+                Icons.privacy_tip_outlined,
+                color: MysticColors.gold,
+              ),
+              title: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Advertising privacy choices',
+                  turkish: 'Reklam gizlilik tercihleri',
+                  spanish: 'Opciones de privacidad publicitaria',
+                  french: 'Choix de confidentialité publicitaire',
+                  portugueseBrazil: 'Opções de privacidade de anúncios',
+                ),
+                style: const TextStyle(fontFamily: 'Arial'),
+              ),
+              subtitle: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Review the consent choices used for native ads.',
+                  turkish:
+                      'Native reklamlar için kullanılan izin tercihlerini gözden geçir.',
+                  spanish:
+                      'Revisa las opciones de consentimiento usadas para los anuncios nativos.',
+                  french:
+                      'Révisez les choix de consentement utilisés pour les publicités natives.',
+                  portugueseBrazil:
+                      'Revise as escolhas de consentimento usadas para anúncios nativos.',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          ],
           const SizedBox(height: 18),
           ListTile(
             onTap: () => Navigator.push(
@@ -8307,17 +8338,20 @@ class _MysticSettingsScreenState extends State<MysticSettingsScreen> {
         ),
       ),
       _faq(
-        t('Can I cancel Mystic Plus?', 'Mystic Plus’ı iptal edebilir miyim?'),
+        t('Why is Mystic Tarot free?', 'Mystic Tarot neden ücretsiz?'),
         t(
-          'When native subscriptions launch, they can be managed and cancelled through Apple or Google account settings. The web release does not process payments.',
-          'Yerel abonelikler başladığında Apple veya Google hesap ayarlarından yönetilip iptal edilebilir. Web sürümü ödeme işlemez.',
+          'There is no paid subscription. Native Android and iOS editions are funded by occasional advertising; the public web edition is ad-free.',
+          'Ücretli abonelik yoktur. Android ve iOS sürümlerinin geliri seyrek reklamlardan gelir; herkese açık web sürümü reklamsızdır.',
         ),
       ),
       _faq(
-        t('How do I restore a purchase?', 'Satın almayı nasıl geri yüklerim?'),
         t(
-          'Restore becomes available with native Apple and Google subscriptions. The current web release does not process or store purchases.',
-          'Geri yükleme, yerel Apple ve Google abonelikleriyle kullanılabilir. Mevcut web sürümü satın alma işlemez veya saklamaz.',
+          'Do I need to restore anything?',
+          'Bir şeyi geri yüklemem gerekir mi?',
+        ),
+        t(
+          'No. Product access does not depend on a purchase or restore flow.',
+          'Hayır. Ürün erişimi satın alma veya geri yükleme akışına bağlı değildir.',
         ),
       ),
       _faq(
@@ -8880,8 +8914,8 @@ class _PremiumReadingPreviewState extends State<PremiumReadingPreview> {
             Text(
               mysticText(
                 widget.language,
-                'Included with Mystic Plus • Cancel anytime',
-                'Mystic Plus’a dâhil • İstediğin zaman iptal et',
+                'Included free • Native apps are advertising-supported',
+                'Ücretsiz dâhil • Mobil uygulama reklam destekli',
               ),
               textAlign: TextAlign.center,
               style: const TextStyle(

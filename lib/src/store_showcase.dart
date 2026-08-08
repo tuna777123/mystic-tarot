@@ -198,7 +198,14 @@ class _Scene extends StatelessWidget {
       fr: 'CARTE VIVANTE DU DESTIN',
       pt: 'MAPA VIVO DO DESTINO',
     ),
-    StoreScreenshotScene.mysticPlus => 'MYSTIC PLUS',
+    StoreScreenshotScene.mysticPlus => _l(
+      language,
+      en: 'FREE EXPERIENCE',
+      tr: 'ÜCRETSİZ DENEYİM',
+      es: 'EXPERIENCIA GRATIS',
+      fr: 'EXPÉRIENCE GRATUITE',
+      pt: 'EXPERIÊNCIA GRÁTIS',
+    ),
   };
 
   String get _title => switch (scene) {
@@ -279,11 +286,11 @@ class _Scene extends StatelessWidget {
     ),
     StoreScreenshotScene.mysticPlus => _l(
       language,
-      en: 'Deep readings and private intelligence, with official store pricing.',
-      tr: 'Derin okumalar ve özel içgörüler; resmi mağaza fiyatlarıyla.',
-      es: 'Lecturas profundas e inteligencia privada con precio oficial.',
-      fr: 'Lectures profondes et intelligence privée, au tarif officiel.',
-      pt: 'Leituras profundas e inteligência privada com preço oficial.',
+      en: 'All features stay free; native ads support the mobile app.',
+      tr: 'Tüm özellikler ücretsiz; mobil uygulamayı reklamlar destekler.',
+      es: 'Todo sigue gratis; los anuncios sostienen la app móvil.',
+      fr: 'Tout reste gratuit ; les pubs soutiennent l’app mobile.',
+      pt: 'Tudo segue grátis; anúncios sustentam o app móvel.',
     ),
   };
 
@@ -914,29 +921,44 @@ class _Plus extends StatelessWidget {
       Row(
         children: [
           Expanded(
-            child: _Plan(
-              _l(
+            child: _Metric(
+              value: _l(
                 language,
-                en: 'MONTHLY',
-                tr: 'AYLIK',
-                es: 'MENSUAL',
-                fr: 'MENSUEL',
-                pt: 'MENSAL',
+                en: 'FREE',
+                tr: 'ÜCRETSİZ',
+                es: 'GRATIS',
+                fr: 'GRATUIT',
+                pt: 'GRÁTIS',
+              ),
+              label: _l(
+                language,
+                en: 'ALL FEATURES',
+                tr: 'TÜM ÖZELLİKLER',
+                es: 'TODAS LAS FUNCIONES',
+                fr: 'TOUTES LES FONCTIONS',
+                pt: 'TODOS OS RECURSOS',
               ),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: _Plan(
-              _l(
+            child: _Metric(
+              value: _l(
                 language,
-                en: 'YEARLY',
-                tr: 'YILLIK',
-                es: 'ANUAL',
-                fr: 'ANNUEL',
-                pt: 'ANUAL',
+                en: 'NO PAYWALL',
+                tr: 'ÖDEME YOK',
+                es: 'SIN PAGO',
+                fr: 'SANS PÉAGE',
+                pt: 'SEM PAYWALL',
               ),
-              selected: true,
+              label: _l(
+                language,
+                en: 'NATIVE AD-SUPPORTED',
+                tr: 'MOBİL REKLAM DESTEKLİ',
+                es: 'APP CON PUBLICIDAD',
+                fr: 'APP AVEC PUBLICITÉ',
+                pt: 'APP COM ANÚNCIOS',
+              ),
             ),
           ),
         ],
@@ -961,7 +983,7 @@ class _Plus extends StatelessWidget {
                       ),
                     ),
                     child: const Icon(
-                      Icons.workspace_premium,
+                      Icons.auto_awesome_rounded,
                       color: Color(0xFF18101F),
                     ),
                   ),
@@ -970,25 +992,32 @@ class _Plus extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'MYSTIC PLUS',
-                          style: TextStyle(
-                            fontSize: 22,
+                        Text(
+                          _l(
+                            language,
+                            en: 'COMPLETE MYSTIC EXPERIENCE',
+                            tr: 'TAM MYSTIC DENEYİMİ',
+                            es: 'EXPERIENCIA MYSTIC COMPLETA',
+                            fr: 'EXPÉRIENCE MYSTIC COMPLÈTE',
+                            pt: 'EXPERIÊNCIA MYSTIC COMPLETA',
+                          ),
+                          style: const TextStyle(
+                            fontSize: 19,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         Text(
                           _l(
                             language,
-                            en: 'Official price shown by your store',
-                            tr: 'Resmi fiyat mağazan tarafından gösterilir',
-                            es: 'Tu tienda muestra el precio oficial',
-                            fr: 'Le prix officiel est affiché par votre boutique',
-                            pt: 'O preço oficial é exibido pela sua loja',
+                            en: 'Core access never depends on watching an ad',
+                            tr: 'Temel erişim reklam izlemeye bağlı değildir',
+                            es: 'El acceso principal no depende de ver un anuncio',
+                            fr: 'L’accès essentiel ne dépend pas du visionnage d’une pub',
+                            pt: 'O acesso principal não depende de assistir anúncio',
                           ),
                           style: const TextStyle(
                             fontFamily: 'Arial',
-                            fontSize: 12,
+                            fontSize: 11,
                             color: MysticColors.muted,
                           ),
                         ),
@@ -1001,33 +1030,33 @@ class _Plus extends StatelessWidget {
               _Feature(
                 _l(
                   language,
-                  en: 'All deep spreads',
-                  tr: 'Tüm derin açılımlar',
-                  es: 'Todas las tiradas profundas',
-                  fr: 'Tous les tirages approfondis',
-                  pt: 'Todas as tiragens profundas',
+                  en: 'All readings and deep spreads',
+                  tr: 'Tüm okumalar ve derin açılımlar',
+                  es: 'Todas las lecturas y tiradas profundas',
+                  fr: 'Tous les tirages et lectures approfondies',
+                  pt: 'Todas as leituras e tiragens profundas',
                 ),
               ),
               const SizedBox(height: 16),
               _Feature(
                 _l(
                   language,
-                  en: 'Private weekly intelligence',
-                  tr: 'Özel haftalık içgörü',
-                  es: 'Inteligencia semanal privada',
-                  fr: 'Intelligence hebdomadaire privée',
-                  pt: 'Inteligência semanal privada',
+                  en: 'Mystic Mirror and private patterns',
+                  tr: 'Mystic Ayna ve özel örüntüler',
+                  es: 'Mystic Mirror y patrones privados',
+                  fr: 'Mystic Mirror et motifs privés',
+                  pt: 'Mystic Mirror e padrões privados',
                 ),
               ),
               const SizedBox(height: 16),
               _Feature(
                 _l(
                   language,
-                  en: 'Restore and manage anytime',
-                  tr: 'İstediğin zaman geri yükle ve yönet',
-                  es: 'Restaura y gestiona cuando quieras',
-                  fr: 'Restaurez et gérez à tout moment',
-                  pt: 'Restaure e gerencie quando quiser',
+                  en: 'Living Journal, Oracle, Path and Arcana',
+                  tr: 'Yaşayan Günlük, Oracle, Yol ve Arkana',
+                  es: 'Diario, Oracle, Path y Arcana',
+                  fr: 'Journal, Oracle, Path et Arcanes',
+                  pt: 'Diário, Oracle, Path e Arcanos',
                 ),
               ),
               const Spacer(),
@@ -1044,11 +1073,11 @@ class _Plus extends StatelessWidget {
                 child: Text(
                   _l(
                     language,
-                    en: 'CONTINUE WITH YEARLY',
-                    tr: 'YILLIK İLE DEVAM ET',
-                    es: 'CONTINUAR CON ANUAL',
-                    fr: 'CONTINUER EN ANNUEL',
-                    pt: 'CONTINUAR COM ANUAL',
+                    en: 'CONTINUE FREE',
+                    tr: 'ÜCRETSİZ DEVAM ET',
+                    es: 'CONTINUAR GRATIS',
+                    fr: 'CONTINUER GRATUITEMENT',
+                    pt: 'CONTINUAR GRÁTIS',
                   ),
                   style: const TextStyle(
                     fontFamily: 'Arial',
@@ -1476,52 +1505,6 @@ class _PathLines extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _Plan extends StatelessWidget {
-  const _Plan(this.text, {this.selected = false});
-
-  final String text;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 72,
-    padding: const EdgeInsets.symmetric(horizontal: 15),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(19),
-      color: selected
-          ? MysticColors.violet.withValues(alpha: .26)
-          : const Color(0xFF171329),
-      border: Border.all(
-        color: selected
-            ? MysticColors.gold.withValues(alpha: .68)
-            : Colors.white.withValues(alpha: .08),
-      ),
-    ),
-    child: Row(
-      children: [
-        Icon(
-          selected ? Icons.radio_button_checked : Icons.radio_button_off,
-          color: selected ? MysticColors.gold : MysticColors.muted,
-        ),
-        const SizedBox(width: 9),
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: 'Arial',
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .8,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _Feature extends StatelessWidget {

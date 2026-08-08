@@ -32,8 +32,9 @@ void main() {
     expect(workflow, contains('keytool -exportcert'));
     expect(workflow, contains('android-upload-cert.der'));
     expect(workflow, contains('android-bundle-cert.pem'));
-    expect(workflow, contains('ACTUAL_UPLOAD_CERT_SHA256'));
-    expect(workflow, contains('ACTUAL_BUNDLE_CERT_SHA256'));
+    expect(workflow, contains('sha256sum'));
+    expect(workflow, contains('test "\$ACTUAL" = "\$EXPECTED"'));
+    expect(workflow, contains('keytool -printcert -jarfile'));
     expect(workflow, contains('jarsigner -verify -certs'));
     expect(workflow, contains("grep -q 'jar verified.'"));
     expect(workflow, isNot(contains('jarsigner -verify -strict -certs')));
@@ -59,7 +60,10 @@ void main() {
     ).readAsStringSync();
 
     expect(workflow, contains('distribution-cert.pem'));
-    expect(workflow, contains('ACTUAL_DISTRIBUTION_CERT_SHA256'));
+    expect(workflow, contains('openssl pkcs12'));
+    expect(workflow, contains('openssl x509'));
+    expect(workflow, contains('shasum -a 256'));
+    expect(workflow, contains('test "\$ACTUAL" = "\$EXPECTED"'));
     expect(workflow, contains('-checkend 604800'));
     expect(
       workflow,
@@ -89,8 +93,8 @@ void main() {
       '.github/workflows/store-release.yml',
     ).readAsStringSync();
 
-    expect(workflow, contains('rm -f "\$RUNNER_TEMP/android-upload-cert.der"'));
-    expect(workflow, contains('rm -f "\$RUNNER_TEMP/android-bundle-cert.pem"'));
-    expect(workflow, contains('rm -f "\$RUNNER_TEMP/distribution-cert.pem"'));
+    expect(workflow, contains(r'$RUNNER_TEMP/android-upload-cert.der'));
+    expect(workflow, contains(r'$RUNNER_TEMP/android-bundle-cert.pem'));
+    expect(workflow, contains(r'$RUNNER_TEMP/distribution-cert.pem'));
   });
 }

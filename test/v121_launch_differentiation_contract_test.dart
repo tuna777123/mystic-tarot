@@ -29,15 +29,19 @@ void main() {
     expect(app, contains('buildReadingSynthesis('));
     expect(continuity, contains('ONE READING. A CONTINUING STORY.'));
     expect(continuity, contains('Private by design'));
-    expect(continuity, contains('No account, ads, cross-app tracking'));
+    expect(
+      continuity,
+      contains('Native ads follow the advertising privacy choices'),
+    );
+    expect(continuity, contains('public web edition is ad-free'));
     expect(continuity, contains('optional six-digit PIN'));
     expect(continuity, contains('biometrics on supported devices'));
     expect(File('lib/src/app_lock.dart').existsSync(), isTrue);
     expect(File('lib/src/app_lock_gate.dart').existsSync(), isTrue);
     expect(nextStep, contains('MysticGrowthStage.activated'));
     expect(nextStep, contains('PrivateByDesignCard('));
-    expect(premium, contains('LaunchContinuityTimeline('));
-    expect(premium, contains('PrivateByDesignCard('));
+    expect(premium, contains('Everything is unlocked.'));
+    expect(premium, contains('there is no subscription to buy'));
     expect(synthesis, contains('Taken together'));
     expect(synthesis, contains('lenses.length == 2'));
     expect(synthesis, contains('ReadingKind.compatibility'));

@@ -1,148 +1,135 @@
 # Mystic Tarot — Final Delivery Handoff
 
-Product version: `1.22.3+32`  
+Product version: `1.23.0+33`  
 Application / bundle ID: `com.tunabozcali.mystictarot`  
 Repository: `https://github.com/tuna777123/mystic-tarot`  
 Public web app: `https://tuna777123.github.io/mystic-tarot/`  
 Public website: `https://tuna777123.github.io/mystic-tarot/landing-en.html`  
-Public press kit: `https://tuna777123.github.io/mystic-tarot/press-kit.html`
+Public press kit: `https://tuna777123.github.io/mystic-tarot/press-kit.html`  
+Complete owner manual: `docs/OWNER_GUIDE_A_TO_Z.md`
 
-This document is designed to be shared directly with a developer, designer, performance marketer, creator, PR partner, store-operations contractor, or technical reviewer.
+This document is designed to be shared directly with a developer, designer, performance marketer, creator, PR partner, store operator, or technical reviewer.
 
-## 1. What is delivered
+## 1. Product delivered
 
-### Product
+Mystic Tarot is a Flutter product for web, Android and iOS packaging with:
 
-- Flutter product source for web, Android, and iOS packaging.
-- Complete 78-card tarot product experience.
-- Daily Guidance and focused deep readings.
-- 24-hour Mystic Mirror reality check.
-- Pattern memory, weekly evidence, Mystic Path, Arcana Vault, rituals, XP, achievements, and streaks.
-- Private local journal with export and deletion.
-- Six-digit PIN and optional supported-device biometrics.
-- Five complete launch languages: EN, TR, ES, FR, PT-BR.
-- Mystic Plus product surface prepared for official store products and RevenueCat entitlement `mystic_plus`.
+- a complete 78-card tarot experience;
+- Daily Guidance and deep readings;
+- explainable reading synthesis and practical aligned actions;
+- 24-hour Mystic Mirror reality checks;
+- Living Journal, pattern memory and search;
+- Oracle follow-up dialogue;
+- Mystic Path, Arcana Vault, journeys, rituals, XP, achievements and streaks;
+- local export/deletion and protected transfer;
+- six-digit PIN and optional supported-device biometrics;
+- reduced-motion protections;
+- five complete launch languages: EN, TR, ES, FR, PT-BR.
 
-### Public web / website
+For a feature-by-feature explanation, start with `docs/OWNER_GUIDE_A_TO_Z.md`.
 
-- Installable PWA.
-- Five localized marketing landing pages.
-- Five-language Privacy, Terms, and Support surfaces.
-- `robots.txt`, sitemap, canonical URLs, Open Graph, Twitter Card, structured-data metadata, branded icon set, install prompt, reduced-motion protections, and a branded 404 page.
-- Public press & sharing page for collaborators and media.
-- Post-deployment live verification for the PWA root, product landing, public press kit, and all 15 localized Privacy/Terms/Support pages.
+## 2. Advertising-only business model
 
-### Store / release operations
+Mystic Tarot has **no paid subscription revenue model**.
 
-- App Store and Google Play metadata pack.
-- Permanent product identifiers.
-- Five-language release notes and store listing copy.
-- Production signing workflow contracts.
-- Android AAB validation and audit pipeline.
-- Unsigned iOS release verification pipeline.
-- Deterministic five-language screenshot generation and package audit.
-- 50 verified QA store screenshots across Apple 6.9-inch and Google Play phone profiles.
-- RevenueCat production setup guide and fail-closed product behavior.
+- all formerly gated product functionality is available without payment;
+- no subscription checkout is required;
+- no restore flow is required to unlock the product;
+- native Android/iOS revenue is designed to come only from Google Mobile Ads;
+- Google User Messaging Platform gates eligible native ad requests;
+- the public web edition remains ad-free.
 
-### Marketing
+Native ad design:
 
-- Paid-social launch copy.
-- Organic and creator copy.
-- 15-second and 20-second short-form creative briefs.
-- Five-language primary campaign messaging.
-- PR one-liner and creator brief.
-- UTM naming convention.
-- Claim-safety / no-fake-proof advertising guardrails.
+- app-open ads only after at least three completed readings, on eligible returning foreground transitions of 30 seconds or longer, with a two-hour minimum interval;
+- interstitial opportunity after every third genuinely new saved reading;
+- cadence persists across process restarts;
+- no permanent banner covering the tarot interface;
+- no rewarded-ad requirement for a core feature.
 
-See `docs/MARKETING_LAUNCH_KIT.md`.
+`purchases_flutter` and RevenueCat are removed from the production dependency graph and runtime source. Only small pure-Dart historical compatibility DTO/interface shapes remain, backed by a fail-closed no-op client with no store SDK, network purchase provider, checkout, restore or paid entitlement behavior.
 
-## 2. Verified final launch source baseline
+## 3. Public web / website
 
-Mystic Tarot `1.22.3+32` final public-launch hardening was verified on PR #133 head:
+Delivered public surfaces include:
 
-`ef1714e394f5edc65814c89db7abe96ee9e4b34d`
+- installable PWA;
+- five localized marketing landing pages;
+- EN/TR/ES/FR/PT-BR Privacy, Terms and Support pages;
+- robots.txt and sitemap;
+- canonical, Open Graph, Twitter Card and structured metadata;
+- install prompt and branded 404;
+- public press/sharing page;
+- post-deployment live URL verification.
 
-and squash-merged to the product launch baseline on `main`:
+The public web edition is a product demo/discovery surface and is not a claim that native stores have approved the app.
 
-`63504ce4a19bb5b1c600932f4a2c26c1250007b6`
+## 4. Native advertising technical delivery
 
-The final-head release chain passed:
+Source contains:
 
-- changed-Dart formatting and clean-diff checks;
-- public launch / SEO / advertising-claim contract;
-- static analysis with no issues;
-- the complete Flutter test suite;
-- web release build;
-- Android AAB release build;
-- unsigned iOS release and application verification;
-- strict Android jarsigner and `bundletool validate` checks;
-- package, version, ABI, sensitive-permission, and advertising/analytics-class audits;
-- Built-in Kotlin exact-warning-set audit;
-- artifact uploads for web, AAB, Android audit, and Built-in Kotlin audit.
+- `google_mobile_ads ^9.0.0` integration;
+- UMP consent information refresh on every launch;
+- consent form handling where required;
+- `canRequestAds()` as the final ad-request gate;
+- privacy-options visibility based on `PrivacyOptionsRequirementStatus.required`;
+- Google demo app/ad-unit IDs for safe QA;
+- environment/dart-define slots for real production AdMob IDs;
+- app-open ad cache/expiry, minimum-use, background-duration and frequency handling;
+- every-third-new-reading interstitial frequency cap;
+- persisted cadence across native process restarts;
+- no-ad fallback that never blocks the product;
+- Android audit policy that distinguishes reviewed Google advertising permissions from unrelated sensitive permissions and unapproved trackers.
 
-Post-merge `pages/deployment = success` on `63504ce4a19bb5b1c600932f4a2c26c1250007b6` additionally proves the live Pages workflow passed `curl --fail` plus page-specific content-marker verification for **18 public endpoints**: the PWA root, product landing, public press kit, and all 15 localized Privacy/Terms/Support pages.
+Required production identifiers are documented in `STORE_RELEASE.md` and `docs/OWNER_GUIDE_A_TO_Z.md`.
 
-The signed native-store preflight intentionally remains scoped to its existing 17 store-critical public URLs. The marketing press kit is not a prerequisite for signing a native candidate.
+## 5. Store / release operations
 
-## 3. Verified QA Android artifact baseline
+Delivered source-side release machinery includes:
 
-Final verified QA artifact from the source set merged by PR #133:
+- permanent application identifier `com.tunabozcali.mystictarot`;
+- Android AAB release/audit pipeline;
+- unsigned iOS release verification;
+- protected signing contracts;
+- protected production AdMob ID contracts that reject Google demo IDs;
+- strict Android signature checks;
+- pinned `bundletool validate`;
+- package/version/ABI validation;
+- sensitive-permission auditing;
+- unapproved analytics/attribution SDK denylist;
+- Kotlin warning policy;
+- localized store metadata/release-note handoff;
+- deterministic localized screenshot generation/audit.
 
-Package: `com.tunabozcali.mystictarot`  
-Version: `1.22.3+32`  
-Size: `61,659,974` bytes (`58.80 MiB`)  
-SHA-256: `17356fdedcc2a61afdba9124eeda191871bf4ffbd0648185cab6db88f3d18882`  
-ABIs: `arm64-v8a`, `armeabi-v7a`, `x86_64`
+Verified builds also run the fail-closed advertising-only UI materializer before analysis, tests and packaging so legacy paid-tier labels cannot leak into delivered builds.
 
-Verified checks:
+Canonical operator instructions: `STORE_RELEASE.md`.
 
-- strict JAR signature policy: PASS;
-- `bundletool validate`: PASS;
-- sensitive permission denylist: clear;
-- advertising / analytics class denylist: clear;
-- Built-in Kotlin audit: PASS with reviewed warnings exactly `flutter_timezone, purchases_flutter`, unknown/regressed plugins none, policy drift none.
+## 6. Marketing delivery
 
-This artifact is a QA release AAB. It is **not** the final Google Play upload-signed production candidate.
+`docs/MARKETING_LAUNCH_KIT.md` contains:
 
-## 4. Verified screenshot baseline
+- paid-social copy;
+- organic and creator copy;
+- 15-second / 20-second video briefs;
+- EN/TR/ES/FR/PT-BR campaign messaging;
+- PR one-liner;
+- UTM convention;
+- advertising-supported product disclosure;
+- creative guardrails;
+- no-fake-proof / no-unsafe-claim rules.
 
-The final public-launch PR did not modify screenshot generator or screenshot-product source. The canonical audited screenshot payload therefore remains the already visually reviewed main set:
+Public campaign traffic can use the live localized website today. Native install campaigns should wait until actual approved store listing URLs exist.
 
-- App version: `1.22.3+32`.
-- Screenshot-source main baseline: `dedd420add86733169e9d2de6e0257f0a86094a8`.
-- Exactly 50 PNGs.
-- 25 Apple 6.9-inch screenshots at `1290×2796`.
-- 25 Google Play phone screenshots at `1080×1920`.
-- EN, TR, ES, FR, PT-BR.
-- 8-bit RGB, no alpha.
-- Full decode, dimension, file-size, package-allowlist, and visual-variation audit.
-- All 50 screenshot pixel payloads matched the manually reviewed accepted set.
+## 7. Privacy boundary
 
-These are audited QA marketing screenshots. Final store evidence from genuinely signed candidates remains a store/device-owned release step.
+Mystic’s journal, tarot questions, profile content, reflection history and PIN information are local-first product data.
 
-## 5. Public links to share
+Native Android/iOS builds integrate Google Mobile Ads and UMP, so final Apple App Privacy and Google Play Data Safety declarations must reflect the actual signed advertising runtime. The public web edition does not embed the native AdMob SDK.
 
-### End users / creators
+Local in-app deletion does not claim to erase records independently handled by an advertising platform.
 
-- Web app: `https://tuna777123.github.io/mystic-tarot/`
-- Product website: `https://tuna777123.github.io/mystic-tarot/landing-en.html`
-- Press kit: `https://tuna777123.github.io/mystic-tarot/press-kit.html`
-
-### Legal / support
-
-- Privacy: `https://tuna777123.github.io/mystic-tarot/privacy.html`
-- Terms: `https://tuna777123.github.io/mystic-tarot/terms.html`
-- Support: `https://tuna777123.github.io/mystic-tarot/support.html`
-
-### Technical collaborators
-
-- Repository: `https://github.com/tuna777123/mystic-tarot`
-- Store handoff: `STORE_RELEASE.md`
-- Marketing launch kit: `docs/MARKETING_LAUNCH_KIT.md`
-- RevenueCat setup: `docs/REVENUECAT_SETUP.md`
-- Production signing guidance: `docs/PRODUCTION_SIGNING_FINGERPRINTS.md`
-
-## 6. Safe advertising claims
+## 8. Safe advertising claims
 
 Use:
 
@@ -150,38 +137,64 @@ Use:
 - “Return after 24 hours and compare the reading with what actually happened.”
 - “Notice recurring cards and personal patterns over time.”
 - “Local-first journal.”
-- “No account required on the public web edition.”
-- “No advertising SDK in the current product.”
+- “No paid subscription.”
+- “Native apps are advertising-supported.”
+- “The public web edition is ad-free.”
 
 Do not use:
 
 - guaranteed prediction claims;
-- medical, mental-health, legal, financial, or emergency-advice claims;
-- fake ratings, user totals, testimonials, press logos, scarcity, awards, or download counts;
-- hardcoded subscription prices;
+- medical, mental-health, legal, financial or emergency-advice claims;
+- fake ratings, user totals, testimonials, press logos, scarcity, awards or download counts;
+- a native ad-free claim;
+- a fake paid/premium price;
 - App Store or Google Play availability claims before the final signed listings are actually live.
 
-## 7. What is intentionally not represented as complete
+## 9. What is intentionally not represented as complete
 
-The source repository cannot complete account-owned store operations on behalf of the owner. Before native production release, the responsible store operator must still complete:
+Source work cannot complete owner-controlled external accounts. Before native production availability, the owner still must complete:
 
 1. Apple Developer / App Store Connect ownership and agreements.
 2. Google Play Console ownership and agreements.
-3. Permanent Android upload signing material.
-4. Apple distribution certificate and provisioning profile.
-5. Production RevenueCat project, platform apps, store credentials, products, offering, and entitlement mapping.
-6. Official localized subscription prices and trial configuration.
-7. Signed Android and iOS production candidates.
-8. TestFlight / Play internal or closed testing.
-9. Real-device and sandbox purchase / restore / renewal / expiration / refund / revocation validation.
-10. Store privacy/data-safety, age/content rating, trader/business, banking, and tax forms.
-11. Final store screenshots/evidence from genuinely signed candidates where required.
-12. Store review and production approval.
+3. Google AdMob Android + iOS apps.
+4. Production app-open and interstitial units for both platforms.
+5. AdMob Privacy & messaging / UMP production configuration.
+6. Real AdMob IDs in protected release configuration.
+7. `MYSTIC_USE_TEST_ADS=false` for production.
+8. Android upload signing material.
+9. Apple distribution certificate/provisioning.
+10. Genuinely signed native candidates.
+11. Real Android+iPhone consent/ad/no-ad/failure-path QA.
+12. Apple App Privacy and Google Play Data Safety from actual signed runtime behavior.
+13. TestFlight / Play closed testing and Play pre-launch reporting.
+14. Final store screenshots/evidence where required.
+15. Store review and production approval.
 
-Until those steps pass, do not describe the native app as publicly available in the Apple App Store or Google Play.
+Until those steps pass, do not describe native App Store / Google Play availability or real advertising revenue as live.
 
-## 8. Handoff message
+## 10. Public links to share
+
+- Web app: `https://tuna777123.github.io/mystic-tarot/`
+- Product website: `https://tuna777123.github.io/mystic-tarot/landing-en.html`
+- Press kit: `https://tuna777123.github.io/mystic-tarot/press-kit.html`
+- Privacy: `https://tuna777123.github.io/mystic-tarot/privacy.html`
+- Terms: `https://tuna777123.github.io/mystic-tarot/terms.html`
+- Support: `https://tuna777123.github.io/mystic-tarot/support.html`
+- Repository: `https://github.com/tuna777123/mystic-tarot`
+
+## 11. Technical collaborator starting points
+
+- Owner guide: `docs/OWNER_GUIDE_A_TO_Z.md`
+- Store handoff: `STORE_RELEASE.md`
+- Marketing kit: `docs/MARKETING_LAUNCH_KIT.md`
+- Advertising model: `docs/AD_REVENUE_MODEL.md`
+- Production signing guidance: `docs/PRODUCTION_SIGNING_FINGERPRINTS.md`
+- Native ad service: `lib/src/ad_revenue_service.dart`
+- Advertising-only UI materializer: `tool/materialize_ad_only_ui.dart`
+- Public launch verifier: `tool/verify_launch_surface.sh`
+
+## 12. Handoff message
 
 Copy/paste this when sending the project to a collaborator:
 
-> Mystic Tarot `1.22.3+32` is a production-hardened Flutter product with a live installable web edition, five complete launch languages, public legal/support pages, verified Android/web/iOS QA pipelines, deterministic 50-image store screenshot generation, a store-release handoff, a public press kit, and a five-language marketing launch kit. The final public-launch source passed Flutter and iOS release CI, and the live Pages deployment passed 18-endpoint content verification. Start with the public press kit for product context and `STORE_RELEASE.md` for native store operations. Native store availability must not be claimed until the account-owned signing, sandbox, real-device, and store-review steps are complete.
+> Mystic Tarot `1.23.0+33` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. RevenueCat and the billing SDK are removed, and there is no paid subscription business model. Start with `docs/OWNER_GUIDE_A_TO_Z.md` for the entire product and `STORE_RELEASE.md` for the native release path. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, real-device QA and store approvals are complete.

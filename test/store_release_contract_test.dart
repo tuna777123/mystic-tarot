@@ -5,50 +5,45 @@ import 'package:flutter_test/flutter_test.dart';
 import '../tool/src/store_release_contract.dart';
 
 void main() {
-  group('RevenueCat public SDK key validation', () {
-    test('accepts platform-specific public application keys', () {
-      expect(
-        validateRevenueCatPublicKey(
-          'goog_1234567890abcdef',
-          platform: StoreReleasePlatform.android,
-        ),
-        isEmpty,
-      );
-      expect(
-        validateRevenueCatPublicKey(
-          'appl_1234567890abcdef',
-          platform: StoreReleasePlatform.ios,
-        ),
-        isEmpty,
-      );
-    });
+  test('accepts production-shaped AdMob IDs', () {
+    expect(
+      validateAdMobAppId(
+        'ca-app-pub-1234567890123456~1234567890',
+        label: 'Android AdMob application ID',
+      ),
+      isEmpty,
+    );
+    expect(
+      validateAdMobAdUnitId(
+        'ca-app-pub-1234567890123456/1234567890',
+        label: 'Android interstitial ad unit ID',
+      ),
+      isEmpty,
+    );
+  });
 
-    test('rejects secret-looking and cross-platform keys', () {
-      expect(
-        validateRevenueCatPublicKey(
-          'sk_1234567890abcdef',
-          platform: StoreReleasePlatform.android,
-        ),
-        isNotEmpty,
-      );
-      expect(
-        validateRevenueCatPublicKey(
-          'appl_1234567890abcdef',
-          platform: StoreReleasePlatform.android,
-        ),
-        isNotEmpty,
-      );
-    });
-
-    test('rejects whitespace and unexpectedly short values', () {
-      expect(
-        validateRevenueCatPublicKey(
-          'goog_ short',
-          platform: StoreReleasePlatform.android,
-        ),
-        hasLength(2),
-      );
-    });
+  test('rejects Google demo and malformed AdMob IDs for production', () {
+    expect(
+      validateAdMobAppId(
+        'ca-app-pub-3940256099942544~3347511713',
+        label: 'Android AdMob application ID',
+      ),
+      isNotEmpty,
+    );
+    expect(
+      validateAdMobAdUnitId(
+        'ca-app-pub-3940256099942544/1033173712',
+        label: 'Android interstitial ad unit ID',
+      ),
+      isNotEmpty,
+    );
+    expect(
+      validateAdMobAdUnitId(
+        'not-an-ad-unit',
+        label: 'Android interstitial ad unit ID',
+      ),
+      isNotEmpty,
+    );
   });
 
   test('finds only missing protected environment values', () {
@@ -59,15 +54,26 @@ void main() {
     expect(missing, ['TWO', 'THREE']);
   });
 
-  test('requires certificate fingerprints for both store platforms', () {
+  test('requires AdMob and certificate values for both store platforms', () {
     expect(
       StoreReleaseContract.androidRequiredEnvironment,
-      contains('ANDROID_UPLOAD_CERT_SHA256'),
+      containsAll(<String>[
+        'ADMOB_ANDROID_APP_ID',
+        'ADMOB_ANDROID_APP_OPEN_ID',
+        'ADMOB_ANDROID_INTERSTITIAL_ID',
+        'ANDROID_UPLOAD_CERT_SHA256',
+      ]),
     );
     expect(
       StoreReleaseContract.iosRequiredEnvironment,
-      contains('IOS_DISTRIBUTION_CERT_SHA256'),
+      containsAll(<String>[
+        'ADMOB_IOS_APP_ID',
+        'ADMOB_IOS_APP_OPEN_ID',
+        'ADMOB_IOS_INTERSTITIAL_ID',
+        'IOS_DISTRIBUTION_CERT_SHA256',
+      ]),
     );
+    expect(StoreReleaseContract.monetizationModel, 'advertising-only');
   });
 
   test('validates base64 file secrets without exposing them', () {
@@ -105,20 +111,16 @@ void main() {
     );
   });
 
-  test('requires permanent store identity and entitlement', () {
+  test('requires permanent store identity', () {
     expect(
       validateReleaseIdentity(
         bundleIdentifier: StoreReleaseContract.bundleIdentifier,
-        entitlementId: StoreReleaseContract.entitlementId,
       ),
       isEmpty,
     );
     expect(
-      validateReleaseIdentity(
-        bundleIdentifier: 'com.example.other',
-        entitlementId: 'premium',
-      ),
-      hasLength(2),
+      validateReleaseIdentity(bundleIdentifier: 'com.example.other'),
+      hasLength(1),
     );
   });
 

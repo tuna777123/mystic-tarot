@@ -45,17 +45,16 @@ Future<void> main(List<String> arguments) async {
     }
     final version = readPubspecVersion(pubspec.readAsStringSync());
     final manifest = <String, Object?>{
-      'schemaVersion': 1,
+      'schemaVersion': 2,
       'app': StoreReleaseContract.appName,
       'version': version,
       'platform': platform.name,
       'channel': channel,
       'bundleIdentifier': StoreReleaseContract.bundleIdentifier,
-      'entitlementId': StoreReleaseContract.entitlementId,
-      'products': const [
-        StoreReleaseContract.monthlyProductId,
-        StoreReleaseContract.yearlyProductId,
-      ],
+      'monetizationModel': StoreReleaseContract.monetizationModel,
+      'adProvider': 'Google Mobile Ads',
+      'consentProvider': 'Google User Messaging Platform',
+      'paidProducts': const <String>[],
       'artifact': artifact.uri.pathSegments.last,
       'artifactBytes': artifact.lengthSync(),
       'artifactSha256': checksum,

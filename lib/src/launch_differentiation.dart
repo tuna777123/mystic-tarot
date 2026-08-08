@@ -215,11 +215,11 @@ class PrivateByDesignCard extends StatelessWidget {
                 Text(
                   _copy(
                     language,
-                    en: 'No account, ads, cross-app tracking, or cloud journal. Your private history stays on this device, with an optional six-digit PIN and biometrics on supported devices for the whole app.',
-                    es: 'Sin cuenta, anuncios, rastreo entre apps ni diario en la nube. Tu historial privado permanece en este dispositivo, con PIN opcional de seis dígitos y biometría en dispositivos compatibles para toda la app.',
-                    fr: 'Aucun compte, aucune publicité, aucun suivi inter-apps ni journal cloud. Votre historique privé reste sur cet appareil, avec un code PIN facultatif à six chiffres et la biométrie sur les appareils compatibles pour toute l’app.',
-                    pt: 'Sem conta, anúncios, rastreamento entre apps ou diário na nuvem. Seu histórico privado fica neste dispositivo, com PIN opcional de seis dígitos e biometria em dispositivos compatíveis para todo o app.',
-                    tr: 'Hesap, reklam, uygulamalar arası takip veya bulut günlüğü yok. Özel geçmişin bu cihazda kalır; istersen tüm uygulamayı altı haneli PIN ve desteklenen cihazlarda biyometriyle koruyabilirsin.',
+                    en: 'No account or cloud journal. Your private history stays on this device. Native ads follow the advertising privacy choices available to you; the public web edition is ad-free. You can also protect the whole app with an optional six-digit PIN and biometrics on supported devices.',
+                    es: 'Sin cuenta ni diario en la nube. Tu historial privado permanece en este dispositivo. Los anuncios nativos respetan las opciones de privacidad publicitaria disponibles; la versión web pública no tiene anuncios. También puedes proteger toda la app con un PIN opcional de seis dígitos y biometría en dispositivos compatibles.',
+                    fr: 'Aucun compte ni journal cloud. Votre historique privé reste sur cet appareil. Les publicités natives respectent les choix de confidentialité publicitaire disponibles ; la version web publique reste sans publicité. Vous pouvez aussi protéger toute l’app avec un code PIN facultatif à six chiffres et la biométrie sur les appareils compatibles.',
+                    pt: 'Sem conta ou diário na nuvem. Seu histórico privado fica neste dispositivo. Os anúncios nativos seguem as opções de privacidade de publicidade disponíveis; a versão web pública permanece sem anúncios. Você também pode proteger todo o app com PIN opcional de seis dígitos e biometria em dispositivos compatíveis.',
+                    tr: 'Hesap veya bulut günlüğü yok. Özel geçmişin bu cihazda kalır. Native reklamlar sana sunulan reklam gizlilik tercihlerini izler; herkese açık web sürümü reklamsızdır. İstersen tüm uygulamayı altı haneli PIN ve desteklenen cihazlarda biyometriyle de koruyabilirsin.',
                   ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: MysticColors.mist,

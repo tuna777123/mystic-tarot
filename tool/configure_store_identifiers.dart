@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'configure_app_lock.dart' as app_lock_config;
 import 'configure_ritual_notifications.dart' as ritual_config;
+import 'materialize_ad_only_ui.dart' as ad_only_ui;
 
 const permanentIdentifier = 'com.tunabozcali.mystictarot';
+const androidAdMobTestAppId = 'ca-app-pub-3940256099942544~3347511713';
+const iosAdMobTestAppId = 'ca-app-pub-3940256099942544~1458002511';
 
 const generatedIdentifiers = <String>[
   'com.tunabozcali.mystic_tarot',
@@ -12,6 +15,8 @@ const generatedIdentifiers = <String>[
 ];
 
 void main() {
+  ad_only_ui.materializeAdOnlyUi();
+
   final roots = <Directory>[
     Directory('android'),
     Directory('ios'),
@@ -65,6 +70,12 @@ void main() {
   final hasIos = Directory('ios').existsSync();
   if (hasAndroid) {
     ritual_config.configureRitualNotifications();
+    _configureAndroidAdMob(
+      _adMobAppId('ADMOB_ANDROID_APP_ID', androidAdMobTestAppId),
+    );
+  }
+  if (hasIos) {
+    _configureIosAdMob(_adMobAppId('ADMOB_IOS_APP_ID', iosAdMobTestAppId));
   }
   if (hasAndroid || hasIos) {
     app_lock_config.configureAppLock(
@@ -75,8 +86,72 @@ void main() {
   if (exitCode != 0) return;
 
   stdout.writeln(
-    'Permanent store identifiers verified; $changedFiles file(s) updated.',
+    'Permanent store identifiers and AdMob app IDs verified; '
+    '$changedFiles file(s) updated.',
   );
+}
+
+String _adMobAppId(String environmentName, String fallback) {
+  final value = Platform.environment[environmentName]?.trim();
+  if (value == null || value.isEmpty) return fallback;
+  if (!RegExp(r'^ca-app-pub-\d{16}~\d{10}$').hasMatch(value)) {
+    stderr.writeln('$environmentName is not a valid AdMob application ID.');
+    exitCode = 1;
+    return fallback;
+  }
+  return value;
+}
+
+void _configureAndroidAdMob(String appId) {
+  final manifest = File('android/app/src/main/AndroidManifest.xml');
+  if (!manifest.existsSync()) {
+    stderr.writeln('AndroidManifest.xml is missing.');
+    exitCode = 1;
+    return;
+  }
+  final original = manifest.readAsStringSync();
+  final pattern = RegExp(
+    r'<meta-data\s+android:name="com\.google\.android\.gms\.ads\.APPLICATION_ID"\s+android:value="[^"]+"\s*/>',
+    multiLine: true,
+  );
+  final metadata = '''<meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="$appId" />''';
+  final updated = pattern.hasMatch(original)
+      ? original.replaceFirst(pattern, metadata)
+      : original.replaceFirst(
+          '</application>',
+          '        $metadata\n    </application>',
+        );
+  manifest.writeAsStringSync(updated);
+  if (!updated.contains('android:value="$appId"')) {
+    stderr.writeln('Android AdMob application ID was not configured.');
+    exitCode = 1;
+  }
+}
+
+void _configureIosAdMob(String appId) {
+  final plist = File('ios/Runner/Info.plist');
+  if (!plist.existsSync()) {
+    stderr.writeln('iOS Info.plist is missing.');
+    exitCode = 1;
+    return;
+  }
+  final original = plist.readAsStringSync();
+  final pattern = RegExp(
+    r'<key>GADApplicationIdentifier</key>\s*<string>[^<]+</string>',
+    multiLine: true,
+  );
+  final entry = '''<key>GADApplicationIdentifier</key>
+	<string>$appId</string>''';
+  final updated = pattern.hasMatch(original)
+      ? original.replaceFirst(pattern, entry)
+      : original.replaceFirst('</dict>', '\t$entry\n</dict>');
+  plist.writeAsStringSync(updated);
+  if (!updated.contains('<string>$appId</string>')) {
+    stderr.writeln('iOS AdMob application ID was not configured.');
+    exitCode = 1;
+  }
 }
 
 bool _isTextBuildFile(String path) {

@@ -70,7 +70,15 @@ jobs:
           fi
           mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$range" -- '*.dart')
           if (( ${#files[@]} > 0 )); then
-            dart format --output=none --set-exit-if-changed "${files[@]}"
+            set +e
+            dart format --set-exit-if-changed "${files[@]}"
+            format_status=$?
+            set -e
+            if (( format_status != 0 )); then
+              echo 'Dart formatting changed the following source. Apply this exact diff:' >&2
+              git --no-pager diff -- "${files[@]}" >&2
+              exit "$format_status"
+            fi
           fi
 
       - name: Verify clean diff
@@ -83,7 +91,27 @@ jobs:
         run: flutter analyze --fatal-infos
 
       - name: Test
-        run: flutter test
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build/reports
+          set +e
+          flutter test 2>&1 | tee build/reports/flutter-test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if (( test_status != 0 )); then
+            echo 'Concise Flutter test failure summary:' >&2
+            grep -E '(^| )FAILED|Expected:|Actual:|Test failed|Some tests failed|test/.+\.dart|\[[Ee]\]' build/reports/flutter-test.log | tail -n 240 >&2 || true
+            exit "$test_status"
+          fi
+
+      - name: Upload Flutter test log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-flutter-test-log
+          path: build/reports/flutter-test.log
+          if-no-files-found: error
 
       - name: Build web release
         run: flutter build web --release

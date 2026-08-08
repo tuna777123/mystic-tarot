@@ -79,11 +79,17 @@ class ManifestSnapshot {
 
 const requiredAndroidAbis = <String>{'arm64-v8a', 'armeabi-v7a', 'x86_64'};
 
-const forbiddenAndroidPermissions = <String>{
+/// Reviewed advertising permissions used by Google Mobile Ads are intentionally
+/// not forbidden. They must be disclosed in Play Data Safety and the privacy
+/// policy, while unrelated sensitive permissions remain fail-closed.
+const reviewedAdvertisingPermissions = <String>{
   'com.google.android.gms.permission.AD_ID',
   'android.permission.ACCESS_ADSERVICES_AD_ID',
   'android.permission.ACCESS_ADSERVICES_ATTRIBUTION',
   'android.permission.ACCESS_ADSERVICES_TOPICS',
+};
+
+const forbiddenAndroidPermissions = <String>{
   'android.permission.ACCESS_FINE_LOCATION',
   'android.permission.ACCESS_COARSE_LOCATION',
   'android.permission.ACCESS_BACKGROUND_LOCATION',
@@ -122,6 +128,8 @@ const forbiddenAndroidPermissions = <String>{
   'android.permission.BIND_ACCESSIBILITY_SERVICE',
 };
 
+/// Unknown analytics / attribution SDKs stay blocked. Google Mobile Ads is the
+/// single reviewed advertising provider for the ad-only launch model.
 const forbiddenDexClassMarkers = <String>{
   'Lcom/appsflyer/',
   'Lcom/onesignal/',
@@ -130,7 +138,6 @@ const forbiddenDexClassMarkers = <String>{
   'Lcom/facebook/appevents/',
   'Lcom/adjust/sdk/',
   'Lcom/google/firebase/analytics/',
-  'Lcom/google/android/gms/ads/identifier/',
   'Lio/sentry/',
 };
 
@@ -183,6 +190,10 @@ Set<String> parseAndroidAbis(Iterable<String> bundleEntries) {
 
 Set<String> findForbiddenPermissions(Set<String> permissions) {
   return permissions.intersection(forbiddenAndroidPermissions);
+}
+
+Set<String> findReviewedAdvertisingPermissions(Set<String> permissions) {
+  return permissions.intersection(reviewedAdvertisingPermissions);
 }
 
 Set<String> findForbiddenDexMarkers(Uint8List bytes) {

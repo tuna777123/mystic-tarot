@@ -1,8 +1,10 @@
 # Mystic Tarot
 
-Mystic Tarot is a private, reflection-first tarot ritual built with Flutter. A reading becomes a 24-hour reality check and, with enough evidence, an explainable personal pattern. Private history stays on-device and the complete app can be protected with a local PIN and optional biometrics on supported devices. The public release runs as an installable PWA and the same product code is prepared for native iOS and Android packaging.
+Mystic Tarot is a private, reflection-first tarot ritual built with Flutter. A reading becomes a 24-hour reality check and, with enough evidence, an explainable personal pattern. Private history stays primarily on-device and the complete app can be protected with a local PIN and optional biometrics on supported devices.
 
-## Live release
+The product is **free**. Native Android and iOS monetization is **advertising-only** through Google Mobile Ads with Google User Messaging Platform consent handling. The public web edition remains ad-free.
+
+## Live public release
 
 https://tuna777123.github.io/mystic-tarot/
 
@@ -23,38 +25,55 @@ Public policies:
 
 ## Product
 
-- Premium three-step onboarding and personal intention
+- Five complete launch languages: EN, TR, ES, FR, PT-BR
 - 78-card deck with upright and reversed meanings
 - Cinematic selection, seal, reveal, and interpretation ritual
-- Daily Guidance plus focused love, career, money, decision, spiritual, and shadow readings
-- Oracle follow-up dialogue grounded in the revealed cards
-- Private local journal, export, and one-tap data deletion
-- Pattern memory, 24-hour Mystic Mirror, weekly wrap, streaks, XP, achievements, rituals, and Arcana Vault
-- Three unlockable visual deck themes
-- Responsive mobile UI and premium desktop presentation
-- Installable PWA metadata and branded icon set
+- Daily Guidance plus focused and deep readings
+- Explainable reading synthesis and practical aligned actions
+- Oracle follow-up dialogue grounded in revealed cards
+- Private local Living Journal, export, deletion, search, recovery and protected transfer
+- 24-hour Mystic Mirror reality check
+- Recurring-card and emotional pattern memory
+- Mystic Path, Arcana Vault, journeys, weekly evidence, streaks, XP, achievements and rituals
+- Six-digit PIN and optional supported-device biometrics
+- Reduced-motion protections
+- Responsive mobile UI and installable PWA
+
+## Advertising-only monetization
+
+There is no paid subscription, paid reading pack, paid unlock, or required account.
+
+Native Android/iOS builds use:
+
+- Google Mobile Ads;
+- Google User Messaging Platform for applicable consent/privacy choices;
+- app-open ads only on eligible returning foreground transitions, never as a deliberate first-start blocker;
+- at least one hour between app-open ad opportunities;
+- an interstitial opportunity after every third genuinely new saved reading;
+- no permanent banner over the tarot interface;
+- no rewarded ad requirement for a core feature.
+
+If an ad is unavailable, the product continues normally.
+
+QA uses Google demo IDs. Production must use the owner’s real AdMob application/ad-unit IDs and `MYSTIC_USE_TEST_ADS=false`.
 
 ## Privacy posture
 
-The current public release is local-first:
+The public web edition is local-first and ad-free. Native builds add Google advertising/consent services, but private Mystic content is not intentionally sent to a Mystic advertising backend for targeting.
 
-- no account;
-- no advertising SDK;
-- no cross-app tracking;
-- no cloud journal;
-- no payment processing;
-- no transmission of reading questions to the developer.
+Private product data includes reading questions, journal text, Mystic Mirror notes, profile information, intention and PIN-related local state.
 
-Native subscriptions must not be enabled until store products, receipt validation, merchant agreements, and store disclosures are configured.
+Final Apple App Privacy and Google Play Data Safety declarations must be completed from the exact signed native advertising build and actual runtime behavior.
 
 ## Shareable launch material
 
-- `STORE_RELEASE.md` — canonical App Store / Google Play / RevenueCat handoff.
-- `docs/MARKETING_LAUNCH_KIT.md` — paid-social copy, short-form video briefs, creator/PR copy, five-language campaign messages, UTM convention, and advertising claim guardrails.
-- `docs/FINAL_DELIVERY.md` — technical and public-facing handoff for collaborators after release verification.
-- `web/press-kit.html` — public, indexable press/share page designed to be sent directly to creators, partners, designers, or press.
+- `docs/OWNER_GUIDE_A_TO_Z.md` — complete product/owner/operator manual from product concept through advertising and store release.
+- `STORE_RELEASE.md` — canonical App Store / Google Play / AdMob / signing handoff.
+- `docs/MARKETING_LAUNCH_KIT.md` — paid-social copy, short-form video briefs, creator/PR copy, five-language campaign messages, UTM convention and claim guardrails.
+- `docs/FINAL_DELIVERY.md` — technical and public-facing delivery summary.
+- `web/press-kit.html` — public, indexable press/share page.
 
-Marketing must not claim App Store or Google Play availability until signed native listings are actually approved and live. Do not fabricate ratings, user counts, testimonials, awards, scarcity, prices, or predictive/professional-advice claims.
+Marketing must not claim App Store or Google Play availability until signed native listings are approved and live. Do not fabricate ratings, user counts, testimonials, awards, scarcity, prices, download counts, or predictive/professional-advice claims.
 
 ## Development
 
@@ -66,10 +85,14 @@ flutter test
 flutter run
 ```
 
+Native QA builds intentionally default to Google test advertising. Real AdMob IDs belong only in protected production configuration.
+
 ## Release verification
 
-Every push to `main` runs static analysis and widget tests. The Pages workflow performs the same checks, builds the release web bundle, and deploys only after they pass.
+Source/release gates cover formatting, clean diff, static analysis, the complete Flutter test suite, public launch/business-model claims, web release, Android AAB build/audit, unsigned iOS verification, localized store screenshots, and post-deployment public URL checks.
 
-See [STORE_RELEASE.md](STORE_RELEASE.md) for approved listing copy, product identifiers, screenshots, review notes, privacy answers, and the remaining account-owned launch actions.
+Production store release additionally requires protected real AdMob IDs, signing materials, real-device consent/ad QA, store privacy declarations and owner-controlled store approvals.
+
+See [docs/OWNER_GUIDE_A_TO_Z.md](docs/OWNER_GUIDE_A_TO_Z.md) first for the full A-to-Z explanation, then [STORE_RELEASE.md](STORE_RELEASE.md) for native release operations.
 
 Tarot content is for reflection and entertainment, not medical, mental-health, legal, financial, or emergency advice.

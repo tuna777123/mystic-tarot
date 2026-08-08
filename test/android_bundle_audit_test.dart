@@ -47,24 +47,31 @@ version: 1.22.1+30
     expect(abis, requiredAndroidAbis);
   });
 
-  test('blocks sensitive permissions while allowing core app access', () {
-    final forbidden = findForbiddenPermissions(<String>{
-      'android.permission.INTERNET',
-      'android.permission.POST_NOTIFICATIONS',
-      'android.permission.ACCESS_FINE_LOCATION',
-      'com.google.android.gms.permission.AD_ID',
-    });
+  test(
+    'allows reviewed advertising identifiers but blocks sensitive access',
+    () {
+      final permissions = <String>{
+        'android.permission.INTERNET',
+        'android.permission.POST_NOTIFICATIONS',
+        'android.permission.ACCESS_FINE_LOCATION',
+        'com.google.android.gms.permission.AD_ID',
+        'android.permission.ACCESS_ADSERVICES_AD_ID',
+      };
 
-    expect(forbidden, <String>{
-      'android.permission.ACCESS_FINE_LOCATION',
-      'com.google.android.gms.permission.AD_ID',
-    });
-  });
+      expect(findForbiddenPermissions(permissions), <String>{
+        'android.permission.ACCESS_FINE_LOCATION',
+      });
+      expect(findReviewedAdvertisingPermissions(permissions), <String>{
+        'com.google.android.gms.permission.AD_ID',
+        'android.permission.ACCESS_ADSERVICES_AD_ID',
+      });
+    },
+  );
 
-  test('detects packaged advertising and analytics class descriptors', () {
-    final cleanBytes = Uint8List.fromList(
+  test('allows Google Mobile Ads while blocking unknown attribution SDKs', () {
+    final reviewedBytes = Uint8List.fromList(
       ascii.encode(
-        'Lcom/revenuecat/purchases/Purchases;Lcom/tunabozcali/mystictarot/App;',
+        'Lcom/google/android/gms/ads/AdView;Lcom/google/android/ump/ConsentInformation;',
       ),
     );
     final trackedBytes = Uint8List.fromList(
@@ -73,7 +80,7 @@ version: 1.22.1+30
       ),
     );
 
-    expect(findForbiddenDexMarkers(cleanBytes), isEmpty);
+    expect(findForbiddenDexMarkers(reviewedBytes), isEmpty);
     expect(findForbiddenDexMarkers(trackedBytes), {'Lcom/appsflyer/'});
   });
 

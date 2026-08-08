@@ -13,11 +13,12 @@ void main() {
     ).readAsStringSync();
 
     expect(pubspec, contains('share_plus: ^13.3.0'));
+    expect(pubspec, isNot(contains('purchases_flutter')));
     expect(pubspec, isNot(contains('dependency_overrides:')));
     expect(pubspec, isNot(contains('jni: 1.0.0')));
 
     expect(kotlinPolicy, contains("'flutter_timezone'"));
-    expect(kotlinPolicy, contains("'purchases_flutter'"));
+    expect(kotlinPolicy, isNot(contains("'purchases_flutter',")));
     expect(kotlinPolicy, isNot(contains("'share_plus',")));
 
     expect(workflow, contains('build/reports/android-store-release.log'));
