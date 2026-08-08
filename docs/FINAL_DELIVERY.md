@@ -1,6 +1,6 @@
 # Mystic Tarot — Final Delivery Handoff
 
-Product version: `1.22.3+32`  
+Product version: `1.23.0+33`  
 Application / bundle ID: `com.tunabozcali.mystictarot`  
 Repository: `https://github.com/tuna777123/mystic-tarot`  
 Public web app: `https://tuna777123.github.io/mystic-tarot/`  
@@ -41,8 +41,9 @@ Mystic Tarot has **no paid subscription revenue model**.
 
 Native ad design:
 
-- app-open ads on eligible returning foreground transitions;
+- app-open ads only after at least three completed readings, on eligible returning foreground transitions of 30 seconds or longer, with a two-hour minimum interval;
 - interstitial opportunity after every third genuinely new saved reading;
+- cadence persists across process restarts;
 - no permanent banner covering the tarot interface;
 - no rewarded-ad requirement for a core feature.
 
@@ -67,14 +68,16 @@ The public web edition is a product demo/discovery surface and is not a claim th
 
 Source contains:
 
-- `google_mobile_ads` integration;
-- UMP consent information refresh on launch;
+- `google_mobile_ads ^9.0.0` integration;
+- UMP consent information refresh on every launch;
 - consent form handling where required;
 - `canRequestAds()` as the final ad-request gate;
+- privacy-options visibility based on `PrivacyOptionsRequirementStatus.required`;
 - Google demo app/ad-unit IDs for safe QA;
 - environment/dart-define slots for real production AdMob IDs;
-- app-open ad cache/expiry handling;
+- app-open ad cache/expiry, minimum-use, background-duration and frequency handling;
 - every-third-new-reading interstitial frequency cap;
+- persisted cadence across native process restarts;
 - no-ad fallback that never blocks the product;
 - Android audit policy that distinguishes reviewed Google advertising permissions from unrelated sensitive permissions and unapproved trackers.
 
@@ -88,6 +91,7 @@ Delivered source-side release machinery includes:
 - Android AAB release/audit pipeline;
 - unsigned iOS release verification;
 - protected signing contracts;
+- protected production AdMob ID contracts that reject Google demo IDs;
 - strict Android signature checks;
 - pinned `bundletool validate`;
 - package/version/ABI validation;
@@ -189,4 +193,4 @@ Until those steps pass, do not describe native App Store / Google Play availabil
 
 Copy/paste this when sending the project to a collaborator:
 
-> Mystic Tarot `1.22.3+32` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Start with `docs/OWNER_GUIDE_A_TO_Z.md` for the entire product and `STORE_RELEASE.md` for the native release path. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, real-device QA and store approvals are complete.
+> Mystic Tarot `1.23.0+33` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Start with `docs/OWNER_GUIDE_A_TO_Z.md` for the entire product and `STORE_RELEASE.md` for the native release path. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, real-device QA and store approvals are complete.
