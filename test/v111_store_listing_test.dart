@@ -60,7 +60,7 @@ void main() {
 
   test('store copy keeps the free Mirror promise honest', () {
     final expected = <String, String>{
-      'docs/STORE_LISTING_TR.md': 'temel 24 saatlik Mystic Ayna ücretsiz kalır',
+      'docs/STORE_LISTING_TR.md': 'Temel 24 saatlik Mystic Ayna ücretsiz kalır',
       'docs/STORE_LISTING_ES.md':
           'Mystic Mirror básico de 24 horas permanecen gratuitos',
       'docs/STORE_LISTING_FR.md':
