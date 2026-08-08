@@ -16,10 +16,22 @@ void main() {
     );
     expect(service, contains('ConsentForm.loadAndShowConsentFormIfRequired'));
     expect(service, contains('ConsentInformation.instance.canRequestAds()'));
+    expect(
+      service,
+      contains('getPrivacyOptionsRequirementStatus'),
+    );
+    expect(
+      service,
+      contains('PrivacyOptionsRequirementStatus.required'),
+    );
     expect(service, contains('MobileAds.instance.initialize()'));
     expect(service, contains('AppOpenAd.load'));
     expect(service, contains('InterstitialAd.load'));
-    expect(service, contains('_completedReadingsSinceAd < 3'));
+    expect(service, contains('_interstitialEveryReadings = 3'));
+    expect(service, contains('_minimumReadingsBeforeAppOpen = 3'));
+    expect(service, contains('_minimumBackgroundDuration = Duration(seconds: 30)'));
+    expect(service, contains('_minimumAppOpenInterval = Duration(hours: 2)'));
+    expect(service, contains('SharedPreferences.getInstance()'));
     expect(service, contains('MYSTIC_USE_TEST_ADS'));
     expect(service, contains('ADMOB_ANDROID_APP_OPEN_ID'));
     expect(service, contains('ADMOB_IOS_APP_OPEN_ID'));
