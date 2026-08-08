@@ -26,8 +26,16 @@ void main() {
       final file = File(entry.key);
       expect(file.existsSync(), isTrue, reason: entry.key);
       final content = file.readAsStringSync();
-      expect(content, contains('<html lang="${entry.value}">'), reason: entry.key);
-      expect(content.toLowerCase(), contains('mystic tarot'), reason: entry.key);
+      expect(
+        content,
+        contains('<html lang="${entry.value}">'),
+        reason: entry.key,
+      );
+      expect(
+        content.toLowerCase(),
+        contains('mystic tarot'),
+        reason: entry.key,
+      );
       expect(content, contains('legal.css'), reason: entry.key);
     }
   });
