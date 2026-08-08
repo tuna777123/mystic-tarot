@@ -112,6 +112,36 @@ void materializeAdOnlyUi() {
         const SizedBox(width: 8),''',
     'responsive Intelligence header',
   );
+  intelligenceSource = _replaceRequired(
+    intelligenceSource,
+    'Preview the intelligence layer that connects premium spreads across time.',
+    'Explore the intelligence layer that connects deep spreads across time.',
+    'English Intelligence paid-tier copy',
+  );
+  intelligenceSource = _replaceRequired(
+    intelligenceSource,
+    'Previsualiza la capa de inteligencia que conecta las tiradas premium con el tiempo.',
+    'Explora la capa de inteligencia que conecta las tiradas profundas con el tiempo.',
+    'Spanish Intelligence paid-tier copy',
+  );
+  intelligenceSource = _replaceRequired(
+    intelligenceSource,
+    'Découvrez la couche d’intelligence qui relie les tirages premium dans le temps.',
+    'Découvrez la couche d’intelligence qui relie les tirages approfondis dans le temps.',
+    'French Intelligence paid-tier copy',
+  );
+  intelligenceSource = _replaceRequired(
+    intelligenceSource,
+    'Veja a camada de inteligência que conecta tiragens premium ao longo do tempo.',
+    'Veja a camada de inteligência que conecta tiragens profundas ao longo do tempo.',
+    'Portuguese Intelligence paid-tier copy',
+  );
+  intelligenceSource = _replaceRequired(
+    intelligenceSource,
+    'Premium açılımları zaman içinde birbirine bağlayan intelligence katmanını önizle.',
+    'Derin açılımları zaman içinde birbirine bağlayan intelligence katmanını keşfet.',
+    'Turkish Intelligence paid-tier copy',
+  );
   _rejectLegacyUserCopy(
     intelligenceSource,
     'lib/src/mystic_plus_intelligence_screen.dart',
@@ -145,6 +175,9 @@ void _rejectLegacyUserCopy(String source, String path) {
     'PLUS’I GÖR',
     'premium spread',
     'premium açılım',
+    'tiradas premium',
+    'tirages premium',
+    'tiragens premium',
     'Mystic Plus',
     'Manage subscription',
     'View plan and manage subscription',
