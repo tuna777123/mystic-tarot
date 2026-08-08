@@ -36,25 +36,31 @@ void main() {
     expect(service, contains('ADMOB_IOS_INTERSTITIAL_ID'));
   });
 
-  test(
-    'subscription revenue is retired without deleting compatibility code',
-    () {
-      final store = File(
-        'lib/src/store_purchase_service.dart',
-      ).readAsStringSync();
-      final paywall = File(
-        'lib/src/store_ready_premium_screen.dart',
-      ).readAsStringSync();
+  test('subscription runtime is completely absent from the ad-only binary', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    final subscriptionClient = File(
+      'lib/src/subscription_client.dart',
+    ).readAsStringSync();
+    final store = File(
+      'lib/src/store_purchase_service.dart',
+    ).readAsStringSync();
+    final paywall = File(
+      'lib/src/store_ready_premium_screen.dart',
+    ).readAsStringSync();
 
-      expect(store, contains('advertising-only business model'));
-      expect(store, contains('bool isPlus = true'));
-      expect(store, contains('bool get canPurchase => false'));
-      expect(store, contains('bool get canRestore => false'));
-      expect(store, isNot(contains('RevenueCatSubscriptionClient()')));
-      expect(paywall, contains('there is no subscription to buy'));
-      expect(paywall, contains('Continue free'));
-    },
-  );
+    expect(pubspec, isNot(contains('purchases_flutter')));
+    expect(subscriptionClient, isNot(contains('package:purchases_flutter')));
+    expect(subscriptionClient, isNot(contains('RevenueCatSubscriptionClient')));
+    expect(subscriptionClient, isNot(contains('Purchases.configure(')));
+    expect(subscriptionClient, isNot(contains('Purchases.purchase(')));
+    expect(store, contains('advertising-only business model'));
+    expect(store, contains('bool isPlus = true'));
+    expect(store, contains('bool get canPurchase => false'));
+    expect(store, contains('bool get canRestore => false'));
+    expect(store, isNot(contains('RevenueCatSubscriptionClient()')));
+    expect(paywall, contains('there is no subscription to buy'));
+    expect(paywall, contains('Continue free'));
+  });
 
   test(
     'native shells receive AdMob app IDs and saved readings drive cadence',
