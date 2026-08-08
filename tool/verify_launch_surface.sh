@@ -27,7 +27,7 @@ forbid_contains() {
 
 version="$(awk '/^version:[[:space:]]*/ {print $2; exit}' pubspec.yaml)"
 [[ -n "$version" ]] || fail "could not read version from pubspec.yaml"
-[[ "$version" == "1.22.3+32" ]] || fail "unexpected product version: $version"
+[[ "$version" == "1.23.0+33" ]] || fail "unexpected product version: $version"
 
 required=(
   web/index.html
@@ -92,6 +92,8 @@ press='web/press-kit.html'
 require_contains "$press" '<meta name="robots" content="index,follow'
 require_contains "$press" '<link rel="canonical" href="https://tuna777123.github.io/mystic-tarot/press-kit.html">'
 require_contains "$press" 'Mystic Tarot — Official Press Kit'
+require_contains "$press" '"softwareVersion":"1.23.0"'
+require_contains "$press" 'Official press & sharing kit · v1.23.0'
 require_contains "$press" 'Public web edition available now'
 require_contains "$press" 'Native iOS and Android store candidates'
 require_contains "$press" 'Native apps are advertising-supported'
@@ -144,13 +146,13 @@ for privacy in \
 done
 
 kit='docs/MARKETING_LAUNCH_KIT.md'
-require_contains "$kit" 'Version: `1.22.3+32`'
+require_contains "$kit" 'Version: `1.23.0+33`'
 require_contains "$kit" '### English'
 require_contains "$kit" '### Turkish'
 require_contains "$kit" '### Spanish'
 require_contains "$kit" '### French'
 require_contains "$kit" '### Brazilian Portuguese'
-require_contains "$kit" 'utm_campaign=launch_1_22_3'
+require_contains "$kit" 'utm_campaign=launch_1_23_0'
 require_contains "$kit" 'Creative guardrails'
 require_contains "$kit" 'fabricated testimonials'
 require_contains "$kit" 'fake user counts'
@@ -160,7 +162,7 @@ require_contains "$kit" 'advertising-supported'
 require_contains "$kit" 'no paid subscription'
 
 handoff='docs/FINAL_DELIVERY.md'
-require_contains "$handoff" 'Product version: `1.22.3+32`'
+require_contains "$handoff" 'Product version: `1.23.0+33`'
 require_contains "$handoff" 'com.tunabozcali.mystictarot'
 require_contains "$handoff" 'Public press kit:'
 require_contains "$handoff" 'advertising-only'
@@ -169,6 +171,7 @@ require_contains "$handoff" 'What is intentionally not represented as complete'
 require_contains "$handoff" 'App Store or Google Play availability claims before'
 
 owner='docs/OWNER_GUIDE_A_TO_Z.md'
+require_contains "$owner" 'Product version: `1.23.0+33`'
 require_contains "$owner" 'Advertising-only business model'
 require_contains "$owner" 'ADMOB_ANDROID_APP_ID'
 require_contains "$owner" 'ADMOB_IOS_APP_ID'
@@ -176,6 +179,7 @@ require_contains "$owner" 'MYSTIC_USE_TEST_ADS=false'
 require_contains "$owner" 'Mystic Mirror'
 require_contains "$owner" 'EN, TR, ES, FR, PT-BR'
 
+require_contains STORE_RELEASE.md 'Current source version: `1.23.0+33`'
 require_contains STORE_RELEASE.md 'ADMOB_ANDROID_APP_ID'
 require_contains STORE_RELEASE.md 'ADMOB_IOS_APP_ID'
 require_contains STORE_RELEASE.md 'ADMOB_ANDROID_APP_OPEN_ID'
