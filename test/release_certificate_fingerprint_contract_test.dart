@@ -33,7 +33,7 @@ void main() {
     expect(workflow, contains('android-upload-cert.der'));
     expect(workflow, contains('android-bundle-cert.pem'));
     expect(workflow, contains('sha256sum'));
-    expect(workflow, contains(r'test "$ACTUAL" = "$EXPECTED"'));
+    expect(workflow, contains(r'test "$ACTUAL" = "$EXPECTED"'.replaceAll(r'\"', '"')));
     expect(workflow, contains('keytool -printcert -jarfile'));
     expect(workflow, contains('jarsigner -verify -certs'));
     expect(workflow, contains("grep -q 'jar verified.'"));
@@ -63,11 +63,11 @@ void main() {
     expect(workflow, contains('openssl pkcs12'));
     expect(workflow, contains('openssl x509'));
     expect(workflow, contains('shasum -a 256'));
-    expect(workflow, contains(r'test "$ACTUAL" = "$EXPECTED"'));
+    expect(workflow, contains(r'test "$ACTUAL" = "$EXPECTED"'.replaceAll(r'\"', '"')));
     expect(workflow, contains('-checkend 604800'));
     expect(
       workflow,
-      contains('security list-keychains -d user -s "\$KEYCHAIN_PATH"'),
+      contains(r'security list-keychains -d user -s "$KEYCHAIN_PATH"'.replaceAll(r'\"', '"')),
     );
     expect(workflow, contains('codesign --verify --deep --strict'));
     expect(workflow, contains("-c 'Print :application-identifier'"));
