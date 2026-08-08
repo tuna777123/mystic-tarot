@@ -1,6 +1,6 @@
 # Mystic Tarot — Store Release Pack
 
-Current source version: `1.22.3+32`.
+Current source version: `1.23.0+33`.
 
 ## Business model
 
@@ -10,8 +10,9 @@ Revenue comes only from Google Mobile Ads in the native Android and iOS apps. Th
 
 ### Native ad formats
 
-- App-open ad: eligible returning foreground transitions.
+- App-open ad: eligible only after at least three completed readings, after 30+ seconds in background, with a two-hour minimum interval; cached ads expire after four hours.
 - Interstitial ad: at most after every third genuinely new saved reading, and only when a preloaded ad is ready.
+- Ad cadence persists across process restarts.
 - No banner is pinned over the tarot interface.
 - No rewarded feature lock: core product functionality never requires watching an ad.
 
@@ -27,7 +28,7 @@ Changing bundle/application IDs after first store upload is disruptive. Confirm 
 
 ## AdMob production configuration
 
-Create the same application in AdMob for Android and iOS and create one app-open and one interstitial unit per platform.
+Create the application in AdMob for Android and iOS and create one app-open and one interstitial unit per platform.
 
 Required production values:
 
@@ -38,9 +39,9 @@ Required production values:
 - `ADMOB_ANDROID_INTERSTITIAL_ID`
 - `ADMOB_IOS_INTERSTITIAL_ID`
 
-QA builds may use Google-provided demo app/ad-unit IDs. Production builds must set `MYSTIC_USE_TEST_ADS=false` and provide the four production ad-unit IDs through `--dart-define` plus the two native application IDs through the protected build environment.
+QA builds use Google-provided demo app/ad-unit IDs. Production builds must set `MYSTIC_USE_TEST_ADS=false`, inject the four production ad-unit IDs through `--dart-define`, and inject the two native AdMob application IDs through the protected build environment.
 
-Never publish a store candidate that still uses Google demo ad units.
+The protected production preflight validates the ID formats and rejects Google demo application/ad-unit IDs. Never publish a store candidate that still uses demo IDs.
 
 ## Ad privacy / consent
 
@@ -48,7 +49,9 @@ The native app integrates Google Mobile Ads and UMP.
 
 On each app launch the app requests current consent information. If a form is required, UMP presents it. Advertising requests remain gated by `ConsentInformation.canRequestAds()`.
 
-Configure the appropriate Privacy & messaging message in the AdMob dashboard before production submission. If UMP says a privacy-options entry point is required, the app exposes an advertising privacy choice action on its ad-supported access surface.
+Configure the appropriate Privacy & messaging message in the AdMob dashboard before production submission. The app exposes an advertising privacy-choice entry point only when UMP reports `PrivacyOptionsRequirementStatus.required`.
+
+The current source does not add a custom iOS ATT/IDFA request flow. If ATT/IDFA messaging is enabled later, add the required iOS usage description and re-run privacy/store QA before submission.
 
 The app does not add Firebase Analytics, AppsFlyer, Adjust, Facebook App Events, Mixpanel, Amplitude, OneSignal, or Sentry as advertising/analytics companions. The Android bundle audit continues to fail closed on those unapproved SDK markers.
 
@@ -78,7 +81,7 @@ https://tuna777123.github.io/mystic-tarot/support.html
 **Marketing URL**  
 https://tuna777123.github.io/mystic-tarot/
 
-Localized metadata remains in:
+Localized metadata:
 
 - `docs/STORE_LISTING_TR.md`
 - `docs/STORE_LISTING_ES.md`
@@ -103,7 +106,7 @@ Mystic Tarot is made for personal reflection and entertainment. It does not prov
 
 ## Screenshot sequence
 
-The canonical QA pack remains five locales × two device profiles × five scenes = 50 screenshots. Do not show subscription prices or purchase CTAs. If an ad-supported disclosure appears in store screenshots, it must match the actual signed build.
+The canonical QA pack is five locales × two device profiles × five scenes = 50 screenshots. Do not show subscription prices or purchase CTAs. If an ad-supported disclosure appears in store screenshots, it must match the actual signed build.
 
 Suggested sequence:
 
@@ -138,9 +141,11 @@ The repository still contains `purchases_flutter` compatibility code from the pr
 5. Confirm formerly gated content is usable without payment.
 6. Confirm there is no subscription checkout or restore requirement.
 7. Test UMP consent behavior on an applicable test geography/device.
-8. Confirm test ads are used during QA.
-9. With production AdMob IDs in the signed store candidate, verify app-open and frequency-capped interstitial behavior on real devices.
-10. Repeat legal-link and narrow-screen checks in EN, TR, ES, FR and PT-BR.
+8. Confirm Google demo/test ads are used during QA.
+9. Complete three new readings and verify the interstitial opportunity occurs only at the natural completion boundary.
+10. Background for 30+ seconds after at least three readings and verify app-open frequency/expiry behavior.
+11. With production IDs in signed candidates, repeat consent/ad/no-ad/failure testing on real Android and iPhone devices.
+12. Repeat legal-link and narrow-screen checks in EN, TR, ES, FR and PT-BR.
 
 ## Privacy declarations
 
@@ -148,7 +153,7 @@ Store forms must be completed from the exact final signed dependency/runtime beh
 
 ### Apple App Privacy
 
-The native app contains an advertising SDK. Review the final Google Mobile Ads/UMP behavior and declare advertising-related data types and purposes required by the App Store form. Do not claim “Data Not Collected” for the native advertising build unless Apple’s current questionnaire and the final runtime evidence genuinely support it.
+The native app contains an advertising SDK. Review the final Google Mobile Ads/UMP behavior and declare advertising-related data types and purposes required by the current App Store form. Do not claim “Data Not Collected” for the native advertising build unless Apple’s current questionnaire and the final runtime evidence genuinely support it.
 
 The app itself does not upload private tarot journal text, profile content, PIN data, or local reflection history to Mystic servers.
 
@@ -160,7 +165,7 @@ Do not claim that advertising/tracking identifiers are absent after AdMob integr
 
 ## Launch languages
 
-Version 1 launches with five complete product languages:
+The launch has five complete product languages:
 
 - English
 - Turkish
@@ -181,10 +186,10 @@ These cannot be completed from source code alone:
 5. Create app-open + interstitial units for Android and iOS.
 6. Configure AdMob Privacy & messaging / UMP messages.
 7. Add the six production AdMob IDs to the protected production build configuration.
-8. Set `MYSTIC_USE_TEST_ADS=false` in production.
+8. Production builds must use `MYSTIC_USE_TEST_ADS=false`.
 9. Create Apple signing/provisioning and Android upload signing materials.
 10. Produce genuinely signed candidates.
-11. Test consent, ad loading, frequency cap, app foreground behavior and no-ad failure paths on a real iPhone and Android phone.
+11. Test consent, ad loading, frequency cap, foreground behavior and no-ad failure paths on a real iPhone and Android phone.
 12. Complete App Privacy and Google Play Data Safety from final runtime evidence.
 13. Run TestFlight / Play closed testing and Play pre-launch report.
 14. Submit for store review.
@@ -200,7 +205,7 @@ A native build is eligible for production submission only when:
 - UMP privacy behavior is configured and real-device tested;
 - every formerly paid feature is usable without purchase;
 - no live purchase/restore CTA remains;
-- Android bundle audit allows only reviewed Google advertising permissions while still blocking sensitive permissions and unknown tracking SDKs;
+- Android bundle audit allows only reviewed Google advertising permissions while still blocking unrelated sensitive permissions and unknown analytics/attribution SDKs;
 - Privacy Policy, App Privacy and Data Safety match the signed runtime;
 - real-device ad/no-ad/error paths pass;
 - all public legal/support/marketing URLs remain live;
