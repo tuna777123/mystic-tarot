@@ -38,9 +38,7 @@ void main() {
 
   test('oversized values cannot become accidental content payloads', () {
     expect(
-      () => MysticBusinessMetrics.validateDimensions({
-        'source': 'x' * 65,
-      }),
+      () => MysticBusinessMetrics.validateDimensions({'source': 'x' * 65}),
       throwsArgumentError,
     );
   });
@@ -61,10 +59,7 @@ void main() {
     );
 
     expect(capturedEvent, MysticBusinessEvent.mirrorCompleted);
-    expect(capturedDimensions, {
-      'language': 'EN',
-      'source': 'living_journal',
-    });
+    expect(capturedDimensions, {'language': 'EN', 'source': 'living_journal'});
   });
 
   test('remote reporter failure never escapes into a product flow', () async {

@@ -39,19 +39,22 @@ void main() {
     expect(result.premiumValueScore, 0);
   });
 
-  test('returning users without a due Mirror are directed to daily guidance', () {
-    final result = engine.analyze(
-      records: [record(createdAt: now.subtract(const Duration(days: 1)))],
-      streak: 2,
-      completedArcanaDays: 1,
-      freeReadingsLeft: 0,
-      mirrorDueCount: 0,
-      now: now,
-    );
+  test(
+    'returning users without a due Mirror are directed to daily guidance',
+    () {
+      final result = engine.analyze(
+        records: [record(createdAt: now.subtract(const Duration(days: 1)))],
+        streak: 2,
+        completedArcanaDays: 1,
+        freeReadingsLeft: 0,
+        mirrorDueCount: 0,
+        now: now,
+      );
 
-    expect(result.nextAction.type, MysticNextActionType.dailyReading);
-    expect(result.nextAction.priority, 95);
-  });
+      expect(result.nextAction.type, MysticNextActionType.dailyReading);
+      expect(result.nextAction.priority, 95);
+    },
+  );
 
   test('a due Mirror outranks a not-yet-completed daily reading', () {
     final result = engine.analyze(

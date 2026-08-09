@@ -14,10 +14,11 @@ enum MysticBusinessEvent {
   adImpression,
 }
 
-typedef MysticBusinessMetricReporter = FutureOr<void> Function(
-  MysticBusinessEvent event,
-  Map<String, String> dimensions,
-);
+typedef MysticBusinessMetricReporter =
+    FutureOr<void> Function(
+      MysticBusinessEvent event,
+      Map<String, String> dimensions,
+    );
 
 /// Privacy-safe product analytics boundary.
 ///

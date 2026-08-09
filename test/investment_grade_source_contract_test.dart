@@ -4,8 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Living Journal contains no stale paid-tier launch copy', () {
-    final source = File('lib/src/mystic_living_journal_feature.dart')
-        .readAsStringSync();
+    final source = File(
+      'lib/src/mystic_living_journal_feature.dart',
+    ).readAsStringSync();
 
     for (final forbidden in [
       'Unlock your full pattern map',
