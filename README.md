@@ -85,13 +85,14 @@ Marketing must not claim App Store or Google Play availability until signed nati
 
 ```bash
 flutter create . --platforms=web,android,ios
+dart run tool/configure_store_identifiers.dart
 flutter pub get
 flutter analyze
 flutter test
 flutter run
 ```
 
-Native QA builds intentionally default to Google test advertising. Real AdMob IDs belong only in protected production configuration.
+The same deterministic materialization used by verified release builds is therefore also part of the documented local-development path. Native QA builds intentionally default to Google test advertising. Real AdMob IDs belong only in protected production configuration.
 
 ## Release verification
 
