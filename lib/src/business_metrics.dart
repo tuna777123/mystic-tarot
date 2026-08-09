@@ -63,16 +63,31 @@ class MysticBusinessMetrics {
     MysticBusinessEvent event, {
     Map<String, String> dimensions = const <String, String>{},
   }) async {
+    await tryRecord(event, dimensions: dimensions);
+  }
+
+  /// Returns whether the reporter accepted the event, while still keeping
+  /// observability failures isolated from product behavior.
+  ///
+  /// This is used only when a local dedupe marker must not advance until the
+  /// aggregate event is durably accepted. Normal product flows should call
+  /// [record].
+  static Future<bool> tryRecord(
+    MysticBusinessEvent event, {
+    Map<String, String> dimensions = const <String, String>{},
+  }) async {
     final safe = validateDimensions(dimensions);
     try {
       await _reporter(event, safe);
+      return true;
     } catch (error, stackTrace) {
       // Metrics are an observability side effect, never a product dependency.
-      // A remote reporter outage must not block reading, Mirror, sharing or ads.
+      // A reporter outage must not block reading, Mirror, sharing or ads.
       if (kDebugMode) {
         debugPrint('Mystic metric reporter failed: $error');
         debugPrintStack(stackTrace: stackTrace);
       }
+      return false;
     }
   }
 
