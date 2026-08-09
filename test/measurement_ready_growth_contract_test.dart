@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('launch bootstraps local aggregate business evidence', () {
+  test('launch and foreground returns bootstrap active-day evidence', () {
     final main = File('lib/main.dart').readAsStringSync();
     final bootstrap = File(
       'lib/src/business_metrics_bootstrap.dart',
@@ -12,6 +12,9 @@ void main() {
     expect(main, contains('MysticBusinessMetricsBootstrap.configure()'));
     expect(main, contains('MysticBusinessMetricsBootstrap.recordLaunch()'));
     expect(bootstrap, contains('MysticLocalGrowthLedger.instance.record'));
+    expect(bootstrap, contains('WidgetsBinding.instance.addObserver'));
+    expect(bootstrap, contains("source: 'foreground'"));
+    expect(bootstrap, contains('AppLifecycleState.resumed'));
   });
 
   test('ad impressions use the Mobile Ads impression callback', () {
@@ -105,6 +108,8 @@ void main() {
       contains("privacyModel'] != 'aggregate-only-local-no-user-id'"),
     );
     expect(aggregator, contains('Mature Mirror numerator cannot exceed'));
+    expect(aggregator, contains('_validateDimensionCountKeys'));
+    expect(aggregator, contains("'device_id'"));
     expect(aggregator, contains('d7Eligible'));
     expect(aggregator, contains('productScaleGatePassed'));
     expect(aggregator, contains('DO NOT SCALE'));
