@@ -136,6 +136,32 @@ A missing/immature denominator is **not** treated as a pass.
 class MysticGrowthEvidenceAggregator {
   const MysticGrowthEvidenceAggregator();
 
+  static const _allowedDimensionNames = <String>{
+    'language',
+    'platform',
+    'reading_kind',
+    'growth_stage',
+    'ad_format',
+    'source',
+  };
+
+  static const _forbiddenDimensionFragments = <String>{
+    'question',
+    'note',
+    'card',
+    'name',
+    'intention',
+    'journal',
+    'emotion',
+    'outcome',
+    'text',
+    'pin',
+    'query',
+    'user_id',
+    'device_id',
+    'advertising_id',
+  };
+
   MysticGrowthCohortReport aggregateJson(
     Iterable<String> payloads, {
     required DateTime asOf,
@@ -241,7 +267,33 @@ class MysticGrowthEvidenceAggregator {
         );
       }
     }
+    _validateDimensionCountKeys(decoded['dimensionCounts']);
+    final dailyDimensions = decoded['dailyDimensionCounts'];
+    if (dailyDimensions is Map<String, dynamic>) {
+      for (final value in dailyDimensions.values) {
+        _validateDimensionCountKeys(value);
+      }
+    }
     return decoded;
+  }
+
+  void _validateDimensionCountKeys(Object? value) {
+    if (value == null) return;
+    if (value is! Map<String, dynamic>) {
+      throw const FormatException('Growth dimension counts must be an object.');
+    }
+    for (final key in value.keys) {
+      final normalized = key.toLowerCase();
+      if (_forbiddenDimensionFragments.any(normalized.contains)) {
+        throw FormatException(
+          'Private/identity-like growth dimension key is not allowed: $key',
+        );
+      }
+      final parts = key.split('|');
+      if (parts.length != 3 || !_allowedDimensionNames.contains(parts[1])) {
+        throw FormatException('Malformed growth dimension key: $key');
+      }
+    }
   }
 
   bool _containsKeyRecursive(Object? value, String forbidden) {
