@@ -20,24 +20,36 @@ class MysticGrowthMeasurementBaseline {
 
   final SharedPreferences? _providedPreferences;
   final DateTime Function() _now;
-  Future<DateTime>? _starting;
+  Future<DateTime>? _creating;
 
   Future<SharedPreferences> _preferences() async =>
       _providedPreferences ?? SharedPreferences.getInstance();
 
-  Future<DateTime> ensureStarted() {
-    final current = _starting;
-    if (current != null) return current;
-    final next = _ensureStarted();
-    _starting = next;
-    return next;
-  }
-
-  Future<DateTime> _ensureStarted() async {
+  Future<DateTime> ensureStarted() async {
     final preferences = await _preferences();
     final storedMillis = preferences.getInt(storageKey);
     if (storedMillis != null) {
       return DateTime.fromMillisecondsSinceEpoch(storedMillis, isUtc: true);
+    }
+
+    final currentCreation = _creating;
+    if (currentCreation != null) return currentCreation;
+
+    final next = _create(preferences);
+    _creating = next;
+    try {
+      return await next;
+    } finally {
+      if (identical(_creating, next)) _creating = null;
+    }
+  }
+
+  Future<DateTime> _create(SharedPreferences preferences) async {
+    // Re-check after joining the creation path in case another caller persisted
+    // the baseline between the first read and this write.
+    final existing = preferences.getInt(storageKey);
+    if (existing != null) {
+      return DateTime.fromMillisecondsSinceEpoch(existing, isUtc: true);
     }
 
     final startedAt = _now().toUtc();
@@ -64,6 +76,6 @@ class MysticGrowthMeasurementBaseline {
     if (!removed && preferences.containsKey(storageKey)) {
       throw StateError('Could not delete the growth measurement baseline.');
     }
-    _starting = null;
+    _creating = null;
   }
 }
