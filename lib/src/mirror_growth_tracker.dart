@@ -38,23 +38,24 @@ class MysticMirrorGrowthTracker {
     required String languageCode,
     DateTime? now,
   }) {
-    final observedAt = now ?? DateTime.now();
+    final observedAtUtc = (now ?? DateTime.now()).toUtc();
     final next = _queue.then<void>((_) async {
-      final measurementStartedAt = await _baseline.ensureStarted();
+      final measurementStartedAtUtc = (await _baseline.ensureStarted()).toUtc();
       final ordered = records.toList(growable: false)
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       for (final record in ordered) {
-        if (record.createdAt.toUtc().isBefore(measurementStartedAt)) continue;
+        final createdAtUtc = record.createdAt.toUtc();
+        if (createdAtUtc.isBefore(measurementStartedAtUtc)) continue;
 
-        final maturesAt = record.createdAt.add(completionWindow);
-        if (observedAt.isBefore(maturesAt)) continue;
+        final maturesAtUtc = createdAtUtc.add(completionWindow);
+        if (observedAtUtc.isBefore(maturesAtUtc)) continue;
 
         final recordId = mysticMirrorRecordId(record);
         final reflection = reflections[recordId];
         final completedWithinWindow =
             reflection != null &&
-            !reflection.completedAt.toLocal().isAfter(maturesAt);
+            !reflection.completedAt.toUtc().isAfter(maturesAtUtc);
         final growthStage = completedWithinWindow
             ? 'completed_within_72h'
             : 'not_completed_within_72h';
