@@ -215,9 +215,7 @@ class MysticGrowthEvidenceAggregator {
           dimensions['mirrorWindowMatured|growth_stage|completed_within_72h'] ??
           0;
       final missed =
-          dimensions[
-            'mirrorWindowMatured|growth_stage|not_completed_within_72h'
-          ] ??
+          dimensions['mirrorWindowMatured|growth_stage|not_completed_within_72h'] ??
           0;
       if (completed + missed != matured) {
         throw const FormatException(
@@ -317,10 +315,7 @@ class MysticGrowthEvidenceAggregator {
     }
   }
 
-  void _validateDimensionCountKeys(
-    Object? value, {
-    Map<String, int>? events,
-  }) {
+  void _validateDimensionCountKeys(Object? value, {Map<String, int>? events}) {
     if (value == null) return;
     final counts = _countMap(value, label: 'growth dimension counts');
     for (final entry in counts.entries) {
@@ -407,9 +402,7 @@ class MysticGrowthEvidenceAggregator {
     DateTime firstOpenDay,
     Set<String> activeDays,
     int offset,
-  ) => activeDays.contains(
-    _dayKey(firstOpenDay.add(Duration(days: offset))),
-  );
+  ) => activeDays.contains(_dayKey(firstOpenDay.add(Duration(days: offset))));
 
   bool _containsKeyRecursive(Object? value, String forbidden) {
     if (value is Map<String, dynamic>) {

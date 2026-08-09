@@ -28,8 +28,7 @@ String evidence({
     if (d1) _day(first.add(const Duration(days: 1))),
     if (d7) _day(first.add(const Duration(days: 7))),
     if (d30) _day(first.add(const Duration(days: 30))),
-  }.toList()
-    ..sort();
+  }.toList()..sort();
   final notCompletedWithin72 = max(0, matureWindows - completedWithin72);
   return jsonEncode(<String, Object?>{
     'schemaVersion': 1,
@@ -167,9 +166,7 @@ void main() {
       'activeDays': <String>['2026-08-01', '2026-08-02', '2026-08-08'],
       'retention': <String, bool>{'d1': true, 'd7': true, 'd30': false},
       'eventCounts': <String, int>{'appOpened': 3, 'readingCompleted': 1},
-      'dimensionCounts': <String, int>{
-        'readingCompleted|device_id|abc': 1,
-      },
+      'dimensionCounts': <String, int>{'readingCompleted|device_id|abc': 1},
     });
 
     expect(
@@ -202,14 +199,16 @@ void main() {
   });
 
   test('rejects reported retention that disagrees with active days', () {
-    final decoded = jsonDecode(
-      evidence(
-        firstOpen: '2026-08-01',
-        d1: true,
-        d7: false,
-        d30: false,
-      ),
-    ) as Map<String, dynamic>;
+    final decoded =
+        jsonDecode(
+              evidence(
+                firstOpen: '2026-08-01',
+                d1: true,
+                d7: false,
+                d30: false,
+              ),
+            )
+            as Map<String, dynamic>;
     decoded['retention'] = <String, bool>{
       'd1': false,
       'd7': false,
@@ -225,16 +224,18 @@ void main() {
   });
 
   test('rejects incomplete mature Mirror classification evidence', () {
-    final decoded = jsonDecode(
-      evidence(
-        firstOpen: '2026-07-01',
-        d1: true,
-        d7: true,
-        d30: true,
-        matureWindows: 2,
-        completedWithin72: 1,
-      ),
-    ) as Map<String, dynamic>;
+    final decoded =
+        jsonDecode(
+              evidence(
+                firstOpen: '2026-07-01',
+                d1: true,
+                d7: true,
+                d30: true,
+                matureWindows: 2,
+                completedWithin72: 1,
+              ),
+            )
+            as Map<String, dynamic>;
     decoded['dimensionCounts'] = <String, int>{
       'mirrorWindowMatured|growth_stage|completed_within_72h': 1,
     };
