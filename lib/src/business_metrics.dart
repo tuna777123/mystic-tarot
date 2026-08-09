@@ -62,7 +62,16 @@ class MysticBusinessMetrics {
     Map<String, String> dimensions = const <String, String>{},
   }) async {
     final safe = validateDimensions(dimensions);
-    await _reporter(event, safe);
+    try {
+      await _reporter(event, safe);
+    } catch (error, stackTrace) {
+      // Metrics are an observability side effect, never a product dependency.
+      // A remote reporter outage must not block reading, Mirror, sharing or ads.
+      if (kDebugMode) {
+        debugPrint('Mystic metric reporter failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
+    }
   }
 
   static Map<String, String> validateDimensions(Map<String, String> values) {
