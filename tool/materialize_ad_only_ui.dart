@@ -28,6 +28,12 @@ void materializeAdOnlyUi() {
     "import 'growth_evidence_screen.dart';\n",
     'growth evidence app import',
   );
+  appSource = _insertAfterRequired(
+    appSource,
+    "import 'mystic_mirror.dart';\n",
+    "import 'mirror_growth_tracker.dart';\n",
+    'Mirror growth tracker app import',
+  );
   appSource = _replaceRequired(
     appSource,
     '''                      Container(
@@ -132,9 +138,17 @@ void materializeAdOnlyUi() {
         ),
       );
     }
+    unawaited(
+      MysticMirrorGrowthTracker.instance.sync(
+        records: journal,
+        reflections: reflections,
+        languageCode: language.code,
+        now: now,
+      ),
+    );
     _scheduleNextMirrorDue(reflections, now);
   }''',
-    'Mirror due business event',
+    'Mirror due and mature-window business events',
   );
   appSource = _replaceRequired(
     appSource,
@@ -182,6 +196,20 @@ void materializeAdOnlyUi() {
     });
   }''',
     'onboarding business event',
+  );
+  appSource = _insertAfterRequired(
+    appSource,
+    '      _scheduleNextMirrorDue(mirrorReflections, now);\n',
+    '''      unawaited(
+        MysticMirrorGrowthTracker.instance.sync(
+          records: journalLoad.records,
+          reflections: mirrorReflections,
+          languageCode: savedLanguage.code,
+          now: now,
+        ),
+      );
+''',
+    'initial mature Mirror cohort sync',
   );
   appSource = _insertBeforeRequired(
     appSource,
@@ -236,8 +264,9 @@ void materializeAdOnlyUi() {
     'growth evidence profile entry',
   );
   _rejectLegacyUserCopy(appSource, 'lib/src/app.dart');
-  if (!appSource.contains('MysticGrowthEvidenceScreen(')) {
-    throw StateError('Growth evidence profile entry was not materialized.');
+  if (!appSource.contains('MysticGrowthEvidenceScreen(') ||
+      !appSource.contains('MysticMirrorGrowthTracker.instance.sync(')) {
+    throw StateError('Growth evidence runtime wiring was not materialized.');
   }
   app.writeAsStringSync(appSource);
 
@@ -364,8 +393,8 @@ void materializeAdOnlyUi() {
 
   stdout.writeln(
     'Advertising-only UI materialized: paid-tier user copy removed, '
-    'growth events and opt-in diagnostics installed, narrow-screen header '
-    'hardened, and Mirror sharing made iPad-safe.',
+    'growth events, mature Mirror cohort evidence and opt-in diagnostics '
+    'installed; narrow-screen and iPad share hardening retained.',
   );
 }
 
