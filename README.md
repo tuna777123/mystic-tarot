@@ -48,7 +48,7 @@ Native Android/iOS builds use:
 - Google Mobile Ads;
 - Google User Messaging Platform for applicable consent/privacy choices;
 - app-open ads only on eligible returning foreground transitions, never as a deliberate first-start blocker;
-- at least one hour between app-open ad opportunities;
+- at least two hours between app-open ad opportunities;
 - an interstitial opportunity after every third genuinely new saved reading;
 - no permanent banner over the tarot interface;
 - no rewarded ad requirement for a core feature.
@@ -63,7 +63,13 @@ The public web edition is local-first and ad-free. Native builds add Google adve
 
 Private product data includes reading questions, journal text, Mystic Mirror notes, profile information, intention and PIN-related local state.
 
+Product-growth telemetry uses a separate allow-listed `MysticBusinessMetrics` boundary. Questions, notes, card names, user names, intentions, journal text, emotions, Mirror outcomes and free text are not permitted as business-metric dimensions.
+
 Final Apple App Privacy and Google Play Data Safety declarations must be completed from the exact signed native advertising build and actual runtime behavior.
+
+## Company growth gates
+
+Mystic is operated as a measured product, not a feature-count project. `docs/GROWTH_KPI_CONTRACT.md` defines retention, Mirror-completion and paid-acquisition gates; `docs/INVESTMENT_GRADE_PRODUCT_PLAN.md` defines the product thesis and capital-allocation rules. Paid acquisition should not materially scale until retained cohorts prove the 24-hour Mirror loop.
 
 ## Shareable launch material
 
