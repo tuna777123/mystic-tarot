@@ -22,6 +22,12 @@ void materializeAdOnlyUi() {
     "import 'business_metrics.dart';\n",
     'business metrics app import',
   );
+  appSource = _insertAfterRequired(
+    appSource,
+    "import 'growth_engine.dart';\n",
+    "import 'growth_evidence_screen.dart';\n",
+    'growth evidence app import',
+  );
   appSource = _replaceRequired(
     appSource,
     '''                      Container(
@@ -177,7 +183,62 @@ void materializeAdOnlyUi() {
   }''',
     'onboarding business event',
   );
+  appSource = _insertBeforeRequired(
+    appSource,
+    '''          const SizedBox(height: 18),
+          ListTile(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => SoulProfileScreen(''',
+    '''          if (mysticGrowthDiagnosticsEnabled) ...[
+            const SizedBox(height: 8),
+            ListTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MysticGrowthEvidenceScreen(
+                    language: language,
+                  ),
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: const Icon(
+                Icons.monitor_heart_outlined,
+                color: MysticColors.gold,
+              ),
+              title: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Growth evidence',
+                  turkish: 'Büyüme kanıtı',
+                  spanish: 'Evidencia de crecimiento',
+                  french: 'Preuves de croissance',
+                  portugueseBrazil: 'Evidência de crescimento',
+                ),
+                style: const TextStyle(fontFamily: 'Arial'),
+              ),
+              subtitle: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Aggregate-only beta diagnostics. No private tarot content.',
+                  turkish: 'Yalnızca toplu beta tanılama verisi. Özel tarot içeriği yok.',
+                  spanish: 'Diagnóstico beta agregado. Sin contenido privado de tarot.',
+                  french: 'Diagnostic bêta agrégé. Aucun contenu tarot privé.',
+                  portugueseBrazil: 'Diagnóstico beta agregado. Sem conteúdo privado de tarot.',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          ],
+''',
+    'growth evidence profile entry',
+  );
   _rejectLegacyUserCopy(appSource, 'lib/src/app.dart');
+  if (!appSource.contains('MysticGrowthEvidenceScreen(')) {
+    throw StateError('Growth evidence profile entry was not materialized.');
+  }
   app.writeAsStringSync(appSource);
 
   var intelligenceSource = intelligence.readAsStringSync();
@@ -303,8 +364,8 @@ void materializeAdOnlyUi() {
 
   stdout.writeln(
     'Advertising-only UI materialized: paid-tier user copy removed, '
-    'growth events installed, narrow-screen header hardened, and Mirror '
-    'sharing made iPad-safe.',
+    'growth events and opt-in diagnostics installed, narrow-screen header '
+    'hardened, and Mirror sharing made iPad-safe.',
   );
 }
 
