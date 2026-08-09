@@ -73,7 +73,10 @@ void main() {
     expect(tool.readAsStringSync(), contains('sha256sum'));
     expect(tool.readAsStringSync(), contains('validateGooglePlayTargetSdk'));
     expect(tool.readAsStringSync(), contains('Android target SDK'));
-    expect(policy.readAsStringSync(), contains('minimumGooglePlayTargetSdk = 36'));
+    expect(
+      policy.readAsStringSync(),
+      contains('minimumGooglePlayTargetSdk = 36'),
+    );
     expect(policy.readAsStringSync(), contains('AD_ID'));
     expect(policy.readAsStringSync(), contains('Lcom/appsflyer/'));
   });
