@@ -16,6 +16,12 @@ void materializeAdOnlyUi() {
   }
 
   var appSource = app.readAsStringSync();
+  appSource = _insertAfterRequired(
+    appSource,
+    "import 'ad_revenue_service.dart';\n",
+    "import 'business_metrics.dart';\n",
+    'business metrics app import',
+  );
   appSource = _replaceRequired(
     appSource,
     '''                      Container(
@@ -81,6 +87,95 @@ void materializeAdOnlyUi() {
     "'Ücretsiz derin okumalar kullanıldı'",
     "'Derin okumalar açık kalır'",
     'Turkish exhausted-reading copy',
+  );
+  appSource = _replaceRequired(
+    appSource,
+    '''  Future<void> _refreshMirrorDueState() async {
+    final reflections = await mirrorStore.load();
+    if (!mounted) return;
+    final now = DateTime.now();
+    setState(() {
+      mirrorDueCount = countDueMysticMirrors(
+        records: journal,
+        reflections: reflections,
+        now: now,
+      );
+    });
+    _scheduleNextMirrorDue(reflections, now);
+  }''',
+    '''  Future<void> _refreshMirrorDueState() async {
+    final reflections = await mirrorStore.load();
+    if (!mounted) return;
+    final now = DateTime.now();
+    final previousMirrorDueCount = mirrorDueCount;
+    setState(() {
+      mirrorDueCount = countDueMysticMirrors(
+        records: journal,
+        reflections: reflections,
+        now: now,
+      );
+    });
+    if (previousMirrorDueCount == 0 && mirrorDueCount > 0) {
+      unawaited(
+        MysticBusinessMetrics.record(
+          MysticBusinessEvent.mirrorDueSeen,
+          dimensions: <String, String>{
+            'language': language.code,
+            'source': 'mirror_due_state',
+          },
+        ),
+      );
+    }
+    _scheduleNextMirrorDue(reflections, now);
+  }''',
+    'Mirror due business event',
+  );
+  appSource = _replaceRequired(
+    appSource,
+    '''  Future<void> _finishOnboarding(
+    String name,
+    String selectedIntention,
+    MysticLanguage selectedLanguage,
+  ) async {
+    final cleanName = name.trim();
+    setState(() {
+      onboarded = true;
+      userName = cleanName.length > 18 ? cleanName.substring(0, 18) : cleanName;
+      intention = selectedIntention;
+      language = selectedLanguage;
+    });
+    await _saveProgress();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startReading(ReadingKind.daily);
+    });
+  }''',
+    '''  Future<void> _finishOnboarding(
+    String name,
+    String selectedIntention,
+    MysticLanguage selectedLanguage,
+  ) async {
+    final cleanName = name.trim();
+    setState(() {
+      onboarded = true;
+      userName = cleanName.length > 18 ? cleanName.substring(0, 18) : cleanName;
+      intention = selectedIntention;
+      language = selectedLanguage;
+    });
+    await _saveProgress();
+    unawaited(
+      MysticBusinessMetrics.record(
+        MysticBusinessEvent.onboardingCompleted,
+        dimensions: <String, String>{
+          'language': selectedLanguage.code,
+          'source': 'onboarding',
+        },
+      ),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startReading(ReadingKind.daily);
+    });
+  }''',
+    'onboarding business event',
   );
   _rejectLegacyUserCopy(appSource, 'lib/src/app.dart');
   app.writeAsStringSync(appSource);
@@ -159,6 +254,32 @@ void materializeAdOnlyUi() {
     '                    sharePositionOrigin: _mirrorShareOrigin(),\n',
     'iPad-safe Mirror share origin parameter',
   );
+  journalSource = _replaceRequired(
+    journalSource,
+    '''                                await MysticBusinessMetrics.record(
+                                  MysticBusinessEvent.mirrorCompleted,
+                                  dimensions: {
+                                    'language': widget.language.code,
+                                    'source': 'living_journal',
+                                  },
+                                );''',
+    '''                                final completionDelay = reflection.completedAt
+                                    .toLocal()
+                                    .difference(record.createdAt);
+                                final growthStage =
+                                    completionDelay <= const Duration(hours: 72)
+                                    ? 'within_72h'
+                                    : 'after_72h';
+                                await MysticBusinessMetrics.record(
+                                  MysticBusinessEvent.mirrorCompleted,
+                                  dimensions: {
+                                    'language': widget.language.code,
+                                    'growth_stage': growthStage,
+                                    'source': 'living_journal',
+                                  },
+                                );''',
+    'Mirror 72-hour completion stage',
+  );
   journalSource = _insertBeforeRequired(
     journalSource,
     '  Widget _buildDueMirrorAction(ReadingRecord record) {\n',
@@ -175,11 +296,15 @@ void materializeAdOnlyUi() {
   if (!journalSource.contains('sharePositionOrigin: _mirrorShareOrigin(),')) {
     throw StateError('Mirror share origin was not materialized.');
   }
+  if (!journalSource.contains("'growth_stage': growthStage")) {
+    throw StateError('Mirror 72-hour growth stage was not materialized.');
+  }
   journal.writeAsStringSync(journalSource);
 
   stdout.writeln(
     'Advertising-only UI materialized: paid-tier user copy removed, '
-    'narrow-screen header hardened, and Mirror sharing made iPad-safe.',
+    'growth events installed, narrow-screen header hardened, and Mirror '
+    'sharing made iPad-safe.',
   );
 }
 
