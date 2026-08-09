@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'business_metrics.dart';
+import 'growth_measurement_baseline.dart';
 import 'local_growth_ledger.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
@@ -12,18 +13,23 @@ import 'mystic_mirror.dart';
 /// every mature reading emits `mirrorWindowMatured`, classified as either
 /// `completed_within_72h` or `not_completed_within_72h`.
 ///
-/// The local dedupe token contains the existing reading record id but is stored
-/// only inside the private local ledger and is never included in exported
-/// Growth Evidence or business metric dimensions.
+/// Readings created before this installation's measurement baseline are ignored
+/// so an app upgrade cannot backfill legacy journal history into a new launch
+/// cohort. The baseline and dedupe token remain local-only and never appear in
+/// exported Growth Evidence.
 class MysticMirrorGrowthTracker {
-  MysticMirrorGrowthTracker({MysticLocalGrowthLedger? ledger})
-    : _ledger = ledger ?? MysticLocalGrowthLedger.instance;
+  MysticMirrorGrowthTracker({
+    MysticLocalGrowthLedger? ledger,
+    MysticGrowthMeasurementBaseline? baseline,
+  }) : _ledger = ledger ?? MysticLocalGrowthLedger.instance,
+       _baseline = baseline ?? MysticGrowthMeasurementBaseline.instance;
 
   static final MysticMirrorGrowthTracker instance = MysticMirrorGrowthTracker();
 
   static const completionWindow = Duration(hours: 72);
 
   final MysticLocalGrowthLedger _ledger;
+  final MysticGrowthMeasurementBaseline _baseline;
   Future<void> _queue = Future<void>.value();
 
   Future<void> sync({
@@ -34,10 +40,13 @@ class MysticMirrorGrowthTracker {
   }) {
     final observedAt = now ?? DateTime.now();
     final next = _queue.then<void>((_) async {
+      final measurementStartedAt = await _baseline.ensureStarted();
       final ordered = records.toList(growable: false)
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
       for (final record in ordered) {
+        if (record.createdAt.toUtc().isBefore(measurementStartedAt)) continue;
+
         final maturesAt = record.createdAt.add(completionWindow);
         if (observedAt.isBefore(maturesAt)) continue;
 
