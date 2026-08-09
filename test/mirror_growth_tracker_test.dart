@@ -113,7 +113,10 @@ void main() {
     expect(exported, isNot(contains('private question')));
     expect(exported, isNot(contains('private note')));
     expect(exported, isNot(contains('private action')));
-    expect(exported, isNot(contains(MysticGrowthMeasurementBaseline.storageKey)));
+    expect(
+      exported,
+      isNot(contains(MysticGrowthMeasurementBaseline.storageKey)),
+    );
   });
 
   test('a completion exactly at 72 hours counts inside the window', () async {
@@ -155,58 +158,64 @@ void main() {
     );
   });
 
-  test('legacy readings created before measurement start never enter KPI', () async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
-    final preferences = await SharedPreferences.getInstance();
-    final measurementStart = DateTime(2026, 8, 5, 9);
-    final observedAt = DateTime(2026, 8, 10, 12);
-    final baseline = MysticGrowthMeasurementBaseline(
-      preferences: preferences,
-      now: () => measurementStart,
-    );
-    await baseline.ensureStarted();
-    final ledger = MysticLocalGrowthLedger(
-      preferences: preferences,
-      now: () => observedAt,
-    );
-    final tracker = MysticMirrorGrowthTracker(
-      ledger: ledger,
-      baseline: baseline,
-    );
+  test(
+    'legacy readings created before measurement start never enter KPI',
+    () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final preferences = await SharedPreferences.getInstance();
+      final measurementStart = DateTime(2026, 8, 5, 9);
+      final observedAt = DateTime(2026, 8, 10, 12);
+      final baseline = MysticGrowthMeasurementBaseline(
+        preferences: preferences,
+        now: () => measurementStart,
+      );
+      await baseline.ensureStarted();
+      final ledger = MysticLocalGrowthLedger(
+        preferences: preferences,
+        now: () => observedAt,
+      );
+      final tracker = MysticMirrorGrowthTracker(
+        ledger: ledger,
+        baseline: baseline,
+      );
 
-    final legacy = _record(DateTime(2026, 8, 1, 8));
-    final measurable = _record(DateTime(2026, 8, 5, 10));
+      final legacy = _record(DateTime(2026, 8, 1, 8));
+      final measurable = _record(DateTime(2026, 8, 5, 10));
 
-    await tracker.sync(
-      records: <ReadingRecord>[legacy, measurable],
-      reflections: <String, MysticMirrorReflection>{
-        mysticMirrorRecordId(legacy): _reflection(
-          legacy,
-          legacy.createdAt.add(const Duration(hours: 24)),
-        ),
-        mysticMirrorRecordId(measurable): _reflection(
-          measurable,
-          measurable.createdAt.add(const Duration(hours: 24)),
-        ),
-      },
-      languageCode: 'en',
-      now: observedAt,
-    );
+      await tracker.sync(
+        records: <ReadingRecord>[legacy, measurable],
+        reflections: <String, MysticMirrorReflection>{
+          mysticMirrorRecordId(legacy): _reflection(
+            legacy,
+            legacy.createdAt.add(const Duration(hours: 24)),
+          ),
+          mysticMirrorRecordId(measurable): _reflection(
+            measurable,
+            measurable.createdAt.add(const Duration(hours: 24)),
+          ),
+        },
+        languageCode: 'en',
+        now: observedAt,
+      );
 
-    final evidence = await ledger.snapshot();
-    expect(
-      evidence.eventCounts[MysticBusinessEvent.mirrorWindowMatured.name],
-      1,
-    );
-    expect(
-      evidence
-          .dimensionCounts['mirrorWindowMatured|growth_stage|completed_within_72h'],
-      1,
-    );
+      final evidence = await ledger.snapshot();
+      expect(
+        evidence.eventCounts[MysticBusinessEvent.mirrorWindowMatured.name],
+        1,
+      );
+      expect(
+        evidence
+            .dimensionCounts['mirrorWindowMatured|growth_stage|completed_within_72h'],
+        1,
+      );
 
-    final exported = await ledger.exportJson();
-    expect(exported, isNot(contains(mysticMirrorRecordId(legacy))));
-    expect(exported, isNot(contains(mysticMirrorRecordId(measurable))));
-    expect(exported, isNot(contains('mystic_growth_measurement_started_at_utc_v1')));
-  });
+      final exported = await ledger.exportJson();
+      expect(exported, isNot(contains(mysticMirrorRecordId(legacy))));
+      expect(exported, isNot(contains(mysticMirrorRecordId(measurable))));
+      expect(
+        exported,
+        isNot(contains('mystic_growth_measurement_started_at_utc_v1')),
+      );
+    },
+  );
 }
