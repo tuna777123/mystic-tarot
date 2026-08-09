@@ -1,0 +1,47 @@
+name: Investment Format Artifact
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Apply canonical Dart formatting
+        run: |
+          dart format \
+            lib/src/business_metrics.dart \
+            lib/src/growth_engine.dart \
+            lib/src/mystic_living_journal_feature.dart \
+            lib/src/mystic_mirror_share.dart \
+            test/business_metrics_test.dart \
+            test/growth_engine_test.dart \
+            test/investment_grade_source_contract_test.dart \
+            test/mystic_mirror_share_test.dart
+      - name: Upload exact formatted source
+        uses: actions/upload-artifact@v7
+        with:
+          name: investment-grade-formatted-dart
+          path: |
+            lib/src/business_metrics.dart
+            lib/src/growth_engine.dart
+            lib/src/mystic_living_journal_feature.dart
+            lib/src/mystic_mirror_share.dart
+            test/business_metrics_test.dart
+            test/growth_engine_test.dart
+            test/investment_grade_source_contract_test.dart
+            test/mystic_mirror_share_test.dart
+          if-no-files-found: error
+          retention-days: 1
