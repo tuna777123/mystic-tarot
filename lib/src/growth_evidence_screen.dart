@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'app_language.dart';
-import 'app_locale.dart';
+import 'language_bridge.dart';
 import 'flagship.dart';
 import 'local_growth_ledger.dart';
 import 'theme.dart';
