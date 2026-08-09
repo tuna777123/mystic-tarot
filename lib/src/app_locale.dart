@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app_language.dart';
 import 'flagship.dart';
 
 const List<Locale> mysticSupportedLocales = <Locale>[
@@ -21,18 +20,6 @@ Locale mysticLocale(MysticLanguage language) => switch (language) {
   MysticLanguage.portugueseBrazil => const Locale('pt', 'BR'),
   _ => const Locale('en'),
 };
-
-extension MysticLanguageAppLanguageAdapter on MysticLanguage {
-  AppLanguage get appLanguage => switch (this) {
-    MysticLanguage.turkish => AppLanguage.turkish,
-    MysticLanguage.spanish => AppLanguage.spanish,
-    MysticLanguage.french => AppLanguage.french,
-    MysticLanguage.portugueseBrazil => AppLanguage.portugueseBrazil,
-    MysticLanguage.italian => AppLanguage.italian,
-    MysticLanguage.german => AppLanguage.german,
-    _ => AppLanguage.english,
-  };
-}
 
 /// Resolves a launch-ready Mystic language from an enum name, locale tag, or
 /// short language code. Non-launch languages intentionally return null so an
