@@ -55,10 +55,7 @@ void main() {
     expect(minimumGooglePlayTargetSdk, 36);
     expect(() => validateGooglePlayTargetSdk(36), returnsNormally);
     expect(() => validateGooglePlayTargetSdk(37), returnsNormally);
-    expect(
-      () => validateGooglePlayTargetSdk(35),
-      throwsA(isA<AuditFailure>()),
-    );
+    expect(() => validateGooglePlayTargetSdk(35), throwsA(isA<AuditFailure>()));
   });
 
   test('reads strict Flutter version identity', () {
