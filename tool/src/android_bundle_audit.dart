@@ -36,12 +36,16 @@ class ManifestSnapshot {
     required this.packageName,
     required this.versionName,
     required this.versionCode,
+    required this.minSdkVersion,
+    required this.targetSdkVersion,
     required this.permissions,
   });
 
   final String packageName;
   final String versionName;
   final int versionCode;
+  final int minSdkVersion;
+  final int targetSdkVersion;
   final Set<String> permissions;
 
   static ManifestSnapshot parse(String xml) {
@@ -49,13 +53,26 @@ class ManifestSnapshot {
     if (manifestTag == null) {
       throw const AuditFailure('bundletool did not return a manifest element.');
     }
+    final usesSdkTag = RegExp(r'<uses-sdk\b[^>]*>').firstMatch(xml)?.group(0);
+    if (usesSdkTag == null) {
+      throw const AuditFailure('Manifest is missing uses-sdk metadata.');
+    }
 
-    String requiredAttribute(String name) {
+    String requiredAttribute(String tag, String name) {
       final value = RegExp(
         '${RegExp.escape(name)}="([^"]+)"',
-      ).firstMatch(manifestTag)?.group(1);
+      ).firstMatch(tag)?.group(1);
       if (value == null || value.isEmpty) {
         throw AuditFailure('Manifest is missing $name.');
+      }
+      return value;
+    }
+
+    int requiredSdkAttribute(String name) {
+      final raw = requiredAttribute(usesSdkTag, name);
+      final value = int.tryParse(raw);
+      if (value == null) {
+        throw AuditFailure('Manifest $name is not numeric: $raw.');
       }
       return value;
     }
@@ -69,10 +86,32 @@ class ManifestSnapshot {
         .toSet();
 
     return ManifestSnapshot(
-      packageName: requiredAttribute('package'),
-      versionName: requiredAttribute('android:versionName'),
-      versionCode: int.parse(requiredAttribute('android:versionCode')),
+      packageName: requiredAttribute(manifestTag, 'package'),
+      versionName: requiredAttribute(manifestTag, 'android:versionName'),
+      versionCode: int.parse(
+        requiredAttribute(manifestTag, 'android:versionCode'),
+      ),
+      minSdkVersion: requiredSdkAttribute('android:minSdkVersion'),
+      targetSdkVersion: requiredSdkAttribute('android:targetSdkVersion'),
       permissions: permissions,
+    );
+  }
+}
+
+/// Google Play requires new mobile apps and updates submitted from
+/// August 31, 2026 to target Android 16 / API 36 or higher. Mystic enforces
+/// the upcoming requirement ahead of the deadline so a green release audit
+/// cannot become store-ineligible days later.
+const minimumGooglePlayTargetSdk = 36;
+
+void validateGooglePlayTargetSdk(
+  int targetSdkVersion, {
+  int minimumTargetSdk = minimumGooglePlayTargetSdk,
+}) {
+  if (targetSdkVersion < minimumTargetSdk) {
+    throw AuditFailure(
+      'Android target SDK $targetSdkVersion is below the Mystic release '
+      'minimum of API $minimumTargetSdk.',
     );
   }
 }
