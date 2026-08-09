@@ -23,10 +23,9 @@ typedef MysticBusinessMetricReporter =
 
 /// Privacy-safe product analytics boundary.
 ///
-/// This contract intentionally accepts only a small allow-list of coarse
-/// dimensions. Private Mystic content must never enter growth telemetry.
-/// A remote aggregate reporter can be connected later without changing product
-/// flows or relaxing this privacy boundary.
+/// Both dimension names and values are constrained to small coarse
+/// vocabularies. This prevents private Mystic content from being smuggled into
+/// an otherwise allow-listed field such as `source`.
 class MysticBusinessMetrics {
   MysticBusinessMetrics._();
 
@@ -51,6 +50,62 @@ class MysticBusinessMetrics {
     'text',
     'pin',
     'query',
+  };
+
+  static const allowedValues = <String, Set<String>>{
+    'language': <String>{
+      'EN',
+      'TR',
+      'ES',
+      'FR',
+      'PT-BR',
+      'en',
+      'tr',
+      'es',
+      'fr',
+      'pt-BR',
+    },
+    'platform': <String>{
+      'android',
+      'ios',
+      'web',
+      'macos',
+      'windows',
+      'linux',
+      'fuchsia',
+    },
+    'reading_kind': <String>{
+      'daily',
+      'love',
+      'career',
+      'money',
+      'decision',
+      'spiritual',
+      'shadow',
+      'compatibility',
+      'timeline',
+      'celticCross',
+    },
+    'growth_stage': <String>{
+      'within_72h',
+      'after_72h',
+      'completed_within_72h',
+      'not_completed_within_72h',
+    },
+    'ad_format': <String>{'app_open', 'interstitial'},
+    'source': <String>{
+      'launch',
+      'foreground',
+      'onboarding',
+      'journal_store',
+      'living_journal',
+      'mirror',
+      'mirror_due_state',
+      'mirror_window',
+      'reading_completion',
+      'reminder',
+      'settings',
+    },
   };
 
   static MysticBusinessMetricReporter _reporter = _debugReporter;
@@ -115,6 +170,14 @@ class MysticBusinessMetrics {
           entry.value,
           'dimensions',
           'Metric values must contain 1–64 characters.',
+        );
+      }
+      final vocabulary = allowedValues[key];
+      if (vocabulary == null || !vocabulary.contains(value)) {
+        throw ArgumentError.value(
+          entry.value,
+          'dimensions',
+          'Metric value is not part of the approved coarse vocabulary for $key.',
         );
       }
       result[key] = value;
