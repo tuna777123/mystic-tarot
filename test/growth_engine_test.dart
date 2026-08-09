@@ -39,17 +39,36 @@ void main() {
     expect(result.premiumValueScore, 0);
   });
 
-  test('returning users are directed to daily guidance before upsell', () {
+  test(
+    'returning users without a due Mirror are directed to daily guidance',
+    () {
+      final result = engine.analyze(
+        records: [record(createdAt: now.subtract(const Duration(days: 1)))],
+        streak: 2,
+        completedArcanaDays: 1,
+        freeReadingsLeft: 0,
+        mirrorDueCount: 0,
+        now: now,
+      );
+
+      expect(result.nextAction.type, MysticNextActionType.dailyReading);
+      expect(result.nextAction.priority, 95);
+    },
+  );
+
+  test('a due Mirror outranks a not-yet-completed daily reading', () {
     final result = engine.analyze(
-      records: [record(createdAt: now.subtract(const Duration(days: 1)))],
+      records: [record(createdAt: now.subtract(const Duration(days: 2)))],
       streak: 2,
       completedArcanaDays: 1,
-      freeReadingsLeft: 0,
+      freeReadingsLeft: 3,
+      mirrorDueCount: 1,
       now: now,
     );
 
-    expect(result.nextAction.type, MysticNextActionType.dailyReading);
-    expect(result.nextAction.priority, 95);
+    expect(result.nextAction.type, MysticNextActionType.mirrorCheckIn);
+    expect(result.nextAction.priority, 98);
+    expect(result.nextAction.cta, 'Complete my Mirror');
   });
 
   test('a non-daily reading today never completes the daily return', () {
@@ -58,7 +77,7 @@ void main() {
       streak: 2,
       completedArcanaDays: 1,
       freeReadingsLeft: 2,
-      mirrorDueCount: 3,
+      mirrorDueCount: 0,
       now: now,
     );
 
@@ -88,7 +107,7 @@ void main() {
     );
 
     expect(result.nextAction.type, MysticNextActionType.mirrorCheckIn);
-    expect(result.nextAction.priority, 90);
+    expect(result.nextAction.priority, 98);
   });
 
   test('earned private patterns surface before another content chapter', () {
@@ -137,6 +156,24 @@ void main() {
       expect(result.nextAction.type, MysticNextActionType.continueJourney);
     },
   );
+
+  test('deeper-reading fallback contains no paid-tier call to action', () {
+    final records = [record(createdAt: now)];
+
+    final result = engine.analyze(
+      records: records,
+      streak: 1,
+      completedArcanaDays: 1,
+      freeReadingsLeft: 0,
+      mirrorDueCount: 0,
+      now: now,
+    );
+
+    expect(result.nextAction.type, MysticNextActionType.explorePremiumSpread);
+    expect(result.nextAction.cta, 'Explore deep readings');
+    expect(result.nextAction.body.toLowerCase(), isNot(contains('premium')));
+    expect(result.nextAction.cta.toLowerCase(), isNot(contains('plus')));
+  });
 
   test('repeating cards create a visible pattern and higher value score', () {
     final records = [

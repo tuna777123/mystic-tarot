@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
+import 'business_metrics.dart';
 import 'flagship.dart';
 import 'models.dart';
 import 'mystic_memory_map_feature.dart';
 import 'mystic_mirror.dart';
+import 'mystic_mirror_share.dart';
 import 'mystic_search.dart';
 import 'oracle_conversation.dart';
 import 'oracle_memory_action.dart';
@@ -25,6 +28,9 @@ class MysticLivingJournalFeature extends StatefulWidget {
 
   final List<ReadingRecord> records;
   final MysticLanguage language;
+
+  /// Retained for source compatibility with the pre-advertising UI contract.
+  /// The Living Journal no longer exposes a paid-tier action.
   final VoidCallback onPremium;
   final Future<void> Function(ReadingRecord record) onOpenOracle;
   final VoidCallback? onStartReading;
@@ -77,14 +83,13 @@ class _MysticLivingJournalFeatureState
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (widget.language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (widget.language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   @override
   void initState() {
@@ -183,10 +188,8 @@ class _MysticLivingJournalFeatureState
                           'Tekrar edenleri, değişenleri ve dikkat isteyenleri gör.',
                         ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: dueCount > 0
-                            ? MysticColors.gold
-                            : MysticColors.mist,
-                      ),
+                    color: dueCount > 0 ? MysticColors.gold : MysticColors.mist,
+                  ),
                 ),
               ],
             ),
@@ -195,8 +198,10 @@ class _MysticLivingJournalFeatureState
           Column(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: MysticColors.violet.withValues(alpha: .24),
                   borderRadius: BorderRadius.circular(16),
@@ -215,8 +220,10 @@ class _MysticLivingJournalFeatureState
               if (dueCount > 0) ...[
                 const SizedBox(height: 6),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: MysticColors.gold,
                     borderRadius: BorderRadius.circular(12),
@@ -278,16 +285,16 @@ class _MysticLivingJournalFeatureState
       duration: const Duration(milliseconds: 240),
       child: switch (section) {
         _JournalSection.timeline => _buildTimeline(
-            widget.records,
-            key: const ValueKey<String>('timeline'),
-            showDueBanner: true,
-          ),
+          widget.records,
+          key: const ValueKey<String>('timeline'),
+          showDueBanner: true,
+        ),
         _JournalSection.insights => _buildInsights(),
         _JournalSection.map => MysticMemoryMapFeature(
-            key: const ValueKey<String>('memory-map'),
-            records: widget.records,
-            language: widget.language,
-          ),
+          key: const ValueKey<String>('memory-map'),
+          records: widget.records,
+          language: widget.language,
+        ),
         _JournalSection.search => _buildSearch(),
       },
     );
@@ -414,17 +421,21 @@ class _MysticLivingJournalFeatureState
   Widget _buildRecordCard(BuildContext context, ReadingRecord record) {
     final recordId = mysticMirrorRecordId(record);
     final mirror = mirrors[recordId];
-    final due = !mirrorsLoading &&
+    final due =
+        !mirrorsLoading &&
         mysticMirrorIsDue(
           record,
           DateTime.now(),
           completedRecordIds: _completedMirrorIds,
         );
-    final cards = record.cards.map((drawn) {
-      final orientation =
-          drawn.reversed ? _copy('reversed', 'ters') : _copy('upright', 'düz');
-      return '${localizedTarotCardName(drawn.card.name, languageCode: _languageCode)} · $orientation';
-    }).join('\n');
+    final cards = record.cards
+        .map((drawn) {
+          final orientation = drawn.reversed
+              ? _copy('reversed', 'ters')
+              : _copy('upright', 'düz');
+          return '${localizedTarotCardName(drawn.card.name, languageCode: _languageCode)} · $orientation';
+        })
+        .join('\n');
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -576,10 +587,7 @@ class _MysticLivingJournalFeatureState
                   ),
                 ),
               ),
-              Text(
-                mirror.emotion.symbol,
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text(mirror.emotion.symbol, style: const TextStyle(fontSize: 16)),
             ],
           ),
           const SizedBox(height: 8),
@@ -594,6 +602,37 @@ class _MysticLivingJournalFeatureState
               style: const TextStyle(color: MysticColors.mist, height: 1.4),
             ),
           ],
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () async {
+                await MysticBusinessMetrics.record(
+                  MysticBusinessEvent.mirrorShareStarted,
+                  dimensions: {
+                    'language': widget.language.code,
+                    'source': 'living_journal',
+                  },
+                );
+                await SharePlus.instance.share(
+                  ShareParams(
+                    text: mysticMirrorShareText(widget.language),
+                    subject: mysticMirrorShareSubject(widget.language),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.ios_share_rounded, size: 17),
+              label: Text(
+                _mirrorCopy(
+                  en: 'Share the 24h ritual',
+                  tr: '24 saatlik ritüeli paylaş',
+                  es: 'Compartir el ritual de 24 h',
+                  fr: 'Partager le rituel de 24 h',
+                  pt: 'Compartilhar o ritual de 24 h',
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -660,11 +699,7 @@ class _MysticLivingJournalFeatureState
     final hours = (minutes / 60).ceil().clamp(1, 24);
     return Row(
       children: [
-        const Icon(
-          Icons.schedule_rounded,
-          size: 16,
-          color: MysticColors.muted,
-        ),
+        const Icon(Icons.schedule_rounded, size: 16, color: MysticColors.muted),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -740,7 +775,10 @@ class _MysticLivingJournalFeatureState
                       fr: 'Regardez en arrière sans forcer un résultat positif. Une preuve honnête vaut mieux qu’une histoire parfaite.',
                       pt: 'Olhe para trás sem forçar um resultado positivo. Evidência honesta vale mais que uma história perfeita.',
                     ),
-                    style: const TextStyle(color: MysticColors.mist, height: 1.45),
+                    style: const TextStyle(
+                      color: MysticColors.mist,
+                      height: 1.45,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -848,6 +886,13 @@ class _MysticLivingJournalFeatureState
                                     reflection.recordId: reflection,
                                   };
                                 });
+                                await MysticBusinessMetrics.record(
+                                  MysticBusinessEvent.mirrorCompleted,
+                                  dimensions: {
+                                    'language': widget.language.code,
+                                    'source': 'living_journal',
+                                  },
+                                );
                                 widget.onMirrorChanged?.call();
                                 if (sheetContext.mounted) {
                                   Navigator.pop(sheetContext);
@@ -855,7 +900,9 @@ class _MysticLivingJournalFeatureState
                               } catch (_) {
                                 if (sheetContext.mounted) {
                                   setSheetState(() => saving = false);
-                                  ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                  ScaffoldMessenger.of(
+                                    sheetContext,
+                                  ).showSnackBar(
                                     SnackBar(
                                       content: Text(
                                         _mirrorCopy(
@@ -1055,7 +1102,7 @@ class _MysticLivingJournalFeatureState
               .toList(),
         ),
         const SizedBox(height: 12),
-        _buildPremiumCard(),
+        _buildPatternLabCard(),
       ],
     );
   }
@@ -1124,10 +1171,7 @@ class _MysticLivingJournalFeatureState
                 padding: const EdgeInsets.only(bottom: 11),
                 child: Row(
                   children: [
-                    const Text(
-                      '✦',
-                      style: TextStyle(color: MysticColors.gold),
-                    ),
+                    const Text('✦', style: TextStyle(color: MysticColors.gold)),
                     const SizedBox(width: 10),
                     Expanded(child: Text(row.label)),
                     Text(
@@ -1146,7 +1190,12 @@ class _MysticLivingJournalFeatureState
     );
   }
 
-  Widget _buildPremiumCard() {
+  Widget _buildPatternLabCard() {
+    final completed = mirrors.length;
+    final readingCount = widget.records.length;
+    final evidenceCount = completed.clamp(0, readingCount);
+    final progress = readingCount == 0 ? 0.0 : evidenceCount / readingCount;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -1162,22 +1211,64 @@ class _MysticLivingJournalFeatureState
           const Icon(Icons.hub_outlined, color: MysticColors.gold),
           const SizedBox(height: 10),
           Text(
-            _copy('Unlock your full pattern map', 'Tüm örüntü haritanı aç'),
+            _mirrorCopy(
+              en: 'Your Pattern Lab grows with evidence',
+              tr: 'Örüntü Laboratuvarın kanıtla büyür',
+              es: 'Tu Laboratorio de Patrones crece con evidencia',
+              fr: 'Votre Laboratoire de schémas grandit avec les preuves',
+              pt: 'Seu Laboratório de Padrões cresce com evidências',
+            ),
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 7),
           Text(
-            _copy(
-              'Reveal longer emotional cycles, yearly reviews, and deeper memory connections. Your basic 24-hour Mirror always remains available.',
-              'Uzun duygusal döngüleri, yıllık özetleri ve derin hafıza bağlantılarını gör. Temel 24 saatlik Ayna her zaman kullanılabilir kalır.',
+            _mirrorCopy(
+              en: 'Every saved reading and honest 24-hour check-in adds context. Nothing is locked: richer patterns appear as your private history earns enough evidence.',
+              tr: 'Her kayıtlı okuma ve dürüst 24 saatlik kontrol yeni bağlam ekler. Hiçbir şey kilitli değil: özel geçmişin yeterli kanıt biriktirdikçe daha zengin örüntüler görünür.',
+              es: 'Cada lectura guardada y revisión honesta de 24 horas añade contexto. Nada está bloqueado: los patrones más ricos aparecen cuando tu historial privado reúne suficiente evidencia.',
+              fr: 'Chaque tirage enregistré et bilan honnête après 24 h ajoute du contexte. Rien n’est verrouillé : des schémas plus riches apparaissent lorsque votre historique privé accumule assez de preuves.',
+              pt: 'Cada leitura salva e check-in honesto de 24 horas adiciona contexto. Nada fica bloqueado: padrões mais ricos aparecem quando seu histórico privado reúne evidências suficientes.',
             ),
             style: const TextStyle(color: MysticColors.mist),
           ),
+          const SizedBox(height: 13),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 7,
+              backgroundColor: Colors.white10,
+              color: MysticColors.gold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _mirrorCopy(
+              en: '$completed reality check-ins • $readingCount saved readings',
+              tr: '$completed gerçeklik kontrolü • $readingCount kayıtlı okuma',
+              es: '$completed revisiones de realidad • $readingCount lecturas guardadas',
+              fr: '$completed bilans de réalité • $readingCount tirages enregistrés',
+              pt: '$completed check-ins de realidade • $readingCount leituras salvas',
+            ),
+            style: const TextStyle(
+              color: MysticColors.lavender,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: widget.onPremium,
-            icon: const Icon(Icons.auto_awesome, size: 18),
-            label: Text(_copy('Explore Premium', 'Premium’u keşfet')),
+            onPressed: () => setState(() => section = _JournalSection.map),
+            icon: const Icon(Icons.hub_rounded, size: 18),
+            label: Text(
+              _mirrorCopy(
+                en: 'Open my Pattern Map',
+                tr: 'Örüntü Haritamı aç',
+                es: 'Abrir mi Mapa de Patrones',
+                fr: 'Ouvrir ma Carte des schémas',
+                pt: 'Abrir meu Mapa de Padrões',
+              ),
+            ),
           ),
         ],
       ),
@@ -1245,43 +1336,43 @@ class _MysticLivingJournalFeatureState
   }
 
   String _outcomeLabel(MysticMirrorOutcome outcome) => switch (outcome) {
-        MysticMirrorOutcome.shifted => _mirrorCopy(
-            en: 'Something shifted',
-            tr: 'Bir şey değişti',
-            es: 'Algo cambió',
-            fr: 'Quelque chose a changé',
-            pt: 'Algo mudou',
-          ),
-        MysticMirrorOutcome.partlyShifted => _mirrorCopy(
-            en: 'Partly changed',
-            tr: 'Kısmen değişti',
-            es: 'Cambió en parte',
-            fr: 'Partiellement changé',
-            pt: 'Mudou em parte',
-          ),
-        MysticMirrorOutcome.unchanged => _mirrorCopy(
-            en: 'Nothing changed yet',
-            tr: 'Henüz değişmedi',
-            es: 'Aún no cambió',
-            fr: 'Rien n’a encore changé',
-            pt: 'Ainda não mudou',
-          ),
-        MysticMirrorOutcome.unclear => _mirrorCopy(
-            en: 'Still unclear',
-            tr: 'Hâlâ belirsiz',
-            es: 'Sigue sin estar claro',
-            fr: 'Toujours incertain',
-            pt: 'Ainda não está claro',
-          ),
-      };
+    MysticMirrorOutcome.shifted => _mirrorCopy(
+      en: 'Something shifted',
+      tr: 'Bir şey değişti',
+      es: 'Algo cambió',
+      fr: 'Quelque chose a changé',
+      pt: 'Algo mudou',
+    ),
+    MysticMirrorOutcome.partlyShifted => _mirrorCopy(
+      en: 'Partly changed',
+      tr: 'Kısmen değişti',
+      es: 'Cambió en parte',
+      fr: 'Partiellement changé',
+      pt: 'Mudou em parte',
+    ),
+    MysticMirrorOutcome.unchanged => _mirrorCopy(
+      en: 'Nothing changed yet',
+      tr: 'Henüz değişmedi',
+      es: 'Aún no cambió',
+      fr: 'Rien n’a encore changé',
+      pt: 'Ainda não mudou',
+    ),
+    MysticMirrorOutcome.unclear => _mirrorCopy(
+      en: 'Still unclear',
+      tr: 'Hâlâ belirsiz',
+      es: 'Sigue sin estar claro',
+      fr: 'Toujours incertain',
+      pt: 'Ainda não está claro',
+    ),
+  };
 
   String _emotionLabel(EmotionalState emotion) => switch (emotion) {
-        EmotionalState.anxious => _copy('Anxious', 'Kaygılı'),
-        EmotionalState.hopeful => _copy('Hopeful', 'Umutlu'),
-        EmotionalState.grounded => _copy('Grounded', 'Dengeli'),
-        EmotionalState.curious => _copy('Curious', 'Meraklı'),
-        EmotionalState.uncertain => _copy('Uncertain', 'Kararsız'),
-      };
+    EmotionalState.anxious => _copy('Anxious', 'Kaygılı'),
+    EmotionalState.hopeful => _copy('Hopeful', 'Umutlu'),
+    EmotionalState.grounded => _copy('Grounded', 'Dengeli'),
+    EmotionalState.curious => _copy('Curious', 'Meraklı'),
+    EmotionalState.uncertain => _copy('Uncertain', 'Kararsız'),
+  };
 
   Widget _buildEmptyState({required Key key}) {
     return SingleChildScrollView(
@@ -1402,47 +1493,41 @@ class _MysticLivingJournalFeatureState
   }
 
   Widget _emptyPreviewRow(IconData icon, String title, String body) => Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: MysticColors.violet.withValues(alpha: .22),
-              borderRadius: BorderRadius.circular(13),
+    children: [
+      Container(
+        width: 40,
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: MysticColors.violet.withValues(alpha: .22),
+          borderRadius: BorderRadius.circular(13),
+        ),
+        child: Icon(icon, size: 19, color: MysticColors.gold),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
             ),
-            child: Icon(icon, size: 19, color: MysticColors.gold),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  body,
-                  style: const TextStyle(
-                    color: MysticColors.muted,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 3),
+            Text(
+              body,
+              style: const TextStyle(color: MysticColors.muted, fontSize: 11),
             ),
-          ),
-          const Icon(
-            Icons.lock_outline_rounded,
-            size: 16,
-            color: MysticColors.lavender,
-          ),
-        ],
-      );
+          ],
+        ),
+      ),
+      const Icon(
+        Icons.arrow_forward_rounded,
+        size: 16,
+        color: MysticColors.lavender,
+      ),
+    ],
+  );
 
   String _formatDate(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');

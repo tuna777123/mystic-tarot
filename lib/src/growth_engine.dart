@@ -141,6 +141,20 @@ class MysticGrowthEngine {
       );
     }
 
+    // Mystic Mirror is the product moat: it closes yesterday's loop with
+    // observed reality. When a check-in is due, surface it before creating a
+    // new daily reading so the differentiator never gets buried by content.
+    if (mirrorDueCount > 0) {
+      return const MysticNextAction(
+        type: MysticNextActionType.mirrorCheckIn,
+        title: 'What actually changed?',
+        body:
+            'Close the 24-hour loop first. Your honest check-in turns a reading into private evidence.',
+        cta: 'Complete my Mirror',
+        priority: 98,
+      );
+    }
+
     final dailyReadToday = records.any(
       (record) =>
           record.kind == ReadingKind.daily && _sameDay(record.createdAt, now),
@@ -158,20 +172,9 @@ class MysticGrowthEngine {
       );
     }
 
-    if (mirrorDueCount > 0) {
-      return const MysticNextAction(
-        type: MysticNextActionType.mirrorCheckIn,
-        title: 'What actually changed?',
-        body:
-            'Close the loop on a recent reading and teach Mystic which guidance became real.',
-        cta: 'Complete my Mirror',
-        priority: 90,
-      );
-    }
-
     // Mystic's strongest differentiator is evidence gathered from the user's
     // own private history. Surface that earned value before sending an engaged
-    // user into another content loop or an upgrade path.
+    // user into another content loop.
     if (visiblePattern) {
       return const MysticNextAction(
         type: MysticNextActionType.reviewPattern,
@@ -199,8 +202,8 @@ class MysticGrowthEngine {
         type: MysticNextActionType.explorePremiumSpread,
         title: 'Go deeper without breaking the moment',
         body:
-            'Your daily free practice is complete. Premium spreads continue the same private story.',
-        cta: 'Explore Mystic Plus',
+            'Your daily ritual is complete. Deeper spreads remain available whenever the question needs more context.',
+        cta: 'Explore deep readings',
         priority: 70,
       );
     }
