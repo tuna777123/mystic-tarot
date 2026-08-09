@@ -61,6 +61,10 @@ required=(
   docs/MARKETING_LAUNCH_KIT.md
   docs/FINAL_DELIVERY.md
   docs/OWNER_GUIDE_A_TO_Z.md
+  docs/GROWTH_KPI_CONTRACT.md
+  docs/INVESTMENT_GRADE_PRODUCT_PLAN.md
+  lib/src/business_metrics.dart
+  lib/src/mystic_mirror_share.dart
   STORE_RELEASE.md
 )
 
@@ -188,6 +192,25 @@ require_contains STORE_RELEASE.md 'ADMOB_ANDROID_INTERSTITIAL_ID'
 require_contains STORE_RELEASE.md 'ADMOB_IOS_INTERSTITIAL_ID'
 require_contains STORE_RELEASE.md 'MYSTIC_USE_TEST_ADS=false'
 require_contains STORE_RELEASE.md 'no paid subscription'
+
+require_contains docs/GROWTH_KPI_CONTRACT.md 'D7 retention'
+require_contains docs/GROWTH_KPI_CONTRACT.md 'eligible-Mirror completion'
+require_contains docs/GROWTH_KPI_CONTRACT.md '1.5 × blended CAC'
+require_contains docs/INVESTMENT_GRADE_PRODUCT_PLAN.md 'Read today → compare with reality after 24 hours'
+require_contains lib/src/business_metrics.dart 'allowedDimensions'
+require_contains lib/src/mystic_mirror_share.dart 'Never add a question, card name, emotion, outcome, note'
+
+for paid_phrase in \
+  'Unlock your full pattern map' \
+  'Explore Premium' \
+  'Premium spreads continue' \
+  'Premium’u keşfet'; do
+  forbid_contains lib/src/mystic_living_journal_feature.dart "$paid_phrase"
+  forbid_contains lib/src/growth_engine.dart "$paid_phrase"
+done
+
+require_contains lib/src/mystic_living_journal_feature.dart 'Your Pattern Lab grows with evidence'
+require_contains lib/src/mystic_living_journal_feature.dart 'Share the 24h ritual'
 
 for path in "$kit" "$handoff" "$owner"; do
   forbid_contains "$path" 'googletagmanager.com'
