@@ -1,0 +1,62 @@
+name: Investment Share Origin Patch
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: product/investment-grade-growth
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Add iPad-safe share origin
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('lib/src/mystic_living_journal_feature.dart')
+          source = path.read_text()
+          old = '''                await SharePlus.instance.share(
+                  ShareParams(
+                    text: mysticMirrorShareText(widget.language),
+                    subject: mysticMirrorShareSubject(widget.language),
+                  ),
+                );'''
+          new = '''                final renderObject = context.findRenderObject();
+                final origin = renderObject is RenderBox
+                    ? renderObject.localToGlobal(Offset.zero) & renderObject.size
+                    : const Rect.fromLTWH(0, 0, 1, 1);
+                await SharePlus.instance.share(
+                  ShareParams(
+                    text: mysticMirrorShareText(widget.language),
+                    subject: mysticMirrorShareSubject(widget.language),
+                    sharePositionOrigin: origin,
+                  ),
+                );'''
+          count = source.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one Mirror share anchor, found {count}')
+          path.write_text(source.replace(old, new, 1))
+          PY
+          dart format lib/src/mystic_living_journal_feature.dart
+          grep -Fq 'sharePositionOrigin: origin' lib/src/mystic_living_journal_feature.dart
+      - name: Commit source fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib/src/mystic_living_journal_feature.dart
+          git commit -m 'Make Mirror sharing iPad-safe'
+          git push origin HEAD:product/investment-grade-growth
