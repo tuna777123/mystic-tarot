@@ -21,6 +21,9 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v6
 
+      - name: Verify Apple submission SDK floor
+        run: bash tool/verify_apple_submission_sdk.sh
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
