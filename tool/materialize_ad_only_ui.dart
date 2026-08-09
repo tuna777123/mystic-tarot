@@ -8,7 +8,8 @@ void main() => materializeAdOnlyUi();
 void materializeAdOnlyUi() {
   final app = File('lib/src/app.dart');
   final intelligence = File('lib/src/mystic_plus_intelligence_screen.dart');
-  if (!app.existsSync() || !intelligence.existsSync()) {
+  final journal = File('lib/src/mystic_living_journal_feature.dart');
+  if (!app.existsSync() || !intelligence.existsSync() || !journal.existsSync()) {
     throw StateError('Mystic Tarot UI source files are missing.');
   }
 
@@ -149,8 +150,36 @@ void materializeAdOnlyUi() {
   );
   intelligence.writeAsStringSync(intelligenceSource);
 
+  var journalSource = journal.readAsStringSync();
+  journalSource = _insertAfterRequired(
+    journalSource,
+    '                    subject: mysticMirrorShareSubject(widget.language),\n',
+    '                    sharePositionOrigin: _mirrorShareOrigin(),\n',
+    'iPad-safe Mirror share origin parameter',
+  );
+  journalSource = _insertBeforeRequired(
+    journalSource,
+    '  Widget _buildDueMirrorAction(ReadingRecord record) {\n',
+    '''  Rect _mirrorShareOrigin() {
+    final renderObject = context.findRenderObject();
+    return renderObject is RenderBox
+        ? renderObject.localToGlobal(Offset.zero) & renderObject.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
+  }
+
+''',
+    'iPad-safe Mirror share origin helper',
+  );
+  if (!journalSource.contains(
+    'sharePositionOrigin: _mirrorShareOrigin(),',
+  )) {
+    throw StateError('Mirror share origin was not materialized.');
+  }
+  journal.writeAsStringSync(journalSource);
+
   stdout.writeln(
-    'Advertising-only UI materialized: paid-tier user copy removed and narrow-screen header hardened.',
+    'Advertising-only UI materialized: paid-tier user copy removed, '
+    'narrow-screen header hardened, and Mirror sharing made iPad-safe.',
   );
 }
 
@@ -167,6 +196,42 @@ String _replaceRequired(
   throw StateError(
     'Unable to materialize $label: expected source anchor missing.',
   );
+}
+
+String _insertAfterRequired(
+  String source,
+  String anchor,
+  String addition,
+  String label,
+) {
+  final materialized = '$anchor$addition';
+  if (source.contains(materialized)) return source;
+  final count = anchor.allMatches(source).length;
+  if (count != 1) {
+    throw StateError(
+      'Unable to materialize $label: expected exactly one source anchor, '
+      'found $count.',
+    );
+  }
+  return source.replaceFirst(anchor, materialized);
+}
+
+String _insertBeforeRequired(
+  String source,
+  String anchor,
+  String addition,
+  String label,
+) {
+  final materialized = '$addition$anchor';
+  if (source.contains(materialized)) return source;
+  final count = anchor.allMatches(source).length;
+  if (count != 1) {
+    throw StateError(
+      'Unable to materialize $label: expected exactly one source anchor, '
+      'found $count.',
+    );
+  }
+  return source.replaceFirst(anchor, materialized);
 }
 
 void _rejectLegacyUserCopy(String source, String path) {
