@@ -34,6 +34,7 @@ void main() {
       final metrics = File('lib/src/business_metrics.dart').readAsStringSync();
 
       expect(metrics, contains('mirrorWindowMatured'));
+      expect(metrics, contains('static const allowedValues'));
       for (final forbiddenAllowedKey in <String>[
         "'user_id'",
         "'device_id'",
@@ -109,7 +110,8 @@ void main() {
     );
     expect(aggregator, contains('Mature Mirror numerator cannot exceed'));
     expect(aggregator, contains('_validateDimensionCountKeys'));
-    expect(aggregator, contains("'device_id'"));
+    expect(aggregator, contains('MysticBusinessMetrics.validateDimensions'));
+    expect(aggregator, contains('Reported retention does not match'));
     expect(aggregator, contains('d7Eligible'));
     expect(aggregator, contains('productScaleGatePassed'));
     expect(aggregator, contains('DO NOT SCALE'));
