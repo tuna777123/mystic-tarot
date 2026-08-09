@@ -12,6 +12,7 @@ void main() {
     expect(main, contains('MysticBusinessMetricsBootstrap.configure()'));
     expect(main, contains('MysticBusinessMetricsBootstrap.recordLaunch()'));
     expect(bootstrap, contains('MysticLocalGrowthLedger.instance.record'));
+    expect(bootstrap, contains('MysticGrowthMeasurementBaseline.instance.ensureStarted()'));
     expect(bootstrap, contains('WidgetsBinding.instance.addObserver'));
     expect(bootstrap, contains("source: 'foreground'"));
     expect(bootstrap, contains('AppLifecycleState.resumed'));
@@ -68,6 +69,24 @@ void main() {
     expect(ledger, contains('_oneShotTokens'));
     expect(exportedSnapshot, isNot(contains('_oneShotTokens')));
     expect(ledger, contains('Future<bool> recordOnce('));
+  });
+
+  test('measurement baseline excludes pre-instrumentation journal history', () {
+    final baseline = File(
+      'lib/src/growth_measurement_baseline.dart',
+    ).readAsStringSync();
+    final tracker = File(
+      'lib/src/mirror_growth_tracker.dart',
+    ).readAsStringSync();
+
+    expect(
+      baseline,
+      contains("'mystic_growth_measurement_started_at_utc_v1'"),
+    );
+    expect(baseline, contains('Future<DateTime> ensureStarted()'));
+    expect(tracker, contains('measurementStartedAtUtc'));
+    expect(tracker, contains('createdAtUtc.isBefore(measurementStartedAtUtc)'));
+    expect(tracker, contains('record.createdAt.toUtc()'));
   });
 
   test('mature Mirror numerator and denominator share one atomic event', () {
