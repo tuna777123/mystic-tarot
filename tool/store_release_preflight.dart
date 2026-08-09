@@ -98,10 +98,9 @@ Future<void> main(List<String> arguments) async {
     }
 
     if (platform == StoreReleasePlatform.ios) {
-      final appleSdkResult = await Process.run(
-        'bash',
-        ['tool/verify_apple_submission_sdk.sh'],
-      );
+      final appleSdkResult = await Process.run('bash', [
+        'tool/verify_apple_submission_sdk.sh',
+      ]);
       if (appleSdkResult.exitCode != 0) {
         final message = '${appleSdkResult.stderr}'.trim();
         _fail([
