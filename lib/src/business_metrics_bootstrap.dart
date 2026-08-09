@@ -23,10 +23,7 @@ class MysticBusinessMetricsBootstrap {
     unawaited(
       MysticBusinessMetrics.record(
         MysticBusinessEvent.appOpened,
-        dimensions: <String, String>{
-          'platform': _platform,
-          'source': 'launch',
-        },
+        dimensions: <String, String>{'platform': _platform, 'source': 'launch'},
       ),
     );
   }

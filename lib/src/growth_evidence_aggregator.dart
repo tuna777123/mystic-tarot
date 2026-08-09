@@ -180,9 +180,7 @@ class MysticGrowthEvidenceAggregator {
 
       matureMirrorWindows += events['mirrorWindowMatured'] ?? 0;
       matureMirrorWithin72 +=
-          dimensions[
-            'mirrorWindowMatured|growth_stage|completed_within_72h'
-          ] ??
+          dimensions['mirrorWindowMatured|growth_stage|completed_within_72h'] ??
           0;
       mirrorCompletions += events['mirrorCompleted'] ?? 0;
       mirrorShares += events['mirrorShareStarted'] ?? 0;

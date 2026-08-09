@@ -22,7 +22,8 @@ class MysticGrowthEvidenceScreen extends StatefulWidget {
       _MysticGrowthEvidenceScreenState();
 }
 
-class _MysticGrowthEvidenceScreenState extends State<MysticGrowthEvidenceScreen> {
+class _MysticGrowthEvidenceScreenState
+    extends State<MysticGrowthEvidenceScreen> {
   MysticGrowthEvidenceSnapshot? snapshot;
   bool loading = true;
 
@@ -91,11 +92,17 @@ class _MysticGrowthEvidenceScreenState extends State<MysticGrowthEvidenceScreen>
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        Expanded(child: _retentionCard('D1', evidence.reachedD1)),
+                        Expanded(
+                          child: _retentionCard('D1', evidence.reachedD1),
+                        ),
                         const SizedBox(width: 9),
-                        Expanded(child: _retentionCard('D7', evidence.reachedD7)),
+                        Expanded(
+                          child: _retentionCard('D7', evidence.reachedD7),
+                        ),
                         const SizedBox(width: 9),
-                        Expanded(child: _retentionCard('D30', evidence.reachedD30)),
+                        Expanded(
+                          child: _retentionCard('D30', evidence.reachedD30),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 14),
@@ -254,13 +261,13 @@ class _MysticGrowthEvidenceScreenState extends State<MysticGrowthEvidenceScreen>
 
   Widget _mirrorCard(MysticGrowthEvidenceSnapshot evidence) {
     final matureWindows = evidence.eventCounts['mirrorWindowMatured'] ?? 0;
-    final completedWithin72 = evidence.dimensionCounts[
-          'mirrorWindowMatured|growth_stage|completed_within_72h'
-        ] ??
+    final completedWithin72 =
+        evidence
+            .dimensionCounts['mirrorWindowMatured|growth_stage|completed_within_72h'] ??
         0;
-    final notCompletedWithin72 = evidence.dimensionCounts[
-          'mirrorWindowMatured|growth_stage|not_completed_within_72h'
-        ] ??
+    final notCompletedWithin72 =
+        evidence
+            .dimensionCounts['mirrorWindowMatured|growth_stage|not_completed_within_72h'] ??
         0;
     final rate = matureWindows <= 0
         ? '—'
@@ -350,7 +357,9 @@ class _MysticGrowthEvidenceScreenState extends State<MysticGrowthEvidenceScreen>
     padding: const EdgeInsets.only(bottom: 8),
     child: Row(
       children: [
-        Expanded(child: Text(label, style: const TextStyle(color: MysticColors.mist))),
+        Expanded(
+          child: Text(label, style: const TextStyle(color: MysticColors.mist)),
+        ),
         Text(
           '$value',
           style: const TextStyle(
@@ -362,44 +371,46 @@ class _MysticGrowthEvidenceScreenState extends State<MysticGrowthEvidenceScreen>
     ),
   );
 
-  Widget _listCard({required String title, required List<(String, int)> rows}) =>
-      Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          color: const Color(0xFF151120),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: .08)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
-            const SizedBox(height: 12),
-            ...rows.map(
-              (row) => Padding(
-                padding: const EdgeInsets.only(bottom: 9),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        row.$1,
-                        style: const TextStyle(color: MysticColors.mist),
-                      ),
-                    ),
-                    Text(
-                      '${row.$2}',
-                      style: const TextStyle(
-                        color: MysticColors.gold,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ],
+  Widget _listCard({
+    required String title,
+    required List<(String, int)> rows,
+  }) => Container(
+    padding: const EdgeInsets.all(17),
+    decoration: BoxDecoration(
+      color: const Color(0xFF151120),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.white.withValues(alpha: .08)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
+        const SizedBox(height: 12),
+        ...rows.map(
+          (row) => Padding(
+            padding: const EdgeInsets.only(bottom: 9),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    row.$1,
+                    style: const TextStyle(color: MysticColors.mist),
+                  ),
                 ),
-              ),
+                Text(
+                  '${row.$2}',
+                  style: const TextStyle(
+                    color: MysticColors.gold,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   Future<void> _shareEvidence() async {
     final json = await MysticLocalGrowthLedger.instance.exportJson();

@@ -29,8 +29,7 @@ String evidence({
     'adImpression': adImpressions,
   },
   'dimensionCounts': <String, int>{
-    'mirrorWindowMatured|growth_stage|completed_within_72h':
-        completedWithin72,
+    'mirrorWindowMatured|growth_stage|completed_within_72h': completedWithin72,
   },
 });
 
@@ -38,50 +37,47 @@ void main() {
   const aggregator = MysticGrowthEvidenceAggregator();
 
   test('uses only mature retention denominators and exact Mirror windows', () {
-    final report = aggregator.aggregateJson(
-      <String>[
-        evidence(
-          firstOpen: '2026-07-01',
-          d1: true,
-          d7: true,
-          d30: true,
-          readings: 4,
-          matureWindows: 3,
-          completedWithin72: 2,
-          mirrorCompletions: 3,
-          shares: 1,
-          adOpportunities: 2,
-          adImpressions: 2,
-        ),
-        evidence(
-          firstOpen: '2026-07-05',
-          d1: true,
-          d7: false,
-          d30: false,
-          readings: 2,
-          matureWindows: 2,
-          completedWithin72: 0,
-          mirrorCompletions: 1,
-        ),
-        evidence(
-          firstOpen: '2026-07-30',
-          d1: true,
-          d7: true,
-          d30: false,
-          readings: 1,
-          matureWindows: 1,
-          completedWithin72: 1,
-        ),
-        evidence(
-          firstOpen: '2026-08-08',
-          d1: false,
-          d7: false,
-          d30: false,
-          readings: 0,
-        ),
-      ],
-      asOf: DateTime(2026, 8, 9),
-    );
+    final report = aggregator.aggregateJson(<String>[
+      evidence(
+        firstOpen: '2026-07-01',
+        d1: true,
+        d7: true,
+        d30: true,
+        readings: 4,
+        matureWindows: 3,
+        completedWithin72: 2,
+        mirrorCompletions: 3,
+        shares: 1,
+        adOpportunities: 2,
+        adImpressions: 2,
+      ),
+      evidence(
+        firstOpen: '2026-07-05',
+        d1: true,
+        d7: false,
+        d30: false,
+        readings: 2,
+        matureWindows: 2,
+        completedWithin72: 0,
+        mirrorCompletions: 1,
+      ),
+      evidence(
+        firstOpen: '2026-07-30',
+        d1: true,
+        d7: true,
+        d30: false,
+        readings: 1,
+        matureWindows: 1,
+        completedWithin72: 1,
+      ),
+      evidence(
+        firstOpen: '2026-08-08',
+        d1: false,
+        d7: false,
+        d30: false,
+        readings: 0,
+      ),
+    ], asOf: DateTime(2026, 8, 9));
 
     expect(report.installs, 4);
     expect(report.activatedInstalls, 3);
@@ -105,18 +101,15 @@ void main() {
   });
 
   test('missing mature denominator never passes the product gate', () {
-    final report = aggregator.aggregateJson(
-      <String>[
-        evidence(
-          firstOpen: '2026-08-08',
-          d1: true,
-          d7: true,
-          d30: true,
-          readings: 1,
-        ),
-      ],
-      asOf: DateTime(2026, 8, 9),
-    );
+    final report = aggregator.aggregateJson(<String>[
+      evidence(
+        firstOpen: '2026-08-08',
+        d1: true,
+        d7: true,
+        d30: true,
+        readings: 1,
+      ),
+    ], asOf: DateTime(2026, 8, 9));
 
     expect(report.d7Eligible, 0);
     expect(report.d7Retention, isNull);
@@ -136,29 +129,25 @@ void main() {
     });
 
     expect(
-      () => aggregator.aggregateJson(
-        <String>[payload],
-        asOf: DateTime(2026, 8, 9),
-      ),
+      () => aggregator.aggregateJson(<String>[
+        payload,
+      ], asOf: DateTime(2026, 8, 9)),
       throwsFormatException,
     );
   });
 
   test('rejects impossible Mirror numerator', () {
     expect(
-      () => aggregator.aggregateJson(
-        <String>[
-          evidence(
-            firstOpen: '2026-07-01',
-            d1: true,
-            d7: true,
-            d30: true,
-            matureWindows: 1,
-            completedWithin72: 2,
-          ),
-        ],
-        asOf: DateTime(2026, 8, 9),
-      ),
+      () => aggregator.aggregateJson(<String>[
+        evidence(
+          firstOpen: '2026-07-01',
+          d1: true,
+          d7: true,
+          d30: true,
+          matureWindows: 1,
+          completedWithin72: 2,
+        ),
+      ], asOf: DateTime(2026, 8, 9)),
       throwsFormatException,
     );
   });

@@ -8,7 +8,10 @@ import 'package:mystic_tarot/src/models.dart';
 import 'package:mystic_tarot/src/mystic_mirror.dart';
 import 'package:mystic_tarot/src/tarot_data.dart';
 
-ReadingRecord _record(DateTime createdAt, {ReadingKind kind = ReadingKind.daily}) {
+ReadingRecord _record(
+  DateTime createdAt, {
+  ReadingKind kind = ReadingKind.daily,
+}) {
   final card = tarotDeck.first;
   return ReadingRecord(
     kind: kind,
@@ -45,10 +48,7 @@ void main() {
     final tracker = MysticMirrorGrowthTracker(ledger: ledger);
 
     final completed = _record(DateTime(2026, 8, 1, 9));
-    final missed = _record(
-      DateTime(2026, 8, 2, 9),
-      kind: ReadingKind.love,
-    );
+    final missed = _record(DateTime(2026, 8, 2, 9), kind: ReadingKind.love);
     final immature = _record(DateTime(2026, 8, 9, 9));
     final reflections = <String, MysticMirrorReflection>{
       mysticMirrorRecordId(completed): _reflection(
@@ -80,15 +80,13 @@ void main() {
       2,
     );
     expect(
-      evidence.dimensionCounts[
-        'mirrorWindowMatured|growth_stage|completed_within_72h'
-      ],
+      evidence
+          .dimensionCounts['mirrorWindowMatured|growth_stage|completed_within_72h'],
       1,
     );
     expect(
-      evidence.dimensionCounts[
-        'mirrorWindowMatured|growth_stage|not_completed_within_72h'
-      ],
+      evidence
+          .dimensionCounts['mirrorWindowMatured|growth_stage|not_completed_within_72h'],
       1,
     );
     expect(
@@ -133,9 +131,8 @@ void main() {
 
     final evidence = await ledger.snapshot();
     expect(
-      evidence.dimensionCounts[
-        'mirrorWindowMatured|growth_stage|completed_within_72h'
-      ],
+      evidence
+          .dimensionCounts['mirrorWindowMatured|growth_stage|completed_within_72h'],
       1,
     );
   });

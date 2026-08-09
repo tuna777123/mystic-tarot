@@ -106,7 +106,10 @@ class MysticLocalGrowthLedger {
       (value) => value + 1,
       ifAbsent: () => 1,
     );
-    final daily = state.dailyEventCounts.putIfAbsent(day, () => <String, int>{});
+    final daily = state.dailyEventCounts.putIfAbsent(
+      day,
+      () => <String, int>{},
+    );
     daily.update(event.name, (value) => value + 1, ifAbsent: () => 1);
 
     if (event == MysticBusinessEvent.appOpened) {
@@ -137,11 +140,7 @@ class MysticLocalGrowthLedger {
         (value) => value + 1,
         ifAbsent: () => 1,
       );
-      dailyDimensions.update(
-        key,
-        (value) => value + 1,
-        ifAbsent: () => 1,
-      );
+      dailyDimensions.update(key, (value) => value + 1, ifAbsent: () => 1);
     }
 
     _trimDailyHistory(state);
@@ -151,7 +150,10 @@ class MysticLocalGrowthLedger {
     SharedPreferences preferences,
     _GrowthLedgerState state,
   ) async {
-    final saved = await preferences.setString(storageKey, jsonEncode(state.toJson()));
+    final saved = await preferences.setString(
+      storageKey,
+      jsonEncode(state.toJson()),
+    );
     if (!saved) {
       throw StateError('Could not persist the local growth ledger.');
     }
@@ -271,7 +273,9 @@ class MysticGrowthEvidenceSnapshot {
 
   bool get firstMirrorCompletedWithinThreeCalendarDays {
     final due = MysticLocalGrowthLedger._parseDay(firstMirrorDueDay);
-    final completed = MysticLocalGrowthLedger._parseDay(firstMirrorCompletedDay);
+    final completed = MysticLocalGrowthLedger._parseDay(
+      firstMirrorCompletedDay,
+    );
     if (due == null || completed == null) return false;
     final offset = completed.difference(due).inDays;
     return offset >= 0 && offset <= 3;
@@ -375,10 +379,7 @@ class _GrowthLedgerState {
     return raw.map((day, value) {
       final counts = value is Map<String, dynamic>
           ? value.map(
-              (key, count) => MapEntry(
-                key,
-                count is num ? count.toInt() : 0,
-              ),
+              (key, count) => MapEntry(key, count is num ? count.toInt() : 0),
             )
           : <String, int>{};
       return MapEntry(day, counts);

@@ -25,38 +25,42 @@ void main() {
     expect(ads, contains("'ad_format': 'interstitial'"));
   });
 
-  test('business metric boundary has no identity or private-content dimensions', () {
-    final metrics = File('lib/src/business_metrics.dart').readAsStringSync();
+  test(
+    'business metric boundary has no identity or private-content dimensions',
+    () {
+      final metrics = File('lib/src/business_metrics.dart').readAsStringSync();
 
-    expect(metrics, contains('mirrorWindowMatured'));
-    for (final forbiddenAllowedKey in <String>[
-      "'user_id'",
-      "'device_id'",
-      "'advertising_id'",
-      "'question'",
-      "'note'",
-      "'card'",
-      "'intention'",
-      "'emotion'",
-      "'outcome'",
-    ]) {
-      final allowedBlock = metrics.substring(
-        metrics.indexOf('static const allowedDimensions'),
-        metrics.indexOf('static const forbiddenDimensionFragments'),
-      );
-      expect(allowedBlock, isNot(contains(forbiddenAllowedKey)));
-    }
-  });
+      expect(metrics, contains('mirrorWindowMatured'));
+      for (final forbiddenAllowedKey in <String>[
+        "'user_id'",
+        "'device_id'",
+        "'advertising_id'",
+        "'question'",
+        "'note'",
+        "'card'",
+        "'intention'",
+        "'emotion'",
+        "'outcome'",
+      ]) {
+        final allowedBlock = metrics.substring(
+          metrics.indexOf('static const allowedDimensions'),
+          metrics.indexOf('static const forbiddenDimensionFragments'),
+        );
+        expect(allowedBlock, isNot(contains(forbiddenAllowedKey)));
+      }
+    },
+  );
 
   test('local ledger never exports internal dedupe tokens', () {
     final ledger = File('lib/src/local_growth_ledger.dart').readAsStringSync();
-    final snapshotStart = ledger.indexOf(
-      'class MysticGrowthEvidenceSnapshot',
-    );
+    final snapshotStart = ledger.indexOf('class MysticGrowthEvidenceSnapshot');
     final stateStart = ledger.indexOf('class _GrowthLedgerState');
     final exportedSnapshot = ledger.substring(snapshotStart, stateStart);
 
-    expect(ledger, contains("'privacyModel': 'aggregate-only-local-no-user-id'"));
+    expect(
+      ledger,
+      contains("'privacyModel': 'aggregate-only-local-no-user-id'"),
+    );
     expect(ledger, contains('_oneShotTokens'));
     expect(exportedSnapshot, isNot(contains('_oneShotTokens')));
     expect(ledger, contains('Future<bool> recordOnce('));
@@ -96,7 +100,10 @@ void main() {
       'lib/src/growth_evidence_aggregator.dart',
     ).readAsStringSync();
 
-    expect(aggregator, contains("privacyModel'] != 'aggregate-only-local-no-user-id'"));
+    expect(
+      aggregator,
+      contains("privacyModel'] != 'aggregate-only-local-no-user-id'"),
+    );
     expect(aggregator, contains('Mature Mirror numerator cannot exceed'));
     expect(aggregator, contains('d7Eligible'));
     expect(aggregator, contains('productScaleGatePassed'));

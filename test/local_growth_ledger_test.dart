@@ -16,10 +16,10 @@ void main() {
       now: () => now,
     );
 
-    await ledger.record(
-      MysticBusinessEvent.appOpened,
-      const <String, String>{'platform': 'android', 'source': 'launch'},
-    );
+    await ledger.record(MysticBusinessEvent.appOpened, const <String, String>{
+      'platform': 'android',
+      'source': 'launch',
+    });
     await ledger.record(
       MysticBusinessEvent.onboardingCompleted,
       const <String, String>{'language': 'en', 'source': 'onboarding'},
@@ -30,10 +30,10 @@ void main() {
     );
 
     now = DateTime(2026, 8, 2, 10);
-    await ledger.record(
-      MysticBusinessEvent.appOpened,
-      const <String, String>{'platform': 'android', 'source': 'launch'},
-    );
+    await ledger.record(MysticBusinessEvent.appOpened, const <String, String>{
+      'platform': 'android',
+      'source': 'launch',
+    });
     await ledger.record(
       MysticBusinessEvent.mirrorDueSeen,
       const <String, String>{'language': 'en', 'source': 'mirror_due_state'},
@@ -50,16 +50,16 @@ void main() {
     );
 
     now = DateTime(2026, 8, 8, 8);
-    await ledger.record(
-      MysticBusinessEvent.appOpened,
-      const <String, String>{'platform': 'android', 'source': 'launch'},
-    );
+    await ledger.record(MysticBusinessEvent.appOpened, const <String, String>{
+      'platform': 'android',
+      'source': 'launch',
+    });
 
     now = DateTime(2026, 8, 31, 8);
-    await ledger.record(
-      MysticBusinessEvent.appOpened,
-      const <String, String>{'platform': 'android', 'source': 'launch'},
-    );
+    await ledger.record(MysticBusinessEvent.appOpened, const <String, String>{
+      'platform': 'android',
+      'source': 'launch',
+    });
 
     final snapshot = await ledger.snapshot();
     expect(snapshot.firstOpenDay, '2026-08-01');
@@ -73,15 +73,12 @@ void main() {
     expect(snapshot.eventCounts[MysticBusinessEvent.appOpened.name], 4);
     expect(snapshot.eventCounts[MysticBusinessEvent.readingCompleted.name], 1);
     expect(
-      snapshot.dimensionCounts[
-        'mirrorCompleted|growth_stage|within_72h'
-      ],
+      snapshot.dimensionCounts['mirrorCompleted|growth_stage|within_72h'],
       1,
     );
     expect(
-      snapshot.dailyDimensionCounts['2026-08-03']?[
-        'mirrorCompleted|growth_stage|within_72h'
-      ],
+      snapshot
+          .dailyDimensionCounts['2026-08-03']?['mirrorCompleted|growth_stage|within_72h'],
       1,
     );
 
@@ -120,9 +117,9 @@ void main() {
     final snapshot = await ledger.snapshot();
     expect(snapshot.eventCounts[MysticBusinessEvent.readingCompleted.name], 25);
     expect(
-      snapshot.dailyEventCounts['2026-08-09']?[
-        MysticBusinessEvent.readingCompleted.name
-      ],
+      snapshot.dailyEventCounts['2026-08-09']?[MysticBusinessEvent
+          .readingCompleted
+          .name],
       25,
     );
   });
@@ -137,37 +134,40 @@ void main() {
       now: () => DateTime(2026, 8, 9),
     );
 
-    await ledger.record(
-      MysticBusinessEvent.appOpened,
-      const <String, String>{'platform': 'ios', 'source': 'launch'},
-    );
+    await ledger.record(MysticBusinessEvent.appOpened, const <String, String>{
+      'platform': 'ios',
+      'source': 'launch',
+    });
 
     final snapshot = await ledger.snapshot();
     expect(snapshot.firstOpenDay, '2026-08-09');
     expect(snapshot.eventCounts[MysticBusinessEvent.appOpened.name], 1);
   });
 
-  test('business boundary rejects private or unknown dimensions before storage', () async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
-    final preferences = await SharedPreferences.getInstance();
-    final ledger = MysticLocalGrowthLedger(preferences: preferences);
+  test(
+    'business boundary rejects private or unknown dimensions before storage',
+    () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final preferences = await SharedPreferences.getInstance();
+      final ledger = MysticLocalGrowthLedger(preferences: preferences);
 
-    expect(
-      () => ledger.record(
-        MysticBusinessEvent.readingCompleted,
-        const <String, String>{'question': 'private question'},
-      ),
-      throwsArgumentError,
-    );
-    expect(
-      () => ledger.record(
-        MysticBusinessEvent.readingCompleted,
-        const <String, String>{'device_id': 'abc'},
-      ),
-      throwsArgumentError,
-    );
+      expect(
+        () => ledger.record(
+          MysticBusinessEvent.readingCompleted,
+          const <String, String>{'question': 'private question'},
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => ledger.record(
+          MysticBusinessEvent.readingCompleted,
+          const <String, String>{'device_id': 'abc'},
+        ),
+        throwsArgumentError,
+      );
 
-    final snapshot = await ledger.snapshot();
-    expect(snapshot.eventCounts, isEmpty);
-  });
+      final snapshot = await ledger.snapshot();
+      expect(snapshot.eventCounts, isEmpty);
+    },
+  );
 }
