@@ -16,11 +16,19 @@ Enable the hidden Growth Evidence entry with:
 
 Keep ordinary public builds at the default `false` unless the product team intentionally decides otherwise.
 
-The diagnostic screen exports **aggregate-only Growth Evidence JSON**. It does not export reading questions, card names, notes, emotions, outcomes, user name, intention, journal text, PIN/search history or internal dedupe tokens.
+The diagnostic screen exports **aggregate-only Growth Evidence JSON**. It does not export reading questions, card names, notes, emotions, outcomes, user name, intention, journal text, PIN/search history, internal dedupe tokens or the exact local measurement-start timestamp.
+
+## Cohort baseline
+
+For company-quality cohort comparisons, start testers from the cohort's agreed fresh-install/reset state.
+
+The app persists a local measurement baseline when the evidence system begins. Readings that existed **before** that timestamp are excluded from the mature 72-hour Mirror KPI, so upgraded legacy journal history cannot masquerade as new launch-cohort behavior.
+
+`Delete all Mystic data` clears the underlying local preferences; the next measurement session therefore creates a new baseline. Do not mix reset/fresh-install evidence and upgraded-user evidence into one named cohort without explicitly labeling the experiment that way.
 
 ## Tester procedure
 
-1. Start from the test cohort's agreed fresh-install state.
+1. Start from the test cohort's agreed fresh-install or explicit reset state.
 2. Use Mystic naturally; do not manufacture extra opens or Mirror completions to improve metrics.
 3. Return on normal days when the product/reminder gives a real reason.
 4. Complete Mystic Mirror honestly when appropriate.
@@ -35,7 +43,7 @@ Collect a named cohort only after its required denominator is mature:
 - D1 review: at/after calendar day +1;
 - D7 scale review: at/after calendar day +7;
 - D30 durability review: at/after calendar day +30;
-- Mystic Mirror 72h rate: only from `mirrorWindowMatured` events.
+- Mystic Mirror 72h rate: only from post-baseline `mirrorWindowMatured` events.
 
 Young installs are excluded from the corresponding retention denominator by the aggregator.
 
@@ -54,6 +62,9 @@ The report is fail-closed:
 - zero/missing D7 denominator = NOT PROVEN;
 - zero/missing mature-Mirror denominator = NOT PROVEN;
 - private/internal export fields = rejected;
+- unapproved metric dimension names or values = rejected;
+- reported retention that conflicts with active-day evidence = rejected;
+- incomplete mature-Mirror classification = rejected;
 - impossible Mirror numerator > denominator = rejected.
 
 ## Company scale decision
@@ -92,4 +103,4 @@ AdMob remains the production revenue source of truth after real production IDs a
 
 ## Privacy rule
 
-If any Growth Evidence export contains private tarot content, an account/device/advertising identifier, or an internal dedupe token, stop collection and treat it as a release-blocking privacy defect.
+If any Growth Evidence export contains private tarot content, an account/device/advertising identifier, an internal dedupe token or the exact measurement-start timestamp, stop collection and treat it as a release-blocking privacy defect.
