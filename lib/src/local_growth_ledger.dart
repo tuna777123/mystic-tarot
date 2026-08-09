@@ -67,9 +67,18 @@ class MysticLocalGrowthLedger {
         state.firstMirrorCompletedDay ??= day;
       }
 
+      final dailyDimensions = state.dailyDimensionCounts.putIfAbsent(
+        day,
+        () => <String, int>{},
+      );
       for (final entry in safeDimensions.entries) {
         final key = '${event.name}|${entry.key}|${entry.value}';
         state.dimensionCounts.update(
+          key,
+          (value) => value + 1,
+          ifAbsent: () => 1,
+        );
+        dailyDimensions.update(
           key,
           (value) => value + 1,
           ifAbsent: () => 1,
@@ -132,6 +141,7 @@ class MysticLocalGrowthLedger {
     final removeCount = days.length - _maxRetainedDays;
     for (final day in days.take(removeCount)) {
       state.dailyEventCounts.remove(day);
+      state.dailyDimensionCounts.remove(day);
     }
   }
 
@@ -166,7 +176,12 @@ class MysticGrowthEvidenceSnapshot {
           (day, counts) => MapEntry(day, Map<String, int>.unmodifiable(counts)),
         ),
       ),
-      dimensionCounts = Map<String, int>.unmodifiable(state.dimensionCounts);
+      dimensionCounts = Map<String, int>.unmodifiable(state.dimensionCounts),
+      dailyDimensionCounts = Map<String, Map<String, int>>.unmodifiable(
+        state.dailyDimensionCounts.map(
+          (day, counts) => MapEntry(day, Map<String, int>.unmodifiable(counts)),
+        ),
+      );
 
   final String? firstObservedDay;
   final String? lastObservedDay;
@@ -179,6 +194,7 @@ class MysticGrowthEvidenceSnapshot {
   final Map<String, int> eventCounts;
   final Map<String, Map<String, int>> dailyEventCounts;
   final Map<String, int> dimensionCounts;
+  final Map<String, Map<String, int>> dailyDimensionCounts;
 
   bool get reachedD1 => _activeOnOffset(1);
   bool get reachedD7 => _activeOnOffset(7);
@@ -232,6 +248,7 @@ class MysticGrowthEvidenceSnapshot {
     'eventCounts': eventCounts,
     'dailyEventCounts': dailyEventCounts,
     'dimensionCounts': dimensionCounts,
+    'dailyDimensionCounts': dailyDimensionCounts,
   };
 }
 
@@ -248,15 +265,19 @@ class _GrowthLedgerState {
     Map<String, int>? eventCounts,
     Map<String, Map<String, int>>? dailyEventCounts,
     Map<String, int>? dimensionCounts,
+    Map<String, Map<String, int>>? dailyDimensionCounts,
   }) : activeDays = activeDays ?? <String>{},
        eventCounts = eventCounts ?? <String, int>{},
        dailyEventCounts = dailyEventCounts ?? <String, Map<String, int>>{},
-       dimensionCounts = dimensionCounts ?? <String, int>{};
+       dimensionCounts = dimensionCounts ?? <String, int>{},
+       dailyDimensionCounts =
+           dailyDimensionCounts ?? <String, Map<String, int>>{};
 
   factory _GrowthLedgerState.fromJson(Map<String, dynamic> json) {
     final rawEventCounts = json['eventCounts'];
     final rawDaily = json['dailyEventCounts'];
     final rawDimensionCounts = json['dimensionCounts'];
+    final rawDailyDimensions = json['dailyDimensionCounts'];
     return _GrowthLedgerState(
       firstObservedDay: json['firstObservedDay'] as String?,
       lastObservedDay: json['lastObservedDay'] as String?,
@@ -273,25 +294,29 @@ class _GrowthLedgerState {
               (key, value) => MapEntry(key, value is num ? value.toInt() : 0),
             )
           : <String, int>{},
-      dailyEventCounts: rawDaily is Map<String, dynamic>
-          ? rawDaily.map((day, value) {
-              final counts = value is Map<String, dynamic>
-                  ? value.map(
-                      (key, count) => MapEntry(
-                        key,
-                        count is num ? count.toInt() : 0,
-                      ),
-                    )
-                  : <String, int>{};
-              return MapEntry(day, counts);
-            })
-          : <String, Map<String, int>>{},
+      dailyEventCounts: _decodeNestedCounts(rawDaily),
       dimensionCounts: rawDimensionCounts is Map<String, dynamic>
           ? rawDimensionCounts.map(
               (key, value) => MapEntry(key, value is num ? value.toInt() : 0),
             )
           : <String, int>{},
+      dailyDimensionCounts: _decodeNestedCounts(rawDailyDimensions),
     );
+  }
+
+  static Map<String, Map<String, int>> _decodeNestedCounts(Object? raw) {
+    if (raw is! Map<String, dynamic>) return <String, Map<String, int>>{};
+    return raw.map((day, value) {
+      final counts = value is Map<String, dynamic>
+          ? value.map(
+              (key, count) => MapEntry(
+                key,
+                count is num ? count.toInt() : 0,
+              ),
+            )
+          : <String, int>{};
+      return MapEntry(day, counts);
+    });
   }
 
   String? firstObservedDay;
@@ -305,6 +330,7 @@ class _GrowthLedgerState {
   final Map<String, int> eventCounts;
   final Map<String, Map<String, int>> dailyEventCounts;
   final Map<String, int> dimensionCounts;
+  final Map<String, Map<String, int>> dailyDimensionCounts;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'schemaVersion': MysticLocalGrowthLedger.schemaVersion,
@@ -319,5 +345,6 @@ class _GrowthLedgerState {
     'eventCounts': eventCounts,
     'dailyEventCounts': dailyEventCounts,
     'dimensionCounts': dimensionCounts,
+    'dailyDimensionCounts': dailyDimensionCounts,
   };
 }
