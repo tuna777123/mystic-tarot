@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
+import 'business_metrics.dart';
 import 'flagship.dart';
 import 'models.dart';
 import 'mystic_memory_map_feature.dart';
 import 'mystic_mirror.dart';
+import 'mystic_mirror_share.dart';
 import 'mystic_search.dart';
 import 'oracle_conversation.dart';
 import 'oracle_memory_action.dart';
@@ -25,6 +28,9 @@ class MysticLivingJournalFeature extends StatefulWidget {
 
   final List<ReadingRecord> records;
   final MysticLanguage language;
+
+  /// Retained for source compatibility with the pre-advertising UI contract.
+  /// The Living Journal no longer exposes a paid-tier action.
   final VoidCallback onPremium;
   final Future<void> Function(ReadingRecord record) onOpenOracle;
   final VoidCallback? onStartReading;
@@ -594,6 +600,37 @@ class _MysticLivingJournalFeatureState
               style: const TextStyle(color: MysticColors.mist, height: 1.4),
             ),
           ],
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () async {
+                await MysticBusinessMetrics.record(
+                  MysticBusinessEvent.mirrorShareStarted,
+                  dimensions: {
+                    'language': widget.language.code,
+                    'source': 'living_journal',
+                  },
+                );
+                await SharePlus.instance.share(
+                  ShareParams(
+                    text: mysticMirrorShareText(widget.language),
+                    subject: mysticMirrorShareSubject(widget.language),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.ios_share_rounded, size: 17),
+              label: Text(
+                _mirrorCopy(
+                  en: 'Share the 24h ritual',
+                  tr: '24 saatlik ritüeli paylaş',
+                  es: 'Compartir el ritual de 24 h',
+                  fr: 'Partager le rituel de 24 h',
+                  pt: 'Compartilhar o ritual de 24 h',
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -848,6 +885,13 @@ class _MysticLivingJournalFeatureState
                                     reflection.recordId: reflection,
                                   };
                                 });
+                                await MysticBusinessMetrics.record(
+                                  MysticBusinessEvent.mirrorCompleted,
+                                  dimensions: {
+                                    'language': widget.language.code,
+                                    'source': 'living_journal',
+                                  },
+                                );
                                 widget.onMirrorChanged?.call();
                                 if (sheetContext.mounted) {
                                   Navigator.pop(sheetContext);
@@ -1055,7 +1099,7 @@ class _MysticLivingJournalFeatureState
               .toList(),
         ),
         const SizedBox(height: 12),
-        _buildPremiumCard(),
+        _buildPatternLabCard(),
       ],
     );
   }
@@ -1146,7 +1190,12 @@ class _MysticLivingJournalFeatureState
     );
   }
 
-  Widget _buildPremiumCard() {
+  Widget _buildPatternLabCard() {
+    final completed = mirrors.length;
+    final readingCount = widget.records.length;
+    final evidenceCount = completed.clamp(0, readingCount);
+    final progress = readingCount == 0 ? 0.0 : evidenceCount / readingCount;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -1162,22 +1211,64 @@ class _MysticLivingJournalFeatureState
           const Icon(Icons.hub_outlined, color: MysticColors.gold),
           const SizedBox(height: 10),
           Text(
-            _copy('Unlock your full pattern map', 'Tüm örüntü haritanı aç'),
+            _mirrorCopy(
+              en: 'Your Pattern Lab grows with evidence',
+              tr: 'Örüntü Laboratuvarın kanıtla büyür',
+              es: 'Tu Laboratorio de Patrones crece con evidencia',
+              fr: 'Votre Laboratoire de schémas grandit avec les preuves',
+              pt: 'Seu Laboratório de Padrões cresce com evidências',
+            ),
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 7),
           Text(
-            _copy(
-              'Reveal longer emotional cycles, yearly reviews, and deeper memory connections. Your basic 24-hour Mirror always remains available.',
-              'Uzun duygusal döngüleri, yıllık özetleri ve derin hafıza bağlantılarını gör. Temel 24 saatlik Ayna her zaman kullanılabilir kalır.',
+            _mirrorCopy(
+              en: 'Every saved reading and honest 24-hour check-in adds context. Nothing is locked: richer patterns appear as your private history earns enough evidence.',
+              tr: 'Her kayıtlı okuma ve dürüst 24 saatlik kontrol yeni bağlam ekler. Hiçbir şey kilitli değil: özel geçmişin yeterli kanıt biriktirdikçe daha zengin örüntüler görünür.',
+              es: 'Cada lectura guardada y revisión honesta de 24 horas añade contexto. Nada está bloqueado: los patrones más ricos aparecen cuando tu historial privado reúne suficiente evidencia.',
+              fr: 'Chaque tirage enregistré et bilan honnête après 24 h ajoute du contexte. Rien n’est verrouillé : des schémas plus riches apparaissent lorsque votre historique privé accumule assez de preuves.',
+              pt: 'Cada leitura salva e check-in honesto de 24 horas adiciona contexto. Nada fica bloqueado: padrões mais ricos aparecem quando seu histórico privado reúne evidências suficientes.',
             ),
             style: const TextStyle(color: MysticColors.mist),
           ),
+          const SizedBox(height: 13),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 7,
+              backgroundColor: Colors.white10,
+              color: MysticColors.gold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _mirrorCopy(
+              en: '$completed reality check-ins • $readingCount saved readings',
+              tr: '$completed gerçeklik kontrolü • $readingCount kayıtlı okuma',
+              es: '$completed revisiones de realidad • $readingCount lecturas guardadas',
+              fr: '$completed bilans de réalité • $readingCount tirages enregistrés',
+              pt: '$completed check-ins de realidade • $readingCount leituras salvas',
+            ),
+            style: const TextStyle(
+              color: MysticColors.lavender,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: widget.onPremium,
-            icon: const Icon(Icons.auto_awesome, size: 18),
-            label: Text(_copy('Explore Premium', 'Premium’u keşfet')),
+            onPressed: () => setState(() => section = _JournalSection.map),
+            icon: const Icon(Icons.hub_rounded, size: 18),
+            label: Text(
+              _mirrorCopy(
+                en: 'Open my Pattern Map',
+                tr: 'Örüntü Haritamı aç',
+                es: 'Abrir mi Mapa de Patrones',
+                fr: 'Ouvrir ma Carte des schémas',
+                pt: 'Abrir meu Mapa de Padrões',
+              ),
+            ),
           ),
         ],
       ),
@@ -1437,7 +1528,7 @@ class _MysticLivingJournalFeatureState
             ),
           ),
           const Icon(
-            Icons.lock_outline_rounded,
+            Icons.arrow_forward_rounded,
             size: 16,
             color: MysticColors.lavender,
           ),
