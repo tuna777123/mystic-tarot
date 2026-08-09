@@ -6,12 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../tool/src/android_bundle_audit.dart';
 
 void main() {
-  test('parses release identity and manifest permissions', () {
+  test('parses release identity, SDK levels and manifest permissions', () {
     final manifest = ManifestSnapshot.parse('''
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tunabozcali.mystictarot"
     android:versionCode="30"
     android:versionName="1.22.1">
+  <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36" />
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission-sdk-23 android:name="android.permission.USE_BIOMETRIC" />
 </manifest>
@@ -20,10 +21,41 @@ void main() {
     expect(manifest.packageName, 'com.tunabozcali.mystictarot');
     expect(manifest.versionName, '1.22.1');
     expect(manifest.versionCode, 30);
+    expect(manifest.minSdkVersion, 24);
+    expect(manifest.targetSdkVersion, 36);
     expect(manifest.permissions, <String>{
       'android.permission.INTERNET',
       'android.permission.USE_BIOMETRIC',
     });
+  });
+
+  test('requires numeric uses-sdk metadata', () {
+    expect(
+      () => ManifestSnapshot.parse('''
+<manifest package="com.tunabozcali.mystictarot"
+    android:versionCode="30"
+    android:versionName="1.22.1">
+</manifest>
+'''),
+      throwsA(isA<AuditFailure>()),
+    );
+    expect(
+      () => ManifestSnapshot.parse('''
+<manifest package="com.tunabozcali.mystictarot"
+    android:versionCode="30"
+    android:versionName="1.22.1">
+  <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="VanillaIceCream" />
+</manifest>
+'''),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
+
+  test('enforces the Google Play API 36 submission floor', () {
+    expect(minimumGooglePlayTargetSdk, 36);
+    expect(() => validateGooglePlayTargetSdk(36), returnsNormally);
+    expect(() => validateGooglePlayTargetSdk(37), returnsNormally);
+    expect(() => validateGooglePlayTargetSdk(35), throwsA(isA<AuditFailure>()));
   });
 
   test('reads strict Flutter version identity', () {

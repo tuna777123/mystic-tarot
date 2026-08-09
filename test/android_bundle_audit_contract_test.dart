@@ -71,7 +71,27 @@ void main() {
     expect(tool.readAsStringSync(), contains('bundletool'));
     expect(tool.readAsStringSync(), contains('jarsigner'));
     expect(tool.readAsStringSync(), contains('sha256sum'));
+    expect(tool.readAsStringSync(), contains('validateGooglePlayTargetSdk'));
+    expect(tool.readAsStringSync(), contains('Android target SDK'));
+    expect(
+      policy.readAsStringSync(),
+      contains('minimumGooglePlayTargetSdk = 36'),
+    );
     expect(policy.readAsStringSync(), contains('AD_ID'));
     expect(policy.readAsStringSync(), contains('Lcom/appsflyer/'));
+  });
+
+  test('dated 2026 store requirements remain attached to the handoff', () {
+    final requirements = File('docs/STORE_TECHNICAL_REQUIREMENTS_2026.md');
+    final checklist = File('docs/OWNER_FINAL_CHECKLIST.md');
+    final delivery = File('docs/FINAL_DELIVERY.md');
+
+    expect(requirements.existsSync(), isTrue);
+    expect(checklist.existsSync(), isTrue);
+    expect(requirements.readAsStringSync(), contains('API level 36'));
+    expect(requirements.readAsStringSync(), contains('Xcode 26'));
+    expect(requirements.readAsStringSync(), contains('12 opted-in testers'));
+    expect(requirements.readAsStringSync(), contains('app-ads.txt'));
+    expect(delivery.readAsStringSync(), contains('OWNER_FINAL_CHECKLIST.md'));
   });
 }

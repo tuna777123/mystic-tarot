@@ -88,6 +88,7 @@ Future<String> _audit(_AuditOptions options) async {
       'does not match pubspec ${expectedVersion.name}+${expectedVersion.code}.',
     );
   }
+  validateGooglePlayTargetSdk(manifest.targetSdkVersion);
 
   final forbiddenPermissions = findForbiddenPermissions(manifest.permissions);
   if (forbiddenPermissions.isNotEmpty) {
@@ -165,6 +166,9 @@ Future<String> _audit(_AuditOptions options) async {
 - Result: **PASS**
 - Package: `${manifest.packageName}`
 - Version: `${manifest.versionName}+${manifest.versionCode}`
+- Android min SDK: `${manifest.minSdkVersion}`
+- Android target SDK: `${manifest.targetSdkVersion}`
+- Google Play target-SDK gate: `API ${manifest.targetSdkVersion} >= API $minimumGooglePlayTargetSdk`
 - Bundle size: `${formatByteCount(bundleBytes)}`
 - SHA-256: `$sha256`
 - Signature container: `strict jarsigner policy passed`
@@ -177,9 +181,10 @@ Future<String> _audit(_AuditOptions options) async {
 
 This automated audit verifies the release artifact itself. Google Mobile Ads is an
 intentional reviewed dependency in the advertising-supported native build. The
-audit does not replace Play pre-launch testing, AdMob/UMP account configuration,
-production signing ownership, store privacy declarations, or real-device
-network and consent inspection.
+audit also rejects a target SDK below the current Mystic Google Play submission
+floor. It does not replace Play pre-launch testing, AdMob/UMP account
+configuration, production signing ownership, store privacy declarations, or
+real-device network and consent inspection.
 ''';
 }
 
