@@ -17,6 +17,8 @@ void main() {
     }
     expect(source, contains('Your Pattern Lab grows with evidence'));
     expect(source, contains('Share the 24h ritual'));
+    expect(source, contains('sharePositionOrigin: _mirrorShareOrigin()'));
+    expect(source, contains('Rect _mirrorShareOrigin()'));
   });
 
   test('growth engine contains no stale paid-tier CTA copy', () {
