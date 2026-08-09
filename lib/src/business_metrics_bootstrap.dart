@@ -24,9 +24,7 @@ class MysticBusinessMetricsBootstrap {
 
   static void recordLaunch() {
     configure();
-    unawaited(
-      _recordActivity(source: 'launch'),
-    );
+    unawaited(_recordActivity(source: 'launch'));
   }
 
   static Future<void> _recordActivity({required String source}) =>
@@ -37,7 +35,14 @@ class MysticBusinessMetricsBootstrap {
 
   static String get _platform {
     if (kIsWeb) return 'web';
-    return defaultTargetPlatform.name;
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => 'android',
+      TargetPlatform.iOS => 'ios',
+      TargetPlatform.macOS => 'macos',
+      TargetPlatform.windows => 'windows',
+      TargetPlatform.linux => 'linux',
+      TargetPlatform.fuchsia => 'fuchsia',
+    };
   }
 }
 
