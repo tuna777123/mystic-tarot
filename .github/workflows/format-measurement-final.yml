@@ -1,0 +1,57 @@
+name: Format Measurement Final
+
+on:
+  push:
+    branches:
+      - product/measurement-ready-growth-lab
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: product/measurement-ready-growth-lab
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Format final measurement source
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart format \
+            lib/main.dart \
+            lib/src/ad_revenue_service.dart \
+            lib/src/app_locale.dart \
+            lib/src/business_metrics.dart \
+            lib/src/business_metrics_bootstrap.dart \
+            lib/src/growth_evidence_aggregator.dart \
+            lib/src/growth_evidence_screen.dart \
+            lib/src/local_growth_ledger.dart \
+            lib/src/mirror_growth_tracker.dart \
+            test/business_metrics_test.dart \
+            test/growth_evidence_aggregator_test.dart \
+            test/local_growth_ledger_test.dart \
+            test/measurement_ready_growth_contract_test.dart \
+            test/mirror_growth_tracker_test.dart \
+            tool/aggregate_growth_evidence.dart \
+            tool/materialize_ad_only_ui.dart
+      - name: Commit exact formatter output
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'Already formatted.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*.dart'
+          git commit -m 'Apply final canonical Dart formatting'
+          git push origin HEAD:product/measurement-ready-growth-lab
