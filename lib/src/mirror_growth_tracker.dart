@@ -1,86 +1,76 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 import 'business_metrics.dart';
+import 'local_growth_ledger.dart';
 import 'models.dart';
 import 'mystic_mirror.dart';
 
-/// Emits exactly one aggregate denominator event when a reading's 72-hour
-/// Mystic Mirror completion window has fully matured.
+/// Emits one aggregate outcome when a reading's 72-hour Mystic Mirror window
+/// has fully matured.
 ///
-/// The local dedupe key uses the existing reading record id and never leaves
-/// the device. It is not included in the Growth Evidence export or business
-/// metric dimensions.
+/// Numerator and denominator are produced at the same maturity boundary:
+/// every mature reading emits `mirrorWindowMatured`, classified as either
+/// `completed_within_72h` or `not_completed_within_72h`.
+///
+/// The local dedupe token contains the existing reading record id but is stored
+/// only inside the private local ledger and is never included in exported
+/// Growth Evidence or business metric dimensions.
 class MysticMirrorGrowthTracker {
-  MysticMirrorGrowthTracker({SharedPreferences? preferences})
-    : _providedPreferences = preferences;
+  MysticMirrorGrowthTracker({MysticLocalGrowthLedger? ledger})
+    : _ledger = ledger ?? MysticLocalGrowthLedger.instance;
 
   static final MysticMirrorGrowthTracker instance = MysticMirrorGrowthTracker();
 
-  static const processedKey = 'mystic_mirror_matured_metric_ids_v1';
   static const completionWindow = Duration(hours: 72);
 
-  final SharedPreferences? _providedPreferences;
+  final MysticLocalGrowthLedger _ledger;
   Future<void> _queue = Future<void>.value();
-
-  Future<SharedPreferences> _preferences() async =>
-      _providedPreferences ?? SharedPreferences.getInstance();
 
   Future<void> sync({
     required Iterable<ReadingRecord> records,
+    required Map<String, MysticMirrorReflection> reflections,
     required String languageCode,
     DateTime? now,
   }) {
     final observedAt = now ?? DateTime.now();
     final next = _queue.then<void>((_) async {
-      final preferences = await _preferences();
-      final processed = (preferences.getStringList(processedKey) ?? const <String>[])
-          .toSet();
-      var changed = false;
-
       final ordered = records.toList(growable: false)
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
       for (final record in ordered) {
         final maturesAt = record.createdAt.add(completionWindow);
         if (observedAt.isBefore(maturesAt)) continue;
 
         final recordId = mysticMirrorRecordId(record);
-        if (processed.contains(recordId)) continue;
+        final reflection = reflections[recordId];
+        final completedWithinWindow =
+            reflection != null &&
+            !reflection.completedAt.toLocal().isAfter(maturesAt);
+        final growthStage = completedWithinWindow
+            ? 'completed_within_72h'
+            : 'not_completed_within_72h';
 
-        final accepted = await MysticBusinessMetrics.tryRecord(
+        await _ledger.recordOnce(
           MysticBusinessEvent.mirrorWindowMatured,
+          dedupeToken: 'mirror-window:$recordId',
           dimensions: <String, String>{
             'language': languageCode,
             'reading_kind': record.kind.name,
+            'growth_stage': growthStage,
             'source': 'mirror_window',
           },
         );
-        if (!accepted) continue;
-
-        processed.add(recordId);
-        changed = true;
-      }
-
-      if (!changed) return;
-      final orderedIds = processed.toList()..sort();
-      final saved = await preferences.setStringList(processedKey, orderedIds);
-      if (!saved) {
-        // The event reporter already accepted the aggregate count, so failing to
-        // persist dedupe would risk a duplicate on the next sync. Throw here so
-        // debug/QA can surface the storage failure instead of silently claiming
-        // exact-once evidence.
-        throw StateError('Could not persist mature Mirror metric dedupe state.');
       }
     });
-    _queue = next.catchError((_) {});
-    return next;
-  }
 
-  Future<void> clear() async {
-    final next = _queue.then<void>((_) async {
-      final preferences = await _preferences();
-      await preferences.remove(processedKey);
+    // Growth evidence is observability, not a product dependency. Storage
+    // failure must not interrupt readings, Mirror, navigation or ads.
+    _queue = next.catchError((error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Mystic mature Mirror evidence sync failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
+      }
     });
-    _queue = next.catchError((_) {});
-    await next;
+    return _queue;
   }
 }
