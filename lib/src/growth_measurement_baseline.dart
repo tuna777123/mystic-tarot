@@ -58,9 +58,12 @@ class MysticGrowthMeasurementBaseline {
     return DateTime.fromMillisecondsSinceEpoch(storedMillis, isUtc: true);
   }
 
-  Future<void> clearForTesting() async {
+  Future<void> clear() async {
     final preferences = await _preferences();
-    await preferences.remove(storageKey);
+    final removed = await preferences.remove(storageKey);
+    if (!removed && preferences.containsKey(storageKey)) {
+      throw StateError('Could not delete the growth measurement baseline.');
+    }
     _starting = null;
   }
 }
