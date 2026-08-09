@@ -66,4 +66,20 @@ void main() {
       'source': 'living_journal',
     });
   });
+
+  test('remote reporter failure never escapes into a product flow', () async {
+    MysticBusinessMetrics.configure(
+      reporter: (event, dimensions) async {
+        throw StateError('analytics unavailable');
+      },
+    );
+
+    await expectLater(
+      MysticBusinessMetrics.record(
+        MysticBusinessEvent.mirrorShareStarted,
+        dimensions: const {'language': 'TR', 'source': 'living_journal'},
+      ),
+      completes,
+    );
+  });
 }
