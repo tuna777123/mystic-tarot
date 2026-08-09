@@ -15,12 +15,20 @@ void main() {
       expect(contract, contains('RevenueCat'));
       expect(contract, contains('purchases_flutter'));
       expect(contract, contains('Growth evidence must remain aggregate-only'));
-      expect(contract, contains('Generic public sharing must never include private tarot content'));
+      expect(
+        contract,
+        contains(
+          'Generic public sharing must never include private tarot content',
+        ),
+      );
     });
 
     test('locks launch identity and required release validation', () {
       expect(contract, contains('com.tunabozcali.mystictarot'));
-      expect(contract, contains('English, Turkish, Spanish, French, and Brazilian Portuguese'));
+      expect(
+        contract,
+        contains('English, Turkish, Spanish, French, and Brazilian Portuguese'),
+      );
       expect(contract, contains('flutter analyze --fatal-infos'));
       expect(contract, contains('Android release AAB build'));
       expect(contract, contains('Unsigned iOS Release build'));
