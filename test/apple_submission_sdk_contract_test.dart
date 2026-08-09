@@ -16,8 +16,12 @@ void main() {
 
   test('unsigned and production iOS release paths use the SDK gate', () {
     final iosCi = File('.github/workflows/ios-ci.yml').readAsStringSync();
-    final preflight = File('tool/store_release_preflight.dart').readAsStringSync();
-    final production = File('.github/workflows/store-release.yml').readAsStringSync();
+    final preflight = File(
+      'tool/store_release_preflight.dart',
+    ).readAsStringSync();
+    final production = File(
+      '.github/workflows/store-release.yml',
+    ).readAsStringSync();
 
     expect(iosCi, contains('Verify Apple submission SDK floor'));
     expect(iosCi, contains('tool/verify_apple_submission_sdk.sh'));
