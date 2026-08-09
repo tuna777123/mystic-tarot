@@ -78,6 +78,12 @@ void main() {
       ],
       1,
     );
+    expect(
+      snapshot.dailyDimensionCounts['2026-08-03']?[
+        'mirrorCompleted|growth_stage|within_72h'
+      ],
+      1,
+    );
 
     final exported = await ledger.exportJson();
     for (final forbidden in <String>[
