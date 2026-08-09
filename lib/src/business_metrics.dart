@@ -7,6 +7,7 @@ enum MysticBusinessEvent {
   onboardingCompleted,
   readingCompleted,
   mirrorDueSeen,
+  mirrorWindowMatured,
   mirrorCompleted,
   mirrorShareStarted,
   ritualReminderEnabled,
