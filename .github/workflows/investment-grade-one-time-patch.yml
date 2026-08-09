@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   patch:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -225,12 +224,11 @@ jobs:
 '''
           replace_once(lock_icon, open_icon, 'Empty-state lock icon')
 
-          forbidden = [
+          for phrase in [
               'Unlock your full pattern map',
               'Explore Premium',
               'Premium’u keşfet',
-          ]
-          for phrase in forbidden:
+          ]:
               if phrase in source:
                   raise SystemExit(f'forbidden paid-model phrase remains: {phrase}')
 
@@ -246,12 +244,16 @@ jobs:
 
           verifier = Path('tool/verify_launch_surface.sh')
           verifier_text = verifier.read_text()
-          anchor = '''require_contains STORE_RELEASE.md 'no paid subscription'\n'''
-          guard = anchor + '''\nfor paid_phrase in \\
+          anchor = "require_contains STORE_RELEASE.md 'no paid subscription'\n"
+          guard = anchor + """\nfor paid_phrase in \\
   'Unlock your full pattern map' \\
   'Explore Premium' \\
   'Premium spreads continue' \\
-  'Premium’u keşfet'; do\n  forbid_contains lib/src/mystic_living_journal_feature.dart "$paid_phrase"\n  forbid_contains lib/src/growth_engine.dart "$paid_phrase"\ndone\n'''
+  'Premium’u keşfet'; do
+  forbid_contains lib/src/mystic_living_journal_feature.dart \"$paid_phrase\"
+  forbid_contains lib/src/growth_engine.dart \"$paid_phrase\"
+done
+"""
           if verifier_text.count(anchor) != 1:
               raise SystemExit('launch verifier anchor mismatch')
           verifier.write_text(verifier_text.replace(anchor, guard, 1))
