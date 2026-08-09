@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'business_metrics.dart';
+
 /// Privacy-aware, advertising-only monetization for native Mystic Tarot builds.
 ///
 /// Revenue formats:
@@ -188,6 +190,12 @@ class AdRevenueService with WidgetsBindingObserver {
   /// across launches so app-open eligibility and interstitial cadence do not
   /// reset when the process is restarted.
   void recordCompletedReading() {
+    unawaited(
+      MysticBusinessMetrics.record(
+        MysticBusinessEvent.readingCompleted,
+        dimensions: const <String, String>{'source': 'journal_store'},
+      ),
+    );
     unawaited(_recordCompletedReading());
   }
 
@@ -200,6 +208,15 @@ class AdRevenueService with WidgetsBindingObserver {
     if (!_initialized || _showingFullScreenAd) return;
     if (_completedReadingsSinceAd < _interstitialEveryReadings) return;
     _completedReadingsSinceAd = 0;
+    unawaited(
+      MysticBusinessMetrics.record(
+        MysticBusinessEvent.adOpportunity,
+        dimensions: const <String, String>{
+          'ad_format': 'interstitial',
+          'source': 'reading_completion',
+        },
+      ),
+    );
     _showInterstitialIfReady();
   }
 
@@ -253,10 +270,30 @@ class AdRevenueService with WidgetsBindingObserver {
       return;
     }
 
+    unawaited(
+      MysticBusinessMetrics.record(
+        MysticBusinessEvent.adOpportunity,
+        dimensions: const <String, String>{
+          'ad_format': 'app_open',
+          'source': 'foreground',
+        },
+      ),
+    );
     _showingFullScreenAd = true;
     _lastAppOpenShownAt = DateTime.now();
     unawaited(_persistLastAppOpenShown());
     ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdImpression: (_) {
+        unawaited(
+          MysticBusinessMetrics.record(
+            MysticBusinessEvent.adImpression,
+            dimensions: const <String, String>{
+              'ad_format': 'app_open',
+              'source': 'foreground',
+            },
+          ),
+        );
+      },
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
         _showingFullScreenAd = false;
@@ -313,6 +350,17 @@ class AdRevenueService with WidgetsBindingObserver {
 
     _showingFullScreenAd = true;
     ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdImpression: (_) {
+        unawaited(
+          MysticBusinessMetrics.record(
+            MysticBusinessEvent.adImpression,
+            dimensions: const <String, String>{
+              'ad_format': 'interstitial',
+              'source': 'reading_completion',
+            },
+          ),
+        );
+      },
       onAdDismissedFullScreenContent: (ad) {
         ad.dispose();
         _showingFullScreenAd = false;

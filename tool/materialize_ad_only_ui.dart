@@ -16,6 +16,24 @@ void materializeAdOnlyUi() {
   }
 
   var appSource = app.readAsStringSync();
+  appSource = _insertAfterRequired(
+    appSource,
+    "import 'ad_revenue_service.dart';\n",
+    "import 'business_metrics.dart';\n",
+    'business metrics app import',
+  );
+  appSource = _insertAfterRequired(
+    appSource,
+    "import 'growth_engine.dart';\n",
+    "import 'growth_evidence_screen.dart';\n",
+    'growth evidence app import',
+  );
+  appSource = _insertAfterRequired(
+    appSource,
+    "import 'mystic_mirror.dart';\n",
+    "import 'mirror_growth_tracker.dart';\n",
+    'Mirror growth tracker app import',
+  );
   appSource = _replaceRequired(
     appSource,
     '''                      Container(
@@ -82,7 +100,174 @@ void materializeAdOnlyUi() {
     "'Derin okumalar açık kalır'",
     'Turkish exhausted-reading copy',
   );
+  appSource = _replaceRequired(
+    appSource,
+    '''  Future<void> _refreshMirrorDueState() async {
+    final reflections = await mirrorStore.load();
+    if (!mounted) return;
+    final now = DateTime.now();
+    setState(() {
+      mirrorDueCount = countDueMysticMirrors(
+        records: journal,
+        reflections: reflections,
+        now: now,
+      );
+    });
+    _scheduleNextMirrorDue(reflections, now);
+  }''',
+    '''  Future<void> _refreshMirrorDueState() async {
+    final reflections = await mirrorStore.load();
+    if (!mounted) return;
+    final now = DateTime.now();
+    final previousMirrorDueCount = mirrorDueCount;
+    setState(() {
+      mirrorDueCount = countDueMysticMirrors(
+        records: journal,
+        reflections: reflections,
+        now: now,
+      );
+    });
+    if (previousMirrorDueCount == 0 && mirrorDueCount > 0) {
+      unawaited(
+        MysticBusinessMetrics.record(
+          MysticBusinessEvent.mirrorDueSeen,
+          dimensions: <String, String>{
+            'language': language.code,
+            'source': 'mirror_due_state',
+          },
+        ),
+      );
+    }
+    unawaited(
+      MysticMirrorGrowthTracker.instance.sync(
+        records: journal,
+        reflections: reflections,
+        languageCode: language.code,
+        now: now,
+      ),
+    );
+    _scheduleNextMirrorDue(reflections, now);
+  }''',
+    'Mirror due and mature-window business events',
+  );
+  appSource = _replaceRequired(
+    appSource,
+    '''  Future<void> _finishOnboarding(
+    String name,
+    String selectedIntention,
+    MysticLanguage selectedLanguage,
+  ) async {
+    final cleanName = name.trim();
+    setState(() {
+      onboarded = true;
+      userName = cleanName.length > 18 ? cleanName.substring(0, 18) : cleanName;
+      intention = selectedIntention;
+      language = selectedLanguage;
+    });
+    await _saveProgress();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startReading(ReadingKind.daily);
+    });
+  }''',
+    '''  Future<void> _finishOnboarding(
+    String name,
+    String selectedIntention,
+    MysticLanguage selectedLanguage,
+  ) async {
+    final cleanName = name.trim();
+    setState(() {
+      onboarded = true;
+      userName = cleanName.length > 18 ? cleanName.substring(0, 18) : cleanName;
+      intention = selectedIntention;
+      language = selectedLanguage;
+    });
+    await _saveProgress();
+    unawaited(
+      MysticBusinessMetrics.record(
+        MysticBusinessEvent.onboardingCompleted,
+        dimensions: <String, String>{
+          'language': selectedLanguage.code,
+          'source': 'onboarding',
+        },
+      ),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startReading(ReadingKind.daily);
+    });
+  }''',
+    'onboarding business event',
+  );
+  appSource = _insertAfterRequired(
+    appSource,
+    '      _scheduleNextMirrorDue(mirrorReflections, now);\n',
+    '''      unawaited(
+        MysticMirrorGrowthTracker.instance.sync(
+          records: journalLoad.records,
+          reflections: mirrorReflections,
+          languageCode: savedLanguage.code,
+          now: now,
+        ),
+      );
+''',
+    'initial mature Mirror cohort sync',
+  );
+  appSource = _insertBeforeRequired(
+    appSource,
+    '''          const SizedBox(height: 18),
+          ListTile(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => SoulProfileScreen(''',
+    '''          if (mysticGrowthDiagnosticsEnabled) ...[
+            const SizedBox(height: 8),
+            ListTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MysticGrowthEvidenceScreen(
+                    language: language,
+                  ),
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+              leading: const Icon(
+                Icons.monitor_heart_outlined,
+                color: MysticColors.gold,
+              ),
+              title: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Growth evidence',
+                  turkish: 'Büyüme kanıtı',
+                  spanish: 'Evidencia de crecimiento',
+                  french: 'Preuves de croissance',
+                  portugueseBrazil: 'Evidência de crescimento',
+                ),
+                style: const TextStyle(fontFamily: 'Arial'),
+              ),
+              subtitle: Text(
+                localized(
+                  language.appLanguage,
+                  english: 'Aggregate-only beta diagnostics. No private tarot content.',
+                  turkish: 'Yalnızca toplu beta tanılama verisi. Özel tarot içeriği yok.',
+                  spanish: 'Diagnóstico beta agregado. Sin contenido privado de tarot.',
+                  french: 'Diagnostic bêta agrégé. Aucun contenu tarot privé.',
+                  portugueseBrazil: 'Diagnóstico beta agregado. Sem conteúdo privado de tarot.',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          ],
+''',
+    'growth evidence profile entry',
+  );
   _rejectLegacyUserCopy(appSource, 'lib/src/app.dart');
+  if (!appSource.contains('MysticGrowthEvidenceScreen(') ||
+      !appSource.contains('MysticMirrorGrowthTracker.instance.sync(')) {
+    throw StateError('Growth evidence runtime wiring was not materialized.');
+  }
   app.writeAsStringSync(appSource);
 
   var intelligenceSource = intelligence.readAsStringSync();
@@ -159,6 +344,32 @@ void materializeAdOnlyUi() {
     '                    sharePositionOrigin: _mirrorShareOrigin(),\n',
     'iPad-safe Mirror share origin parameter',
   );
+  journalSource = _replaceRequired(
+    journalSource,
+    '''                                await MysticBusinessMetrics.record(
+                                  MysticBusinessEvent.mirrorCompleted,
+                                  dimensions: {
+                                    'language': widget.language.code,
+                                    'source': 'living_journal',
+                                  },
+                                );''',
+    '''                                final completionDelay = reflection.completedAt
+                                    .toLocal()
+                                    .difference(record.createdAt);
+                                final growthStage =
+                                    completionDelay <= const Duration(hours: 72)
+                                    ? 'within_72h'
+                                    : 'after_72h';
+                                await MysticBusinessMetrics.record(
+                                  MysticBusinessEvent.mirrorCompleted,
+                                  dimensions: {
+                                    'language': widget.language.code,
+                                    'growth_stage': growthStage,
+                                    'source': 'living_journal',
+                                  },
+                                );''',
+    'Mirror 72-hour completion stage',
+  );
   journalSource = _insertBeforeRequired(
     journalSource,
     '  Widget _buildDueMirrorAction(ReadingRecord record) {\n',
@@ -175,11 +386,15 @@ void materializeAdOnlyUi() {
   if (!journalSource.contains('sharePositionOrigin: _mirrorShareOrigin(),')) {
     throw StateError('Mirror share origin was not materialized.');
   }
+  if (!journalSource.contains("'growth_stage': growthStage")) {
+    throw StateError('Mirror 72-hour growth stage was not materialized.');
+  }
   journal.writeAsStringSync(journalSource);
 
   stdout.writeln(
     'Advertising-only UI materialized: paid-tier user copy removed, '
-    'narrow-screen header hardened, and Mirror sharing made iPad-safe.',
+    'growth events, mature Mirror cohort evidence and opt-in diagnostics '
+    'installed; narrow-screen and iPad share hardening retained.',
   );
 }
 

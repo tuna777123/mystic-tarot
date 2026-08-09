@@ -4,7 +4,7 @@ import 'package:mystic_tarot/src/business_metrics.dart';
 void main() {
   tearDown(MysticBusinessMetrics.configure);
 
-  test('allow-listed coarse dimensions are normalized and accepted', () {
+  test('allow-listed coarse dimensions and values are accepted', () {
     final result = MysticBusinessMetrics.validateDimensions({
       'language': 'TR',
       'reading_kind': 'daily',
@@ -34,6 +34,36 @@ void main() {
         reason: key,
       );
     }
+  });
+
+  test('private content cannot hide inside an approved dimension value', () {
+    expect(
+      () => MysticBusinessMetrics.validateDimensions({
+        'source': 'my private question',
+      }),
+      throwsArgumentError,
+    );
+    expect(
+      () => MysticBusinessMetrics.validateDimensions({
+        'language': 'secret diary text',
+      }),
+      throwsArgumentError,
+    );
+  });
+
+  test('unknown coarse vocabulary values are rejected', () {
+    expect(
+      () => MysticBusinessMetrics.validateDimensions({
+        'reading_kind': 'invented_spread',
+      }),
+      throwsArgumentError,
+    );
+    expect(
+      () => MysticBusinessMetrics.validateDimensions({
+        'ad_format': 'rewarded_video',
+      }),
+      throwsArgumentError,
+    );
   });
 
   test('oversized values cannot become accidental content payloads', () {

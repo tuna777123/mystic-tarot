@@ -63,8 +63,16 @@ required=(
   docs/OWNER_GUIDE_A_TO_Z.md
   docs/GROWTH_KPI_CONTRACT.md
   docs/INVESTMENT_GRADE_PRODUCT_PLAN.md
+  docs/MEASUREMENT_ROADMAP.md
+  docs/BETA_MEASUREMENT_PROTOCOL.md
   lib/src/business_metrics.dart
+  lib/src/business_metrics_bootstrap.dart
+  lib/src/local_growth_ledger.dart
+  lib/src/mirror_growth_tracker.dart
+  lib/src/growth_evidence_aggregator.dart
+  lib/src/growth_evidence_screen.dart
   lib/src/mystic_mirror_share.dart
+  tool/aggregate_growth_evidence.dart
   STORE_RELEASE.md
 )
 
@@ -194,11 +202,36 @@ require_contains STORE_RELEASE.md 'MYSTIC_USE_TEST_ADS=false'
 require_contains STORE_RELEASE.md 'no paid subscription'
 
 require_contains docs/GROWTH_KPI_CONTRACT.md 'D7 retention'
-require_contains docs/GROWTH_KPI_CONTRACT.md 'eligible-Mirror completion'
+require_contains docs/GROWTH_KPI_CONTRACT.md 'Mature 72h Mirror completion'
+require_contains docs/GROWTH_KPI_CONTRACT.md 'mirrorWindowMatured'
 require_contains docs/GROWTH_KPI_CONTRACT.md '1.5 × blended CAC'
+require_contains docs/MEASUREMENT_ROADMAP.md 'local, aggregate-only Growth Ledger'
+require_contains docs/MEASUREMENT_ROADMAP.md 'completed_within_72h'
+require_contains docs/BETA_MEASUREMENT_PROTOCOL.md 'MYSTIC_GROWTH_DIAGNOSTICS=true'
+require_contains docs/BETA_MEASUREMENT_PROTOCOL.md 'three consecutive mature cohorts'
 require_contains docs/INVESTMENT_GRADE_PRODUCT_PLAN.md 'Read today → compare with reality after 24 hours'
+
 require_contains lib/src/business_metrics.dart 'allowedDimensions'
+require_contains lib/src/business_metrics.dart 'mirrorWindowMatured'
+require_contains lib/src/business_metrics_bootstrap.dart 'MysticLocalGrowthLedger.instance.record'
+require_contains lib/src/local_growth_ledger.dart 'aggregate-only-local-no-user-id'
+require_contains lib/src/local_growth_ledger.dart 'recordOnce('
+require_contains lib/src/mirror_growth_tracker.dart 'completed_within_72h'
+require_contains lib/src/mirror_growth_tracker.dart 'not_completed_within_72h'
+require_contains lib/src/growth_evidence_aggregator.dart 'Mature Mirror numerator cannot exceed'
+require_contains lib/src/growth_evidence_aggregator.dart 'productScaleGatePassed'
+require_contains lib/src/growth_evidence_screen.dart 'MYSTIC_GROWTH_DIAGNOSTICS'
+require_contains lib/src/growth_evidence_screen.dart 'defaultValue: false'
 require_contains lib/src/mystic_mirror_share.dart 'Never add a question, card name, emotion, outcome, note'
+require_contains lib/src/ad_revenue_service.dart 'onAdImpression: (_)'
+require_contains tool/aggregate_growth_evidence.dart 'DO NOT SCALE'
+
+for forbidden_dimension in \
+  "'user_id'" \
+  "'device_id'" \
+  "'advertising_id'"; do
+  forbid_contains lib/src/business_metrics.dart "$forbidden_dimension"
+done
 
 for paid_phrase in \
   'Unlock your full pattern map' \

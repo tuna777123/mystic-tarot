@@ -63,13 +63,15 @@ The public web edition is local-first and ad-free. Native builds add Google adve
 
 Private product data includes reading questions, journal text, Mystic Mirror notes, profile information, intention and PIN-related local state.
 
-Product-growth telemetry uses a separate allow-listed `MysticBusinessMetrics` boundary. Questions, notes, card names, user names, intentions, journal text, emotions, Mirror outcomes and free text are not permitted as business-metric dimensions.
+Product-growth telemetry uses a separate allow-listed `MysticBusinessMetrics` boundary. Questions, notes, card names, user names, intentions, journal text, emotions, Mirror outcomes and free text are not permitted as business-metric dimensions. Dimension **values** are also restricted to a closed coarse vocabulary, so private content cannot be hidden inside a field such as `source`.
+
+Controlled beta builds can optionally expose a local **Growth Evidence** screen with `MYSTIC_GROWTH_DIAGNOSTICS=true`. The ledger is aggregate-only, has no Mystic account/device/advertising identifier, does not upload automatically, excludes pre-measurement legacy journal history from the mature 72-hour Mirror cohort, and keeps its internal measurement timestamp/dedupe tokens out of exported evidence.
 
 Final Apple App Privacy and Google Play Data Safety declarations must be completed from the exact signed native advertising build and actual runtime behavior.
 
 ## Company growth gates
 
-Mystic is operated as a measured product, not a feature-count project. `docs/GROWTH_KPI_CONTRACT.md` defines retention, Mirror-completion and paid-acquisition gates; `docs/INVESTMENT_GRADE_PRODUCT_PLAN.md` defines the product thesis and capital-allocation rules. Paid acquisition should not materially scale until retained cohorts prove the 24-hour Mirror loop.
+Mystic is operated as a measured product, not a feature-count project. `docs/GROWTH_KPI_CONTRACT.md` defines retention, Mirror-completion and paid-acquisition gates; `docs/INVESTMENT_GRADE_PRODUCT_PLAN.md` defines the product thesis and capital-allocation rules; `docs/BETA_MEASUREMENT_PROTOCOL.md` defines how controlled devices produce and aggregate launch evidence. Paid acquisition should not materially scale until retained cohorts prove the 24-hour Mirror loop.
 
 ## Shareable launch material
 
