@@ -253,46 +253,114 @@ class _MysticGrowthEvidenceScreenState extends State<MysticGrowthEvidenceScreen>
   }
 
   Widget _mirrorCard(MysticGrowthEvidenceSnapshot evidence) {
-    final completed72 = evidence.dimensionCounts[
-          'mirrorCompleted|growth_stage|within_72h'
+    final matureWindows = evidence.eventCounts['mirrorWindowMatured'] ?? 0;
+    final completedWithin72 = evidence.dimensionCounts[
+          'mirrorWindowMatured|growth_stage|completed_within_72h'
         ] ??
         0;
-    final completedLater = evidence.dimensionCounts[
-          'mirrorCompleted|growth_stage|after_72h'
+    final notCompletedWithin72 = evidence.dimensionCounts[
+          'mirrorWindowMatured|growth_stage|not_completed_within_72h'
         ] ??
         0;
-    return _listCard(
-      title: _copy(
-        en: 'Mystic Mirror timing',
-        tr: 'Mystic Ayna zamanlaması',
-        es: 'Tiempo de Mystic Mirror',
-        fr: 'Délai Mystic Mirror',
-        pt: 'Tempo do Mystic Mirror',
+    final rate = matureWindows <= 0
+        ? '—'
+        : '${((completedWithin72 / matureWindows) * 100).toStringAsFixed(1)}%';
+
+    return Container(
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4B2E72), Color(0xFF21152F)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .28)),
       ),
-      rows: <(String, int)>[
-        (
-          _copy(
-            en: 'Completed within 72h',
-            tr: '72 saat içinde tamamlandı',
-            es: 'Completado en 72 h',
-            fr: 'Terminé sous 72 h',
-            pt: 'Concluído em 72 h',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _copy(
+              en: 'Mature 72h Mystic Mirror KPI',
+              tr: 'Olgun 72s Mystic Ayna KPI’ı',
+              es: 'KPI maduro de Mystic Mirror 72 h',
+              fr: 'KPI Mystic Mirror mature à 72 h',
+              pt: 'KPI maduro do Mystic Mirror em 72 h',
+            ),
+            style: const TextStyle(fontWeight: FontWeight.w900),
           ),
-          completed72,
-        ),
-        (
-          _copy(
-            en: 'Completed later',
-            tr: 'Daha sonra tamamlandı',
-            es: 'Completado más tarde',
-            fr: 'Terminé plus tard',
-            pt: 'Concluído depois',
+          const SizedBox(height: 9),
+          Text(
+            rate,
+            style: const TextStyle(
+              color: MysticColors.gold,
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+            ),
           ),
-          completedLater,
-        ),
-      ],
+          const SizedBox(height: 5),
+          Text(
+            matureWindows == 0
+                ? _copy(
+                    en: 'Not proven yet — no 72-hour window has matured.',
+                    tr: 'Henüz kanıtlanmadı — olgunlaşmış 72 saatlik pencere yok.',
+                    es: 'Aún no demostrado: no ha madurado ninguna ventana de 72 h.',
+                    fr: 'Pas encore démontré : aucune fenêtre de 72 h n’est arrivée à maturité.',
+                    pt: 'Ainda não comprovado — nenhuma janela de 72 h amadureceu.',
+                  )
+                : '$completedWithin72 / $matureWindows',
+            style: const TextStyle(color: MysticColors.mist),
+          ),
+          const SizedBox(height: 13),
+          _metricRow(
+            _copy(
+              en: 'Mature windows',
+              tr: 'Olgun pencereler',
+              es: 'Ventanas maduras',
+              fr: 'Fenêtres matures',
+              pt: 'Janelas maduras',
+            ),
+            matureWindows,
+          ),
+          _metricRow(
+            _copy(
+              en: 'Completed within 72h',
+              tr: '72 saat içinde tamamlandı',
+              es: 'Completado en 72 h',
+              fr: 'Terminé sous 72 h',
+              pt: 'Concluído em 72 h',
+            ),
+            completedWithin72,
+          ),
+          _metricRow(
+            _copy(
+              en: 'Not completed within 72h',
+              tr: '72 saat içinde tamamlanmadı',
+              es: 'No completado en 72 h',
+              fr: 'Non terminé sous 72 h',
+              pt: 'Não concluído em 72 h',
+            ),
+            notCompletedWithin72,
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _metricRow(String label, int value) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      children: [
+        Expanded(child: Text(label, style: const TextStyle(color: MysticColors.mist))),
+        Text(
+          '$value',
+          style: const TextStyle(
+            color: MysticColors.gold,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _listCard({required String title, required List<(String, int)> rows}) =>
       Container(
