@@ -9,7 +9,9 @@ void materializeAdOnlyUi() {
   final app = File('lib/src/app.dart');
   final intelligence = File('lib/src/mystic_plus_intelligence_screen.dart');
   final journal = File('lib/src/mystic_living_journal_feature.dart');
-  if (!app.existsSync() || !intelligence.existsSync() || !journal.existsSync()) {
+  if (!app.existsSync() ||
+      !intelligence.existsSync() ||
+      !journal.existsSync()) {
     throw StateError('Mystic Tarot UI source files are missing.');
   }
 
@@ -170,9 +172,7 @@ void materializeAdOnlyUi() {
 ''',
     'iPad-safe Mirror share origin helper',
   );
-  if (!journalSource.contains(
-    'sharePositionOrigin: _mirrorShareOrigin(),',
-  )) {
+  if (!journalSource.contains('sharePositionOrigin: _mirrorShareOrigin(),')) {
     throw StateError('Mirror share origin was not materialized.');
   }
   journal.writeAsStringSync(journalSource);
