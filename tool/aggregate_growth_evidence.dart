@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../lib/src/growth_evidence_aggregator.dart';
+import 'package:mystic_tarot/src/growth_evidence_aggregator.dart';
 
 void main(List<String> args) {
   if (args.isEmpty || args.contains('--help') || args.contains('-h')) {
