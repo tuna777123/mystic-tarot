@@ -97,7 +97,7 @@ void main() {
     expect(report.retentionScaleGatePassed, isTrue);
     expect(report.mirrorScaleGatePassed, isTrue);
     expect(report.productScaleGatePassed, isTrue);
-    expect(report.toMarkdown(), contains('PRODUCT GATE'));
+    expect(report.toMarkdown(), contains('Product scale gate'));
   });
 
   test('missing mature denominator never passes the product gate', () {
@@ -126,6 +126,44 @@ void main() {
       'eventCounts': <String, int>{},
       'dimensionCounts': <String, int>{},
       '_oneShotTokens': <String>['private-local-token'],
+    });
+
+    expect(
+      () => aggregator.aggregateJson(<String>[
+        payload,
+      ], asOf: DateTime(2026, 8, 9)),
+      throwsFormatException,
+    );
+  });
+
+  test('rejects private or identity-like imported dimension keys', () {
+    final payload = jsonEncode(<String, Object?>{
+      'schemaVersion': 1,
+      'privacyModel': 'aggregate-only-local-no-user-id',
+      'firstOpenDay': '2026-08-01',
+      'retention': <String, bool>{'d1': true, 'd7': true, 'd30': false},
+      'eventCounts': <String, int>{'readingCompleted': 1},
+      'dimensionCounts': <String, int>{
+        'readingCompleted|device_id|abc': 1,
+      },
+    });
+
+    expect(
+      () => aggregator.aggregateJson(<String>[
+        payload,
+      ], asOf: DateTime(2026, 8, 9)),
+      throwsFormatException,
+    );
+  });
+
+  test('rejects malformed imported dimension keys', () {
+    final payload = jsonEncode(<String, Object?>{
+      'schemaVersion': 1,
+      'privacyModel': 'aggregate-only-local-no-user-id',
+      'firstOpenDay': '2026-08-01',
+      'retention': <String, bool>{'d1': true, 'd7': true, 'd30': false},
+      'eventCounts': <String, int>{'readingCompleted': 1},
+      'dimensionCounts': <String, int>{'not-a-valid-dimension-key': 1},
     });
 
     expect(
