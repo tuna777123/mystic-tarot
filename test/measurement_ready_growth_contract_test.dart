@@ -12,7 +12,10 @@ void main() {
     expect(main, contains('MysticBusinessMetricsBootstrap.configure()'));
     expect(main, contains('MysticBusinessMetricsBootstrap.recordLaunch()'));
     expect(bootstrap, contains('MysticLocalGrowthLedger.instance.record'));
-    expect(bootstrap, contains('MysticGrowthMeasurementBaseline.instance.ensureStarted()'));
+    expect(
+      bootstrap,
+      contains('MysticGrowthMeasurementBaseline.instance.ensureStarted()'),
+    );
     expect(bootstrap, contains('WidgetsBinding.instance.addObserver'));
     expect(bootstrap, contains("source: 'foreground'"));
     expect(bootstrap, contains('AppLifecycleState.resumed'));
@@ -79,10 +82,7 @@ void main() {
       'lib/src/mirror_growth_tracker.dart',
     ).readAsStringSync();
 
-    expect(
-      baseline,
-      contains("'mystic_growth_measurement_started_at_utc_v1'"),
-    );
+    expect(baseline, contains("'mystic_growth_measurement_started_at_utc_v1'"));
     expect(baseline, contains('Future<DateTime> ensureStarted()'));
     expect(tracker, contains('measurementStartedAtUtc'));
     expect(tracker, contains('createdAtUtc.isBefore(measurementStartedAtUtc)'));
