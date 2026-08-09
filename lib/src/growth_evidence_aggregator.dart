@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'business_metrics.dart';
+
 class MysticGrowthCohortReport {
   const MysticGrowthCohortReport({
     required this.asOf,
@@ -136,31 +138,9 @@ A missing/immature denominator is **not** treated as a pass.
 class MysticGrowthEvidenceAggregator {
   const MysticGrowthEvidenceAggregator();
 
-  static const _allowedDimensionNames = <String>{
-    'language',
-    'platform',
-    'reading_kind',
-    'growth_stage',
-    'ad_format',
-    'source',
-  };
-
-  static const _forbiddenDimensionFragments = <String>{
-    'question',
-    'note',
-    'card',
-    'name',
-    'intention',
-    'journal',
-    'emotion',
-    'outcome',
-    'text',
-    'pin',
-    'query',
-    'user_id',
-    'device_id',
-    'advertising_id',
-  };
+  static final Set<String> _knownEvents = MysticBusinessEvent.values
+      .map((event) => event.name)
+      .toSet();
 
   MysticGrowthCohortReport aggregateJson(
     Iterable<String> payloads, {
@@ -181,33 +161,72 @@ class MysticGrowthEvidenceAggregator {
     var adOpportunities = 0;
     var adImpressions = 0;
 
+    final asOfDay = DateTime(asOf.year, asOf.month, asOf.day);
     for (final item in evidence) {
-      final events = _intMap(item['eventCounts']);
-      final dimensions = _intMap(item['dimensionCounts']);
-      final retention = item['retention'];
+      final events = _countMap(
+        item['eventCounts'],
+        label: 'eventCounts',
+        allowedKeys: _knownEvents,
+      );
+      final dimensions = _countMap(
+        item['dimensionCounts'],
+        label: 'dimensionCounts',
+      );
+      _validateDimensionCountKeys(item['dimensionCounts'], events: events);
+
       if ((events['readingCompleted'] ?? 0) > 0) activated++;
 
-      final firstOpenDay = _parseDay(item['firstOpenDay']);
-      if (firstOpenDay != null) {
-        final age = _calendarAge(firstOpenDay, asOf);
-        if (age >= 1) {
-          d1Eligible++;
-          if (_retained(retention, 'd1')) d1Retained++;
-        }
-        if (age >= 7) {
-          d7Eligible++;
-          if (_retained(retention, 'd7')) d7Retained++;
-        }
-        if (age >= 30) {
-          d30Eligible++;
-          if (_retained(retention, 'd30')) d30Retained++;
-        }
+      final firstOpenDay = _requiredDay(item['firstOpenDay'], 'firstOpenDay');
+      if (firstOpenDay.isAfter(asOfDay)) {
+        throw const FormatException('firstOpenDay cannot be after as-of date.');
+      }
+      final activeDays = _daySet(item['activeDays']);
+      if (!activeDays.contains(_dayKey(firstOpenDay))) {
+        throw const FormatException('activeDays must include firstOpenDay.');
+      }
+      final appOpens = events['appOpened'] ?? 0;
+      if (appOpens < activeDays.length) {
+        throw const FormatException(
+          'appOpened count cannot be smaller than distinct active days.',
+        );
       }
 
-      matureMirrorWindows += events['mirrorWindowMatured'] ?? 0;
-      matureMirrorWithin72 +=
+      final d1 = _retainedOnOffset(firstOpenDay, activeDays, 1);
+      final d7 = _retainedOnOffset(firstOpenDay, activeDays, 7);
+      final d30 = _retainedOnOffset(firstOpenDay, activeDays, 30);
+      _validateReportedRetention(item['retention'], d1: d1, d7: d7, d30: d30);
+
+      final age = asOfDay.difference(firstOpenDay).inDays;
+      if (age >= 1) {
+        d1Eligible++;
+        if (d1) d1Retained++;
+      }
+      if (age >= 7) {
+        d7Eligible++;
+        if (d7) d7Retained++;
+      }
+      if (age >= 30) {
+        d30Eligible++;
+        if (d30) d30Retained++;
+      }
+
+      final matured = events['mirrorWindowMatured'] ?? 0;
+      final completed =
           dimensions['mirrorWindowMatured|growth_stage|completed_within_72h'] ??
           0;
+      final missed =
+          dimensions[
+            'mirrorWindowMatured|growth_stage|not_completed_within_72h'
+          ] ??
+          0;
+      if (completed + missed != matured) {
+        throw const FormatException(
+          'Every mature Mirror window must have exactly one 72-hour classification.',
+        );
+      }
+
+      matureMirrorWindows += matured;
+      matureMirrorWithin72 += completed;
       mirrorCompletions += events['mirrorCompleted'] ?? 0;
       mirrorShares += events['mirrorShareStarted'] ?? 0;
       adOpportunities += events['adOpportunity'] ?? 0;
@@ -267,34 +286,130 @@ class MysticGrowthEvidenceAggregator {
         );
       }
     }
-    _validateDimensionCountKeys(decoded['dimensionCounts']);
-    final dailyDimensions = decoded['dailyDimensionCounts'];
-    if (dailyDimensions is Map<String, dynamic>) {
-      for (final value in dailyDimensions.values) {
-        _validateDimensionCountKeys(value);
-      }
-    }
+
+    final events = _countMap(
+      decoded['eventCounts'],
+      label: 'eventCounts',
+      allowedKeys: _knownEvents,
+    );
+    _validateDimensionCountKeys(decoded['dimensionCounts'], events: events);
+    _validateDailyCounts(decoded['dailyEventCounts'], dimensions: false);
+    _validateDailyCounts(decoded['dailyDimensionCounts'], dimensions: true);
     return decoded;
   }
 
-  void _validateDimensionCountKeys(Object? value) {
+  void _validateDailyCounts(Object? value, {required bool dimensions}) {
     if (value == null) return;
     if (value is! Map<String, dynamic>) {
-      throw const FormatException('Growth dimension counts must be an object.');
+      throw const FormatException('Daily growth evidence must be an object.');
     }
-    for (final key in value.keys) {
-      final normalized = key.toLowerCase();
-      if (_forbiddenDimensionFragments.any(normalized.contains)) {
-        throw FormatException(
-          'Private/identity-like growth dimension key is not allowed: $key',
+    for (final entry in value.entries) {
+      _requiredDay(entry.key, 'daily evidence day');
+      if (dimensions) {
+        _validateDimensionCountKeys(entry.value);
+      } else {
+        _countMap(
+          entry.value,
+          label: 'dailyEventCounts',
+          allowedKeys: _knownEvents,
         );
-      }
-      final parts = key.split('|');
-      if (parts.length != 3 || !_allowedDimensionNames.contains(parts[1])) {
-        throw FormatException('Malformed growth dimension key: $key');
       }
     }
   }
+
+  void _validateDimensionCountKeys(
+    Object? value, {
+    Map<String, int>? events,
+  }) {
+    if (value == null) return;
+    final counts = _countMap(value, label: 'growth dimension counts');
+    for (final entry in counts.entries) {
+      final parts = entry.key.split('|');
+      if (parts.length != 3 || !_knownEvents.contains(parts[0])) {
+        throw FormatException('Malformed growth dimension key: ${entry.key}');
+      }
+      try {
+        MysticBusinessMetrics.validateDimensions(<String, String>{
+          parts[1]: parts[2],
+        });
+      } on ArgumentError {
+        throw FormatException(
+          'Unapproved growth dimension vocabulary: ${entry.key}',
+        );
+      }
+      final eventCount = events?[parts[0]];
+      if (eventCount != null && entry.value > eventCount) {
+        throw FormatException(
+          'Growth dimension count exceeds its event count: ${entry.key}',
+        );
+      }
+    }
+  }
+
+  Map<String, int> _countMap(
+    Object? value, {
+    required String label,
+    Set<String>? allowedKeys,
+  }) {
+    if (value == null) return <String, int>{};
+    if (value is! Map<String, dynamic>) {
+      throw FormatException('$label must be an object.');
+    }
+    final result = <String, int>{};
+    for (final entry in value.entries) {
+      if (allowedKeys != null && !allowedKeys.contains(entry.key)) {
+        throw FormatException('Unknown $label key: ${entry.key}');
+      }
+      final count = entry.value;
+      if (count is! int || count < 0) {
+        throw FormatException('$label values must be non-negative integers.');
+      }
+      result[entry.key] = count;
+    }
+    return result;
+  }
+
+  Set<String> _daySet(Object? value) {
+    if (value is! List<dynamic>) {
+      throw const FormatException('activeDays must be an array.');
+    }
+    final result = <String>{};
+    for (final item in value) {
+      final day = _requiredDay(item, 'active day');
+      final key = _dayKey(day);
+      if (!result.add(key)) {
+        throw const FormatException('activeDays cannot contain duplicates.');
+      }
+    }
+    return result;
+  }
+
+  void _validateReportedRetention(
+    Object? value, {
+    required bool d1,
+    required bool d7,
+    required bool d30,
+  }) {
+    if (value is! Map<String, dynamic> ||
+        value['d1'] is! bool ||
+        value['d7'] is! bool ||
+        value['d30'] is! bool) {
+      throw const FormatException('retention evidence is malformed.');
+    }
+    if (value['d1'] != d1 || value['d7'] != d7 || value['d30'] != d30) {
+      throw const FormatException(
+        'Reported retention does not match active-day evidence.',
+      );
+    }
+  }
+
+  bool _retainedOnOffset(
+    DateTime firstOpenDay,
+    Set<String> activeDays,
+    int offset,
+  ) => activeDays.contains(
+    _dayKey(firstOpenDay.add(Duration(days: offset))),
+  );
 
   bool _containsKeyRecursive(Object? value, String forbidden) {
     if (value is Map<String, dynamic>) {
@@ -308,24 +423,19 @@ class MysticGrowthEvidenceAggregator {
     return false;
   }
 
-  Map<String, int> _intMap(Object? value) {
-    if (value is! Map<String, dynamic>) return <String, int>{};
-    return value.map(
-      (key, item) => MapEntry(key, item is num ? item.toInt() : 0),
-    );
+  DateTime _requiredDay(Object? value, String label) {
+    if (value is! String || value.length != 10) {
+      throw FormatException('$label must be YYYY-MM-DD.');
+    }
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null || _dayKey(parsed) != value) {
+      throw FormatException('$label must be a valid calendar day.');
+    }
+    return DateTime(parsed.year, parsed.month, parsed.day);
   }
 
-  DateTime? _parseDay(Object? value) {
-    if (value is! String || value.length != 10) return null;
-    return DateTime.tryParse(value);
-  }
-
-  int _calendarAge(DateTime first, DateTime asOf) {
-    final firstDay = DateTime(first.year, first.month, first.day);
-    final asOfDay = DateTime(asOf.year, asOf.month, asOf.day);
-    return asOfDay.difference(firstDay).inDays;
-  }
-
-  bool _retained(Object? retention, String key) =>
-      retention is Map<String, dynamic> && retention[key] == true;
+  String _dayKey(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
 }
