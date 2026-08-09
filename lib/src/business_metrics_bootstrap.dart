@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'business_metrics.dart';
+import 'growth_measurement_baseline.dart';
 import 'local_growth_ledger.dart';
 
 class MysticBusinessMetricsBootstrap {
@@ -27,11 +28,15 @@ class MysticBusinessMetricsBootstrap {
     unawaited(_recordActivity(source: 'launch'));
   }
 
-  static Future<void> _recordActivity({required String source}) =>
-      MysticBusinessMetrics.record(
-        MysticBusinessEvent.appOpened,
-        dimensions: <String, String>{'platform': _platform, 'source': source},
-      );
+  static Future<void> _recordActivity({required String source}) async {
+    // Establish the cohort boundary before accepting activity evidence. The
+    // timestamp is private/local and is never part of exported Growth Evidence.
+    await MysticGrowthMeasurementBaseline.instance.ensureStarted();
+    await MysticBusinessMetrics.record(
+      MysticBusinessEvent.appOpened,
+      dimensions: <String, String>{'platform': _platform, 'source': source},
+    );
+  }
 
   static String get _platform {
     if (kIsWeb) return 'web';
