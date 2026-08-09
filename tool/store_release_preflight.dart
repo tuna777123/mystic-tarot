@@ -97,6 +97,23 @@ Future<void> main(List<String> arguments) async {
       return;
     }
 
+    if (platform == StoreReleasePlatform.ios) {
+      final appleSdkResult = await Process.run(
+        'bash',
+        ['tool/verify_apple_submission_sdk.sh'],
+      );
+      if (appleSdkResult.exitCode != 0) {
+        final message = '${appleSdkResult.stderr}'.trim();
+        _fail([
+          message.isEmpty
+              ? 'Apple submission SDK verification failed.'
+              : message,
+        ]);
+        return;
+      }
+      stdout.write(appleSdkResult.stdout);
+    }
+
     final publicUrlErrors = await verifyPublicStoreEndpoints();
     if (publicUrlErrors.isNotEmpty) {
       _fail(publicUrlErrors);
