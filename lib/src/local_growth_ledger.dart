@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,8 +9,9 @@ import 'business_metrics.dart';
 ///
 /// No account ID, advertising ID, question, card, note, emotion, Mirror outcome,
 /// user name, intention, journal content, search query or arbitrary free text is
-/// stored here. The ledger keeps coarse event/day counts and already-validated
-/// business dimensions only.
+/// exported here. The ledger keeps coarse event/day counts and already-validated
+/// business dimensions only. Internal one-shot dedupe tokens never appear in an
+/// exported snapshot.
 class MysticLocalGrowthLedger {
   MysticLocalGrowthLedger({
     SharedPreferences? preferences,
@@ -22,6 +24,7 @@ class MysticLocalGrowthLedger {
   static const storageKey = 'mystic_local_growth_ledger_v1';
   static const schemaVersion = 1;
   static const _maxRetainedDays = 120;
+  static const _maxOneShotTokens = 10000;
 
   final SharedPreferences? _providedPreferences;
   final DateTime Function() _now;
@@ -30,69 +33,128 @@ class MysticLocalGrowthLedger {
   Future<SharedPreferences> _preferences() async =>
       _providedPreferences ?? SharedPreferences.getInstance();
 
+  Future<T> _enqueue<T>(Future<T> Function() operation) {
+    final completer = Completer<T>();
+    final next = _writeQueue.then<void>((_) async {
+      try {
+        completer.complete(await operation());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    _writeQueue = next.catchError((_) {});
+    return completer.future;
+  }
+
   Future<void> record(
     MysticBusinessEvent event,
     Map<String, String> dimensions,
   ) {
     final safeDimensions = MysticBusinessMetrics.validateDimensions(dimensions);
-    final next = _writeQueue.then<void>((_) async {
+    return _enqueue<void>(() async {
       final preferences = await _preferences();
       final state = _decode(preferences.getString(storageKey));
-      final day = _dayKey(_now());
+      _applyEvent(state, event, safeDimensions, _dayKey(_now()));
+      await _save(preferences, state);
+    });
+  }
 
-      state.firstObservedDay ??= day;
-      state.lastObservedDay = day;
-      state.eventCounts.update(
-        event.name,
+  /// Atomically records an aggregate event and a local-only dedupe token.
+  ///
+  /// Returns `false` when [dedupeToken] was already accepted. The token is
+  /// persisted in the same JSON payload as the event count so a successful
+  /// write cannot leave the counter and dedupe state out of sync.
+  Future<bool> recordOnce(
+    MysticBusinessEvent event, {
+    required String dedupeToken,
+    Map<String, String> dimensions = const <String, String>{},
+  }) {
+    final token = dedupeToken.trim();
+    if (token.isEmpty || token.length > 160) {
+      throw ArgumentError.value(
+        dedupeToken,
+        'dedupeToken',
+        'Local metric dedupe tokens must contain 1–160 characters.',
+      );
+    }
+    final safeDimensions = MysticBusinessMetrics.validateDimensions(dimensions);
+    return _enqueue<bool>(() async {
+      final preferences = await _preferences();
+      final state = _decode(preferences.getString(storageKey));
+      if (state.oneShotTokens.contains(token)) return false;
+      if (state.oneShotTokens.length >= _maxOneShotTokens) {
+        throw StateError('Local growth metric dedupe capacity exceeded.');
+      }
+
+      _applyEvent(state, event, safeDimensions, _dayKey(_now()));
+      state.oneShotTokens.add(token);
+      await _save(preferences, state);
+      return true;
+    });
+  }
+
+  void _applyEvent(
+    _GrowthLedgerState state,
+    MysticBusinessEvent event,
+    Map<String, String> safeDimensions,
+    String day,
+  ) {
+    state.firstObservedDay ??= day;
+    state.lastObservedDay = day;
+    state.eventCounts.update(
+      event.name,
+      (value) => value + 1,
+      ifAbsent: () => 1,
+    );
+    final daily = state.dailyEventCounts.putIfAbsent(day, () => <String, int>{});
+    daily.update(event.name, (value) => value + 1, ifAbsent: () => 1);
+
+    if (event == MysticBusinessEvent.appOpened) {
+      state.firstOpenDay ??= day;
+      state.activeDays.add(day);
+    }
+    if (event == MysticBusinessEvent.onboardingCompleted) {
+      state.firstOnboardingDay ??= day;
+    }
+    if (event == MysticBusinessEvent.readingCompleted) {
+      state.firstReadingDay ??= day;
+    }
+    if (event == MysticBusinessEvent.mirrorDueSeen) {
+      state.firstMirrorDueDay ??= day;
+    }
+    if (event == MysticBusinessEvent.mirrorCompleted) {
+      state.firstMirrorCompletedDay ??= day;
+    }
+
+    final dailyDimensions = state.dailyDimensionCounts.putIfAbsent(
+      day,
+      () => <String, int>{},
+    );
+    for (final entry in safeDimensions.entries) {
+      final key = '${event.name}|${entry.key}|${entry.value}';
+      state.dimensionCounts.update(
+        key,
         (value) => value + 1,
         ifAbsent: () => 1,
       );
-      final daily = state.dailyEventCounts.putIfAbsent(day, () => <String, int>{});
-      daily.update(event.name, (value) => value + 1, ifAbsent: () => 1);
-
-      if (event == MysticBusinessEvent.appOpened) {
-        state.firstOpenDay ??= day;
-        state.activeDays.add(day);
-      }
-      if (event == MysticBusinessEvent.onboardingCompleted) {
-        state.firstOnboardingDay ??= day;
-      }
-      if (event == MysticBusinessEvent.readingCompleted) {
-        state.firstReadingDay ??= day;
-      }
-      if (event == MysticBusinessEvent.mirrorDueSeen) {
-        state.firstMirrorDueDay ??= day;
-      }
-      if (event == MysticBusinessEvent.mirrorCompleted) {
-        state.firstMirrorCompletedDay ??= day;
-      }
-
-      final dailyDimensions = state.dailyDimensionCounts.putIfAbsent(
-        day,
-        () => <String, int>{},
+      dailyDimensions.update(
+        key,
+        (value) => value + 1,
+        ifAbsent: () => 1,
       );
-      for (final entry in safeDimensions.entries) {
-        final key = '${event.name}|${entry.key}|${entry.value}';
-        state.dimensionCounts.update(
-          key,
-          (value) => value + 1,
-          ifAbsent: () => 1,
-        );
-        dailyDimensions.update(
-          key,
-          (value) => value + 1,
-          ifAbsent: () => 1,
-        );
-      }
+    }
 
-      _trimDailyHistory(state);
-      final saved = await preferences.setString(storageKey, jsonEncode(state.toJson()));
-      if (!saved) {
-        throw StateError('Could not persist the local growth ledger.');
-      }
-    });
-    _writeQueue = next.catchError((_) {});
-    return next;
+    _trimDailyHistory(state);
+  }
+
+  Future<void> _save(
+    SharedPreferences preferences,
+    _GrowthLedgerState state,
+  ) async {
+    final saved = await preferences.setString(storageKey, jsonEncode(state.toJson()));
+    if (!saved) {
+      throw StateError('Could not persist the local growth ledger.');
+    }
   }
 
   Future<MysticGrowthEvidenceSnapshot> snapshot() async {
@@ -108,12 +170,10 @@ class MysticLocalGrowthLedger {
   }
 
   Future<void> clear() async {
-    final next = _writeQueue.then<void>((_) async {
+    await _enqueue<void>(() async {
       final preferences = await _preferences();
       await preferences.remove(storageKey);
     });
-    _writeQueue = next.catchError((_) {});
-    await next;
   }
 
   static String _dayKey(DateTime value) {
@@ -266,12 +326,14 @@ class _GrowthLedgerState {
     Map<String, Map<String, int>>? dailyEventCounts,
     Map<String, int>? dimensionCounts,
     Map<String, Map<String, int>>? dailyDimensionCounts,
+    Set<String>? oneShotTokens,
   }) : activeDays = activeDays ?? <String>{},
        eventCounts = eventCounts ?? <String, int>{},
        dailyEventCounts = dailyEventCounts ?? <String, Map<String, int>>{},
        dimensionCounts = dimensionCounts ?? <String, int>{},
        dailyDimensionCounts =
-           dailyDimensionCounts ?? <String, Map<String, int>>{};
+           dailyDimensionCounts ?? <String, Map<String, int>>{},
+       oneShotTokens = oneShotTokens ?? <String>{};
 
   factory _GrowthLedgerState.fromJson(Map<String, dynamic> json) {
     final rawEventCounts = json['eventCounts'];
@@ -301,6 +363,10 @@ class _GrowthLedgerState {
             )
           : <String, int>{},
       dailyDimensionCounts: _decodeNestedCounts(rawDailyDimensions),
+      oneShotTokens:
+          (json['_oneShotTokens'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<String>()
+              .toSet(),
     );
   }
 
@@ -331,6 +397,7 @@ class _GrowthLedgerState {
   final Map<String, Map<String, int>> dailyEventCounts;
   final Map<String, int> dimensionCounts;
   final Map<String, Map<String, int>> dailyDimensionCounts;
+  final Set<String> oneShotTokens;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'schemaVersion': MysticLocalGrowthLedger.schemaVersion,
@@ -346,5 +413,6 @@ class _GrowthLedgerState {
     'dailyEventCounts': dailyEventCounts,
     'dimensionCounts': dimensionCounts,
     'dailyDimensionCounts': dailyDimensionCounts,
+    '_oneShotTokens': oneShotTokens.toList()..sort(),
   };
 }
