@@ -738,7 +738,7 @@ class _MysticLivingJournalFeatureState
               en: "YESTERDAY'S SIGNAL",
               tr: 'DÜNÜN İŞARETİ',
               es: 'LA SEÑAL DE AYER',
-              fr: "LE SIGNAL D’HIER",
+              fr: 'LE SIGNAL D’HIER',
               pt: 'O SINAL DE ONTEM',
             ),
             style: const TextStyle(
