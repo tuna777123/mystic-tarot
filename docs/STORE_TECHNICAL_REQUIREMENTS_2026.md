@@ -23,13 +23,12 @@ Official references:
 
 Google Play requires new apps and updates that target Android 15 / API level 35 or higher and target 64-bit devices to support **16 KB memory page sizes**. Google's current Android guidance states that this Google Play compatibility requirement has applied since **November 1, 2025**.
 
-Mystic's Android AAB audit therefore inspects the built artifact with pinned `bundletool dump config` and fails unless the bundle requests:
+Mystic's Android AAB audit verifies both artifact-level requirements that can be proven from the built bundle:
 
-`PAGE_ALIGNMENT_16K`
+1. Pinned `bundletool dump config` must report `PAGE_ALIGNMENT_16K`. Legacy `PAGE_ALIGNMENT_4K`, missing alignment evidence, or ambiguous mixed alignment fails closed.
+2. Every packaged `arm64-v8a` and `x86_64` shared library is extracted from the AAB and inspected with `readelf -lW`; every ELF `LOAD` program-header alignment must be at least **16,384 bytes** (`2**14`).
 
-Legacy `PAGE_ALIGNMENT_4K`, missing alignment evidence, or ambiguous mixed alignment fails closed.
-
-This artifact gate verifies the AAB's native-library zip-alignment request. It does **not** replace validation of the exact signed store candidate in Google Play App Bundle Explorer or runtime testing on a 16 KB Android device/emulator. Keep both of those checks in final production QA.
+These automated checks prove the AAB requests 16 KB native-library zip alignment and that its packaged 64-bit ELF load segments meet the minimum alignment. They do **not** replace validation of the exact signed store candidate in Google Play App Bundle Explorer or runtime testing on a 16 KB Android device/emulator. Keep both of those checks in final production QA.
 
 Official reference:
 
@@ -106,6 +105,7 @@ A green repository build is necessary but not sufficient. Before store submissio
 - exact Flutter version;
 - exact Android target SDK from the audited AAB;
 - `PAGE_ALIGNMENT_16K` evidence from the exact AAB;
+- automated arm64-v8a/x86_64 ELF `LOAD >= 16,384` audit evidence;
 - Play App Bundle Explorer 16 KB compatibility result for the signed candidate;
 - 16 KB Android device/emulator smoke-test evidence;
 - exact Xcode version;
