@@ -47,10 +47,7 @@ void main() {
     );
 
     expect(
-      () => auditIosAdMobPlistXml(
-        missing,
-        expectedAppId: productionLikeAppId,
-      ),
+      () => auditIosAdMobPlistXml(missing, expectedAppId: productionLikeAppId),
       throwsA(isA<IosAdMobPlistAuditFailure>()),
     );
   });
@@ -61,25 +58,33 @@ void main() {
     final duplicate = xml.replaceFirst(marker, '$marker\n$marker');
 
     expect(
-      () => auditIosAdMobPlistXml(
-        duplicate,
-        expectedAppId: productionLikeAppId,
-      ),
+      () =>
+          auditIosAdMobPlistXml(duplicate, expectedAppId: productionLikeAppId),
       throwsA(isA<IosAdMobPlistAuditFailure>()),
     );
   });
 
-  test('production release manifest fail-closes on exported iOS AdMob drift', () {
-    final source = File('tool/write_release_manifest.dart').readAsStringSync();
-    final workflow = File('.github/workflows/store-release.yml').readAsStringSync();
+  test(
+    'production release manifest fail-closes on exported iOS AdMob drift',
+    () {
+      final source = File(
+        'tool/write_release_manifest.dart',
+      ).readAsStringSync();
+      final workflow = File(
+        '.github/workflows/store-release.yml',
+      ).readAsStringSync();
 
-    expect(source, contains("Platform.environment['ADMOB_IOS_APP_ID']"));
-    expect(source, contains('verifyIosArtifactAdMobConfiguration('));
-    expect(source, contains("'productionAdMobAppIdVerified': true"));
-    expect(source, contains("'skAdNetworkCount': iosAdMobAudit.skAdNetworkCount"));
-    expect(
-      workflow,
-      contains('dart run tool/write_release_manifest.dart --platform=ios'),
-    );
-  });
+      expect(source, contains("Platform.environment['ADMOB_IOS_APP_ID']"));
+      expect(source, contains('verifyIosArtifactAdMobConfiguration('));
+      expect(source, contains("'productionAdMobAppIdVerified': true"));
+      expect(
+        source,
+        contains("'skAdNetworkCount': iosAdMobAudit.skAdNetworkCount"),
+      );
+      expect(
+        workflow,
+        contains('dart run tool/write_release_manifest.dart --platform=ios'),
+      );
+    },
+  );
 }
