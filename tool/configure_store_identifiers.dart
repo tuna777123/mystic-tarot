@@ -249,7 +249,8 @@ void _configureIosAdMob(String appId) {
 String _iosSkAdNetworkPlistEntry() {
   final items = iosSkAdNetworkIdentifiers
       .map(
-        (identifier) => '''\t\t<dict>
+        (identifier) =>
+            '''\t\t<dict>
 \t\t\t<key>SKAdNetworkIdentifier</key>
 \t\t\t<string>$identifier</string>
 \t\t</dict>''',
@@ -266,11 +267,7 @@ String _insertBeforeRootDictionaryClose(String source, String entry) {
   if (insertionPoint < 0) {
     throw StateError('Info.plist has no root dictionary closing tag.');
   }
-  return source.replaceRange(
-    insertionPoint,
-    insertionPoint,
-    '\t$entry\n',
-  );
+  return source.replaceRange(insertionPoint, insertionPoint, '\t$entry\n');
 }
 
 bool _isTextBuildFile(String path) {
