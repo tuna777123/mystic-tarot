@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ad_experience_policy.dart';
 import 'business_metrics.dart';
 
 /// Privacy-aware, advertising-only monetization for native Mystic Tarot builds.
@@ -45,15 +46,12 @@ class AdRevenueService with WidgetsBindingObserver {
 
   static const _completedReadingsKey = 'ad_completed_readings_total_v1';
   static const _lastAppOpenShownKey = 'ad_last_app_open_shown_v1';
-  static const _maxAppOpenCacheAge = Duration(hours: 4);
-  static const _minimumAppOpenInterval = Duration(hours: 2);
-  static const _minimumBackgroundDuration = Duration(seconds: 30);
-  static const _minimumReadingsBeforeAppOpen = 3;
-  static const _interstitialEveryReadings = 3;
+  static const _lastFullScreenShownKey = 'ad_last_full_screen_shown_v1';
 
   AppOpenAd? _appOpenAd;
   DateTime? _appOpenLoadedAt;
   DateTime? _lastAppOpenShownAt;
+  DateTime? _lastFullScreenShownAt;
   DateTime? _backgroundedAt;
   InterstitialAd? _interstitial;
   bool _initializing = false;
@@ -132,11 +130,17 @@ class AdRevenueService with WidgetsBindingObserver {
     final preferences = await SharedPreferences.getInstance();
     _completedReadingsTotal = preferences.getInt(_completedReadingsKey) ?? 0;
     _completedReadingsSinceAd =
-        _completedReadingsTotal % _interstitialEveryReadings;
+        _completedReadingsTotal % AdExperiencePolicy.interstitialEveryReadings;
     final lastShownMillis = preferences.getInt(_lastAppOpenShownKey);
     if (lastShownMillis != null) {
       _lastAppOpenShownAt = DateTime.fromMillisecondsSinceEpoch(
         lastShownMillis,
+      );
+    }
+    final lastFullScreenMillis = preferences.getInt(_lastFullScreenShownKey);
+    if (lastFullScreenMillis != null) {
+      _lastFullScreenShownAt = DateTime.fromMillisecondsSinceEpoch(
+        lastFullScreenMillis,
       );
     }
   }
@@ -177,7 +181,7 @@ class AdRevenueService with WidgetsBindingObserver {
     _backgroundedAt = null;
     if (backgroundedAt == null) return;
     if (DateTime.now().difference(backgroundedAt) <
-        _minimumBackgroundDuration) {
+        AdExperiencePolicy.minimumBackgroundDuration) {
       return;
     }
     _showAppOpenIfReady();
@@ -206,7 +210,10 @@ class AdRevenueService with WidgetsBindingObserver {
     await preferences.setInt(_completedReadingsKey, _completedReadingsTotal);
 
     if (!_initialized || _showingFullScreenAd) return;
-    if (_completedReadingsSinceAd < _interstitialEveryReadings) return;
+    if (_completedReadingsSinceAd <
+        AdExperiencePolicy.interstitialEveryReadings) {
+      return;
+    }
     _completedReadingsSinceAd = 0;
     unawaited(
       MysticBusinessMetrics.record(
@@ -242,19 +249,24 @@ class AdRevenueService with WidgetsBindingObserver {
   bool get _appOpenExpired {
     final loadedAt = _appOpenLoadedAt;
     if (loadedAt == null) return true;
-    return DateTime.now().difference(loadedAt) >= _maxAppOpenCacheAge;
+    return DateTime.now().difference(loadedAt) >=
+        AdExperiencePolicy.maxAppOpenCacheAge;
   }
 
-  bool get _appOpenIntervalSatisfied {
-    final shownAt = _lastAppOpenShownAt;
-    if (shownAt == null) return true;
-    return DateTime.now().difference(shownAt) >= _minimumAppOpenInterval;
-  }
+  bool get _fullScreenGapSatisfied =>
+      AdExperiencePolicy.fullScreenGapSatisfied(
+        now: DateTime.now(),
+        lastFullScreenShownAt: _lastFullScreenShownAt,
+      );
 
   void _showAppOpenIfReady() {
     if (_showingFullScreenAd ||
-        _completedReadingsTotal < _minimumReadingsBeforeAppOpen ||
-        !_appOpenIntervalSatisfied) {
+        !AdExperiencePolicy.appOpenEligible(
+          now: DateTime.now(),
+          completedReadings: _completedReadingsTotal,
+          lastAppOpenShownAt: _lastAppOpenShownAt,
+          lastFullScreenShownAt: _lastFullScreenShownAt,
+        )) {
       return;
     }
     final ad = _appOpenAd;
@@ -281,6 +293,7 @@ class AdRevenueService with WidgetsBindingObserver {
     );
     _showingFullScreenAd = true;
     _lastAppOpenShownAt = DateTime.now();
+    _markFullScreenShown();
     unawaited(_persistLastAppOpenShown());
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdImpression: (_) {
@@ -323,6 +336,21 @@ class AdRevenueService with WidgetsBindingObserver {
     );
   }
 
+  void _markFullScreenShown() {
+    _lastFullScreenShownAt = DateTime.now();
+    unawaited(_persistLastFullScreenShown());
+  }
+
+  Future<void> _persistLastFullScreenShown() async {
+    final shownAt = _lastFullScreenShownAt;
+    if (shownAt == null) return;
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setInt(
+      _lastFullScreenShownKey,
+      shownAt.millisecondsSinceEpoch,
+    );
+  }
+
   void _loadInterstitial() {
     final id = _interstitialId;
     if (!_initialized || id == null || _interstitial != null) return;
@@ -341,7 +369,7 @@ class AdRevenueService with WidgetsBindingObserver {
   }
 
   void _showInterstitialIfReady() {
-    if (_showingFullScreenAd) return;
+    if (_showingFullScreenAd || !_fullScreenGapSatisfied) return;
     final ad = _interstitial;
     if (ad == null) {
       _loadInterstitial();
@@ -349,6 +377,7 @@ class AdRevenueService with WidgetsBindingObserver {
     }
 
     _showingFullScreenAd = true;
+    _markFullScreenShown();
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdImpression: (_) {
         unawaited(
