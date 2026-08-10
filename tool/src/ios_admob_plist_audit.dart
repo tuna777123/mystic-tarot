@@ -53,13 +53,14 @@ IosAdMobPlistAuditResult auditIosAdMobPlistXml(
     );
   }
 
-  final identifiers = RegExp(
-    r'<key>SKAdNetworkIdentifier</key>\s*<string>([^<]+)</string>',
-    multiLine: true,
-  )
-      .allMatches(skAdNetworkBlockMatches.single.group(1)!)
-      .map((match) => match.group(1)!)
-      .toList(growable: false);
+  final identifiers =
+      RegExp(
+            r'<key>SKAdNetworkIdentifier</key>\s*<string>([^<]+)</string>',
+            multiLine: true,
+          )
+          .allMatches(skAdNetworkBlockMatches.single.group(1)!)
+          .map((match) => match.group(1)!)
+          .toList(growable: false);
   final uniqueIdentifiers = identifiers.toSet();
   if (identifiers.length != uniqueIdentifiers.length) {
     throw const IosAdMobPlistAuditFailure(
