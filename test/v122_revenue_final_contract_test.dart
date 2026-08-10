@@ -11,6 +11,9 @@ void main() {
     final adService = File(
       'lib/src/ad_revenue_service.dart',
     ).readAsStringSync();
+    final adPolicy = File(
+      'lib/src/ad_experience_policy.dart',
+    ).readAsStringSync();
     final identifiers = File(
       'tool/configure_store_identifiers.dart',
     ).readAsStringSync();
@@ -35,16 +38,30 @@ void main() {
     expect(access, isNot(contains('limited time')));
     expect(access, isNot(contains('Manage subscription')));
 
+    expect(adService, contains("import 'ad_experience_policy.dart';"));
     expect(adService, contains('ConsentInformation.instance.canRequestAds()'));
     expect(adService, contains('AppOpenAd.load'));
     expect(adService, contains('InterstitialAd.load'));
-    expect(adService, contains('_minimumAppOpenInterval = Duration(hours: 2)'));
     expect(
       adService,
-      contains('_minimumBackgroundDuration = Duration(seconds: 30)'),
+      contains('AdExperiencePolicy.minimumAppOpenInterval'),
     );
-    expect(adService, contains('_minimumReadingsBeforeAppOpen = 3'));
-    expect(adService, contains('_interstitialEveryReadings = 3'));
+    expect(
+      adService,
+      contains('AdExperiencePolicy.minimumBackgroundDuration'),
+    );
+    expect(
+      adService,
+      contains('AdExperiencePolicy.interstitialEveryReadings'),
+    );
+    expect(adPolicy, contains('minimumAppOpenInterval = Duration(hours: 2)'));
+    expect(
+      adPolicy,
+      contains('minimumBackgroundDuration = Duration(seconds: 30)'),
+    );
+    expect(adPolicy, contains('minimumReadingsBeforeAppOpen = 3'));
+    expect(adPolicy, contains('interstitialEveryReadings = 3'));
+    expect(adPolicy, contains('minimumFullScreenGap = Duration(minutes: 20)'));
     expect(adService, contains('SharedPreferences.getInstance()'));
 
     expect(
