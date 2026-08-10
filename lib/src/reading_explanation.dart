@@ -46,14 +46,13 @@ ReadingExplanation buildReadingExplanation({
     required String es,
     required String fr,
     required String pt,
-  }) =>
-      switch (language) {
-        MysticLanguage.turkish => tr,
-        MysticLanguage.spanish => es,
-        MysticLanguage.french => fr,
-        MysticLanguage.portugueseBrazil => pt,
-        _ => en,
-      };
+  }) => switch (language) {
+    MysticLanguage.turkish => tr,
+    MysticLanguage.spanish => es,
+    MysticLanguage.french => fr,
+    MysticLanguage.portugueseBrazil => pt,
+    _ => en,
+  };
 
   final position = localizedReadingPosition(
     kind: kind,
@@ -166,15 +165,47 @@ String _localizedExplanationIntention(
 }
 
 class ReadingExplanationPanel extends StatelessWidget {
-  const ReadingExplanationPanel({
-    required this.explanation,
-    super.key,
-  });
+  const ReadingExplanationPanel({required this.explanation, super.key});
 
   final ReadingExplanation explanation;
 
   @override
-  Widget build(BuildContext context) => Theme(
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Container(
+        key: const ValueKey('reading-practical-bridge'),
+        width: double.infinity,
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          color: MysticColors.gold.withValues(alpha: .07),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .18)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.directions_walk_outlined,
+              size: 18,
+              color: MysticColors.gold,
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                explanation.practicalBridge,
+                style: const TextStyle(
+                  color: MysticColors.mist,
+                  fontSize: 11,
+                  height: 1.45,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
@@ -226,10 +257,6 @@ class ReadingExplanationPanel extends StatelessWidget {
                     text: explanation.symbolicBasis,
                   ),
                   _ExplanationRow(
-                    icon: Icons.directions_walk_outlined,
-                    text: explanation.practicalBridge,
-                  ),
-                  _ExplanationRow(
                     icon: Icons.tune_rounded,
                     text: explanation.contextLabel,
                   ),
@@ -260,7 +287,9 @@ class ReadingExplanationPanel extends StatelessWidget {
             ),
           ],
         ),
-      );
+      ),
+    ],
+  );
 }
 
 class _ExplanationRow extends StatelessWidget {
@@ -271,23 +300,23 @@ class _ExplanationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 16, color: MysticColors.lavender),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  color: MysticColors.mist,
-                  fontSize: 11,
-                  height: 1.45,
-                ),
-              ),
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: MysticColors.lavender),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: MysticColors.mist,
+              fontSize: 11,
+              height: 1.45,
             ),
-          ],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 }

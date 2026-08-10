@@ -717,6 +717,107 @@ class _MysticLivingJournalFeatureState
     );
   }
 
+  Widget _buildMirrorEvidenceContext(ReadingRecord record) {
+    final action = record.alignedAction.trim();
+    return Container(
+      key: const ValueKey('mirror-evidence-context'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2D2348), Color(0xFF171321)],
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _mirrorCopy(
+              en: "YESTERDAY'S SIGNAL",
+              tr: 'DÜNÜN İŞARETİ',
+              es: 'LA SEÑAL DE AYER',
+              fr: 'LE SIGNAL D’HIER',
+              pt: 'O SINAL DE ONTEM',
+            ),
+            style: const TextStyle(
+              color: MysticColors.gold,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${record.emotion.symbol} ${localizedEmotionLabel(record.emotion, languageCode: _languageCode)}',
+            style: const TextStyle(
+              color: MysticColors.lavender,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          if (action.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              _mirrorCopy(
+                en: 'ACTION YOU CHOSE',
+                tr: 'SEÇTİĞİN EYLEM',
+                es: 'LA ACCIÓN QUE ELEGISTE',
+                fr: 'L’ACTION CHOISIE',
+                pt: 'A AÇÃO QUE VOCÊ ESCOLHEU',
+              ),
+              style: const TextStyle(
+                color: MysticColors.muted,
+                fontSize: 8,
+                fontWeight: FontWeight.w900,
+                letterSpacing: .8,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              action,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: MysticColors.mist, height: 1.4),
+            ),
+          ],
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: Colors.white10),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.compare_arrows_rounded,
+                color: MysticColors.gold,
+                size: 18,
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  _mirrorCopy(
+                    en: 'Record reality, not whether tarot was right.',
+                    tr: 'Tarotun doğru çıkıp çıkmadığını değil, gerçeği kaydet.',
+                    es: 'Registra la realidad, no si el tarot acertó.',
+                    fr: 'Notez la réalité, pas si le tarot avait raison.',
+                    pt: 'Registre a realidade, não se o tarô acertou.',
+                  ),
+                  style: const TextStyle(
+                    color: MysticColors.mist,
+                    fontSize: 11,
+                    height: 1.4,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _openMirrorCheckIn(ReadingRecord record) async {
     MysticMirrorOutcome? outcome;
     var emotion = record.emotion;
@@ -780,6 +881,8 @@ class _MysticLivingJournalFeatureState
                       height: 1.45,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  _buildMirrorEvidenceContext(record),
                   const SizedBox(height: 20),
                   Text(
                     _mirrorCopy(
