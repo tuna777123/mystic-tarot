@@ -35,7 +35,7 @@ IosAdMobPlistAuditResult auditIosAdMobPlistXml(
   }
   final appId = appIdMatches.single.group(1)!;
   if (appId != expectedAppId) {
-    throw IosAdMobPlistAuditFailure(
+    throw const IosAdMobPlistAuditFailure(
       'Exported iOS AdMob application ID does not match the protected '
       'production value.',
     );
