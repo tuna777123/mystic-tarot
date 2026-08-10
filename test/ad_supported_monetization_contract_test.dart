@@ -6,6 +6,9 @@ void main() {
   test('native monetization is Google Mobile Ads with UMP consent', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final service = File('lib/src/ad_revenue_service.dart').readAsStringSync();
+    final policy = File(
+      'lib/src/ad_experience_policy.dart',
+    ).readAsStringSync();
     final main = File('lib/main.dart').readAsStringSync();
 
     expect(pubspec, contains('google_mobile_ads: ^9.0.0'));
@@ -21,13 +24,24 @@ void main() {
     expect(service, contains('MobileAds.instance.initialize()'));
     expect(service, contains('AppOpenAd.load'));
     expect(service, contains('InterstitialAd.load'));
-    expect(service, contains('_interstitialEveryReadings = 3'));
-    expect(service, contains('_minimumReadingsBeforeAppOpen = 3'));
+    expect(service, contains("import 'ad_experience_policy.dart';"));
     expect(
       service,
-      contains('_minimumBackgroundDuration = Duration(seconds: 30)'),
+      contains('AdExperiencePolicy.interstitialEveryReadings'),
     );
-    expect(service, contains('_minimumAppOpenInterval = Duration(hours: 2)'));
+    expect(service, contains('AdExperiencePolicy.appOpenEligible('));
+    expect(
+      service,
+      contains('AdExperiencePolicy.minimumBackgroundDuration'),
+    );
+    expect(policy, contains('interstitialEveryReadings = 3'));
+    expect(policy, contains('minimumReadingsBeforeAppOpen = 3'));
+    expect(
+      policy,
+      contains('minimumBackgroundDuration = Duration(seconds: 30)'),
+    );
+    expect(policy, contains('minimumAppOpenInterval = Duration(hours: 2)'));
+    expect(policy, contains('minimumFullScreenGap = Duration(minutes: 20)'));
     expect(service, contains('SharedPreferences.getInstance()'));
     expect(service, contains('MYSTIC_USE_TEST_ADS'));
     expect(service, contains('ADMOB_ANDROID_APP_OPEN_ID'));
