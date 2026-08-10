@@ -3,15 +3,18 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('reading keeps the grounded action visible before deeper explanation', () {
-    final explanation = File(
-      'lib/src/reading_explanation.dart',
-    ).readAsStringSync();
+  test(
+    'reading keeps the grounded action visible before deeper explanation',
+    () {
+      final explanation = File(
+        'lib/src/reading_explanation.dart',
+      ).readAsStringSync();
 
-    expect(explanation, contains("ValueKey('reading-practical-bridge')"));
-    expect(explanation, contains('explanation.practicalBridge'));
-    expect(explanation, contains('Icons.directions_walk_outlined'));
-  });
+      expect(explanation, contains("ValueKey('reading-practical-bridge')"));
+      expect(explanation, contains('explanation.practicalBridge'));
+      expect(explanation, contains('Icons.directions_walk_outlined'));
+    },
+  );
 
   test('Mystic Mirror reconnects the user with yesterday before check-in', () {
     final journal = File(
