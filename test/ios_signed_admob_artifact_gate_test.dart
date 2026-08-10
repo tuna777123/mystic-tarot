@@ -54,7 +54,8 @@ void main() {
 
   test('rejects duplicate SKAdNetwork identifiers', () {
     final xml = materializeIosAdMobPlist(minimalPlist, productionLikeAppId);
-    final marker = '<string>${iosSkAdNetworkIdentifiers.first}</string>';
+    final marker = '''<key>SKAdNetworkIdentifier</key>
+\t\t\t<string>${iosSkAdNetworkIdentifiers.first}</string>''';
     final duplicate = xml.replaceFirst(marker, '$marker\n$marker');
 
     expect(
