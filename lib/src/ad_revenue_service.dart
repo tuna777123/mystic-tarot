@@ -253,11 +253,10 @@ class AdRevenueService with WidgetsBindingObserver {
         AdExperiencePolicy.maxAppOpenCacheAge;
   }
 
-  bool get _fullScreenGapSatisfied =>
-      AdExperiencePolicy.fullScreenGapSatisfied(
-        now: DateTime.now(),
-        lastFullScreenShownAt: _lastFullScreenShownAt,
-      );
+  bool get _fullScreenGapSatisfied => AdExperiencePolicy.fullScreenGapSatisfied(
+    now: DateTime.now(),
+    lastFullScreenShownAt: _lastFullScreenShownAt,
+  );
 
   void _showAppOpenIfReady() {
     if (_showingFullScreenAd ||
