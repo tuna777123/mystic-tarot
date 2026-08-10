@@ -60,4 +60,13 @@ legacy_alignment: PAGE_ALIGNMENT_4K
       throwsA(isA<AuditFailure>()),
     );
   });
+
+  test('rejects a lookalike value instead of exact 16 KB alignment', () {
+    expect(
+      () => validateGooglePlayPageAlignment(
+        'alignment: PAGE_ALIGNMENT_16K_COMPAT',
+      ),
+      throwsA(isA<AuditFailure>()),
+    );
+  });
 }
