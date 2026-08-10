@@ -225,8 +225,9 @@ void materializeAdOnlyUi() {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      MysticGrowthEvidenceScreen(language: language),
+                  builder: (_) => MysticGrowthEvidenceScreen(
+                    language: language,
+                  ),
                 ),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 4),
