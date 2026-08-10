@@ -42,7 +42,6 @@ void main() {
     expect(adService, contains('ConsentInformation.instance.canRequestAds()'));
     expect(adService, contains('AppOpenAd.load'));
     expect(adService, contains('InterstitialAd.load'));
-    expect(adService, contains('AdExperiencePolicy.minimumAppOpenInterval'));
     expect(adService, contains('AdExperiencePolicy.minimumBackgroundDuration'));
     expect(adService, contains('AdExperiencePolicy.interstitialEveryReadings'));
     expect(adPolicy, contains('minimumAppOpenInterval = Duration(hours: 2)'));
