@@ -63,6 +63,17 @@ Future<String> _audit(_AuditOptions options) async {
     '--bundle=${bundle.path}',
   ]);
 
+  final configResult = await _runChecked('java', [
+    '-jar',
+    options.bundletoolFile.path,
+    'dump',
+    'config',
+    '--bundle=${bundle.path}',
+  ]);
+  final pageAlignment = validateGooglePlayPageAlignment(
+    configResult.stdout as String,
+  );
+
   final manifestResult = await _runChecked('java', [
     '-jar',
     options.bundletoolFile.path,
@@ -169,6 +180,7 @@ Future<String> _audit(_AuditOptions options) async {
 - Android min SDK: `${manifest.minSdkVersion}`
 - Android target SDK: `${manifest.targetSdkVersion}`
 - Google Play target-SDK gate: `API ${manifest.targetSdkVersion} >= API $minimumGooglePlayTargetSdk`
+- Google Play 16 KB bundle alignment: `$pageAlignment`
 - Bundle size: `${formatByteCount(bundleBytes)}`
 - SHA-256: `$sha256`
 - Signature container: `strict jarsigner policy passed`
@@ -181,10 +193,12 @@ Future<String> _audit(_AuditOptions options) async {
 
 This automated audit verifies the release artifact itself. Google Mobile Ads is an
 intentional reviewed dependency in the advertising-supported native build. The
-audit also rejects a target SDK below the current Mystic Google Play submission
-floor. It does not replace Play pre-launch testing, AdMob/UMP account
-configuration, production signing ownership, store privacy declarations, or
-real-device network and consent inspection.
+audit rejects a target SDK below the current Mystic Google Play submission
+floor and requires the AAB BundleConfig to request 16 KB native-library zip
+alignment. It does not replace Play pre-launch testing, App Bundle Explorer or
+real 16 KB device/emulator verification, AdMob/UMP account configuration,
+production signing ownership, store privacy declarations, or real-device
+network and consent inspection.
 ''';
 }
 
