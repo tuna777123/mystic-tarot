@@ -18,6 +18,7 @@ void main() {
       expect(app, contains('Reveal my first card'));
       expect(app, contains('PATTERN MEMORY'));
       expect(app, contains('PRIVATE JOURNAL'));
+      expect(app, contains('Your first reading starts next.'));
 
       final finishOnboarding = app.indexOf('Future<void> _finishOnboarding(');
       final startFirstDaily = app.indexOf(
@@ -45,6 +46,9 @@ void main() {
     expect(app, contains('✦  YOUR GUIDANCE'));
     expect(app, contains('MYSTIC MIRROR • 24H LOOP'));
     expect(app, contains('Tomorrow, Mystic will ask what actually changed.'));
+    expect(app, contains('Your reading isn’t finished yet.'));
+    expect(app, contains('A reflective path is taking shape.'));
+    expect(app, contains('MediaQuery.maybeOf(context)?.disableAnimations'));
     expect(app, contains('Save this reading'));
   });
 
@@ -65,6 +69,15 @@ void main() {
       expect(journal, contains('This is reflection, not a prediction score.'));
       expect(journal, contains('mysticMirrorShareText(widget.language)'));
       expect(journal, contains('Your Pattern Lab grows with evidence'));
+      expect(journal, contains("YESTERDAY'S SIGNAL"));
+      expect(
+        journal,
+        contains('Record reality, not whether tarot was right.'),
+      );
+      final explanation = File(
+        'lib/src/reading_explanation.dart',
+      ).readAsStringSync();
+      expect(explanation, contains("ValueKey('reading-practical-bridge')"));
     },
   );
 

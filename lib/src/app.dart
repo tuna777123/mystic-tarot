@@ -1616,7 +1616,45 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        const SizedBox(height: 25),
+        const SizedBox(height: 18),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .045),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: .08)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.lock_outline_rounded,
+                color: MysticColors.gold,
+                size: 18,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _copy(
+                    en: 'Your first reading starts next. No account is required, and your private journal stays on this device.',
+                    es: 'Tu primera lectura comienza a continuación. No necesitas una cuenta y tu diario privado permanece en este dispositivo.',
+                    fr: 'Votre premier tirage commence ensuite. Aucun compte n’est requis et votre journal privé reste sur cet appareil.',
+                    pt: 'Sua primeira leitura começa em seguida. Nenhuma conta é necessária e seu diário privado fica neste dispositivo.',
+                    tr: 'İlk okuman birazdan başlar. Hesap gerekmez ve özel günlüğün bu cihazda kalır.',
+                    it: 'La tua prima lettura inizia subito dopo. Non serve un account e il diario privato resta su questo dispositivo.',
+                    de: 'Deine erste Lesung startet als Nächstes. Es ist kein Konto nötig und dein privates Journal bleibt auf diesem Gerät.',
+                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: MysticColors.mist,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -3559,12 +3597,16 @@ class _ReadingFlowState extends State<ReadingFlow> {
   }
 
   Future<void> _openRitual() async {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     HapticFeedback.mediumImpact();
     MysticSoundscape.instance.revealCards();
     setState(() => ritualOpened = true);
-    await Future<void>.delayed(
-      Duration(milliseconds: 850 + widget.kind.cardCount * 520),
-    );
+    if (!reduceMotion) {
+      await Future<void>.delayed(
+        Duration(milliseconds: 850 + widget.kind.cardCount * 520),
+      );
+    }
     if (mounted) setState(() => revealComplete = true);
   }
 
@@ -3726,6 +3768,38 @@ class _ReadingFlowState extends State<ReadingFlow> {
                       ),
                       const SizedBox(height: 10),
                       Text(
+                        localized(
+                          widget.language.appLanguage,
+                          english: 'Your reading isn’t finished yet.',
+                          turkish: 'Okuman henüz bitmedi.',
+                          spanish: 'Tu lectura aún no ha terminado.',
+                          french: 'Votre tirage n’est pas encore terminé.',
+                          portugueseBrazil: 'Sua leitura ainda não terminou.',
+                        ),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        localized(
+                          widget.language.appLanguage,
+                          english:
+                              'One action today. One reality check tomorrow. Repetition becomes a pattern.',
+                          turkish:
+                              'Bugün tek bir eylem. Yarın tek bir gerçeklik kontrolü. Tekrar, örüntüye dönüşür.',
+                          spanish:
+                              'Una acción hoy. Una comprobación de la realidad mañana. La repetición se convierte en un patrón.',
+                          french:
+                              'Une action aujourd’hui. Un retour au réel demain. La répétition devient une tendance.',
+                          portugueseBrazil:
+                              'Uma ação hoje. Uma checagem da realidade amanhã. A repetição vira um padrão.',
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: MysticColors.lavender,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
                         mysticText(
                           widget.language,
                           'Your aligned action',
@@ -3863,30 +3937,25 @@ class _ReadingFlowState extends State<ReadingFlow> {
     final hopeful = drawn!.any(
       (c) => c.card.name == 'The Star' || c.card.name == 'The Sun',
     );
-    if (widget.userName.isEmpty) {
-      return hopeful
-          ? mysticText(
-              widget.language,
-              'A hopeful path is becoming visible.',
-              'Umut veren bir yol görünür oluyor.',
-            )
-          : mysticText(
-              widget.language,
-              'The truth arrives when you slow down.',
-              'Yavaşladığında gerçek belirginleşiyor.',
-            );
-    }
-    return hopeful
-        ? mysticText(
-            widget.language,
-            '${widget.userName}, a hopeful path is becoming visible.',
-            '${widget.userName}, umut veren bir yol görünür oluyor.',
+    final baseHeadline = hopeful
+        ? localized(
+            widget.language.appLanguage,
+            english: 'A hopeful possibility is worth noticing.',
+            turkish: 'Umut veren bir ihtimal dikkatini hak ediyor.',
+            spanish: 'Una posibilidad esperanzadora merece tu atención.',
+            french: 'Une possibilité porteuse d’espoir mérite votre attention.',
+            portugueseBrazil: 'Uma possibilidade esperançosa merece sua atenção.',
           )
-        : mysticText(
-            widget.language,
-            '${widget.userName}, the truth arrives when you slow down.',
-            '${widget.userName}, yavaşladığında gerçek belirginleşiyor.',
+        : localized(
+            widget.language.appLanguage,
+            english: 'A reflective path is taking shape.',
+            turkish: 'Üzerinde düşünebileceğin bir yol şekilleniyor.',
+            spanish: 'Un camino de reflexión está tomando forma.',
+            french: 'Une piste de réflexion prend forme.',
+            portugueseBrazil: 'Um caminho de reflexão está tomando forma.',
           );
+    if (widget.userName.isEmpty) return baseHeadline;
+    return '${widget.userName}, ${baseHeadline[0].toLowerCase()}${baseHeadline.substring(1)}';
   }
 
   Widget _memoryBridge(BuildContext context) {
@@ -4164,8 +4233,27 @@ class _RevealRitualState extends State<_RevealRitual>
   late final AnimationController pulse = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 2400),
-  )..repeat(reverse: true);
+  );
   bool opening = false;
+  bool reduceMotion = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final shouldReduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduceMotion == shouldReduceMotion &&
+        (shouldReduceMotion || pulse.isAnimating)) {
+      return;
+    }
+    reduceMotion = shouldReduceMotion;
+    if (reduceMotion) {
+      pulse.stop();
+      pulse.value = .5;
+    } else if (!pulse.isAnimating) {
+      pulse.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -4176,7 +4264,9 @@ class _RevealRitualState extends State<_RevealRitual>
   Future<void> _open() async {
     if (opening) return;
     setState(() => opening = true);
-    await Future<void>.delayed(const Duration(milliseconds: 820));
+    if (!reduceMotion) {
+      await Future<void>.delayed(const Duration(milliseconds: 820));
+    }
     if (mounted) widget.onReveal();
   }
 
@@ -4261,7 +4351,7 @@ class _RevealRitualState extends State<_RevealRitual>
       AnimatedBuilder(
         animation: pulse,
         builder: (context, _) {
-          final value = Curves.easeInOut.transform(pulse.value);
+          final value = reduceMotion ? .5 : Curves.easeInOut.transform(pulse.value);
           return Center(
             child: SizedBox(
               width: 210,
@@ -4292,7 +4382,9 @@ class _RevealRitualState extends State<_RevealRitual>
                   ),
                   for (var i = min(widget.cardCount, 3) - 1; i >= 0; i--)
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 700),
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 700),
                       curve: Curves.easeInOutCubic,
                       transform: Matrix4.identity()
                         ..translateByDouble(
@@ -4316,10 +4408,14 @@ class _RevealRitualState extends State<_RevealRitual>
                       ),
                     ),
                   AnimatedScale(
-                    duration: const Duration(milliseconds: 500),
+                    duration: reduceMotion
+                        ? Duration.zero
+                        : const Duration(milliseconds: 500),
                     scale: opening ? 1.18 : .94 + value * .06,
                     child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 350),
+                      duration: reduceMotion
+                          ? Duration.zero
+                          : const Duration(milliseconds: 350),
                       opacity: opening ? 0 : 1,
                       child: Container(
                         width: 62,
@@ -4406,7 +4502,9 @@ class _RevealRitualState extends State<_RevealRitual>
 
   Widget _ritualStep(String number, String label, bool active) =>
       AnimatedContainer(
-        duration: const Duration(milliseconds: 350),
+        duration: reduceMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 350),
         height: 42,
         padding: const EdgeInsets.symmetric(horizontal: 9),
         decoration: BoxDecoration(
@@ -5429,11 +5527,20 @@ class _RitualRevealCard extends StatefulWidget {
 
 class _RitualRevealCardState extends State<_RitualRevealCard> {
   bool faceUp = false;
+  bool scheduled = false;
   Timer? _revealTimer;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (scheduled) return;
+    scheduled = true;
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduceMotion) {
+      faceUp = true;
+      return;
+    }
     _revealTimer = Timer(widget.delay, () {
       if (mounted) setState(() => faceUp = true);
     });
@@ -5446,9 +5553,14 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
   }
 
   @override
-  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(end: faceUp ? 1 : 0),
-    duration: const Duration(milliseconds: 720),
+  Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: faceUp ? 1 : 0),
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 720),
     curve: Curves.easeInOutCubic,
     builder: (context, value, _) {
       final showFace = value > .5;
@@ -5472,7 +5584,8 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
         ),
       );
     },
-  );
+    );
+  }
 }
 
 class _ReadingInProgress extends StatelessWidget {

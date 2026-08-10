@@ -174,10 +174,47 @@ class ReadingExplanationPanel extends StatelessWidget {
   final ReadingExplanation explanation;
 
   @override
-  Widget build(BuildContext context) => Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: EdgeInsets.zero,
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            key: const ValueKey('reading-practical-bridge'),
+            width: double.infinity,
+            padding: const EdgeInsets.all(13),
+            decoration: BoxDecoration(
+              color: MysticColors.gold.withValues(alpha: .07),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: MysticColors.gold.withValues(alpha: .18),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.directions_walk_outlined,
+                  size: 18,
+                  color: MysticColors.gold,
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    explanation.practicalBridge,
+                    style: const TextStyle(
+                      color: MysticColors.mist,
+                      fontSize: 11,
+                      height: 1.45,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.zero,
           childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 6),
           leading: Container(
             width: 34,
@@ -226,10 +263,6 @@ class ReadingExplanationPanel extends StatelessWidget {
                     text: explanation.symbolicBasis,
                   ),
                   _ExplanationRow(
-                    icon: Icons.directions_walk_outlined,
-                    text: explanation.practicalBridge,
-                  ),
-                  _ExplanationRow(
                     icon: Icons.tune_rounded,
                     text: explanation.contextLabel,
                   ),
@@ -258,8 +291,10 @@ class ReadingExplanationPanel extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       );
 }
 
