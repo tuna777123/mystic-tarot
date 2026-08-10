@@ -20,9 +20,8 @@ void main() {
     expect(iosSkAdNetworkIdentifiers.first, 'cstr6suwn9.skadnetwork');
     expect(
       iosSkAdNetworkIdentifiers.every(
-        (identifier) => RegExp(
-          r'^[a-z0-9]{10}\.skadnetwork$',
-        ).hasMatch(identifier),
+        (identifier) =>
+            RegExp(r'^[a-z0-9]{10}\.skadnetwork$').hasMatch(identifier),
       ),
       isTrue,
     );
