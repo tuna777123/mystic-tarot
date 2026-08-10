@@ -206,18 +206,16 @@ declarations, or real-device network and consent inspection.
 ''';
 }
 
-Future<int> _audit64BitElfAlignment(
-  File bundle,
-  List<String> entries,
-) async {
-  final nativeEntries = entries
-      .where(
-        (entry) => RegExp(
-          r'^base/lib/(?:arm64-v8a|x86_64)/[^/]+\.so$',
-        ).hasMatch(entry),
-      )
-      .toList(growable: false)
-    ..sort();
+Future<int> _audit64BitElfAlignment(File bundle, List<String> entries) async {
+  final nativeEntries =
+      entries
+          .where(
+            (entry) => RegExp(
+              r'^base/lib/(?:arm64-v8a|x86_64)/[^/]+\.so$',
+            ).hasMatch(entry),
+          )
+          .toList(growable: false)
+        ..sort();
   if (nativeEntries.isEmpty) {
     throw const AuditFailure(
       'Bundle contains no 64-bit shared libraries to audit for 16 KB ELF '
