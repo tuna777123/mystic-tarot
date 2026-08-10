@@ -85,9 +85,7 @@ ThemeData buildMysticTheme() {
         foregroundColor: MysticColors.mist,
         minimumSize: const Size(48, 52),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-        side: BorderSide(
-          color: MysticColors.lavender.withValues(alpha: .28),
-        ),
+        side: BorderSide(color: MysticColors.lavender.withValues(alpha: .28)),
         shape: premiumShape,
       ),
     ),
@@ -129,15 +127,11 @@ ThemeData buildMysticTheme() {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(
-          color: Colors.white.withValues(alpha: .1),
-        ),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: .1)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(
-          color: Colors.white.withValues(alpha: .1),
-        ),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: .1)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
