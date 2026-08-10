@@ -125,12 +125,8 @@ void validateGooglePlayTargetSdk(
 }
 
 String validateGooglePlayPageAlignment(String bundleConfig) {
-  final has16Kb = RegExp(
-    r'\bPAGE_ALIGNMENT_16K\b',
-  ).hasMatch(bundleConfig);
-  final hasLegacy4Kb = RegExp(
-    r'\bPAGE_ALIGNMENT_4K\b',
-  ).hasMatch(bundleConfig);
+  final has16Kb = RegExp(r'\bPAGE_ALIGNMENT_16K\b').hasMatch(bundleConfig);
+  final hasLegacy4Kb = RegExp(r'\bPAGE_ALIGNMENT_4K\b').hasMatch(bundleConfig);
   if (!has16Kb || hasLegacy4Kb) {
     throw const AuditFailure(
       'Android App Bundle must request PAGE_ALIGNMENT_16K for Google Play '
@@ -175,7 +171,9 @@ void validateGooglePlayElfLoadAlignment(
       .where((alignment) => alignment < minimumGooglePlayElfLoadAlignmentBytes)
       .toList(growable: false);
   if (invalid.isNotEmpty) {
-    final smallest = invalid.reduce((left, right) => left < right ? left : right);
+    final smallest = invalid.reduce(
+      (left, right) => left < right ? left : right,
+    );
     throw AuditFailure(
       '$label contains an ELF LOAD segment aligned to $smallest bytes; '
       'Google Play 16 KB compatibility requires at least '
