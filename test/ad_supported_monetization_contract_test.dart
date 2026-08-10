@@ -6,9 +6,7 @@ void main() {
   test('native monetization is Google Mobile Ads with UMP consent', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final service = File('lib/src/ad_revenue_service.dart').readAsStringSync();
-    final policy = File(
-      'lib/src/ad_experience_policy.dart',
-    ).readAsStringSync();
+    final policy = File('lib/src/ad_experience_policy.dart').readAsStringSync();
     final main = File('lib/main.dart').readAsStringSync();
 
     expect(pubspec, contains('google_mobile_ads: ^9.0.0'));
@@ -25,15 +23,9 @@ void main() {
     expect(service, contains('AppOpenAd.load'));
     expect(service, contains('InterstitialAd.load'));
     expect(service, contains("import 'ad_experience_policy.dart';"));
-    expect(
-      service,
-      contains('AdExperiencePolicy.interstitialEveryReadings'),
-    );
+    expect(service, contains('AdExperiencePolicy.interstitialEveryReadings'));
     expect(service, contains('AdExperiencePolicy.appOpenEligible('));
-    expect(
-      service,
-      contains('AdExperiencePolicy.minimumBackgroundDuration'),
-    );
+    expect(service, contains('AdExperiencePolicy.minimumBackgroundDuration'));
     expect(policy, contains('interstitialEveryReadings = 3'));
     expect(policy, contains('minimumReadingsBeforeAppOpen = 3'));
     expect(
