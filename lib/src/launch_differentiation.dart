@@ -112,37 +112,41 @@ class LaunchContinuityTimeline extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: MysticColors.gold.withValues(alpha: .12),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: MysticColors.gold.withValues(alpha: .2),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
                     ),
-                  ),
-                  child: Text(
-                    _copy(
-                      language,
-                      en: 'PRIVATE EVIDENCE LOOP',
-                      es: 'CICLO DE EVIDENCIA PRIVADA',
-                      fr: 'BOUCLE D’INDICES PRIVÉE',
-                      pt: 'CICLO DE EVIDÊNCIA PRIVADA',
-                      tr: 'ÖZEL KANIT DÖNGÜSÜ',
+                    decoration: BoxDecoration(
+                      color: MysticColors.gold.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: MysticColors.gold.withValues(alpha: .2),
+                      ),
                     ),
-                    style: const TextStyle(
-                      fontFamily: 'Arial',
-                      color: MysticColors.gold,
-                      fontSize: 8,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: .9,
+                    child: Text(
+                      _copy(
+                        language,
+                        en: 'PRIVATE EVIDENCE',
+                        es: 'EVIDENCIA PRIVADA',
+                        fr: 'INDICES PRIVÉS',
+                        pt: 'EVIDÊNCIA PRIVADA',
+                        tr: 'ÖZEL KANIT',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Arial',
+                        color: MysticColors.gold,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: .9,
+                      ),
                     ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 10),
                 const Icon(
                   Icons.lock_outline_rounded,
                   color: MysticColors.lavender,
