@@ -1,0 +1,14 @@
+--- a/tool/materialize_ad_only_ui.dart
++++ b/tool/materialize_ad_only_ui.dart
+@@ -221,9 +221,8 @@
+               onTap: () => Navigator.push(
+                 context,
+                 MaterialPageRoute(
+-                  builder: (_) => MysticGrowthEvidenceScreen(
+-                    language: language,
+-                  ),
++                  builder: (_) =>
++                      MysticGrowthEvidenceScreen(language: language),
+                 ),
+               ),
+               contentPadding: const EdgeInsets.symmetric(horizontal: 4),
