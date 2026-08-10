@@ -291,11 +291,11 @@ class AdRevenueService with WidgetsBindingObserver {
       ),
     );
     _showingFullScreenAd = true;
-    _lastAppOpenShownAt = DateTime.now();
-    _markFullScreenShown();
-    unawaited(_persistLastAppOpenShown());
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdImpression: (_) {
+        _lastAppOpenShownAt = DateTime.now();
+        _markFullScreenShown();
+        unawaited(_persistLastAppOpenShown());
         unawaited(
           MysticBusinessMetrics.record(
             MysticBusinessEvent.adImpression,
@@ -376,9 +376,9 @@ class AdRevenueService with WidgetsBindingObserver {
     }
 
     _showingFullScreenAd = true;
-    _markFullScreenShown();
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdImpression: (_) {
+        _markFullScreenShown();
         unawaited(
           MysticBusinessMetrics.record(
             MysticBusinessEvent.adImpression,
