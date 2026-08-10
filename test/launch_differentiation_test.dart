@@ -48,6 +48,7 @@ void main() {
         find.byKey(const ValueKey('private-by-design-card')),
         findsOneWidget,
       );
+      expect(find.text(_signature(language)), findsOneWidget);
       expect(find.text(_nowLabel(language)), findsOneWidget);
       expect(find.text(_tomorrowLabel(language)), findsOneWidget);
       expect(find.text(_evidenceLabel(language)), findsOneWidget);
@@ -55,6 +56,14 @@ void main() {
     });
   }
 }
+
+String _signature(MysticLanguage language) => switch (language) {
+  MysticLanguage.turkish => 'Bugün oku. Yarın gerçeği kontrol et.',
+  MysticLanguage.spanish => 'Lee hoy. Comprueba la realidad mañana.',
+  MysticLanguage.french => 'Lisez aujourd’hui. Vérifiez la réalité demain.',
+  MysticLanguage.portugueseBrazil => 'Leia hoje. Confira a realidade amanhã.',
+  _ => 'Read today. Check reality tomorrow.',
+};
 
 String _nowLabel(MysticLanguage language) => switch (language) {
   MysticLanguage.turkish => 'ŞİMDİ',
