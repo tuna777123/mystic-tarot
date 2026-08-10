@@ -61,6 +61,53 @@ Official reference:
 
 - `https://developer.apple.com/news/upcoming-requirements/`
 
+## Apple — privacy manifests and required-reason APIs
+
+Apple requires apps and relevant third-party SDKs that use required-reason APIs to describe approved reasons in valid `PrivacyInfo.xcprivacy` manifests. Commonly used SDKs on Apple's required list must also ship the required privacy manifest/signature evidence.
+
+Mystic's source intentionally does not invent an app-level privacy manifest to stand in for third-party SDK behavior. The final signed/archive candidate must instead be inspected with the exact resolved Pods/frameworks and Xcode privacy report before App Store submission.
+
+At submission time:
+
+- verify every bundled privacy manifest is valid;
+- retain the Xcode privacy report from the exact candidate;
+- make sure required-reason API entries are present where the final executable/frameworks require them;
+- use that evidence when completing Apple App Privacy.
+
+Official references:
+
+- `https://developer.apple.com/documentation/bundleresources/privacy-manifest-files`
+- `https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api`
+- `https://developer.apple.com/support/third-party-SDK-requirements/`
+
+## Apple — encryption export compliance
+
+Mystic includes the Dart `cryptography` package for product security features. Apple requires the app owner to determine export-compliance treatment whenever an app uses, accesses, contains, implements or incorporates encryption.
+
+Do **not** guess the value of `ITSAppUsesNonExemptEncryption` in source. Complete Apple's current App Store Connect export-compliance determination for the exact product/distribution countries first. Then:
+
+- if Apple determines no export documentation is required, set the Info.plist declaration that matches that determination so the same questionnaire does not repeat on every upload;
+- if documentation is required, submit it through App Store Connect and use Apple's resulting compliance code/declaration as instructed;
+- retain the determination with the exact signed candidate's release evidence.
+
+Official references:
+
+- `https://developer.apple.com/help/app-store-connect/manage-app-information/overview-of-export-compliance/`
+- `https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations`
+- `https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption`
+
+## AdMob — iOS Info.plist and SKAdNetwork
+
+Google's current iOS AdMob quick-start requires both the production `GADApplicationIdentifier` and `SKAdNetworkItems` entries in `Info.plist`.
+
+Mystic's release materializer keeps a dated allowlist reviewed against Google's official **2026-07-22** snippet. It currently materializes **50 unique SKAdNetwork identifiers**, including Google's `cstr6suwn9.skadnetwork`, on every generated iOS shell. Regression tests require the list to stay unique, syntactically valid, complete within the reviewed snapshot and idempotent when materialized repeatedly.
+
+Because Google can change buyer identifiers independently of this repository, re-open the official quick-start immediately before producing a new store candidate and update the dated list if the official snippet has changed.
+
+Official reference:
+
+- `https://developers.google.com/admob/ios/quick-start`
+
 ## AdMob — app ownership and app readiness
 
 Google currently requires new AdMob apps to verify app ownership with `app-ads.txt`. Apps cannot fully serve ads until app ownership is verified and the app passes AdMob app-readiness review.
@@ -111,6 +158,10 @@ A green repository build is necessary but not sufficient. Before store submissio
 - exact Xcode version;
 - exact iOS SDK version;
 - exact Google Mobile Ads / UMP versions;
+- production iOS `GADApplicationIdentifier` evidence;
+- current SKAdNetwork list evidence from the exact signed/archive candidate;
+- final Xcode privacy report / bundled privacy-manifest evidence;
+- Apple export-compliance determination and any required declaration/code;
 - signed AAB/IPA checksums;
 - signing certificate fingerprints;
 - UMP/ad/no-ad/error real-device evidence;

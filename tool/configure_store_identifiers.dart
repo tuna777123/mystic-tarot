@@ -8,6 +8,63 @@ const permanentIdentifier = 'com.tunabozcali.mystictarot';
 const androidAdMobTestAppId = 'ca-app-pub-3940256099942544~3347511713';
 const iosAdMobTestAppId = 'ca-app-pub-3940256099942544~1458002511';
 
+/// Reviewed against Google's official iOS AdMob quick-start snippet on
+/// 2026-07-22. Keep this list synchronized with the dated release contract
+/// before producing a new store candidate.
+const iosSkAdNetworkSourceReviewedOn = '2026-07-22';
+const iosSkAdNetworkIdentifiers = <String>[
+  'cstr6suwn9.skadnetwork',
+  '4fzdc2evr5.skadnetwork',
+  '2fnua5tdw4.skadnetwork',
+  'ydx93a7ass.skadnetwork',
+  'p78axxw29g.skadnetwork',
+  'v72qych5uu.skadnetwork',
+  'ludvb6z3bs.skadnetwork',
+  'cp8zw746q7.skadnetwork',
+  '3sh42y64q3.skadnetwork',
+  'c6k4g5qg8m.skadnetwork',
+  's39g8k73mm.skadnetwork',
+  'wg4vff78zm.skadnetwork',
+  '3qy4746246.skadnetwork',
+  'f38h382jlk.skadnetwork',
+  'hs6bdukanm.skadnetwork',
+  'mlmmfzh3r3.skadnetwork',
+  'v4nxqhlyqp.skadnetwork',
+  'wzmmz9fp6w.skadnetwork',
+  'su67r6k2v3.skadnetwork',
+  'yclnxrl5pm.skadnetwork',
+  't38b2kh725.skadnetwork',
+  '7ug5zh24hu.skadnetwork',
+  'gta9lk7p23.skadnetwork',
+  'vutu7akeur.skadnetwork',
+  'y5ghdn5j9k.skadnetwork',
+  'v9wttpbfk9.skadnetwork',
+  'n38lu8286q.skadnetwork',
+  '47vhws6wlr.skadnetwork',
+  'kbd757ywx3.skadnetwork',
+  '9t245vhmpl.skadnetwork',
+  'a2p9lx4jpn.skadnetwork',
+  '22mmun2rn5.skadnetwork',
+  '44jx6755aq.skadnetwork',
+  'k674qkevps.skadnetwork',
+  '4468km3ulz.skadnetwork',
+  '2u9pt9hc89.skadnetwork',
+  '8s468mfl3y.skadnetwork',
+  'klf5c3l5u5.skadnetwork',
+  'ppxm28t8ap.skadnetwork',
+  'kbmxgpxpgc.skadnetwork',
+  'uw77j35x4d.skadnetwork',
+  '578prtvx9j.skadnetwork',
+  '4dzt52r2t5.skadnetwork',
+  'tl55sbb4fm.skadnetwork',
+  'c3frkrj4fj.skadnetwork',
+  'e5fvkxwrpn.skadnetwork',
+  '8c4e2ghe7u.skadnetwork',
+  '3rd42ekr43.skadnetwork',
+  '97r2b46745.skadnetwork',
+  '3qcr597p9d.skadnetwork',
+];
+
 const generatedIdentifiers = <String>[
   'com.tunabozcali.mystic_tarot',
   'com.tunabozcali.mysticTarot',
@@ -130,6 +187,29 @@ void _configureAndroidAdMob(String appId) {
   }
 }
 
+String materializeIosAdMobPlist(String original, String appId) {
+  final appIdPattern = RegExp(
+    r'<key>GADApplicationIdentifier</key>\s*<string>[^<]+</string>',
+    multiLine: true,
+  );
+  final appIdEntry = '''<key>GADApplicationIdentifier</key>
+\t<string>$appId</string>''';
+  var updated = appIdPattern.hasMatch(original)
+      ? original.replaceFirst(appIdPattern, appIdEntry)
+      : _insertBeforeRootDictionaryClose(original, appIdEntry);
+
+  final skAdNetworkPattern = RegExp(
+    r'<key>SKAdNetworkItems</key>\s*<array>.*?</array>',
+    multiLine: true,
+    dotAll: true,
+  );
+  final skAdNetworkEntry = _iosSkAdNetworkPlistEntry();
+  updated = skAdNetworkPattern.hasMatch(updated)
+      ? updated.replaceFirst(skAdNetworkPattern, skAdNetworkEntry)
+      : _insertBeforeRootDictionaryClose(updated, skAdNetworkEntry);
+  return updated;
+}
+
 void _configureIosAdMob(String appId) {
   final plist = File('ios/Runner/Info.plist');
   if (!plist.existsSync()) {
@@ -138,20 +218,56 @@ void _configureIosAdMob(String appId) {
     return;
   }
   final original = plist.readAsStringSync();
-  final pattern = RegExp(
-    r'<key>GADApplicationIdentifier</key>\s*<string>[^<]+</string>',
-    multiLine: true,
-  );
-  final entry = '''<key>GADApplicationIdentifier</key>
-	<string>$appId</string>''';
-  final updated = pattern.hasMatch(original)
-      ? original.replaceFirst(pattern, entry)
-      : original.replaceFirst('</dict>', '\t$entry\n</dict>');
+  late final String updated;
+  try {
+    updated = materializeIosAdMobPlist(original, appId);
+  } on StateError catch (error) {
+    stderr.writeln('iOS AdMob configuration failed: $error');
+    exitCode = 1;
+    return;
+  }
   plist.writeAsStringSync(updated);
+
   if (!updated.contains('<string>$appId</string>')) {
     stderr.writeln('iOS AdMob application ID was not configured.');
     exitCode = 1;
   }
+  final invalidSkAdNetworkIds = <String>[
+    for (final identifier in iosSkAdNetworkIdentifiers)
+      if (RegExp(RegExp.escape(identifier)).allMatches(updated).length != 1)
+        identifier,
+  ];
+  if (invalidSkAdNetworkIds.isNotEmpty) {
+    stderr.writeln(
+      'iOS SKAdNetwork materialization is incomplete or duplicated: '
+      '${invalidSkAdNetworkIds.join(', ')}',
+    );
+    exitCode = 1;
+  }
+}
+
+String _iosSkAdNetworkPlistEntry() {
+  final items = iosSkAdNetworkIdentifiers
+      .map(
+        (identifier) =>
+            '''\t\t<dict>
+\t\t\t<key>SKAdNetworkIdentifier</key>
+\t\t\t<string>$identifier</string>
+\t\t</dict>''',
+      )
+      .join('\n');
+  return '''<key>SKAdNetworkItems</key>
+\t<array>
+$items
+\t</array>''';
+}
+
+String _insertBeforeRootDictionaryClose(String source, String entry) {
+  final insertionPoint = source.lastIndexOf('</dict>');
+  if (insertionPoint < 0) {
+    throw StateError('Info.plist has no root dictionary closing tag.');
+  }
+  return source.replaceRange(insertionPoint, insertionPoint, '\t$entry\n');
 }
 
 bool _isTextBuildFile(String path) {
