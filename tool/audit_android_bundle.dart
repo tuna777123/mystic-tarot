@@ -63,6 +63,17 @@ Future<String> _audit(_AuditOptions options) async {
     '--bundle=${bundle.path}',
   ]);
 
+  final configResult = await _runChecked('java', [
+    '-jar',
+    options.bundletoolFile.path,
+    'dump',
+    'config',
+    '--bundle=${bundle.path}',
+  ]);
+  final pageAlignment = validateGooglePlayPageAlignment(
+    configResult.stdout as String,
+  );
+
   final manifestResult = await _runChecked('java', [
     '-jar',
     options.bundletoolFile.path,
@@ -127,6 +138,8 @@ Future<String> _audit(_AuditOptions options) async {
     throw const AuditFailure('Legacy 32-bit x86 ABI must not ship.');
   }
 
+  final elfLibrariesChecked = await _audit64BitElfAlignment(bundle, entries);
+
   final dexEntries = entries
       .where((entry) => RegExp(r'^base/dex/.*\.dex$').hasMatch(entry))
       .toList(growable: false);
@@ -169,6 +182,8 @@ Future<String> _audit(_AuditOptions options) async {
 - Android min SDK: `${manifest.minSdkVersion}`
 - Android target SDK: `${manifest.targetSdkVersion}`
 - Google Play target-SDK gate: `API ${manifest.targetSdkVersion} >= API $minimumGooglePlayTargetSdk`
+- Google Play 16 KB bundle alignment: `$pageAlignment`
+- Google Play 16 KB ELF LOAD alignment: `$elfLibrariesChecked 64-bit shared libraries >= $minimumGooglePlayElfLoadAlignmentBytes bytes`
 - Bundle size: `${formatByteCount(bundleBytes)}`
 - SHA-256: `$sha256`
 - Signature container: `strict jarsigner policy passed`
@@ -181,11 +196,62 @@ Future<String> _audit(_AuditOptions options) async {
 
 This automated audit verifies the release artifact itself. Google Mobile Ads is an
 intentional reviewed dependency in the advertising-supported native build. The
-audit also rejects a target SDK below the current Mystic Google Play submission
-floor. It does not replace Play pre-launch testing, AdMob/UMP account
-configuration, production signing ownership, store privacy declarations, or
-real-device network and consent inspection.
+audit rejects a target SDK below the current Mystic Google Play submission
+floor, requires the AAB BundleConfig to request 16 KB native-library zip
+alignment, and verifies every packaged arm64-v8a/x86_64 shared library has ELF
+LOAD alignment of at least 16 KB. It does not replace Play pre-launch testing,
+App Bundle Explorer or real 16 KB device/emulator verification, AdMob/UMP
+account configuration, production signing ownership, store privacy
+declarations, or real-device network and consent inspection.
 ''';
+}
+
+Future<int> _audit64BitElfAlignment(File bundle, List<String> entries) async {
+  final nativeEntries =
+      entries
+          .where(
+            (entry) => RegExp(
+              r'^base/lib/(?:arm64-v8a|x86_64)/[^/]+\.so$',
+            ).hasMatch(entry),
+          )
+          .toList(growable: false)
+        ..sort();
+  if (nativeEntries.isEmpty) {
+    throw const AuditFailure(
+      'Bundle contains no 64-bit shared libraries to audit for 16 KB ELF '
+      'alignment.',
+    );
+  }
+
+  final tempDirectory = await Directory.systemTemp.createTemp(
+    'mystic-elf-audit-',
+  );
+  try {
+    for (var index = 0; index < nativeEntries.length; index++) {
+      final entry = nativeEntries[index];
+      final extractResult = await _runChecked('unzip', [
+        '-p',
+        bundle.path,
+        entry,
+      ], binaryStdout: true);
+      final bytes = extractResult.stdout;
+      if (bytes is! List<int> || bytes.isEmpty) {
+        throw AuditFailure('Could not extract native library $entry.');
+      }
+      final library = File('${tempDirectory.path}/library-$index.so');
+      await library.writeAsBytes(bytes, flush: true);
+      final readelfResult = await _runChecked('readelf', ['-lW', library.path]);
+      validateGooglePlayElfLoadAlignment(
+        readelfResult.stdout as String,
+        label: entry,
+      );
+    }
+  } finally {
+    if (tempDirectory.existsSync()) {
+      await tempDirectory.delete(recursive: true);
+    }
+  }
+  return nativeEntries.length;
 }
 
 Future<ProcessResult> _runChecked(

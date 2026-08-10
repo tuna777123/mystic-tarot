@@ -1,6 +1,6 @@
 # Mystic Tarot — 2026 Store Technical Requirements
 
-Status date: **2026-08-09**  
+Status date: **2026-08-11**  
 Release target: `1.23.0+33`  
 Application / bundle ID: `com.tunabozcali.mystictarot`
 
@@ -18,6 +18,21 @@ Official references:
 
 - `https://developer.android.com/google/play/requirements/target-sdk`
 - `https://support.google.com/googleplay/android-developer/answer/11926878`
+
+## Google Play — 16 KB memory pages
+
+Google Play requires new apps and updates that target Android 15 / API level 35 or higher and target 64-bit devices to support **16 KB memory page sizes**. Google's current Android guidance states that this Google Play compatibility requirement has applied since **November 1, 2025**.
+
+Mystic's Android AAB audit verifies both artifact-level requirements that can be proven from the built bundle:
+
+1. Pinned `bundletool dump config` must report `PAGE_ALIGNMENT_16K`. Legacy `PAGE_ALIGNMENT_4K`, missing alignment evidence, or ambiguous mixed alignment fails closed.
+2. Every packaged `arm64-v8a` and `x86_64` shared library is extracted from the AAB and inspected with `readelf -lW`; every ELF `LOAD` program-header alignment must be at least **16,384 bytes** (`2**14`).
+
+These automated checks prove the AAB requests 16 KB native-library zip alignment and that its packaged 64-bit ELF load segments meet the minimum alignment. They do **not** replace validation of the exact signed store candidate in Google Play App Bundle Explorer or runtime testing on a 16 KB Android device/emulator. Keep both of those checks in final production QA.
+
+Official reference:
+
+- `https://developer.android.com/guide/practices/page-sizes`
 
 ## Google Play — new personal developer account testing
 
@@ -89,6 +104,10 @@ A green repository build is necessary but not sufficient. Before store submissio
 
 - exact Flutter version;
 - exact Android target SDK from the audited AAB;
+- `PAGE_ALIGNMENT_16K` evidence from the exact AAB;
+- automated arm64-v8a/x86_64 ELF `LOAD >= 16,384` audit evidence;
+- Play App Bundle Explorer 16 KB compatibility result for the signed candidate;
+- 16 KB Android device/emulator smoke-test evidence;
 - exact Xcode version;
 - exact iOS SDK version;
 - exact Google Mobile Ads / UMP versions;
