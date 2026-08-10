@@ -98,9 +98,7 @@ class LaunchContinuityTimeline extends StatelessWidget {
             colors: [Color(0xFF24183E), Color(0xFF120F1D)],
           ),
           borderRadius: BorderRadius.circular(compact ? 18 : 22),
-          border: Border.all(
-            color: MysticColors.gold.withValues(alpha: .24),
-          ),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .24)),
           boxShadow: [
             BoxShadow(
               color: MysticColors.violet.withValues(alpha: .12),
@@ -334,9 +332,7 @@ class _TimelineStepRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: MysticColors.gold.withValues(alpha: .1),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: MysticColors.gold.withValues(alpha: .22),
-          ),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .22)),
         ),
         child: Icon(
           step.icon,
