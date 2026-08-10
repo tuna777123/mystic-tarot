@@ -104,6 +104,13 @@ class ManifestSnapshot {
 /// cannot become store-ineligible days later.
 const minimumGooglePlayTargetSdk = 36;
 
+/// Google Play requires apps targeting Android 15 / API 35 and higher to
+/// support 16 KB memory pages on 64-bit devices. Bundletool exposes the
+/// requested native-library zip alignment in BundleConfig.pb. Mystic requires
+/// the modern 16 KB value so a green AAB audit cannot silently package native
+/// libraries with the legacy 4 KB bundle alignment.
+const requiredGooglePlayPageAlignment = 'PAGE_ALIGNMENT_16K';
+
 void validateGooglePlayTargetSdk(
   int targetSdkVersion, {
   int minimumTargetSdk = minimumGooglePlayTargetSdk,
@@ -114,6 +121,22 @@ void validateGooglePlayTargetSdk(
       'minimum of API $minimumTargetSdk.',
     );
   }
+}
+
+String validateGooglePlayPageAlignment(String bundleConfig) {
+  final has16Kb = RegExp(
+    r'\bPAGE_ALIGNMENT_16K\b',
+  ).hasMatch(bundleConfig);
+  final hasLegacy4Kb = RegExp(
+    r'\bPAGE_ALIGNMENT_4K\b',
+  ).hasMatch(bundleConfig);
+  if (!has16Kb || hasLegacy4Kb) {
+    throw const AuditFailure(
+      'Android App Bundle must request PAGE_ALIGNMENT_16K for Google Play '
+      '16 KB memory-page compatibility.',
+    );
+  }
+  return requiredGooglePlayPageAlignment;
 }
 
 const requiredAndroidAbis = <String>{'arm64-v8a', 'armeabi-v7a', 'x86_64'};
