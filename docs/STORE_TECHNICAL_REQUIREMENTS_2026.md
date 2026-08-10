@@ -21,7 +21,7 @@ Official references:
 
 ## Google Play — 16 KB memory pages
 
-Google Play requires apps that target Android 15 / API level 35 or higher and ship native code to support **16 KB memory page sizes** on 64-bit devices. Google's current guidance states that starting **February 1, 2027**, updates that do not support 16 KB page sizes cannot be released through Google Play.
+Google Play requires new apps and updates that target Android 15 / API level 35 or higher and target 64-bit devices to support **16 KB memory page sizes**. Google's current Android guidance states that this Google Play compatibility requirement has applied since **November 1, 2025**.
 
 Mystic's Android AAB audit therefore inspects the built artifact with pinned `bundletool dump config` and fails unless the bundle requests:
 
