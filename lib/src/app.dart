@@ -3944,7 +3944,8 @@ class _ReadingFlowState extends State<ReadingFlow> {
             turkish: 'Umut veren bir ihtimal dikkatini hak ediyor.',
             spanish: 'Una posibilidad esperanzadora merece tu atención.',
             french: 'Une possibilité porteuse d’espoir mérite votre attention.',
-            portugueseBrazil: 'Uma possibilidade esperançosa merece sua atenção.',
+            portugueseBrazil:
+                'Uma possibilidade esperançosa merece sua atenção.',
           )
         : localized(
             widget.language.appLanguage,
@@ -4351,7 +4352,9 @@ class _RevealRitualState extends State<_RevealRitual>
       AnimatedBuilder(
         animation: pulse,
         builder: (context, _) {
-          final value = reduceMotion ? .5 : Curves.easeInOut.transform(pulse.value);
+          final value = reduceMotion
+              ? .5
+              : Curves.easeInOut.transform(pulse.value);
           return Center(
             child: SizedBox(
               width: 210,
@@ -5561,29 +5564,29 @@ class _RitualRevealCardState extends State<_RitualRevealCard> {
       duration: reduceMotion
           ? Duration.zero
           : const Duration(milliseconds: 720),
-    curve: Curves.easeInOutCubic,
-    builder: (context, value, _) {
-      final showFace = value > .5;
-      final angle = value * pi;
-      return Transform(
-        alignment: Alignment.center,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, .0014)
-          ..rotateY(angle),
-        child: Transform.flip(
-          flipX: showFace,
-          child: TarotCardFace(
-            drawn: showFace ? widget.card : null,
-            displayName: localizedTarotCardName(
-              widget.card.card.name,
-              languageCode: widget.language.code,
+      curve: Curves.easeInOutCubic,
+      builder: (context, value, _) {
+        final showFace = value > .5;
+        final angle = value * pi;
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, .0014)
+            ..rotateY(angle),
+          child: Transform.flip(
+            flipX: showFace,
+            child: TarotCardFace(
+              drawn: showFace ? widget.card : null,
+              displayName: localizedTarotCardName(
+                widget.card.card.name,
+                languageCode: widget.language.code,
+              ),
+              reversedLabel: mysticText(widget.language, 'Reversed', 'Ters'),
+              style: widget.deckStyle,
             ),
-            reversedLabel: mysticText(widget.language, 'Reversed', 'Ters'),
-            style: widget.deckStyle,
           ),
-        ),
-      );
-    },
+        );
+      },
     );
   }
 }

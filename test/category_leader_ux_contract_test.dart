@@ -70,10 +70,7 @@ void main() {
       expect(journal, contains('mysticMirrorShareText(widget.language)'));
       expect(journal, contains('Your Pattern Lab grows with evidence'));
       expect(journal, contains("YESTERDAY'S SIGNAL"));
-      expect(
-        journal,
-        contains('Record reality, not whether tarot was right.'),
-      );
+      expect(journal, contains('Record reality, not whether tarot was right.'));
       final explanation = File(
         'lib/src/reading_explanation.dart',
       ).readAsStringSync();
