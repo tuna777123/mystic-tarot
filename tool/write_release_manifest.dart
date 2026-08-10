@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'configure_store_identifiers.dart' as store_identifiers;
+import 'src/ios_admob_plist_audit.dart';
+import 'src/ios_artifact_admob.dart';
 import 'src/ios_artifact_certificate.dart';
 import 'src/store_release_contract.dart';
 
@@ -25,6 +28,7 @@ Future<void> main(List<String> arguments) async {
     }
 
     String? signingCertificateSha256;
+    IosAdMobPlistAuditResult? iosAdMobAudit;
     if (platform == StoreReleasePlatform.ios) {
       final reviewedFingerprint =
           Platform.environment['IOS_DISTRIBUTION_CERT_SHA256'] ?? '';
@@ -37,6 +41,22 @@ Future<void> main(List<String> arguments) async {
         ipaFile: artifact,
         expectedFingerprint: reviewedFingerprint,
       );
+
+      final productionAdMobAppId =
+          Platform.environment['ADMOB_IOS_APP_ID']?.trim() ?? '';
+      if (productionAdMobAppId.isEmpty) {
+        throw const FormatException(
+          'ADMOB_IOS_APP_ID is required to verify the final IPA.',
+        );
+      }
+      try {
+        iosAdMobAudit = await verifyIosArtifactAdMobConfiguration(
+          ipaFile: artifact,
+          expectedAppId: productionAdMobAppId,
+        );
+      } on IosAdMobPlistAuditFailure catch (error) {
+        throw FormatException(error.message);
+      }
     }
 
     final pubspec = File('pubspec.yaml');
@@ -60,6 +80,12 @@ Future<void> main(List<String> arguments) async {
       'artifactSha256': checksum,
       if (signingCertificateSha256 != null)
         'signingCertificateSha256': signingCertificateSha256,
+      if (iosAdMobAudit != null) ...<String, Object?>{
+        'productionAdMobAppIdVerified': true,
+        'skAdNetworkCatalogReviewedOn':
+            store_identifiers.iosSkAdNetworkSourceReviewedOn,
+        'skAdNetworkCount': iosAdMobAudit.skAdNetworkCount,
+      },
       'signed': true,
       'gitSha': Platform.environment['GITHUB_SHA'],
       'sourceRef': Platform.environment['GITHUB_REF_NAME'],
