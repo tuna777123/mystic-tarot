@@ -1,6 +1,6 @@
 # Mystic Tarot — 2026 Store Technical Requirements
 
-Status date: **2026-08-09**  
+Status date: **2026-08-11**  
 Release target: `1.23.0+33`  
 Application / bundle ID: `com.tunabozcali.mystictarot`
 
@@ -18,6 +18,22 @@ Official references:
 
 - `https://developer.android.com/google/play/requirements/target-sdk`
 - `https://support.google.com/googleplay/android-developer/answer/11926878`
+
+## Google Play — 16 KB memory pages
+
+Google Play requires apps that target Android 15 / API level 35 or higher and ship native code to support **16 KB memory page sizes** on 64-bit devices. Google's current guidance states that starting **February 1, 2027**, updates that do not support 16 KB page sizes cannot be released through Google Play.
+
+Mystic's Android AAB audit therefore inspects the built artifact with pinned `bundletool dump config` and fails unless the bundle requests:
+
+`PAGE_ALIGNMENT_16K`
+
+Legacy `PAGE_ALIGNMENT_4K`, missing alignment evidence, or ambiguous mixed alignment fails closed.
+
+This artifact gate verifies the AAB's native-library zip-alignment request. It does **not** replace validation of the exact signed store candidate in Google Play App Bundle Explorer or runtime testing on a 16 KB Android device/emulator. Keep both of those checks in final production QA.
+
+Official reference:
+
+- `https://developer.android.com/guide/practices/page-sizes`
 
 ## Google Play — new personal developer account testing
 
@@ -89,6 +105,9 @@ A green repository build is necessary but not sufficient. Before store submissio
 
 - exact Flutter version;
 - exact Android target SDK from the audited AAB;
+- `PAGE_ALIGNMENT_16K` evidence from the exact AAB;
+- Play App Bundle Explorer 16 KB compatibility result for the signed candidate;
+- 16 KB Android device/emulator smoke-test evidence;
 - exact Xcode version;
 - exact iOS SDK version;
 - exact Google Mobile Ads / UMP versions;
