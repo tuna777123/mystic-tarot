@@ -14,7 +14,7 @@ void main() {
     expect(launch, contains('Mystic Mirror asks what actually happened'));
     expect(launch, contains('PRIVATE EVIDENCE'));
     expect(app, contains('Reveal my first card'));
-    expect(app, contains('Pattern memory'));
+    expect(app, contains('PATTERN MEMORY'));
     expect(app, contains('PRIVATE JOURNAL'));
 
     final finishOnboarding = app.indexOf('Future<void> _finishOnboarding(');
