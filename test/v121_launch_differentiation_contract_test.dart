@@ -28,10 +28,7 @@ void main() {
     expect(app, contains('LaunchContinuityTimeline('));
     expect(app, contains('buildReadingSynthesis('));
     expect(continuity, contains('Read today. Check reality tomorrow.'));
-    expect(
-      continuity,
-      contains('ONE READING BECOMES A CONTINUING STORY.'),
-    );
+    expect(continuity, contains('ONE READING BECOMES A CONTINUING STORY.'));
     expect(continuity, contains('PRIVATE EVIDENCE'));
     expect(continuity, contains('Private by design'));
     expect(
