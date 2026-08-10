@@ -23,17 +23,11 @@ void main() {
 
   test('app-open remains for experienced returning users only', () {
     expect(
-      AdExperiencePolicy.appOpenEligible(
-        now: now,
-        completedReadings: 2,
-      ),
+      AdExperiencePolicy.appOpenEligible(now: now, completedReadings: 2),
       isFalse,
     );
     expect(
-      AdExperiencePolicy.appOpenEligible(
-        now: now,
-        completedReadings: 3,
-      ),
+      AdExperiencePolicy.appOpenEligible(now: now, completedReadings: 3),
       isTrue,
     );
   });
