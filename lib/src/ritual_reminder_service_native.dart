@@ -33,7 +33,7 @@ class RitualReminderService {
         requestSoundPermission: false,
       );
       await _plugin.initialize(
-        const InitializationSettings(android: android, iOS: ios),
+        settings: const InitializationSettings(android: android, iOS: ios),
       );
       _initialized = true;
     } catch (_) {
@@ -49,7 +49,8 @@ class RitualReminderService {
       if (Platform.isAndroid) {
         final granted = await _plugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin
+            >()
             ?.requestNotificationsPermission();
         return granted == true
             ? RitualReminderPermissionResult.granted
@@ -57,7 +58,8 @@ class RitualReminderService {
       }
       final granted = await _plugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: false, sound: true);
       return granted == true
           ? RitualReminderPermissionResult.granted
@@ -77,13 +79,13 @@ class RitualReminderService {
     final copy = RitualReminderCopy.forLanguage(language);
     final scheduled = _nextOccurrence(settings.hour, settings.minute);
     try {
-      await _plugin.cancel(ritualReminderNotificationId);
+      await _plugin.cancel(id: ritualReminderNotificationId);
       await _plugin.zonedSchedule(
-        ritualReminderNotificationId,
-        copy.title,
-        copy.body,
-        scheduled,
-        NotificationDetails(
+        id: ritualReminderNotificationId,
+        title: copy.title,
+        body: copy.body,
+        scheduledDate: scheduled,
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'mystic_daily_ritual',
             copy.channelName,
@@ -113,7 +115,7 @@ class RitualReminderService {
     await initialize();
     if (!_initialized) return;
     try {
-      await _plugin.cancel(ritualReminderNotificationId);
+      await _plugin.cancel(id: ritualReminderNotificationId);
     } catch (_) {
       // A disabled reminder must never block the rest of the app.
     }
