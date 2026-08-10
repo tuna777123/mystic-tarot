@@ -19,9 +19,6 @@ void main() {
     expect(source, contains("ValueKey('mirror-evidence-context')"));
     expect(source, contains("YESTERDAY'S SIGNAL"));
     expect(source, contains('ACTION YOU CHOSE'));
-    expect(
-      source,
-      contains('Record reality, not whether tarot was right.'),
-    );
+    expect(source, contains('Record reality, not whether tarot was right.'));
   });
 }
