@@ -19,7 +19,7 @@ class LaunchContinuityTimeline extends StatelessWidget {
   Widget build(BuildContext context) {
     final steps = <_ContinuityStep>[
       _ContinuityStep(
-        icon: Icons.bookmark_added_outlined,
+        icon: Icons.auto_awesome_rounded,
         label: _copy(
           language,
           en: 'NOW',
@@ -30,11 +30,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en: 'Your reading is saved privately on this device.',
-          es: 'Tu lectura se guarda de forma privada en este dispositivo.',
-          fr: 'Votre tirage est enregistré en privé sur cet appareil.',
-          pt: 'Sua leitura é salva de forma privada neste dispositivo.',
-          tr: 'Okuman bu cihazda özel olarak kaydedilir.',
+          en: 'Read, choose one aligned action, and keep the moment privately.',
+          es: 'Lee, elige una acción alineada y guarda el momento en privado.',
+          fr: 'Lisez, choisissez une action alignée et gardez ce moment en privé.',
+          pt: 'Leia, escolha uma ação alinhada e guarde o momento em privado.',
+          tr: 'Oku, tek bir uyumlu eylem seç ve bu anı özel olarak sakla.',
         ),
       ),
       _ContinuityStep(
@@ -49,11 +49,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en: 'Mystic Mirror asks what actually changed after 24 hours.',
-          es: 'Mystic Mirror pregunta qué cambió realmente después de 24 horas.',
-          fr: 'Mystic Mirror demande ce qui a réellement changé après 24 heures.',
-          pt: 'O Mystic Mirror pergunta o que realmente mudou após 24 horas.',
-          tr: 'Mystic Mirror 24 saat sonra gerçekte neyin değiştiğini sorar.',
+          en: 'Mystic Mirror asks what actually happened — not whether tarot was “right.”',
+          es: 'Mystic Mirror pregunta qué ocurrió de verdad, no si el tarot “acertó”.',
+          fr: 'Mystic Mirror demande ce qui s’est vraiment passé, pas si le tarot avait « raison ».',
+          pt: 'O Mystic Mirror pergunta o que realmente aconteceu — não se o tarô “acertou”.',
+          tr: 'Mystic Mirror tarotun “doğru çıkıp çıkmadığını” değil, gerçekte ne olduğunu sorar.',
         ),
       ),
       _ContinuityStep(
@@ -68,11 +68,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en: 'Mystic Intelligence reveals recurring cards, emotions, and choices.',
-          es: 'Mystic Intelligence revela cartas, emociones y decisiones recurrentes.',
-          fr: 'Mystic Intelligence révèle les cartes, émotions et choix récurrents.',
-          pt: 'O Mystic Intelligence revela cartas, emoções e escolhas recorrentes.',
-          tr: 'Mystic Intelligence tekrar eden kartları, duyguları ve seçimleri gösterir.',
+          en: 'Repeated check-ins reveal the cards, emotions, and choices that keep returning.',
+          es: 'Las revisiones repetidas revelan las cartas, emociones y decisiones que vuelven.',
+          fr: 'Les bilans répétés révèlent les cartes, émotions et choix qui reviennent.',
+          pt: 'Check-ins repetidos revelam as cartas, emoções e escolhas que continuam voltando.',
+          tr: 'Tekrarlanan kontroller geri dönen kartları, duyguları ve seçimleri görünür kılar.',
         ),
       ),
     ];
@@ -81,46 +81,117 @@ class LaunchContinuityTimeline extends StatelessWidget {
       container: true,
       label: _copy(
         language,
-        en: 'How Mystic becomes more useful over time',
-        es: 'Cómo Mystic se vuelve más útil con el tiempo',
-        fr: 'Comment Mystic devient plus utile avec le temps',
-        pt: 'Como o Mystic se torna mais útil com o tempo',
-        tr: 'Mystic zamanla nasıl daha faydalı hale gelir',
+        en: 'Read today. Check reality tomorrow. Build private evidence over time.',
+        es: 'Lee hoy. Comprueba la realidad mañana. Construye evidencia privada con el tiempo.',
+        fr: 'Lisez aujourd’hui. Vérifiez la réalité demain. Construisez des indices privés dans le temps.',
+        pt: 'Leia hoje. Confira a realidade amanhã. Construa evidências privadas ao longo do tempo.',
+        tr: 'Bugün oku. Yarın gerçeği kontrol et. Zamanla özel kanıtını oluştur.',
       ),
       child: Container(
         key: const ValueKey('launch-continuity-timeline'),
         width: double.infinity,
-        padding: EdgeInsets.all(compact ? 13 : 17),
+        padding: EdgeInsets.all(compact ? 14 : 18),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .035),
-          borderRadius: BorderRadius.circular(compact ? 16 : 20),
-          border: Border.all(
-            color: MysticColors.lavender.withValues(alpha: .18),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF24183E), Color(0xFF120F1D)],
           ),
+          borderRadius: BorderRadius.circular(compact ? 18 : 22),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .24)),
+          boxShadow: [
+            BoxShadow(
+              color: MysticColors.violet.withValues(alpha: .12),
+              blurRadius: compact ? 18 : 26,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: MysticColors.gold.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: MysticColors.gold.withValues(alpha: .2),
+                      ),
+                    ),
+                    child: Text(
+                      _copy(
+                        language,
+                        en: 'PRIVATE EVIDENCE',
+                        es: 'EVIDENCIA PRIVADA',
+                        fr: 'INDICES PRIVÉS',
+                        pt: 'EVIDÊNCIA PRIVADA',
+                        tr: 'ÖZEL KANIT',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Arial',
+                        color: MysticColors.gold,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: .9,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  color: MysticColors.lavender,
+                  size: 16,
+                ),
+              ],
+            ),
+            SizedBox(height: compact ? 9 : 11),
+            Text(
+              _copy(
+                language,
+                en: 'Read today. Check reality tomorrow.',
+                es: 'Lee hoy. Comprueba la realidad mañana.',
+                fr: 'Lisez aujourd’hui. Vérifiez la réalité demain.',
+                pt: 'Leia hoje. Confira a realidade amanhã.',
+                tr: 'Bugün oku. Yarın gerçeği kontrol et.',
+              ),
+              style: TextStyle(
+                color: MysticColors.mist,
+                fontSize: compact ? 15 : 18,
+                height: 1.12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             if (showTitle) ...[
+              const SizedBox(height: 5),
               Text(
                 _copy(
                   language,
-                  en: 'ONE READING. A CONTINUING STORY.',
-                  es: 'UNA LECTURA. UNA HISTORIA QUE CONTINÚA.',
-                  fr: 'UN TIRAGE. UNE HISTOIRE QUI CONTINUE.',
-                  pt: 'UMA LEITURA. UMA HISTÓRIA QUE CONTINUA.',
-                  tr: 'TEK OKUMA. DEVAM EDEN BİR HİKÂYE.',
+                  en: 'ONE READING BECOMES A CONTINUING STORY.',
+                  es: 'UNA LECTURA SE CONVIERTE EN UNA HISTORIA CONTINUA.',
+                  fr: 'UN TIRAGE DEVIENT UNE HISTOIRE QUI CONTINUE.',
+                  pt: 'UMA LEITURA VIRA UMA HISTÓRIA CONTÍNUA.',
+                  tr: 'TEK OKUMA DEVAM EDEN BİR HİKÂYEYE DÖNÜŞÜR.',
                 ),
                 style: const TextStyle(
                   fontFamily: 'Arial',
-                  color: MysticColors.gold,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.05,
+                  color: MysticColors.lavender,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: .75,
                 ),
               ),
-              const SizedBox(height: 11),
             ],
+            SizedBox(height: compact ? 12 : 15),
             for (var index = 0; index < steps.length; index++) ...[
               _TimelineStepRow(step: steps[index], compact: compact),
               if (index != steps.length - 1)
@@ -129,7 +200,7 @@ class LaunchContinuityTimeline extends StatelessWidget {
                   child: Container(
                     width: 1,
                     height: compact ? 8 : 11,
-                    color: MysticColors.lavender.withValues(alpha: .24),
+                    color: MysticColors.gold.withValues(alpha: .2),
                   ),
                 ),
             ],
@@ -263,12 +334,13 @@ class _TimelineStepRow extends StatelessWidget {
         height: compact ? 27 : 31,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: MysticColors.violet.withValues(alpha: .22),
+          color: MysticColors.gold.withValues(alpha: .1),
           shape: BoxShape.circle,
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .22)),
         ),
         child: Icon(
           step.icon,
-          color: MysticColors.lavender,
+          color: MysticColors.gold,
           size: compact ? 15 : 17,
         ),
       ),
