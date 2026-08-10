@@ -110,6 +110,7 @@ const minimumGooglePlayTargetSdk = 36;
 /// the modern 16 KB value so a green AAB audit cannot silently package native
 /// libraries with the legacy 4 KB bundle alignment.
 const requiredGooglePlayPageAlignment = 'PAGE_ALIGNMENT_16K';
+const minimumGooglePlayElfLoadAlignmentBytes = 16 * 1024;
 
 void validateGooglePlayTargetSdk(
   int targetSdkVersion, {
@@ -137,6 +138,50 @@ String validateGooglePlayPageAlignment(String bundleConfig) {
     );
   }
   return requiredGooglePlayPageAlignment;
+}
+
+List<int> parseElfLoadAlignments(String readelfOutput) {
+  final alignments = <int>[];
+  for (final line in const LineSplitter().convert(readelfOutput)) {
+    final trimmed = line.trimLeft();
+    if (!RegExp(r'^LOAD\s').hasMatch(trimmed)) continue;
+    final columns = trimmed.split(RegExp(r'\s+'));
+    if (columns.length < 2) {
+      throw const AuditFailure('Could not parse ELF LOAD program header.');
+    }
+    final alignmentText = columns.last.toLowerCase();
+    final alignment = alignmentText.startsWith('0x')
+        ? int.tryParse(alignmentText.substring(2), radix: 16)
+        : int.tryParse(alignmentText);
+    if (alignment == null) {
+      throw AuditFailure(
+        'Could not parse ELF LOAD alignment value: $alignmentText.',
+      );
+    }
+    alignments.add(alignment);
+  }
+  if (alignments.isEmpty) {
+    throw const AuditFailure('ELF program headers contained no LOAD segments.');
+  }
+  return alignments;
+}
+
+void validateGooglePlayElfLoadAlignment(
+  String readelfOutput, {
+  required String label,
+}) {
+  final alignments = parseElfLoadAlignments(readelfOutput);
+  final invalid = alignments
+      .where((alignment) => alignment < minimumGooglePlayElfLoadAlignmentBytes)
+      .toList(growable: false);
+  if (invalid.isNotEmpty) {
+    final smallest = invalid.reduce((left, right) => left < right ? left : right);
+    throw AuditFailure(
+      '$label contains an ELF LOAD segment aligned to $smallest bytes; '
+      'Google Play 16 KB compatibility requires at least '
+      '$minimumGooglePlayElfLoadAlignmentBytes bytes.',
+    );
+  }
 }
 
 const requiredAndroidAbis = <String>{'arm64-v8a', 'armeabi-v7a', 'x86_64'};
