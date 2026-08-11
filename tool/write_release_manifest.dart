@@ -102,6 +102,10 @@ Future<void> main(List<String> arguments) async {
     };
 
     output.parent.createSync(recursive: true);
+    writeMobileAdsSdkEvidence(
+      mobileAdsSdkEvidence,
+      '${output.parent.path}/mobile-ads-sdk-evidence.json',
+    );
     output.writeAsStringSync(
       const JsonEncoder.withIndent('  ').convert(manifest),
     );
