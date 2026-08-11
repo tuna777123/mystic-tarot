@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - release/lock-production-dependencies
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -65,5 +68,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .github/workflows/flutter-ci.yml .github/workflows/ios-ci.yml .github/workflows/pages.yml .github/workflows/store-release.yml .github/workflows/store-screenshots.yml
+          if git diff --cached --quiet; then
+            echo "Workflow lockfile enforcement already applied."
+            exit 0
+          fi
           git commit -m "Enforce locked Flutter dependencies in release workflows"
           git push origin HEAD:release/lock-production-dependencies
