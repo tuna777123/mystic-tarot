@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - release/lock-production-dependencies
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
