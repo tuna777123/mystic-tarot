@@ -35,7 +35,7 @@ jobs:
         run: flutter create . --platforms=web
 
       - name: Install packages
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Check code
         run: flutter analyze

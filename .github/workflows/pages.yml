@@ -29,7 +29,7 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Configure GitHub Pages
         id: pages
@@ -227,7 +227,7 @@ jobs:
             description="Mystic Tarot Pages, press kit, and localized store URLs are live"
           else
             state="failure"
-            description="Mystic Tarot Pages, press kit, or localized URL verification failed"
+            description="Mystic Tarot Pages, press kit, or localized store URLs verification failed"
           fi
 
           args=(
