@@ -10,6 +10,12 @@ Use these files as the copy-ready store-listing source for release `1.23.0+33`:
 
 `STORE_RELEASE.md` remains the broader release/operator runbook. The locale files above are the canonical copy source for localized App Store Connect and Google Play listing fields.
 
+Before completing the store rating forms, also use:
+
+- Apple age-rating + Google Play IARC owner worksheet: `docs/CONTENT_RATING_OWNER_WORKSHEET.md`
+
+The worksheet intentionally does not preassign a rating. It separates source-proven answers from tarot-art / intended-audience decisions that must be confirmed against the exact signed candidate.
+
 ## Submission limits locked by CI
 
 Current official store limits reviewed on 2026-08-11:
@@ -44,4 +50,4 @@ Official reference:
 - Native Android/iOS advertising may be described accurately as Google Mobile Ads subject to applicable privacy choices.
 - Public web remains ad-free.
 - Do not invent prices, rankings, awards, download counts, ratings, or performance claims.
-- Revalidate the store limits above against official Apple/Google documentation immediately before submission if the release is delayed materially.
+- Revalidate the store limits and rating questionnaire against official Apple/Google documentation immediately before submission if the release is delayed materially.
