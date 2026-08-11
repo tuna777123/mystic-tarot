@@ -227,14 +227,14 @@ jobs:
             description="Mystic Tarot Pages, press kit, and localized store URLs are live"
           else
             state="failure"
-            description="Mystic Tarot Pages, press kit, or localized URL verification failed"
+            description="Mystic Tarot Pages, press kit, or localized store URLs verification failed"
           fi
 
           args=(
             --method POST
             "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
             -f "state=${state}"
-            -f "context=${context}"
+            -f "context=pages/deployment"
             -f "description=${description}"
           )
 
