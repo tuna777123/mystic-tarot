@@ -148,11 +148,11 @@ Current formats:
 
 ### App-open
 
-An app-open ad is preloaded but is eligible only after the user has completed at least three readings. It is considered only after the app has spent at least 30 seconds in the background, and there is a two-hour minimum interval between app-open impressions. Cached app-open ads expire after four hours. The app does not block cold-start bootstrap waiting for an ad.
+An app-open ad is preloaded but is eligible only after the user has completed at least five readings. It is considered only after a genuine returning foreground transition following at least one minute in the background, with a six-hour minimum interval between app-open impressions. A shared 45-minute cross-format full-screen gap also applies after any actual app-open or interstitial impression. Cached app-open ads expire after four hours. The app does not block cold-start bootstrap waiting for an ad.
 
 ### Interstitial
 
-An interstitial opportunity is created after every **third genuinely new saved reading**. The first two new readings remain uninterrupted. The cadence persists across process restarts. If an ad is not ready, the product continues rather than blocking the user.
+An interstitial opportunity is created only after every **fourth genuinely new saved reading**. The first three new readings remain uninterrupted. The shared 45-minute cross-format full-screen gap prevents stacked full-screen advertising. Cadence persists across process restarts. Cooldown begins only when the Mobile Ads SDK reports a real impression, so failed show attempts do not consume it. If an ad is not ready, the product continues rather than blocking the user.
 
 ### Intentionally not used
 
@@ -196,6 +196,8 @@ The repository is designed to fail closed rather than silently publish a broken 
 
 Key gates include:
 
+- committed root `pubspec.lock` and `--enforce-lockfile` dependency installation across release workflows;
+- regression detection for missing/ignored/mutated lockfiles and unlocked workflow dependency installs;
 - Dart formatting;
 - clean diff;
 - static analysis;
@@ -206,6 +208,8 @@ Key gates include:
 - Android strict JAR signature checks;
 - pinned `bundletool validate`;
 - package/version/ABI audit;
+- API 36 target-SDK floor;
+- 16 KB BundleConfig and 64-bit ELF LOAD alignment audit;
 - sensitive Android permission denylist;
 - reviewed Google advertising permission classification;
 - denylist for unapproved analytics/attribution SDKs;
@@ -312,21 +316,22 @@ Recommended sequence:
 4. Create Android + iOS app-open and interstitial units.
 5. Configure UMP Privacy & messaging.
 6. Put production AdMob IDs into protected release configuration.
-7. Produce signed internal candidates.
+7. Produce signed internal candidates from canonical `main` with the committed lockfile enforced.
 8. Test on one current Android phone and one current iPhone.
 9. Verify consent, no-consent, ad-load failure, offline/poor network and normal reading flows.
-10. Verify no checkout/restore/paywall remains in the user path.
-11. Complete App Privacy and Data Safety from actual evidence.
-12. Upload to TestFlight / Play closed testing.
-13. Fix pre-launch/store review findings.
-14. Publish native listings.
-15. Only after listing URLs are live, run install campaigns and use official store badges.
+10. Verify readings 1–3 remain uninterrupted, reading 4 is the first possible interstitial boundary, app-open stays blocked before five readings/<1 minute background, and the six-hour/45-minute full-screen cooldowns hold.
+11. Verify no checkout/restore/paywall remains in the user path.
+12. Complete App Privacy and Data Safety from actual evidence.
+13. Upload to TestFlight / Play closed testing.
+14. Fix pre-launch/store review findings.
+15. Publish native listings.
+16. Only after listing URLs are live, run install campaigns and use official store badges.
 
 ## Z — Zero ambiguity handoff
 
 When handing Mystic Tarot to another developer, agency, advertiser or operator, tell them:
 
-> Mystic Tarot `1.23.0+33` is a free, local-first, five-language Flutter tarot product. Its core differentiator is Mystic Mirror: a reading returns after 24 hours as a reality check and contributes to private pattern history. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Production revenue is not considered live until the owner configures real AdMob IDs, privacy messaging, signed store candidates and real-device QA.
+> Mystic Tarot `1.23.0+33` is a free, local-first, five-language Flutter tarot product. Its core differentiator is Mystic Mirror: a reading returns after 24 hours as a reality check and contributes to private pattern history. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. There is no paid subscription business model. Production dependencies are locked to the committed Flutter application lockfile. Production revenue is not considered live until the owner configures real AdMob IDs, privacy messaging, signed store candidates and real-device QA.
 
 ---
 
@@ -362,6 +367,7 @@ Important files:
 - UMP consent gate and conditional privacy-options entry point;
 - app-open + frequency-capped interstitial logic;
 - persisted advertising cadence;
+- committed/enforced Flutter application dependency lockfile;
 - test AdMob configuration for QA;
 - build/audit/CI infrastructure;
 - store and marketing handoffs.

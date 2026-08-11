@@ -47,13 +47,15 @@ Native Android/iOS builds use:
 
 - Google Mobile Ads;
 - Google User Messaging Platform for applicable consent/privacy choices;
-- app-open ads only on eligible returning foreground transitions, never as a deliberate first-start blocker;
-- at least two hours between app-open ad opportunities;
-- an interstitial opportunity after every third genuinely new saved reading;
+- app-open ads only on eligible returning foreground transitions after at least five completed readings and at least one minute in the background;
+- at least six hours between app-open impressions;
+- an interstitial opportunity only after every fourth genuinely new saved reading, so the first three new readings remain uninterrupted;
+- a shared 45-minute cross-format full-screen gap after an actual app-open or interstitial impression;
+- cooldown state that begins only after a real ad impression, so failed show attempts do not consume it;
 - no permanent banner over the tarot interface;
 - no rewarded ad requirement for a core feature.
 
-If an ad is unavailable, the product continues normally.
+If an ad is unavailable or fails, the product continues normally.
 
 QA uses Google demo IDs. Production must use the owner’s real AdMob application/ad-unit IDs and `MYSTIC_USE_TEST_ADS=false`.
 
@@ -88,11 +90,13 @@ Marketing must not claim App Store or Google Play availability until signed nati
 ```bash
 flutter create . --platforms=web,android,ios
 dart run tool/configure_store_identifiers.dart
-flutter pub get
+flutter pub get --enforce-lockfile
 flutter analyze
 flutter test
 flutter run
 ```
+
+The application dependency graph is committed in `pubspec.lock`. Development, CI, screenshots, previews, and protected store-release workflows must respect that lockfile so validated QA and later signed production candidates cannot silently resolve different transitive package versions.
 
 The same deterministic materialization used by verified release builds is therefore also part of the documented local-development path. Native QA builds intentionally default to Google test advertising. Real AdMob IDs belong only in protected production configuration.
 

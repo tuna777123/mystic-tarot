@@ -43,8 +43,10 @@ Mystic Tarot has **no paid subscription revenue model**.
 
 Native ad design:
 
-- app-open ads only after at least three completed readings, on eligible returning foreground transitions of 30 seconds or longer, with a two-hour minimum interval;
-- interstitial opportunity after every third genuinely new saved reading;
+- app-open ads are eligible only after at least five completed readings, on a genuine returning foreground transition after at least one minute in the background, with at least six hours between app-open impressions;
+- an interstitial opportunity occurs only after every fourth genuinely new saved reading, so the first three new readings remain uninterrupted;
+- a shared 45-minute cross-format full-screen gap applies after any actual app-open or interstitial impression;
+- cooldown state begins only after a real ad impression, so failed show attempts do not consume the user's cooldown;
 - cadence persists across process restarts;
 - no permanent banner covering the tarot interface;
 - no rewarded-ad requirement for a core feature.
@@ -77,8 +79,9 @@ Source contains:
 - privacy-options visibility based on `PrivacyOptionsRequirementStatus.required`;
 - Google demo app/ad-unit IDs for safe QA;
 - environment/dart-define slots for real production AdMob IDs;
-- app-open ad cache/expiry, minimum-use, background-duration and frequency handling;
-- every-third-new-reading interstitial frequency cap;
+- app-open ad cache/expiry, five-reading minimum-use, one-minute background-duration and six-hour app-open frequency handling;
+- every-fourth-new-reading interstitial frequency cap at the natural completion boundary;
+- shared 45-minute cross-format full-screen cooldown based on actual impressions;
 - persisted cadence across native process restarts;
 - no-ad fallback that never blocks the product;
 - Android audit policy that distinguishes reviewed Google advertising permissions from unrelated sensitive permissions and unapproved trackers.
@@ -120,6 +123,9 @@ Do not invent the AdMob publisher line. Copy the personalized snippet from the o
 Delivered source-side release machinery includes:
 
 - permanent application identifier `com.tunabozcali.mystictarot`;
+- committed root `pubspec.lock` for the Flutter application dependency graph;
+- lockfile-enforced dependency installation across CI, web preview/deployment, screenshots, QA candidates and protected production store workflows;
+- a regression contract that rejects unlocked workflow dependency installs and lockfile mutation during generated-platform/dependency setup;
 - Android AAB release/audit pipeline;
 - Android target-SDK release floor enforcement;
 - unsigned iOS release verification;
@@ -239,4 +245,4 @@ Until those steps pass, do not describe native App Store / Google Play availabil
 
 ## 14. Handoff message
 
-> Mystic Tarot `1.23.0+33` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. RevenueCat and the billing SDK are removed, and there is no paid subscription business model. The Android release audit enforces API 36+, and the owner handoff explicitly covers Apple's current Xcode/iOS SDK floor, app-ads.txt ownership verification, AdMob app readiness, store privacy declarations and any applicable Play testing gate. Start with `docs/OWNER_FINAL_CHECKLIST.md` for production and `docs/OWNER_GUIDE_A_TO_Z.md` for the complete product. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, app-ads.txt/readiness, real-device QA, store privacy declarations and store approvals are complete.
+> Mystic Tarot `1.23.0+33` is a free, five-language, local-first Flutter tarot product. Its main differentiator is Mystic Mirror: readings return after 24 hours as reality checks and become private pattern evidence over time. Native Android/iOS monetization is advertising-only through Google Mobile Ads with UMP consent gating; the public web edition is ad-free. RevenueCat and the billing SDK are removed, and there is no paid subscription business model. The Flutter dependency graph is committed and enforced in release workflows so validated QA and signed production cannot silently resolve different transitive packages. The Android release audit enforces API 36+, and the owner handoff explicitly covers Apple's current Xcode/iOS SDK floor, app-ads.txt ownership verification, AdMob app readiness, store privacy declarations and any applicable Play testing gate. Start with `docs/OWNER_FINAL_CHECKLIST.md` for production and `docs/OWNER_GUIDE_A_TO_Z.md` for the complete product. Native store availability and real ad revenue must not be claimed until production AdMob IDs, signing, app-ads.txt/readiness, real-device QA, store privacy declarations and store approvals are complete.
