@@ -141,12 +141,18 @@ void main() {
     expect(manifestWriter, contains("'mobileAdsSdkEvidence':"));
     expect(manifestWriter, contains('collectMobileAdsSdkEvidence('));
     expect(
-      flutterWorkflow,
-      contains('collect_mobile_ads_sdk_evidence.dart --platform=android'),
+      manifestWriter,
+      contains('mobile-ads-sdk-evidence.json'),
     );
     expect(
-      iosWorkflow,
-      contains('collect_mobile_ads_sdk_evidence.dart --platform=ios'),
+      flutterWorkflow,
+      contains('dart run tool/collect_mobile_ads_sdk_evidence.dart'),
     );
+    expect(flutterWorkflow, contains('--platform=android'));
+    expect(
+      iosWorkflow,
+      contains('dart run tool/collect_mobile_ads_sdk_evidence.dart'),
+    );
+    expect(iosWorkflow, contains('--platform=ios'));
   });
 }
