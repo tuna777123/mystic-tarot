@@ -1,0 +1,35 @@
+name: Generate dependency lockfile
+
+on:
+  push:
+    branches:
+      - release/lock-production-dependencies
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve application dependencies
+        run: flutter pub get
+      - name: Verify generated lockfile is enforceable
+        run: |
+          test -s pubspec.lock
+          dart pub get --enforce-lockfile
+      - name: Upload generated lockfile
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-pubspec-lock
+          path: pubspec.lock
+          if-no-files-found: error
+          retention-days: 1
