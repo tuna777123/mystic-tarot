@@ -156,104 +156,124 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                   ]
                 : null,
           ),
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 50,
-                height: 50,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(17),
-                  color: MysticColors.gold.withValues(alpha: .09),
-                  border: Border.all(
-                    color: MysticColors.gold.withValues(alpha: .3),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: MysticColors.gold.withValues(alpha: .09),
+                      border: Border.all(
+                        color: MysticColors.gold.withValues(alpha: .3),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.insights_rounded,
+                      size: 21,
+                      color: MysticColors.gold,
+                    ),
                   ),
-                ),
-                child: const Icon(
-                  Icons.insights_rounded,
-                  size: 24,
-                  color: MysticColors.gold,
+                  const SizedBox(width: 12),
+                  Expanded(child: _header(ready, recent.length)),
+                ],
+              ),
+              const SizedBox(height: 13),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: MysticColors.mist,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 15,
+                  height: 1.18,
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _header(ready, recent.length),
-                    const SizedBox(height: 7),
-                    Text(
-                      title,
+              const SizedBox(height: 6),
+              Text(
+                body,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: MysticColors.mist,
+                  height: 1.34,
+                  fontSize: 11.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.lock_outline_rounded,
+                    size: 14,
+                    color: MysticColors.muted,
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      t(
+                        en: 'Calculated privately on this device',
+                        es: 'Calculado en privado en este dispositivo',
+                        fr: 'Calculé en privé sur cet appareil',
+                        pt: 'Calculado em privado neste dispositivo',
+                        tr: 'Bu cihazda özel olarak hesaplanır',
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: MysticColors.mist,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 15,
-                        height: 1.18,
+                        fontFamily: 'Arial',
+                        color: MysticColors.muted,
+                        fontSize: 9,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      body,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: MysticColors.mist,
-                        height: 1.34,
-                        fontSize: 11.5,
-                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: MysticColors.gold.withValues(alpha: .09),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: MysticColors.gold.withValues(alpha: .2),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.lock_outline_rounded,
-                          size: 14,
-                          color: MysticColors.muted,
-                        ),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: Text(
-                            t(
-                              en: 'Calculated privately on this device',
-                              es: 'Calculado en privado en este dispositivo',
-                              fr: 'Calculé en privé sur cet appareil',
-                              pt: 'Calculado em privado neste dispositivo',
-                              tr: 'Bu cihazda özel olarak hesaplanır',
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'Arial',
-                              color: MysticColors.muted,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 7),
-                        Text(
-                          actionLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Arial',
-                            color: MysticColors.gold,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 15,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        actionLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Arial',
                           color: MysticColors.gold,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(width: 5),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 15,
+                        color: MysticColors.gold,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
