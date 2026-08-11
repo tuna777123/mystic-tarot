@@ -67,7 +67,7 @@ void main() {
     );
 
     expect(result.nextAction.type, MysticNextActionType.mirrorCheckIn);
-    expect(result.nextAction.priority, 98);
+    expect(result.nextAction.priority, 100);
     expect(result.nextAction.cta, 'Complete my Mirror');
   });
 
@@ -107,7 +107,7 @@ void main() {
     );
 
     expect(result.nextAction.type, MysticNextActionType.mirrorCheckIn);
-    expect(result.nextAction.priority, 98);
+    expect(result.nextAction.priority, 100);
   });
 
   test('earned private patterns surface before another content chapter', () {
@@ -133,7 +133,7 @@ void main() {
 
     expect(result.hasVisiblePattern, isTrue);
     expect(result.nextAction.type, MysticNextActionType.reviewPattern);
-    expect(result.nextAction.priority, 85);
+    expect(result.nextAction.priority, 90);
   });
 
   test(
