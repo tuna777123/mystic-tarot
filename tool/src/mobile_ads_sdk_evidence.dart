@@ -70,7 +70,8 @@ MobileAdsSdkEvidence parseIosMobileAdsSdkEvidence({
     throw const FormatException('SwiftPM Package.resolved must be a JSON map.');
   }
 
-  final pinsValue = decoded['pins'] ??
+  final pinsValue =
+      decoded['pins'] ??
       (decoded['object'] is Map<String, dynamic>
           ? (decoded['object'] as Map<String, dynamic>)['pins']
           : null);
@@ -84,8 +85,8 @@ MobileAdsSdkEvidence parseIosMobileAdsSdkEvidence({
     if (pinValue is! Map) continue;
     final pin = Map<String, dynamic>.from(pinValue);
     final identity = '${pin['identity'] ?? pin['package'] ?? ''}'.toLowerCase();
-    final location =
-        '${pin['location'] ?? pin['repositoryURL'] ?? ''}'.toLowerCase();
+    final location = '${pin['location'] ?? pin['repositoryURL'] ?? ''}'
+        .toLowerCase();
     final stateValue = pin['state'];
     if (stateValue is! Map) continue;
     final state = Map<String, dynamic>.from(stateValue);
@@ -148,16 +149,12 @@ Future<MobileAdsSdkEvidence> collectMobileAdsSdkEvidence({
       throw FormatException('Missing Android project: $androidDirectory');
     }
     final gradleExecutable = Platform.isWindows ? 'gradlew.bat' : './gradlew';
-    final result = await Process.run(
-      gradleExecutable,
-      const <String>[
-        ':app:dependencies',
-        '--configuration',
-        'releaseRuntimeClasspath',
-        '--console=plain',
-      ],
-      workingDirectory: gradleDirectory.path,
-    );
+    final result = await Process.run(gradleExecutable, const <String>[
+      ':app:dependencies',
+      '--configuration',
+      'releaseRuntimeClasspath',
+      '--console=plain',
+    ], workingDirectory: gradleDirectory.path);
     final report = '${result.stdout}\n${result.stderr}';
     if (result.exitCode != 0) {
       throw FormatException(
@@ -215,7 +212,10 @@ Future<MobileAdsSdkEvidence> collectMobileAdsSdkEvidence({
   }
 
   final versions = parsed
-      .map((evidence) => '${evidence.mobileAdsSdkVersion}/${evidence.umpSdkVersion}')
+      .map(
+        (evidence) =>
+            '${evidence.mobileAdsSdkVersion}/${evidence.umpSdkVersion}',
+      )
       .toSet();
   if (versions.length != 1) {
     throw FormatException(
@@ -233,10 +233,9 @@ void writeMobileAdsSdkEvidence(
   final output = File(outputPath);
   output.parent.createSync(recursive: true);
   output.writeAsStringSync(
-    const JsonEncoder.withIndent('  ').convert(<String, Object>{
-      'schemaVersion': 1,
-      ...evidence.toJson(),
-    }),
+    const JsonEncoder.withIndent(
+      '  ',
+    ).convert(<String, Object>{'schemaVersion': 1, ...evidence.toJson()}),
   );
 }
 
@@ -262,7 +261,11 @@ String _resolvedGradleModuleVersion(String report, String module) {
   return versions.single;
 }
 
-bool _matchesSwiftPackage(String identity, String location, String packageName) {
+bool _matchesSwiftPackage(
+  String identity,
+  String location,
+  String packageName,
+) {
   return identity == packageName ||
       location.endsWith('/$packageName') ||
       location.endsWith('/$packageName.git');
