@@ -41,12 +41,13 @@ Future<IosPrivacyManifestAuditResult> verifyIosAppPrivacyManifests({
     );
   }
 
-  final manifests = appBundle
-      .listSync(recursive: true, followLinks: false)
-      .whereType<File>()
-      .where((file) => file.path.endsWith('PrivacyInfo.xcprivacy'))
-      .toList(growable: false)
-    ..sort((left, right) => left.path.compareTo(right.path));
+  final manifests =
+      appBundle
+          .listSync(recursive: true, followLinks: false)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('PrivacyInfo.xcprivacy'))
+          .toList(growable: false)
+        ..sort((left, right) => left.path.compareTo(right.path));
 
   if (manifests.isEmpty) {
     throw const IosPrivacyManifestAuditFailure(
