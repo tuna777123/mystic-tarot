@@ -14,7 +14,8 @@ void main() {
       expect(launch, contains('Read today. Check reality tomorrow.'));
       expect(launch, contains('Build private evidence over time.'));
       expect(launch, contains('Mystic Mirror asks what actually happened'));
-      expect(launch, contains('PRIVATE EVIDENCE'));
+      expect(launch, contains('THE MYSTIC LOOP'));
+      expect(launch, contains('No prediction score.'));
       expect(app, contains('Reveal my first card'));
       expect(app, contains('PATTERN MEMORY'));
       expect(app, contains('PRIVATE JOURNAL'));
@@ -72,7 +73,14 @@ void main() {
     final service = File('lib/src/ad_revenue_service.dart').readAsStringSync();
     final policy = File('lib/src/ad_experience_policy.dart').readAsStringSync();
 
-    expect(policy, contains('minimumFullScreenGap = Duration(minutes: 20)'));
+    expect(policy, contains('minimumAppOpenInterval = Duration(hours: 6)'));
+    expect(
+      policy,
+      contains('minimumBackgroundDuration = Duration(minutes: 1)'),
+    );
+    expect(policy, contains('minimumReadingsBeforeAppOpen = 5'));
+    expect(policy, contains('interstitialEveryReadings = 4'));
+    expect(policy, contains('minimumFullScreenGap = Duration(minutes: 45)'));
 
     final appOpenShow = service.indexOf('void _showAppOpenIfReady()');
     final appOpenImpression = service.indexOf('onAdImpression:', appOpenShow);

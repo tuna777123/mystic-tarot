@@ -17,13 +17,25 @@ The public web edition remains ad-free.
 
 ## Native advertising design
 
+### Category Leader advertising guardrail
+
+The current cadence is intentionally conservative. The product hypothesis is that protecting the first sessions, the 24-hour Mystic Mirror return, and the feeling of a private premium reflection tool will improve activation, D1/D7 retention, mature Mirror completion, and store sentiment enough to outweigh a lower short-term impression count.
+
+Guardrails:
+
+- do not increase full-screen frequency merely to raise impressions;
+- treat Mystic Mirror completion and user continuity as more valuable than an extra ad opportunity;
+- keep the first several readings free of app-open pressure;
+- keep all full-screen formats behind one shared cooldown;
+- evaluate any future cadence increase against the repository retention gates and review sentiment, with deterministic policy tests before release.
+
 ### App-open
 
-Eligible only after at least three completed readings, after a returning foreground transition of at least 30 seconds, with a two-hour minimum interval between impressions. Cached app-open ads expire after four hours. Cold-start bootstrap never waits for an ad.
+Eligible only after at least **five** completed readings, after a genuine returning foreground transition of at least **one minute**, with a **six-hour** minimum interval between app-open impressions. A **45-minute cross-format full-screen gap** also applies after any app-open or interstitial impression. Cached app-open ads expire after four hours. Cold-start bootstrap never waits for an ad.
 
 ### Interstitial
 
-An interstitial opportunity is created only after every third genuinely new saved reading at the natural completion boundary. The first two new readings remain uninterrupted. Cadence persists across process restarts. Missing/not-ready ads never block the product.
+An interstitial opportunity is created only after every **fourth** genuinely new saved reading at the natural completion boundary. The first three new readings remain uninterrupted. A **45-minute cross-format full-screen gap** prevents a recent app-open ad from being followed by an interstitial (or vice versa). Cadence persists across process restarts. Missing/not-ready ads never block the product.
 
 ### Not used
 
@@ -210,8 +222,8 @@ Suggested reviewer path:
 6. Confirm no checkout/restore requirement exists.
 7. Exercise UMP in an applicable test state.
 8. Confirm QA uses Google demo/test ads.
-9. Complete three new readings and verify the natural interstitial opportunity.
-10. Background for 30+ seconds after at least three readings and verify app-open cadence.
+9. Complete four genuinely new readings and verify the natural interstitial opportunity occurs only at the fourth-reading completion boundary.
+10. After at least five completed readings, background the app for 60+ seconds and verify returning app-open eligibility respects the six-hour app-open interval and 45-minute shared full-screen gap.
 11. Repeat legal-link and narrow-screen checks in EN, TR, ES, FR and PT-BR.
 
 ## Store privacy declarations
@@ -239,13 +251,14 @@ Advertising/privacy checks:
 - consent refresh failure;
 - ad load failure;
 - offline/poor network;
-- readings #1/#2 uninterrupted;
-- reading #3 interstitial opportunity;
+- readings #1/#2/#3 uninterrupted;
+- reading #4 interstitial opportunity only at the natural completion boundary;
 - cadence after restart;
 - no app-open on first cold start;
-- no app-open before three readings;
-- no app-open after background <30 seconds;
-- two-hour app-open cap;
+- no app-open before five completed readings;
+- no app-open after background <60 seconds;
+- six-hour app-open cap;
+- 45-minute cross-format full-screen gap;
 - no overlapping full-screen ads;
 - immediate continuation after dismiss;
 - no paywall/checkout/restore path.

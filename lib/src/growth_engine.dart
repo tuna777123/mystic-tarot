@@ -7,6 +7,10 @@ enum MysticNextActionType {
   dailyReading,
   mirrorCheckIn,
   continueJourney,
+
+  /// Legacy enum name retained for source compatibility. In the current
+  /// advertising-only product this means "explore a deeper spread"; it does
+  /// not imply a paid unlock.
   explorePremiumSpread,
   reviewPattern,
 }
@@ -49,6 +53,10 @@ class MysticGrowthSnapshot {
   final MysticNextAction nextAction;
   final MysticReturnState returnState;
   final String returnMessage;
+
+  /// Legacy field name retained for compatibility with earlier releases.
+  /// The value now represents continuity/evidence maturity, not willingness
+  /// to pay or an entitlement score.
   final int premiumValueScore;
   final bool hasVisiblePattern;
 }
@@ -72,7 +80,7 @@ class MysticGrowthEngine {
     );
     final visiblePattern = _hasVisiblePattern(records);
     final returnState = _returnState(records, streak, moment);
-    final score = _premiumValueScore(
+    final score = _continuityValueScore(
       records: records,
       streak: streak,
       completedArcanaDays: completedArcanaDays,
@@ -85,7 +93,6 @@ class MysticGrowthEngine {
         records: records,
         streak: streak,
         completedArcanaDays: completedArcanaDays,
-        freeReadingsLeft: freeReadingsLeft,
         mirrorDueCount: mirrorDueCount,
         visiblePattern: visiblePattern,
         now: moment,
@@ -125,7 +132,6 @@ class MysticGrowthEngine {
     required List<ReadingRecord> records,
     required int streak,
     required int completedArcanaDays,
-    required int freeReadingsLeft,
     required int mirrorDueCount,
     required bool visiblePattern,
     required DateTime now,
@@ -135,23 +141,22 @@ class MysticGrowthEngine {
         type: MysticNextActionType.firstReading,
         title: 'Your first signal is waiting',
         body:
-            'Begin with one focused question. Mystic becomes more useful as your history grows.',
+            'Begin with one focused question. The useful part is what you can compare with reality later.',
         cta: 'Start my first reading',
         priority: 100,
       );
     }
 
-    // Mystic Mirror is the product moat: it closes yesterday's loop with
-    // observed reality. When a check-in is due, surface it before creating a
-    // new daily reading so the differentiator never gets buried by content.
     if (mirrorDueCount > 0) {
-      return const MysticNextAction(
+      return MysticNextAction(
         type: MysticNextActionType.mirrorCheckIn,
-        title: 'What actually changed?',
+        title: mirrorDueCount == 1
+            ? 'Yesterday is ready for reality'
+            : '$mirrorDueCount readings are ready for reality',
         body:
-            'Close the 24-hour loop first. Your honest check-in turns a reading into private evidence.',
+            'Close the 24-hour loop before adding more input. Honest follow-up turns a reading into private evidence.',
         cta: 'Complete my Mirror',
-        priority: 98,
+        priority: 100,
       );
     }
 
@@ -166,23 +171,20 @@ class MysticGrowthEngine {
             ? 'Protect your $streak-day rhythm'
             : 'Open today’s guidance',
         body:
-            'A sixty-second return keeps your pattern map alive without turning the ritual into work.',
+            'A brief return keeps your private pattern history alive without turning reflection into work.',
         cta: 'Reveal today’s card',
         priority: 95,
       );
     }
 
-    // Mystic's strongest differentiator is evidence gathered from the user's
-    // own private history. Surface that earned value before sending an engaged
-    // user into another content loop.
     if (visiblePattern) {
       return const MysticNextAction(
         type: MysticNextActionType.reviewPattern,
         title: 'A repeating pattern is becoming visible',
         body:
-            'Compare the symbol, emotion, and choice that keep returning across your readings.',
+            'Compare the cards, emotions, and choices that keep returning across your private history.',
         cta: 'View my pattern',
-        priority: 85,
+        priority: 90,
       );
     }
 
@@ -191,27 +193,17 @@ class MysticGrowthEngine {
         type: MysticNextActionType.continueJourney,
         title: 'Your next Arcana chapter is ready',
         body:
-            '${22 - completedArcanaDays} chapters remain in your personal path.',
-        cta: 'Continue my journey',
+            '${22 - completedArcanaDays} chapters remain. Continue only if today has room for another reflection.',
+        cta: 'Continue my path',
         priority: 80,
-      );
-    }
-
-    if (freeReadingsLeft == 0) {
-      return const MysticNextAction(
-        type: MysticNextActionType.explorePremiumSpread,
-        title: 'Go deeper without breaking the moment',
-        body:
-            'Your daily ritual is complete. Deeper spreads remain available whenever the question needs more context.',
-        cta: 'Explore deep readings',
-        priority: 70,
       );
     }
 
     return const MysticNextAction(
       type: MysticNextActionType.explorePremiumSpread,
-      title: 'Ask the question beneath the question',
-      body: 'Use a deeper spread when a simple answer no longer feels honest.',
+      title: 'Go deeper only when the question needs it',
+      body:
+          'Use a larger spread for context, not because the app needs another tap.',
       cta: 'Explore deep readings',
       priority: 60,
     );
@@ -233,18 +225,20 @@ class MysticGrowthEngine {
     return MysticReturnState.resumedPath;
   }
 
-  String _returnMessage(MysticReturnState state, int streak) => switch (state) {
-    MysticReturnState.firstVisit =>
-      'Your path begins with one honest question.',
-    MysticReturnState.activeToday =>
-      'Today’s signal is already part of your story.',
-    MysticReturnState.returnedNextDay =>
-      'You returned before yesterday’s insight went quiet.',
-    MysticReturnState.continuingStreak =>
-      'Your $streak-day practice is building real continuity.',
-    MysticReturnState.resumedPath =>
-      'Your path kept its place. Continue from where you left it.',
-  };
+  String _returnMessage(MysticReturnState state, int streak) {
+    switch (state) {
+      case MysticReturnState.firstVisit:
+        return 'Your path begins with one honest question.';
+      case MysticReturnState.activeToday:
+        return 'Today’s signal is already part of your evidence trail.';
+      case MysticReturnState.returnedNextDay:
+        return 'You came back at the moment yesterday can be compared with reality.';
+      case MysticReturnState.continuingStreak:
+        return 'Your $streak-day practice is building continuity, not just a streak.';
+      case MysticReturnState.resumedPath:
+        return 'Your private history kept its place. Continue from where you left it.';
+    }
+  }
 
   bool _hasVisiblePattern(List<ReadingRecord> records) {
     if (records.length < 3) return false;
@@ -260,7 +254,7 @@ class MysticGrowthEngine {
         emotions.values.any((count) => count >= 3);
   }
 
-  int _premiumValueScore({
+  int _continuityValueScore({
     required List<ReadingRecord> records,
     required int streak,
     required int completedArcanaDays,
@@ -276,8 +270,12 @@ class MysticGrowthEngine {
     return score.clamp(0, 100);
   }
 
-  int _activeDayCount(List<ReadingRecord> records) =>
-      records.map((record) => _calendarDayKey(record.createdAt)).toSet().length;
+  int _activeDayCount(List<ReadingRecord> records) {
+    return records
+        .map((record) => _calendarDayKey(record.createdAt))
+        .toSet()
+        .length;
+  }
 
   int _calendarDayDifference(DateTime earlier, DateTime later) {
     final earlierDay = DateTime(earlier.year, earlier.month, earlier.day);
@@ -285,9 +283,11 @@ class MysticGrowthEngine {
     return laterDay.difference(earlierDay).inDays;
   }
 
-  String _calendarDayKey(DateTime value) =>
-      '${value.year}-${value.month}-${value.day}';
+  String _calendarDayKey(DateTime value) {
+    return '${value.year}-${value.month}-${value.day}';
+  }
 
-  bool _sameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _sameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 }

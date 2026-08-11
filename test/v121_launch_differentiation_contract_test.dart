@@ -28,20 +28,26 @@ void main() {
     expect(app, contains('LaunchContinuityTimeline('));
     expect(app, contains('buildReadingSynthesis('));
     expect(continuity, contains('Read today. Check reality tomorrow.'));
-    expect(continuity, contains('ONE READING BECOMES A CONTINUING STORY.'));
-    expect(continuity, contains('PRIVATE EVIDENCE'));
-    expect(continuity, contains('Private by design'));
+    expect(continuity, contains('THE MYSTIC LOOP'));
     expect(
       continuity,
-      contains('Native ads follow the advertising privacy choices'),
+      contains('A READING SHOULD LEAVE EVIDENCE, NOT JUST A FEELING.'),
     );
-    expect(continuity, contains('public web edition is ad-free'));
-    expect(continuity, contains('optional six-digit PIN'));
-    expect(continuity, contains('biometrics on supported devices'));
+    expect(continuity, contains('Build private evidence over time.'));
+    expect(continuity, contains('No prediction score.'));
+    expect(continuity, contains('Private by design'));
+    expect(continuity, contains('No account or cloud journal.'));
+    expect(continuity, contains('optional PIN and biometrics'));
+    expect(
+      continuity,
+      contains('Native ads respect available advertising privacy choices'),
+    );
+    expect(continuity, contains('public web edition stays ad-free'));
     expect(File('lib/src/app_lock.dart').existsSync(), isTrue);
     expect(File('lib/src/app_lock_gate.dart').existsSync(), isTrue);
     expect(nextStep, contains('MysticGrowthStage.activated'));
-    expect(nextStep, contains('PrivateByDesignCard('));
+    expect(nextStep, contains('LaunchContinuityTimeline('));
+    expect(nextStep, contains('PRIVATE EVIDENCE MEMORY'));
     expect(premium, contains('Everything is unlocked.'));
     expect(premium, contains('there is no subscription to buy'));
     expect(synthesis, contains('Taken together'));

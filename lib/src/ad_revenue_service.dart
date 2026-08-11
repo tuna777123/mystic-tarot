@@ -11,11 +11,13 @@ import 'business_metrics.dart';
 /// Privacy-aware, advertising-only monetization for native Mystic Tarot builds.
 ///
 /// Revenue formats:
-/// - app-open ads on eligible returning foreground transitions;
-/// - interstitial ads after every third genuinely new saved reading.
+/// - app-open ads on established, eligible returning foreground transitions;
+/// - interstitial ads after every fourth genuinely new saved reading.
 ///
-/// The public web edition intentionally remains ad-free because the official
-/// Google Mobile Ads Flutter plugin supports Android and iOS, not web.
+/// Both formats share the product-level cooldown in [AdExperiencePolicy] so
+/// monetization never outranks the reflection loop. The public web edition is
+/// intentionally ad-free because Google Mobile Ads Flutter targets Android
+/// and iOS rather than web.
 class AdRevenueService with WidgetsBindingObserver {
   AdRevenueService._();
 
@@ -189,7 +191,7 @@ class AdRevenueService with WidgetsBindingObserver {
 
   /// Called only when a genuinely new reading is persisted.
   ///
-  /// The first two new readings remain uninterrupted; the third may show a
+  /// The first three new readings remain uninterrupted; the fourth may show a
   /// preloaded interstitial at the natural completion boundary. Counts persist
   /// across launches so app-open eligibility and interstitial cadence do not
   /// reset when the process is restarted.
