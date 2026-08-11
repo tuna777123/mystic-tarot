@@ -38,11 +38,7 @@ class MysticNextStepCard extends StatelessWidget {
       mirrorDueCount: mirrorDueCount,
       completedArcanaDays: completedArcanaDays,
     );
-    final continuity = _returnMessage(
-      language,
-      snapshot.returnState,
-      streak,
-    );
+    final continuity = _returnMessage(language, snapshot.returnState, streak);
     final maturity = snapshot.premiumValueScore.clamp(0, 100);
     final isMirror =
         snapshot.nextAction.type == MysticNextActionType.mirrorCheckIn;
@@ -186,9 +182,7 @@ class _NextStepHeader extends StatelessWidget {
           decoration: BoxDecoration(
             color: MysticColors.gold.withValues(alpha: .12),
             borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color: MysticColors.gold.withValues(alpha: .17),
-            ),
+            border: Border.all(color: MysticColors.gold.withValues(alpha: .17)),
           ),
           child: Icon(icon, color: MysticColors.gold, size: 22),
         ),
@@ -247,9 +241,7 @@ class _ActionButtonLabel extends StatelessWidget {
       decoration: BoxDecoration(
         color: MysticColors.gold.withValues(alpha: .11),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: MysticColors.gold.withValues(alpha: .25),
-        ),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .25)),
       ),
       child: Row(
         children: [
@@ -301,9 +293,7 @@ class _EvidenceMaturity extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: .13),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: .065),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: .065)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,16 +430,11 @@ _NextStepContent _actionContent(
         ),
         body: _copy(
           language,
-          en:
-              'Start with one focused question. The useful part is not a fortune score — it is what you can compare with real life tomorrow.',
-          es:
-              'Empieza con una pregunta concreta. Lo útil no es una puntuación de destino, sino lo que mañana podrás comparar con la vida real.',
-          fr:
-              'Commencez par une question précise. L’utile n’est pas un score de destin, mais ce que vous pourrez comparer au réel demain.',
-          pt:
-              'Comece com uma pergunta focada. O valor não está em uma nota do destino, mas no que você poderá comparar com a vida real amanhã.',
-          tr:
-              'Tek ve net bir soruyla başla. Değer kehanet puanında değil; yarın gerçek hayatla karşılaştırabileceğin şeyde.',
+          en: 'Start with one focused question. The useful part is not a fortune score — it is what you can compare with real life tomorrow.',
+          es: 'Empieza con una pregunta concreta. Lo útil no es una puntuación de destino, sino lo que mañana podrás comparar con la vida real.',
+          fr: 'Commencez par une question précise. L’utile n’est pas un score de destin, mais ce que vous pourrez comparer au réel demain.',
+          pt: 'Comece com uma pergunta focada. O valor não está em uma nota do destino, mas no que você poderá comparar com a vida real amanhã.',
+          tr: 'Tek ve net bir soruyla başla. Değer kehanet puanında değil; yarın gerçek hayatla karşılaştırabileceğin şeyde.',
         ),
         cta: _copy(
           language,
@@ -483,16 +468,11 @@ _NextStepContent _actionContent(
         title: title,
         body: _copy(
           language,
-          en:
-              'A short daily return keeps your private pattern history alive without turning reflection into another task.',
-          es:
-              'Un regreso breve mantiene vivo tu historial privado de patrones sin convertir la reflexión en otra tarea.',
-          fr:
-              'Un bref retour quotidien garde votre historique privé vivant sans transformer la réflexion en corvée.',
-          pt:
-              'Um retorno breve mantém seu histórico privado de padrões vivo sem transformar a reflexão em obrigação.',
-          tr:
-              'Kısa bir günlük dönüş, düşünmeyi işe çevirmeden özel örüntü geçmişini canlı tutar.',
+          en: 'A short daily return keeps your private pattern history alive without turning reflection into another task.',
+          es: 'Un regreso breve mantiene vivo tu historial privado de patrones sin convertir la reflexión en otra tarea.',
+          fr: 'Un bref retour quotidien garde votre historique privé vivant sans transformer la réflexion en corvée.',
+          pt: 'Um retorno breve mantém seu histórico privado de padrões vivo sem transformar a reflexão em obrigação.',
+          tr: 'Kısa bir günlük dönüş, düşünmeyi işe çevirmeden özel örüntü geçmişini canlı tutar.',
         ),
         cta: _copy(
           language,
@@ -509,16 +489,11 @@ _NextStepContent _actionContent(
         title: _mirrorTitle(language, mirrorDueCount),
         body: _copy(
           language,
-          en:
-              'Close the 24-hour loop before adding more input. Record what actually changed — not whether tarot was “right.”',
-          es:
-              'Cierra el ciclo de 24 horas antes de añadir más señales. Registra qué cambió de verdad, no si el tarot “acertó”.',
-          fr:
-              'Fermez la boucle de 24 heures avant d’ajouter un nouveau signal. Notez ce qui a réellement changé, pas si le tarot avait « raison ».',
-          pt:
-              'Feche o ciclo de 24 horas antes de adicionar mais sinais. Registre o que realmente mudou, não se o tarô “acertou”.',
-          tr:
-              'Yeni bir işaret eklemeden önce 24 saatlik döngüyü kapat. Tarotun “doğru çıkmasını” değil, gerçekte neyin değiştiğini kaydet.',
+          en: 'Close the 24-hour loop before adding more input. Record what actually changed — not whether tarot was “right.”',
+          es: 'Cierra el ciclo de 24 horas antes de añadir más señales. Registra qué cambió de verdad, no si el tarot “acertó”.',
+          fr: 'Fermez la boucle de 24 heures avant d’ajouter un nouveau signal. Notez ce qui a réellement changé, pas si le tarot avait « raison ».',
+          pt: 'Feche o ciclo de 24 horas antes de adicionar mais sinais. Registre o que realmente mudou, não se o tarô “acertou”.',
+          tr: 'Yeni bir işaret eklemeden önce 24 saatlik döngüyü kapat. Tarotun “doğru çıkmasını” değil, gerçekte neyin değiştiğini kaydet.',
         ),
         cta: _copy(
           language,
@@ -543,16 +518,11 @@ _NextStepContent _actionContent(
         ),
         body: _copy(
           language,
-          en:
-              '$remaining chapters remain. Continue when today has room for another reflection, not just because it is available.',
-          es:
-              'Quedan $remaining capítulos. Continúa cuando hoy tengas espacio para otra reflexión, no solo porque esté disponible.',
-          fr:
-              'Il reste $remaining chapitres. Continuez lorsque vous avez vraiment de la place pour une nouvelle réflexion.',
-          pt:
-              'Restam $remaining capítulos. Continue quando houver espaço real para outra reflexão.',
-          tr:
-              '$remaining bölüm kaldı. Sadece açık olduğu için değil, bugün gerçekten yer varsa devam et.',
+          en: '$remaining chapters remain. Continue when today has room for another reflection, not just because it is available.',
+          es: 'Quedan $remaining capítulos. Continúa cuando hoy tengas espacio para otra reflexión, no solo porque esté disponible.',
+          fr: 'Il reste $remaining chapitres. Continuez lorsque vous avez vraiment de la place pour une nouvelle réflexion.',
+          pt: 'Restam $remaining capítulos. Continue quando houver espaço real para outra reflexão.',
+          tr: '$remaining bölüm kaldı. Sadece açık olduğu için değil, bugün gerçekten yer varsa devam et.',
         ),
         cta: _copy(
           language,
@@ -576,16 +546,11 @@ _NextStepContent _actionContent(
         ),
         body: _copy(
           language,
-          en:
-              'This is earned insight from your own history. Compare the cards, emotions, and choices that keep returning.',
-          es:
-              'Esta información nace de tu propio historial. Compara las cartas, emociones y decisiones que siguen volviendo.',
-          fr:
-              'Cet aperçu vient de votre propre historique. Comparez les cartes, émotions et choix qui reviennent.',
-          pt:
-              'Esse insight vem do seu próprio histórico. Compare as cartas, emoções e escolhas que continuam voltando.',
-          tr:
-              'Bu, kendi geçmişinden kazanılmış bir içgörü. Tekrar dönen kartları, duyguları ve seçimleri karşılaştır.',
+          en: 'This is earned insight from your own history. Compare the cards, emotions, and choices that keep returning.',
+          es: 'Esta información nace de tu propio historial. Compara las cartas, emociones y decisiones que siguen volviendo.',
+          fr: 'Cet aperçu vient de votre propre historique. Comparez les cartes, émotions et choix qui reviennent.',
+          pt: 'Esse insight vem do seu próprio histórico. Compare as cartas, emoções e escolhas que continuam voltando.',
+          tr: 'Bu, kendi geçmişinden kazanılmış bir içgörü. Tekrar dönen kartları, duyguları ve seçimleri karşılaştır.',
         ),
         cta: _copy(
           language,
@@ -609,16 +574,11 @@ _NextStepContent _actionContent(
         ),
         body: _copy(
           language,
-          en:
-              'Use a larger spread for context, not because the app needs another tap. Every reading remains part of the same private evidence loop.',
-          es:
-              'Usa una tirada mayor para ganar contexto, no porque la app necesite otro toque. Cada lectura sigue formando parte del mismo ciclo privado.',
-          fr:
-              'Utilisez un tirage plus large pour le contexte, pas pour multiplier les interactions. Chaque tirage reste dans la même boucle privée.',
-          pt:
-              'Use uma abertura maior por contexto, não porque o app precise de outro toque. Toda leitura continua no mesmo ciclo privado.',
-          tr:
-              'Daha geniş açılımı sadece bağlam gerektiğinde kullan. Her okuma aynı özel kanıt döngüsünün parçası olarak kalır.',
+          en: 'Use a larger spread for context, not because the app needs another tap. Every reading remains part of the same private evidence loop.',
+          es: 'Usa una tirada mayor para ganar contexto, no porque la app necesite otro toque. Cada lectura sigue formando parte del mismo ciclo privado.',
+          fr: 'Utilisez un tirage plus large pour le contexte, pas pour multiplier les interactions. Chaque tirage reste dans la même boucle privée.',
+          pt: 'Use uma abertura maior por contexto, não porque o app precise de outro toque. Toda leitura continua no mesmo ciclo privado.',
+          tr: 'Daha geniş açılımı sadece bağlam gerektiğinde kullan. Her okuma aynı özel kanıt döngüsünün parçası olarak kalır.',
         ),
         cta: _copy(
           language,
@@ -740,16 +700,11 @@ String _returnMessage(
     case MysticReturnState.continuingStreak:
       return _copy(
         language,
-        en:
-            'Your $streak-day rhythm is building continuity, not just a streak.',
-        es:
-            'Tu ritmo de $streak días construye continuidad, no solo una racha.',
-        fr:
-            'Votre rythme de $streak jours construit une continuité, pas seulement une série.',
-        pt:
-            'Seu ritmo de $streak dias constrói continuidade, não só uma sequência.',
-        tr:
-            '$streak günlük ritmin sadece seri değil, süreklilik oluşturuyor.',
+        en: 'Your $streak-day rhythm is building continuity, not just a streak.',
+        es: 'Tu ritmo de $streak días construye continuidad, no solo una racha.',
+        fr: 'Votre rythme de $streak jours construit une continuité, pas seulement une série.',
+        pt: 'Seu ritmo de $streak dias constrói continuidade, não só uma sequência.',
+        tr: '$streak günlük ritmin sadece seri değil, süreklilik oluşturuyor.',
       );
     case MysticReturnState.resumedPath:
       return _copy(
