@@ -13,6 +13,22 @@ Tarô, Diário e Padrões
 **Texto promocional**  
 Revele as cartas, entenda a interpretação e volte 24 horas depois para comparar a orientação com o que realmente aconteceu.
 
+**Descrição**  
+Mystic Tarot transforma uma leitura de cartas em uma prática privada de reflexão diária que continua depois que as cartas são reveladas.
+
+Escolha as cartas que chamam você e veja como posição, orientação, simbolismo e um próximo passo concreto contribuem para a interpretação. Mystic não apresenta uma leitura como diagnóstico, certeza ou previsão garantida.
+
+Volte 24 horas depois com Mystic Mirror e registre o que realmente mudou. Com o tempo, compare cartas recorrentes, mudanças emocionais, leituras salvas e verificações do Mirror no seu histórico privado. Pattern Lab e Mystic Intelligence ajudam a revelar temas que se repetem a partir das evidências que você realmente registrou.
+
+Explore os 78 Arcanos, Daily Guidance, leituras profundas, o diálogo Oracle, Living Journal, Mystic Path e ferramentas privadas de reflexão. O acesso aos recursos não depende de assinatura paga. Os apps nativos Android e iOS são sustentados por anúncios ocasionais do Google Mobile Ads, sujeitos às escolhas de privacidade aplicáveis; a edição web pública continua sem anúncios.
+
+Suas perguntas, leituras, notas do Mystic Mirror, dados de perfil e progresso permanecem principalmente no seu dispositivo. Você pode exportar ou excluir seu histórico local do Mystic dentro do produto.
+
+Mystic Tarot foi criado para reflexão pessoal e entretenimento. Não oferece aconselhamento médico, de saúde mental, jurídico, financeiro ou de emergência.
+
+**Palavras-chave**  
+oráculo,carta,reflexão,arcano,bem-estar,introspecção,simbolismo,autoconhecimento
+
 **Privacidade:** https://tuna777123.github.io/mystic-tarot/privacy-pt-br.html  
 **Suporte:** https://tuna777123.github.io/mystic-tarot/support-pt-br.html  
 **Marketing:** https://tuna777123.github.io/mystic-tarot/
