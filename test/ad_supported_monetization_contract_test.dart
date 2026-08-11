@@ -42,6 +42,43 @@ void main() {
     expect(service, contains('ADMOB_IOS_INTERSTITIAL_ID'));
   });
 
+  test('release-facing advertising documentation matches runtime cadence', () {
+    final documents = <String, String>{
+      'README.md': File('README.md').readAsStringSync(),
+      'STORE_RELEASE.md': File('STORE_RELEASE.md').readAsStringSync(),
+      'docs/AD_REVENUE_MODEL.md': File(
+        'docs/AD_REVENUE_MODEL.md',
+      ).readAsStringSync(),
+      'docs/FINAL_DELIVERY.md': File(
+        'docs/FINAL_DELIVERY.md',
+      ).readAsStringSync(),
+    };
+
+    final combined = documents.values.join('\n');
+    expect(combined, contains('five completed readings'));
+    expect(combined, contains('one minute'));
+    expect(combined, contains('six hours'));
+    expect(combined, contains('45-minute'));
+    expect(combined, contains('every fourth'));
+
+    const stalePhrases = <String>[
+      'every third genuinely new saved reading',
+      'at least three completed readings',
+      'at least 30 seconds in the background',
+      'once every two hours',
+      'every-third-new-reading',
+    ];
+    for (final entry in documents.entries) {
+      for (final stale in stalePhrases) {
+        expect(
+          entry.value,
+          isNot(contains(stale)),
+          reason: '${entry.key} contains stale ad cadence: $stale',
+        );
+      }
+    }
+  });
+
   test('subscription runtime is completely absent from the ad-only binary', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final subscriptionClient = File(
