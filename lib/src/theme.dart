@@ -13,11 +13,12 @@ class MysticColors {
 }
 
 ThemeData buildMysticTheme() {
-  final scheme = ColorScheme.fromSeed(
+  final seedScheme = ColorScheme.fromSeed(
     seedColor: MysticColors.violet,
     brightness: Brightness.dark,
     surface: MysticColors.night,
-  ).copyWith(
+  );
+  final scheme = seedScheme.copyWith(
     primary: MysticColors.gold,
     onPrimary: MysticColors.ink,
     secondary: MysticColors.lavender,
