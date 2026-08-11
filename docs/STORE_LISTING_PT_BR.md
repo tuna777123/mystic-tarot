@@ -27,7 +27,7 @@ Suas perguntas, leituras, notas do Mystic Mirror, dados de perfil e progresso pe
 Mystic Tarot foi criado para reflexão pessoal e entretenimento. Não oferece aconselhamento médico, de saúde mental, jurídico, financeiro ou de emergência.
 
 **Palavras-chave**  
-oráculo,carta diária,reflexão,arcano,ritual,bem-estar,introspecção,simbolismo,autoconhecimento
+oráculo,carta,reflexão,arcano,bem-estar,introspecção,simbolismo,autoconhecimento
 
 **Privacidade:** https://tuna777123.github.io/mystic-tarot/privacy-pt-br.html  
 **Suporte:** https://tuna777123.github.io/mystic-tarot/support-pt-br.html  
