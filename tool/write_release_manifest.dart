@@ -5,6 +5,7 @@ import 'configure_store_identifiers.dart' as store_identifiers;
 import 'src/ios_admob_plist_audit.dart';
 import 'src/ios_artifact_admob.dart';
 import 'src/ios_artifact_certificate.dart';
+import 'src/ios_privacy_manifest_audit.dart';
 import 'src/mobile_ads_sdk_evidence.dart';
 import 'src/store_release_contract.dart';
 
@@ -30,6 +31,7 @@ Future<void> main(List<String> arguments) async {
 
     String? signingCertificateSha256;
     IosAdMobPlistAuditResult? iosAdMobAudit;
+    IosPrivacyManifestAuditResult? iosPrivacyManifestAudit;
     if (platform == StoreReleasePlatform.ios) {
       final reviewedFingerprint =
           Platform.environment['IOS_DISTRIBUTION_CERT_SHA256'] ?? '';
@@ -56,6 +58,14 @@ Future<void> main(List<String> arguments) async {
           expectedAppId: productionAdMobAppId,
         );
       } on IosAdMobPlistAuditFailure catch (error) {
+        throw FormatException(error.message);
+      }
+
+      try {
+        iosPrivacyManifestAudit = await verifyIosArtifactPrivacyManifests(
+          ipaFile: artifact,
+        );
+      } on IosPrivacyManifestAuditFailure catch (error) {
         throw FormatException(error.message);
       }
     }
@@ -95,6 +105,11 @@ Future<void> main(List<String> arguments) async {
             store_identifiers.iosSkAdNetworkSourceReviewedOn,
         'skAdNetworkCount': iosAdMobAudit.skAdNetworkCount,
       },
+      if (iosPrivacyManifestAudit != null) ...<String, Object?>{
+        'privacyManifestsVerified': true,
+        'privacyManifestCount': iosPrivacyManifestAudit.manifestCount,
+        'privacyManifestPaths': iosPrivacyManifestAudit.manifestPaths,
+      },
       'signed': true,
       'gitSha': Platform.environment['GITHUB_SHA'],
       'sourceRef': Platform.environment['GITHUB_REF_NAME'],
@@ -106,6 +121,15 @@ Future<void> main(List<String> arguments) async {
       mobileAdsSdkEvidence,
       '${output.parent.path}/mobile-ads-sdk-evidence.json',
     );
+    if (iosPrivacyManifestAudit != null) {
+      File(
+        '${output.parent.path}/ios-privacy-manifest-evidence.json',
+      ).writeAsStringSync(
+        const JsonEncoder.withIndent('  ').convert(
+          iosPrivacyManifestAudit.toJson(),
+        ),
+      );
+    }
     output.writeAsStringSync(
       const JsonEncoder.withIndent('  ').convert(manifest),
     );
