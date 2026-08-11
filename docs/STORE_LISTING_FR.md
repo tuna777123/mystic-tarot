@@ -27,7 +27,7 @@ Vos questions, tirages, notes Mystic Mirror, informations de profil et progressi
 Mystic Tarot est conçu pour la réflexion personnelle et le divertissement. Il ne fournit aucun conseil médical, psychologique, juridique, financier ou d’urgence.
 
 **Mots-clés**  
-oracle,carte du jour,réflexion,arcane,rituel,bien-être,introspection,symbolisme,conscience
+oracle,carte,réflexion,arcane,bien-être,introspection,symbolisme,conscience,spiritualité
 
 **Confidentialité :** https://tuna777123.github.io/mystic-tarot/privacy-fr.html  
 **Assistance :** https://tuna777123.github.io/mystic-tarot/support-fr.html  
