@@ -127,7 +127,12 @@ void main() {
         labels.releaseNotes,
       );
 
-      _expectCharacters(appName, min: 2, max: 30, field: '$locale App Store name');
+      _expectCharacters(
+        appName,
+        min: 2,
+        max: 30,
+        field: '$locale App Store name',
+      );
       _expectCharacters(subtitle, max: 30, field: '$locale App Store subtitle');
       _expectCharacters(
         promotionalText,
@@ -216,5 +221,9 @@ void _expectCharacters(
 }) {
   final count = value.runes.length;
   expect(count, greaterThanOrEqualTo(min), reason: '$field is required.');
-  expect(count, lessThanOrEqualTo(max), reason: '$field exceeds $max characters.');
+  expect(
+    count,
+    lessThanOrEqualTo(max),
+    reason: '$field exceeds $max characters.',
+  );
 }
