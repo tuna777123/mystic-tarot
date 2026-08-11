@@ -30,16 +30,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en:
-              'Reveal a focused reading and choose one small action worth testing.',
-          es:
-              'Revela una lectura concreta y elige una pequeña acción que valga la pena probar.',
-          fr:
-              'Révélez un tirage ciblé et choisissez une petite action à tester.',
-          pt:
-              'Revele uma leitura focada e escolha uma pequena ação que valha testar.',
-          tr:
-              'Odaklı bir okuma aç ve gerçekten denemeye değer tek bir küçük eylem seç.',
+          en: 'Reveal a focused reading and choose one small action worth testing.',
+          es: 'Revela una lectura concreta y elige una pequeña acción que valga la pena probar.',
+          fr: 'Révélez un tirage ciblé et choisissez une petite action à tester.',
+          pt: 'Revele uma leitura focada e escolha uma pequena ação que valha testar.',
+          tr: 'Odaklı bir okuma aç ve gerçekten denemeye değer tek bir küçük eylem seç.',
         ),
       ),
       _ContinuityStep(
@@ -54,16 +49,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en:
-              'Mystic Mirror asks what actually happened — never whether tarot “won.”',
-          es:
-              'Mystic Mirror pregunta qué ocurrió de verdad, nunca si el tarot “ganó”.',
-          fr:
-              'Mystic Mirror demande ce qui s’est vraiment passé, jamais si le tarot a « gagné ».',
-          pt:
-              'O Mystic Mirror pergunta o que realmente aconteceu — nunca se o tarô “venceu”.',
-          tr:
-              'Mystic Mirror tarotun “tutup tutmadığını” değil, gerçekte ne olduğunu sorar.',
+          en: 'Mystic Mirror asks what actually happened — never whether tarot “won.”',
+          es: 'Mystic Mirror pregunta qué ocurrió de verdad, nunca si el tarot “ganó”.',
+          fr: 'Mystic Mirror demande ce qui s’est vraiment passé, jamais si le tarot a « gagné ».',
+          pt: 'O Mystic Mirror pergunta o que realmente aconteceu — nunca se o tarô “venceu”.',
+          tr: 'Mystic Mirror tarotun “tutup tutmadığını” değil, gerçekte ne olduğunu sorar.',
         ),
       ),
       _ContinuityStep(
@@ -78,16 +68,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en:
-              'Repeated check-ins expose the cards, emotions, and choices that keep returning.',
-          es:
-              'Las revisiones repetidas revelan las cartas, emociones y decisiones que siguen volviendo.',
-          fr:
-              'Les bilans répétés révèlent les cartes, émotions et choix qui reviennent.',
-          pt:
-              'Check-ins repetidos revelam as cartas, emoções e escolhas que continuam voltando.',
-          tr:
-              'Tekrarlanan kontroller geri dönen kartları, duyguları ve seçimleri görünür kılar.',
+          en: 'Repeated check-ins expose the cards, emotions, and choices that keep returning.',
+          es: 'Las revisiones repetidas revelan las cartas, emociones y decisiones que siguen volviendo.',
+          fr: 'Les bilans répétés révèlent les cartes, émotions et choix qui reviennent.',
+          pt: 'Check-ins repetidos revelam as cartas, emoções e escolhas que continuam voltando.',
+          tr: 'Tekrarlanan kontroller geri dönen kartları, duyguları ve seçimleri görünür kılar.',
         ),
       ),
     ];
@@ -96,16 +81,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
       container: true,
       label: _copy(
         language,
-        en:
-            'Read today. Check reality tomorrow. Build private evidence over time.',
-        es:
-            'Lee hoy. Comprueba la realidad mañana. Construye evidencia privada con el tiempo.',
-        fr:
-            'Lisez aujourd’hui. Vérifiez la réalité demain. Construisez des indices privés dans le temps.',
-        pt:
-            'Leia hoje. Confira a realidade amanhã. Construa evidências privadas ao longo do tempo.',
-        tr:
-            'Bugün oku. Yarın gerçeği kontrol et. Zamanla özel kanıtını oluştur.',
+        en: 'Read today. Check reality tomorrow. Build private evidence over time.',
+        es: 'Lee hoy. Comprueba la realidad mañana. Construye evidencia privada con el tiempo.',
+        fr: 'Lisez aujourd’hui. Vérifiez la réalité demain. Construisez des indices privés dans le temps.',
+        pt: 'Leia hoje. Confira a realidade amanhã. Construa evidências privadas ao longo do tempo.',
+        tr: 'Bugün oku. Yarın gerçeği kontrol et. Zamanla özel kanıtını oluştur.',
       ),
       child: Container(
         key: const ValueKey('launch-continuity-timeline'),
@@ -115,16 +95,10 @@ class LaunchContinuityTimeline extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2B1E49),
-              Color(0xFF171223),
-              Color(0xFF0F0D18),
-            ],
+            colors: [Color(0xFF2B1E49), Color(0xFF171223), Color(0xFF0F0D18)],
           ),
           borderRadius: BorderRadius.circular(compact ? 19 : 24),
-          border: Border.all(
-            color: MysticColors.gold.withValues(alpha: .28),
-          ),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .28)),
           boxShadow: [
             BoxShadow(
               color: MysticColors.violet.withValues(alpha: .15),
@@ -152,14 +126,10 @@ class LaunchContinuityTimeline extends StatelessWidget {
               Text(
                 _copy(
                   language,
-                  en:
-                      'A READING SHOULD LEAVE EVIDENCE, NOT JUST A FEELING.',
-                  es:
-                      'UNA LECTURA DEBE DEJAR EVIDENCIA, NO SOLO UNA SENSACIÓN.',
-                  fr:
-                      'UN TIRAGE DOIT LAISSER DES INDICES, PAS SEULEMENT UNE IMPRESSION.',
-                  pt:
-                      'UMA LEITURA DEVE DEIXAR EVIDÊNCIAS, NÃO SÓ UMA SENSAÇÃO.',
+                  en: 'A READING SHOULD LEAVE EVIDENCE, NOT JUST A FEELING.',
+                  es: 'UNA LECTURA DEBE DEJAR EVIDENCIA, NO SOLO UNA SENSACIÓN.',
+                  fr: 'UN TIRAGE DOIT LAISSER DES INDICES, PAS SEULEMENT UNE IMPRESSION.',
+                  pt: 'UMA LEITURA DEVE DEIXAR EVIDÊNCIAS, NÃO SÓ UMA SENSAÇÃO.',
                   tr: 'BİR OKUMA SADECE HİS DEĞİL, KANIT BIRAKMALI.',
                 ),
                 style: const TextStyle(
@@ -271,10 +241,7 @@ class _TimelineHeader extends StatelessWidget {
 }
 
 class _RealityGuardrail extends StatelessWidget {
-  const _RealityGuardrail({
-    required this.language,
-    required this.compact,
-  });
+  const _RealityGuardrail({required this.language, required this.compact});
 
   final MysticLanguage language;
   final bool compact;
@@ -290,9 +257,7 @@ class _RealityGuardrail extends StatelessWidget {
       decoration: BoxDecoration(
         color: MysticColors.gold.withValues(alpha: .075),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: MysticColors.gold.withValues(alpha: .15),
-        ),
+        border: Border.all(color: MysticColors.gold.withValues(alpha: .15)),
       ),
       child: Row(
         children: [
@@ -306,16 +271,11 @@ class _RealityGuardrail extends StatelessWidget {
             child: Text(
               _copy(
                 language,
-                en:
-                    'No prediction score. No forced “accuracy.” Just your private pattern history.',
-                es:
-                    'Sin puntuación de predicción ni “precisión” forzada. Solo tu historial privado de patrones.',
-                fr:
-                    'Aucun score de prédiction ni « précision » forcée. Seulement votre historique privé de tendances.',
-                pt:
-                    'Sem pontuação de previsão ou “precisão” forçada. Só seu histórico privado de padrões.',
-                tr:
-                    'Kehanet puanı yok, zorlama “doğruluk” yok. Yalnızca sana ait özel örüntü geçmişi.',
+                en: 'No prediction score. No forced “accuracy.” Just your private pattern history.',
+                es: 'Sin puntuación de predicción ni “precisión” forzada. Solo tu historial privado de patrones.',
+                fr: 'Aucun score de prédiction ni « précision » forcée. Seulement votre historique privé de tendances.',
+                pt: 'Sem pontuação de previsão ou “precisão” forçada. Só seu histórico privado de padrões.',
+                tr: 'Kehanet puanı yok, zorlama “doğruluk” yok. Yalnızca sana ait özel örüntü geçmişi.',
               ),
               style: TextStyle(
                 fontFamily: 'Arial',
@@ -410,16 +370,11 @@ class PrivateByDesignCard extends StatelessWidget {
                   Text(
                     _copy(
                       language,
-                      en:
-                          'No account or cloud journal. Your reading history stays on this device, with optional PIN and biometrics. Native ads respect available advertising privacy choices; the public web edition stays ad-free.',
-                      es:
-                          'Sin cuenta ni diario en la nube. Tu historial permanece en este dispositivo, con PIN y biometría opcionales. Los anuncios nativos respetan las opciones de privacidad publicitaria disponibles; la web pública sigue sin anuncios.',
-                      fr:
-                          'Aucun compte ni journal cloud. Votre historique reste sur cet appareil, avec code PIN et biométrie en option. Les publicités natives respectent les choix de confidentialité disponibles ; la version web publique reste sans publicité.',
-                      pt:
-                          'Sem conta ou diário na nuvem. Seu histórico fica neste dispositivo, com PIN e biometria opcionais. Os anúncios nativos seguem as opções de privacidade disponíveis; a versão web pública continua sem anúncios.',
-                      tr:
-                          'Hesap veya bulut günlüğü yok. Okuma geçmişin bu cihazda kalır; istersen PIN ve biyometriyle korursun. Native reklamlar mevcut reklam gizlilik tercihlerine uyar; herkese açık web sürümü reklamsızdır.',
+                      en: 'No account or cloud journal. Your reading history stays on this device, with optional PIN and biometrics. Native ads respect available advertising privacy choices; the public web edition stays ad-free.',
+                      es: 'Sin cuenta ni diario en la nube. Tu historial permanece en este dispositivo, con PIN y biometría opcionales. Los anuncios nativos respetan las opciones de privacidad publicitaria disponibles; la web pública sigue sin anuncios.',
+                      fr: 'Aucun compte ni journal cloud. Votre historique reste sur cet appareil, avec code PIN et biométrie en option. Les publicités natives respectent les choix de confidentialité disponibles ; la version web publique reste sans publicité.',
+                      pt: 'Sem conta ou diário na nuvem. Seu histórico fica neste dispositivo, com PIN e biometria opcionais. Os anúncios nativos seguem as opções de privacidade disponíveis; a versão web pública continua sem anúncios.',
+                      tr: 'Hesap veya bulut günlüğü yok. Okuma geçmişin bu cihazda kalır; istersen PIN ve biyometriyle korursun. Native reklamlar mevcut reklam gizlilik tercihlerine uyar; herkese açık web sürümü reklamsızdır.',
                     ),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: MysticColors.mist,
@@ -472,9 +427,7 @@ class _TimelineStepRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: MysticColors.gold.withValues(alpha: .095),
             shape: BoxShape.circle,
-            border: Border.all(
-              color: MysticColors.gold.withValues(alpha: .28),
-            ),
+            border: Border.all(color: MysticColors.gold.withValues(alpha: .28)),
           ),
           child: Stack(
             alignment: Alignment.center,
