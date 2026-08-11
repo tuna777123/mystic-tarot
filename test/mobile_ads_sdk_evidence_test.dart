@@ -65,8 +65,7 @@ void main() {
             'state': <String, Object>{'version': '13.4.0'},
           },
           <String, Object>{
-            'identity':
-                'swift-package-manager-google-user-messaging-platform',
+            'identity': 'swift-package-manager-google-user-messaging-platform',
             'location':
                 'https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git',
             'state': <String, Object>{'version': '3.1.0'},
@@ -94,8 +93,7 @@ void main() {
               'state': <String, Object>{'version': '13.3.0'},
             },
             <String, Object>{
-              'package':
-                  'swift-package-manager-google-user-messaging-platform',
+              'package': 'swift-package-manager-google-user-messaging-platform',
               'repositoryURL':
                   'https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git',
               'state': <String, Object>{'version': '3.1.0'},
@@ -131,8 +129,12 @@ void main() {
   });
 
   test('release manifest and CI keep exact SDK evidence wired in', () {
-    final manifestWriter = File('tool/write_release_manifest.dart').readAsStringSync();
-    final flutterWorkflow = File('.github/workflows/flutter-ci.yml').readAsStringSync();
+    final manifestWriter = File(
+      'tool/write_release_manifest.dart',
+    ).readAsStringSync();
+    final flutterWorkflow = File(
+      '.github/workflows/flutter-ci.yml',
+    ).readAsStringSync();
     final iosWorkflow = File('.github/workflows/ios-ci.yml').readAsStringSync();
 
     expect(manifestWriter, contains("'schemaVersion': 3"));
