@@ -5,6 +5,7 @@ import 'configure_store_identifiers.dart' as store_identifiers;
 import 'src/ios_admob_plist_audit.dart';
 import 'src/ios_artifact_admob.dart';
 import 'src/ios_artifact_certificate.dart';
+import 'src/mobile_ads_sdk_evidence.dart';
 import 'src/store_release_contract.dart';
 
 Future<void> main(List<String> arguments) async {
@@ -59,13 +60,20 @@ Future<void> main(List<String> arguments) async {
       }
     }
 
+    final mobileAdsSdkEvidence = await collectMobileAdsSdkEvidence(
+      platform: platform,
+      androidReportPath: platform == StoreReleasePlatform.android
+          ? 'build/release/android/release-runtime-classpath.txt'
+          : null,
+    );
+
     final pubspec = File('pubspec.yaml');
     if (!pubspec.existsSync()) {
       throw const FormatException('pubspec.yaml was not found.');
     }
     final version = readPubspecVersion(pubspec.readAsStringSync());
     final manifest = <String, Object?>{
-      'schemaVersion': 2,
+      'schemaVersion': 3,
       'app': StoreReleaseContract.appName,
       'version': version,
       'platform': platform.name,
@@ -74,6 +82,7 @@ Future<void> main(List<String> arguments) async {
       'monetizationModel': StoreReleaseContract.monetizationModel,
       'adProvider': 'Google Mobile Ads',
       'consentProvider': 'Google User Messaging Platform',
+      'mobileAdsSdkEvidence': mobileAdsSdkEvidence.toJson(),
       'paidProducts': const <String>[],
       'artifact': artifact.uri.pathSegments.last,
       'artifactBytes': artifact.lengthSync(),
@@ -93,6 +102,10 @@ Future<void> main(List<String> arguments) async {
     };
 
     output.parent.createSync(recursive: true);
+    writeMobileAdsSdkEvidence(
+      mobileAdsSdkEvidence,
+      '${output.parent.path}/mobile-ads-sdk-evidence.json',
+    );
     output.writeAsStringSync(
       const JsonEncoder.withIndent('  ').convert(manifest),
     );

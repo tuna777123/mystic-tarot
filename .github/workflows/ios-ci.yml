@@ -51,7 +51,20 @@ jobs:
       - name: Build unsigned iOS release
         run: flutter build ios --release --no-codesign
 
+      - name: Record iOS Mobile Ads SDK evidence
+        run: |
+          dart run tool/collect_mobile_ads_sdk_evidence.dart \
+            --platform=ios \
+            --output=build/reports/mobile-ads-sdk-evidence-ios.json
+
       - name: Verify release application
         run: |
           test -d build/ios/iphoneos/Runner.app
           grep -q 'com.tunabozcali.mystictarot' ios/Runner.xcodeproj/project.pbxproj
+
+      - name: Upload iOS Mobile Ads SDK evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-ios-mobile-ads-sdk-evidence
+          path: build/reports/mobile-ads-sdk-evidence-ios.json
+          if-no-files-found: error
