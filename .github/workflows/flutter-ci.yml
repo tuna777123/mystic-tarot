@@ -54,7 +54,7 @@ jobs:
           mv /tmp/mystic-build.gradle.kts android/app/build.gradle.kts
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
