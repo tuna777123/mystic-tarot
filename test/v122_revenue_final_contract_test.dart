@@ -29,7 +29,7 @@ void main() {
     final storePack = File('STORE_RELEASE.md').readAsStringSync();
 
     expect(pubspec, contains('version: 1.23.0+33'));
-    expect(pubspec, contains('google_mobile_ads: ^9.0.0'));
+    expect(pubspec, contains('google_mobile_ads: 9.0.0'));
     expect(access, contains('Everything is unlocked.'));
     expect(access, contains('there is no subscription to buy'));
     expect(access, contains('Continue free'));
