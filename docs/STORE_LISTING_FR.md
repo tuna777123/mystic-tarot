@@ -13,6 +13,22 @@ Tarot, Journal & Motifs
 **Texte promotionnel**  
 Révélez les cartes, comprenez l’interprétation et revenez 24 heures plus tard pour la comparer à ce qui s’est réellement passé.
 
+**Description**  
+Mystic Tarot transforme un tirage en une pratique privée de réflexion quotidienne qui continue après la révélation des cartes.
+
+Choisissez les cartes qui vous appellent et voyez comment leur position, leur orientation, leur symbolisme et une prochaine étape concrète contribuent à l’interprétation. Mystic ne présente jamais un tirage comme un diagnostic, une certitude ou une prédiction garantie.
+
+Revenez 24 heures plus tard avec Mystic Mirror et notez ce qui a réellement changé. Au fil du temps, comparez les cartes récurrentes, les évolutions émotionnelles, les tirages enregistrés et les retours Mirror dans votre historique privé. Pattern Lab et Mystic Intelligence aident à faire ressortir les thèmes récurrents à partir des éléments que vous avez réellement consignés.
+
+Explorez les 78 Arcanes, Daily Guidance, les tirages approfondis, le dialogue Oracle, Living Journal, Mystic Path et les outils privés de réflexion. L’accès aux fonctionnalités ne dépend pas d’un abonnement payant. Les apps natives Android et iOS sont soutenues par des publicités occasionnelles Google Mobile Ads soumises aux choix de confidentialité applicables ; l’édition web publique reste sans publicité.
+
+Vos questions, tirages, notes Mystic Mirror, informations de profil et progression restent principalement sur votre appareil. Vous pouvez exporter ou supprimer votre historique local Mystic depuis le produit.
+
+Mystic Tarot est conçu pour la réflexion personnelle et le divertissement. Il ne fournit aucun conseil médical, psychologique, juridique, financier ou d’urgence.
+
+**Mots-clés**  
+oracle,carte du jour,réflexion,arcane,rituel,bien-être,introspection,symbolisme,conscience
+
 **Confidentialité :** https://tuna777123.github.io/mystic-tarot/privacy-fr.html  
 **Assistance :** https://tuna777123.github.io/mystic-tarot/support-fr.html  
 **Marketing :** https://tuna777123.github.io/mystic-tarot/
