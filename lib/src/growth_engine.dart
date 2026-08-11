@@ -271,7 +271,10 @@ class MysticGrowthEngine {
   }
 
   int _activeDayCount(List<ReadingRecord> records) {
-    return records.map((record) => _calendarDayKey(record.createdAt)).toSet().length;
+    return records
+        .map((record) => _calendarDayKey(record.createdAt))
+        .toSet()
+        .length;
   }
 
   int _calendarDayDifference(DateTime earlier, DateTime later) {
