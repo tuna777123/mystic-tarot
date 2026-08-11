@@ -147,9 +147,6 @@ class MysticGrowthEngine {
       );
     }
 
-    // The 24-hour reality check is the product moat. A due Mirror outranks new
-    // content so Mystic behaves like a continuity product, not a card vending
-    // machine.
     if (mirrorDueCount > 0) {
       return MysticNextAction(
         type: MysticNextActionType.mirrorCheckIn,
@@ -180,8 +177,6 @@ class MysticGrowthEngine {
       );
     }
 
-    // Earned insight beats feature discovery. Once the user's own history can
-    // support a pattern, surface it before offering another reading mode.
     if (visiblePattern) {
       return const MysticNextAction(
         type: MysticNextActionType.reviewPattern,
@@ -230,18 +225,20 @@ class MysticGrowthEngine {
     return MysticReturnState.resumedPath;
   }
 
-  String _returnMessage(MysticReturnState state, int streak) => switch (state) {
-        MysticReturnState.firstVisit =>
-          'Your path begins with one honest question.',
-        MysticReturnState.activeToday =>
-          'Today’s signal is already part of your evidence trail.',
-        MysticReturnState.returnedNextDay =>
-          'You came back at the moment yesterday can be compared with reality.',
-        MysticReturnState.continuingStreak =>
-          'Your $streak-day practice is building continuity, not just a streak.',
-        MysticReturnState.resumedPath =>
-          'Your private history kept its place. Continue from where you left it.',
-      };
+  String _returnMessage(MysticReturnState state, int streak) {
+    switch (state) {
+      case MysticReturnState.firstVisit:
+        return 'Your path begins with one honest question.';
+      case MysticReturnState.activeToday:
+        return 'Today’s signal is already part of your evidence trail.';
+      case MysticReturnState.returnedNextDay:
+        return 'You came back at the moment yesterday can be compared with reality.';
+      case MysticReturnState.continuingStreak:
+        return 'Your $streak-day practice is building continuity, not just a streak.';
+      case MysticReturnState.resumedPath:
+        return 'Your private history kept its place. Continue from where you left it.';
+    }
+  }
 
   bool _hasVisiblePattern(List<ReadingRecord> records) {
     if (records.length < 3) return false;
@@ -273,8 +270,9 @@ class MysticGrowthEngine {
     return score.clamp(0, 100);
   }
 
-  int _activeDayCount(List<ReadingRecord> records) =>
-      records.map((record) => _calendarDayKey(record.createdAt)).toSet().length;
+  int _activeDayCount(List<ReadingRecord> records) {
+    return records.map((record) => _calendarDayKey(record.createdAt)).toSet().length;
+  }
 
   int _calendarDayDifference(DateTime earlier, DateTime later) {
     final earlierDay = DateTime(earlier.year, earlier.month, earlier.day);
@@ -282,9 +280,11 @@ class MysticGrowthEngine {
     return laterDay.difference(earlierDay).inDays;
   }
 
-  String _calendarDayKey(DateTime value) =>
-      '${value.year}-${value.month}-${value.day}';
+  String _calendarDayKey(DateTime value) {
+    return '${value.year}-${value.month}-${value.day}';
+  }
 
-  bool _sameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
+  bool _sameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 }
