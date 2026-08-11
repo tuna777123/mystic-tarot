@@ -32,16 +32,18 @@ class MysticIntelligenceTeaser extends StatelessWidget {
     required String fr,
     required String pt,
     required String tr,
-  }) => localized(
-    language.appLanguage,
-    english: en,
-    spanish: es,
-    french: fr,
-    portugueseBrazil: pt,
-    turkish: tr,
-    italian: en,
-    german: en,
-  );
+  }) {
+    return localized(
+      language.appLanguage,
+      english: en,
+      spanish: es,
+      french: fr,
+      portugueseBrazil: pt,
+      turkish: tr,
+      italian: en,
+      german: en,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,19 +73,21 @@ class MysticIntelligenceTeaser extends StatelessWidget {
       final current = topCard;
       if (current == null ||
           entry.value > current.value ||
-          (entry.value == current.value && entry.key.compareTo(current.key) < 0)) {
+          (entry.value == current.value &&
+              entry.key.compareTo(current.key) < 0)) {
         topCard = entry;
       }
     }
 
     final ready = recent.length >= 3;
     final remaining = ready ? 0 : 3 - recent.length;
-    final topCardName = topCard == null
-        ? null
-        : localizedTarotCardName(
-            topCard.key,
-            languageCode: language.code,
-          );
+    String? topCardName;
+    if (topCard != null) {
+      topCardName = localizedTarotCardName(
+        topCard.key,
+        languageCode: language.code,
+      );
+    }
     final title = _title(
       ready: ready,
       topCardName: topCardName,
@@ -139,11 +143,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF3F2D5F),
-                Color(0xFF21172F),
-                Color(0xFF12101A),
-              ],
+              colors: [Color(0xFF3F2D5F), Color(0xFF21172F), Color(0xFF12101A)],
             ),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
@@ -270,7 +270,13 @@ class MysticIntelligenceTeaser extends StatelessWidget {
 
   Widget _header(bool ready, int recentCount) {
     final badge = ready
-        ? t(en: 'READY', es: 'LISTO', fr: 'PRÊT', pt: 'PRONTO', tr: 'HAZIR')
+        ? t(
+            en: 'READY',
+            es: 'LISTO',
+            fr: 'PRÊT',
+            pt: 'PRONTO',
+            tr: 'HAZIR',
+          )
         : '$recentCount/3';
     return Row(
       children: [
