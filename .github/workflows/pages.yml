@@ -29,7 +29,7 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Configure GitHub Pages
         id: pages
@@ -234,7 +234,7 @@ jobs:
             --method POST
             "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
             -f "state=${state}"
-            -f "context=pages/deployment"
+            -f "context=${context}"
             -f "description=${description}"
           )
 
