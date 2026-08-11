@@ -82,6 +82,7 @@ Protected signing values:
 Then:
 
 - [ ] Run the protected production store workflow from `main`.
+- [ ] Confirm the committed `pubspec.lock` is used with `--enforce-lockfile` and remains unchanged.
 - [ ] Produce the owner-signed AAB with real AdMob IDs.
 - [ ] Confirm package `com.tunabozcali.mystictarot`.
 - [ ] Confirm version `1.23.0+33`.
@@ -91,8 +92,10 @@ Then:
 - [ ] Confirm reviewed upload-certificate SHA-256 PASS.
 - [ ] Confirm pinned `bundletool validate` PASS.
 - [ ] Confirm permission/SDK/Kotlin audits PASS.
+- [ ] Confirm `PAGE_ALIGNMENT_16K` and 64-bit ELF LOAD alignment audit PASS.
 - [ ] Save AAB checksum + release manifest.
 - [ ] Upload to Play Internal/Closed Testing.
+- [ ] Review Play App Bundle Explorer 16 KB compatibility evidence.
 - [ ] Review Play pre-launch report.
 
 ## 7. iOS store candidate
@@ -110,6 +113,7 @@ Protected signing values:
 Then:
 
 - [ ] Run the protected production store workflow from `main`.
+- [ ] Confirm the committed `pubspec.lock` is used with `--enforce-lockfile` and remains unchanged.
 - [ ] Record `xcodebuild -version`.
 - [ ] Record `xcrun --sdk iphoneos --show-sdk-version`.
 - [ ] Produce the owner-signed IPA with real AdMob IDs.
@@ -119,6 +123,7 @@ Then:
 - [ ] Confirm final codesign.
 - [ ] Confirm certificate SHA-256.
 - [ ] Confirm entitlements.
+- [ ] Confirm final exported-IPA AdMob App ID + reviewed SKAdNetwork audit PASS.
 - [ ] Save IPA checksum + release manifest.
 - [ ] Upload to TestFlight.
 
@@ -135,13 +140,16 @@ Advertising/privacy:
 - [ ] consent refresh failure;
 - [ ] ad load failure;
 - [ ] offline/poor network;
-- [ ] readings 1 and 2 uninterrupted;
-- [ ] reading 3 creates an eligible interstitial opportunity;
+- [ ] readings 1–3 uninterrupted;
+- [ ] reading 4 is the first possible interstitial boundary;
+- [ ] interstitial opportunity remains every 4th genuinely new saved reading;
 - [ ] cadence persists across restart;
 - [ ] no app-open on first cold start;
-- [ ] no app-open before 3 readings;
-- [ ] no app-open after background <30 seconds;
-- [ ] 2-hour app-open minimum interval;
+- [ ] no app-open before 5 completed readings;
+- [ ] no app-open after background <1 minute;
+- [ ] at least 6 hours between app-open impressions;
+- [ ] at least 45 minutes between actual full-screen impressions across formats;
+- [ ] failed ad-show attempts do not consume cooldown;
 - [ ] no overlapping fullscreen ads;
 - [ ] dismiss and continue immediately;
 - [ ] no paywall/checkout/restore/subscription-management path.
@@ -158,6 +166,7 @@ Product regression:
 - [ ] deep readings;
 - [ ] Mystic Mirror;
 - [ ] Living Journal;
+- [ ] Pattern Lab;
 - [ ] Oracle;
 - [ ] Mystic Path / Arcana;
 - [ ] export/import/delete/protected transfer;
