@@ -9,7 +9,7 @@ void main() {
     final policy = File('lib/src/ad_experience_policy.dart').readAsStringSync();
     final main = File('lib/main.dart').readAsStringSync();
 
-    expect(pubspec, contains('google_mobile_ads: ^9.0.0'));
+    expect(pubspec, contains('google_mobile_ads: 9.0.0'));
     expect(main, contains('AdRevenueService.instance.initialize()'));
     expect(
       service,
