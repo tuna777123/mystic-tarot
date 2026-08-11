@@ -35,7 +35,9 @@ Map<String, String> _parseArguments(List<String> arguments) {
   for (final argument in arguments) {
     if (!argument.startsWith('--') || !argument.contains('=')) continue;
     final separator = argument.indexOf('=');
-    values[argument.substring(2, separator)] = argument.substring(separator + 1);
+    values[argument.substring(2, separator)] = argument.substring(
+      separator + 1,
+    );
   }
   return values;
 }
