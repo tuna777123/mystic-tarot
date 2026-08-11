@@ -1,20 +1,39 @@
 /// Product-level guardrails that keep advertising from interrupting Mystic's
 /// reflection loop or appearing back-to-back.
 ///
-/// This policy is intentionally independent from the ad SDK so cadence can be
-/// tested deterministically without loading native ads.
+/// Mystic is advertising-supported, but the product must feel like a premium
+/// reflection tool rather than an ad container. These limits intentionally
+/// trade some short-term impression volume for trust, retention, and a cleaner
+/// first-session experience.
+///
+/// This policy is independent from the ad SDK so cadence can be tested
+/// deterministically without loading native ads.
 class AdExperiencePolicy {
   const AdExperiencePolicy._();
 
   static const maxAppOpenCacheAge = Duration(hours: 4);
-  static const minimumAppOpenInterval = Duration(hours: 2);
-  static const minimumBackgroundDuration = Duration(seconds: 30);
-  static const minimumReadingsBeforeAppOpen = 3;
-  static const interstitialEveryReadings = 3;
 
-  /// A full-screen ad should never feel like it is chasing the user from one
-  /// surface to the next. This gap applies across formats and app restarts.
-  static const minimumFullScreenGap = Duration(minutes: 20);
+  /// Returning-user app-open ads are intentionally rare. A six-hour cooldown
+  /// prevents the format from becoming part of the user's mental model of
+  /// opening Mystic.
+  static const minimumAppOpenInterval = Duration(hours: 6);
+
+  /// Short app switches should never be monetized. The user must have truly
+  /// left the experience before a returning app-open opportunity exists.
+  static const minimumBackgroundDuration = Duration(minutes: 1);
+
+  /// The first several readings establish product value and the 24-hour Mirror
+  /// loop before an app-open ad can ever be eligible.
+  static const minimumReadingsBeforeAppOpen = 5;
+
+  /// Interstitials remain tied only to a natural saved-reading boundary, and
+  /// no more often than every fourth genuinely new completed reading.
+  static const interstitialEveryReadings = 4;
+
+  /// Full-screen formats share one generous cooldown across app restarts so an
+  /// interstitial cannot be followed by an app-open ad (or vice versa) while
+  /// the reflection still feels recent.
+  static const minimumFullScreenGap = Duration(minutes: 45);
 
   static bool fullScreenGapSatisfied({
     required DateTime now,
