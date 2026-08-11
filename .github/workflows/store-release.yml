@@ -61,7 +61,7 @@ jobs:
       - name: Apply permanent store identifiers
         run: dart run tool/configure_store_identifiers.dart
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
       - name: Verify Dart formatting
@@ -138,7 +138,7 @@ jobs:
           dart run tool/configure_android_signing.dart
           grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
       - name: Build signed Android bundle
@@ -289,7 +289,7 @@ jobs:
           echo "profile_uuid=$PROFILE_UUID" >> "$GITHUB_OUTPUT"
           echo "profile_name=$PROFILE_NAME" >> "$GITHUB_OUTPUT"
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
       - name: Prepare Flutter iOS release
