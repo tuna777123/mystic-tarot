@@ -27,7 +27,7 @@ Questions, readings, Mirror notes, profile details, and progress remain primaril
 Mystic Tarot is designed for personal reflection and entertainment. It does not provide medical, mental-health, legal, financial, or emergency advice.
 
 **Keywords**  
-daily card,oracle,reflection,arcana,mindfulness,symbolism,introspection,self care,spiritual
+oracle,reflection,arcana,mindfulness,symbolism,introspection,self care,spiritual,card reading
 
 **Primary category:** Lifestyle  
 **Secondary category:** Entertainment
