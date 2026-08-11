@@ -44,14 +44,14 @@ void main() {
     expect(adService, contains('InterstitialAd.load'));
     expect(adService, contains('AdExperiencePolicy.minimumBackgroundDuration'));
     expect(adService, contains('AdExperiencePolicy.interstitialEveryReadings'));
-    expect(adPolicy, contains('minimumAppOpenInterval = Duration(hours: 2)'));
+    expect(adPolicy, contains('minimumAppOpenInterval = Duration(hours: 6)'));
     expect(
       adPolicy,
-      contains('minimumBackgroundDuration = Duration(seconds: 30)'),
+      contains('minimumBackgroundDuration = Duration(minutes: 1)'),
     );
-    expect(adPolicy, contains('minimumReadingsBeforeAppOpen = 3'));
-    expect(adPolicy, contains('interstitialEveryReadings = 3'));
-    expect(adPolicy, contains('minimumFullScreenGap = Duration(minutes: 20)'));
+    expect(adPolicy, contains('minimumReadingsBeforeAppOpen = 5'));
+    expect(adPolicy, contains('interstitialEveryReadings = 4'));
+    expect(adPolicy, contains('minimumFullScreenGap = Duration(minutes: 45)'));
     expect(adService, contains('SharedPreferences.getInstance()'));
 
     expect(
