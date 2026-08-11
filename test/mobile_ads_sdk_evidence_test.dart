@@ -140,10 +140,7 @@ void main() {
     expect(manifestWriter, contains("'schemaVersion': 3"));
     expect(manifestWriter, contains("'mobileAdsSdkEvidence':"));
     expect(manifestWriter, contains('collectMobileAdsSdkEvidence('));
-    expect(
-      manifestWriter,
-      contains('mobile-ads-sdk-evidence.json'),
-    );
+    expect(manifestWriter, contains('mobile-ads-sdk-evidence.json'));
     expect(
       flutterWorkflow,
       contains('dart run tool/collect_mobile_ads_sdk_evidence.dart'),
