@@ -27,7 +27,7 @@ Tus preguntas, lecturas, notas de Mystic Mirror, datos de perfil y progreso perm
 Mystic Tarot está diseñado para la reflexión personal y el entretenimiento. No ofrece asesoramiento médico, psicológico, legal, financiero ni de emergencia.
 
 **Palabras clave**  
-oráculo,carta diaria,reflexión,arcano,bienestar,introspección,simbolismo,autoconocimiento
+oráculo,carta,reflexión,arcano,bienestar,introspección,simbolismo,autoconocimiento
 
 **Privacidad:** https://tuna777123.github.io/mystic-tarot/privacy-es.html  
 **Soporte:** https://tuna777123.github.io/mystic-tarot/support-es.html  
