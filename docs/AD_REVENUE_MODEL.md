@@ -6,11 +6,12 @@ The normal profile experience states this directly as a free, advertising-suppor
 
 ## Revenue surfaces
 
-- **Interstitial:** eligible after every third genuinely new saved reading, at the natural completion boundary.
-- **App open:** eligible only for returning users after at least three completed readings, after at least 30 seconds in the background, and no more frequently than once every two hours.
+- **Interstitial:** eligible only after every fourth genuinely new saved reading, at the natural completion boundary. The first three new readings remain uninterrupted.
+- **App open:** eligible only for returning users after at least five completed readings, after at least one minute in the background, and no more frequently than once every six hours.
+- **Cross-format guardrail:** any actual app-open or interstitial impression starts a shared 45-minute full-screen gap. Failed show attempts do not consume the cooldown.
 - **Web:** the public web edition remains ad-free.
 
-Core access never depends on watching an ad. Rewarded ads are intentionally not used as a gate for core features.
+Core access never depends on watching an ad. Rewarded ads are intentionally not used as a gate for core features. Missing, unavailable, or failed ads never block the product.
 
 ## Privacy and consent
 
