@@ -121,16 +121,11 @@ class MysticIntelligenceTeaser extends StatelessWidget {
               tr: 'Yedi günlük Pattern Lab kanıtını aç',
             )
           : t(
-              en:
-                  '$remaining more saved readings until Pattern Lab has enough evidence to compare',
-              es:
-                  'Faltan $remaining lecturas guardadas para que Pattern Lab tenga evidencia suficiente',
-              fr:
-                  'Encore $remaining tirages enregistrés avant que Pattern Lab ait assez d’indices',
-              pt:
-                  'Faltam $remaining leituras salvas para o Pattern Lab ter evidências suficientes',
-              tr:
-                  'Pattern Lab karşılaştırması için $remaining kayıtlı okuma daha gerekiyor',
+              en: '$remaining more saved readings until Pattern Lab has enough evidence to compare',
+              es: 'Faltan $remaining lecturas guardadas para que Pattern Lab tenga evidencia suficiente',
+              fr: 'Encore $remaining tirages enregistrés avant que Pattern Lab ait assez d’indices',
+              pt: 'Faltam $remaining leituras salvas para o Pattern Lab ter evidências suficientes',
+              tr: 'Pattern Lab karşılaştırması için $remaining kayıtlı okuma daha gerekiyor',
             ),
       child: InkWell(
         onTap: onOpen,
@@ -270,13 +265,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
 
   Widget _header(bool ready, int recentCount) {
     final badge = ready
-        ? t(
-            en: 'READY',
-            es: 'LISTO',
-            fr: 'PRÊT',
-            pt: 'PRONTO',
-            tr: 'HAZIR',
-          )
+        ? t(en: 'READY', es: 'LISTO', fr: 'PRÊT', pt: 'PRONTO', tr: 'HAZIR')
         : '$recentCount/3';
     return Row(
       children: [
@@ -353,29 +342,19 @@ class MysticIntelligenceTeaser extends StatelessWidget {
   String _body({required bool ready, required int remaining}) {
     if (ready) {
       return t(
-        en:
-            'Compare recurring symbols and emotional direction from your own saved history — never a prediction score.',
-        es:
-            'Compara símbolos recurrentes y dirección emocional de tu propio historial, nunca una puntuación de predicción.',
-        fr:
-            'Comparez les symboles récurrents et la direction émotionnelle de votre historique, jamais un score de prédiction.',
-        pt:
-            'Compare símbolos recorrentes e direção emocional do seu próprio histórico, nunca uma pontuação de previsão.',
-        tr:
-            'Kendi kayıtlı geçmişindeki tekrar eden sembolleri ve duygusal yönü karşılaştır; kehanet puanı üretmez.',
+        en: 'Compare recurring symbols and emotional direction from your own saved history — never a prediction score.',
+        es: 'Compara símbolos recurrentes y dirección emocional de tu propio historial, nunca una puntuación de predicción.',
+        fr: 'Comparez les symboles récurrents et la direction émotionnelle de votre historique, jamais un score de prédiction.',
+        pt: 'Compare símbolos recorrentes e direção emocional do seu próprio histórico, nunca uma pontuação de previsão.',
+        tr: 'Kendi kayıtlı geçmişindeki tekrar eden sembolleri ve duygusal yönü karşılaştır; kehanet puanı üretmez.',
       );
     }
     return t(
-      en:
-          '$remaining more saved reading${remaining == 1 ? '' : 's'} will give Pattern Lab enough evidence for its first comparison.',
-      es:
-          '$remaining lectura(s) guardada(s) más darán a Pattern Lab evidencia suficiente para su primera comparación.',
-      fr:
-          '$remaining tirage(s) enregistré(s) de plus donneront à Pattern Lab assez d’indices pour une première comparaison.',
-      pt:
-          'Mais $remaining leitura(s) salva(s) darão ao Pattern Lab evidências suficientes para a primeira comparação.',
-      tr:
-          '$remaining kayıtlı okuma daha Pattern Lab’in ilk karşılaştırması için yeterli kanıtı oluşturacak.',
+      en: '$remaining more saved reading${remaining == 1 ? '' : 's'} will give Pattern Lab enough evidence for its first comparison.',
+      es: '$remaining lectura(s) guardada(s) más darán a Pattern Lab evidencia suficiente para su primera comparación.',
+      fr: '$remaining tirage(s) enregistré(s) de plus donneront à Pattern Lab assez d’indices pour une première comparaison.',
+      pt: 'Mais $remaining leitura(s) salva(s) darão ao Pattern Lab evidências suficientes para a primeira comparação.',
+      tr: '$remaining kayıtlı okuma daha Pattern Lab’in ilk karşılaştırması için yeterli kanıtı oluşturacak.',
     );
   }
 }
