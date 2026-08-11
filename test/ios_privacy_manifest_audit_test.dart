@@ -43,11 +43,7 @@ void main() {
     final linted = <String>[];
     final result = await verifyIosAppPrivacyManifests(
       appBundle: app,
-      commandRunner: (
-        executable,
-        arguments, {
-        workingDirectory,
-      }) async {
+      commandRunner: (executable, arguments, {workingDirectory}) async {
         expect(executable, 'plutil');
         expect(arguments.first, '-lint');
         linted.add(arguments.last);
@@ -56,13 +52,10 @@ void main() {
     );
 
     expect(result.manifestCount, 2);
-    expect(
-      result.manifestPaths,
-      <String>[
-        'Frameworks/GoogleMobileAds.framework/PrivacyInfo.xcprivacy',
-        'Frameworks/UserMessagingPlatform.framework/PrivacyInfo.xcprivacy',
-      ],
-    );
+    expect(result.manifestPaths, <String>[
+      'Frameworks/GoogleMobileAds.framework/PrivacyInfo.xcprivacy',
+      'Frameworks/UserMessagingPlatform.framework/PrivacyInfo.xcprivacy',
+    ]);
     expect(linted, hasLength(2));
     expect(result.toJson()['privacyManifestCount'], 2);
   });
@@ -80,11 +73,8 @@ void main() {
     expect(
       () => verifyIosAppPrivacyManifests(
         appBundle: app,
-        commandRunner: (
-          executable,
-          arguments, {
-          workingDirectory,
-        }) async => ProcessResult(1, 1, '', 'invalid plist'),
+        commandRunner: (executable, arguments, {workingDirectory}) async =>
+            ProcessResult(1, 1, '', 'invalid plist'),
       ),
       throwsA(
         isA<IosPrivacyManifestAuditFailure>().having(
@@ -104,13 +94,11 @@ void main() {
 
     final result = await verifyIosArtifactPrivacyManifests(
       ipaFile: ipa,
-      commandRunner: (
-        executable,
-        arguments, {
-        workingDirectory,
-      }) async {
+      commandRunner: (executable, arguments, {workingDirectory}) async {
         if (executable == 'unzip') {
-          final outputDirectory = Directory(arguments[arguments.indexOf('-d') + 1]);
+          final outputDirectory = Directory(
+            arguments[arguments.indexOf('-d') + 1],
+          );
           final manifest = File(
             '${outputDirectory.path}${Platform.pathSeparator}Payload'
             '${Platform.pathSeparator}Runner.app'
@@ -136,7 +124,9 @@ void main() {
   });
 
   test('fails closed for an empty signed IPA', () async {
-    final root = Directory.systemTemp.createTempSync('mystic-privacy-empty-ipa-');
+    final root = Directory.systemTemp.createTempSync(
+      'mystic-privacy-empty-ipa-',
+    );
     addTearDown(() => root.deleteSync(recursive: true));
     final ipa = File('${root.path}${Platform.pathSeparator}Mystic.ipa')
       ..writeAsBytesSync(const <int>[]);
