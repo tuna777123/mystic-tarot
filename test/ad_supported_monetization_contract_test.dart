@@ -26,14 +26,14 @@ void main() {
     expect(service, contains('AdExperiencePolicy.interstitialEveryReadings'));
     expect(service, contains('AdExperiencePolicy.appOpenEligible('));
     expect(service, contains('AdExperiencePolicy.minimumBackgroundDuration'));
-    expect(policy, contains('interstitialEveryReadings = 3'));
-    expect(policy, contains('minimumReadingsBeforeAppOpen = 3'));
+    expect(policy, contains('interstitialEveryReadings = 4'));
+    expect(policy, contains('minimumReadingsBeforeAppOpen = 5'));
     expect(
       policy,
-      contains('minimumBackgroundDuration = Duration(seconds: 30)'),
+      contains('minimumBackgroundDuration = Duration(minutes: 1)'),
     );
-    expect(policy, contains('minimumAppOpenInterval = Duration(hours: 2)'));
-    expect(policy, contains('minimumFullScreenGap = Duration(minutes: 20)'));
+    expect(policy, contains('minimumAppOpenInterval = Duration(hours: 6)'));
+    expect(policy, contains('minimumFullScreenGap = Duration(minutes: 45)'));
     expect(service, contains('SharedPreferences.getInstance()'));
     expect(service, contains('MYSTIC_USE_TEST_ADS'));
     expect(service, contains('ADMOB_ANDROID_APP_OPEN_ID'));
