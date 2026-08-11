@@ -30,11 +30,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en: 'Read, choose one aligned action, and keep the moment privately.',
-          es: 'Lee, elige una acción alineada y guarda el momento en privado.',
-          fr: 'Lisez, choisissez une action alignée et gardez ce moment en privé.',
-          pt: 'Leia, escolha uma ação alinhada e guarde o momento em privado.',
-          tr: 'Oku, tek bir uyumlu eylem seç ve bu anı özel olarak sakla.',
+          en: 'Reveal a focused reading and choose one small action worth testing.',
+          es: 'Revela una lectura concreta y elige una pequeña acción que valga la pena probar.',
+          fr: 'Révélez un tirage ciblé et choisissez une petite action à tester.',
+          pt: 'Revele uma leitura focada e escolha uma pequena ação que valha testar.',
+          tr: 'Odaklı bir okuma aç ve gerçekten denemeye değer tek bir küçük eylem seç.',
         ),
       ),
       _ContinuityStep(
@@ -49,11 +49,11 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en: 'Mystic Mirror asks what actually happened — not whether tarot was “right.”',
-          es: 'Mystic Mirror pregunta qué ocurrió de verdad, no si el tarot “acertó”.',
-          fr: 'Mystic Mirror demande ce qui s’est vraiment passé, pas si le tarot avait « raison ».',
-          pt: 'O Mystic Mirror pergunta o que realmente aconteceu — não se o tarô “acertou”.',
-          tr: 'Mystic Mirror tarotun “doğru çıkıp çıkmadığını” değil, gerçekte ne olduğunu sorar.',
+          en: 'Mystic Mirror asks what actually happened — never whether tarot “won.”',
+          es: 'Mystic Mirror pregunta qué ocurrió de verdad, nunca si el tarot “ganó”.',
+          fr: 'Mystic Mirror demande ce qui s’est vraiment passé, jamais si le tarot a « gagné ».',
+          pt: 'O Mystic Mirror pergunta o que realmente aconteceu — nunca se o tarô “venceu”.',
+          tr: 'Mystic Mirror tarotun “tutup tutmadığını” değil, gerçekte ne olduğunu sorar.',
         ),
       ),
       _ContinuityStep(
@@ -68,8 +68,8 @@ class LaunchContinuityTimeline extends StatelessWidget {
         ),
         body: _copy(
           language,
-          en: 'Repeated check-ins reveal the cards, emotions, and choices that keep returning.',
-          es: 'Las revisiones repetidas revelan las cartas, emociones y decisiones que vuelven.',
+          en: 'Repeated check-ins expose the cards, emotions, and choices that keep returning.',
+          es: 'Las revisiones repetidas revelan las cartas, emociones y decisiones que siguen volviendo.',
           fr: 'Les bilans répétés révèlent les cartes, émotions et choix qui reviennent.',
           pt: 'Check-ins repetidos revelam as cartas, emoções e escolhas que continuam voltando.',
           tr: 'Tekrarlanan kontroller geri dönen kartları, duyguları ve seçimleri görünür kılar.',
@@ -95,15 +95,15 @@ class LaunchContinuityTimeline extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF24183E), Color(0xFF120F1D)],
+            colors: [Color(0xFF2B1E49), Color(0xFF171223), Color(0xFF0F0D18)],
           ),
-          borderRadius: BorderRadius.circular(compact ? 18 : 22),
-          border: Border.all(color: MysticColors.gold.withValues(alpha: .24)),
+          borderRadius: BorderRadius.circular(compact ? 19 : 24),
+          border: Border.all(color: MysticColors.gold.withValues(alpha: .28)),
           boxShadow: [
             BoxShadow(
-              color: MysticColors.violet.withValues(alpha: .12),
-              blurRadius: compact ? 18 : 26,
-              offset: const Offset(0, 8),
+              color: MysticColors.violet.withValues(alpha: .15),
+              blurRadius: compact ? 20 : 30,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -112,49 +112,68 @@ class LaunchContinuityTimeline extends StatelessWidget {
           children: [
             Row(
               children: [
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 5,
+                Expanded(
+                  child: Text(
+                    _copy(
+                      language,
+                      en: 'THE MYSTIC LOOP',
+                      es: 'EL CICLO MYSTIC',
+                      fr: 'LA BOUCLE MYSTIC',
+                      pt: 'O CICLO MYSTIC',
+                      tr: 'MYSTIC DÖNGÜSÜ',
                     ),
-                    decoration: BoxDecoration(
-                      color: MysticColors.gold.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: MysticColors.gold.withValues(alpha: .2),
-                      ),
-                    ),
-                    child: Text(
-                      _copy(
-                        language,
-                        en: 'PRIVATE EVIDENCE',
-                        es: 'EVIDENCIA PRIVADA',
-                        fr: 'INDICES PRIVÉS',
-                        pt: 'EVIDÊNCIA PRIVADA',
-                        tr: 'ÖZEL KANIT',
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: 'Arial',
-                        color: MysticColors.gold,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: .9,
-                      ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Arial',
+                      color: MysticColors.gold,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.25,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                const Icon(
-                  Icons.lock_outline_rounded,
-                  color: MysticColors.lavender,
-                  size: 16,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .05),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: MysticColors.lavender.withValues(alpha: .17),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.lock_outline_rounded,
+                        color: MysticColors.lavender,
+                        size: 13,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _copy(
+                          language,
+                          en: 'PRIVATE',
+                          es: 'PRIVADO',
+                          fr: 'PRIVÉ',
+                          pt: 'PRIVADO',
+                          tr: 'ÖZEL',
+                        ),
+                        style: const TextStyle(
+                          fontFamily: 'Arial',
+                          color: MysticColors.lavender,
+                          fontSize: 7.5,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .7,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: compact ? 9 : 11),
+            SizedBox(height: compact ? 10 : 12),
             Text(
               _copy(
                 language,
@@ -166,7 +185,7 @@ class LaunchContinuityTimeline extends StatelessWidget {
               ),
               style: TextStyle(
                 color: MysticColors.mist,
-                fontSize: compact ? 15 : 18,
+                fontSize: compact ? 16 : 19,
                 height: 1.12,
                 fontWeight: FontWeight.w800,
               ),
@@ -176,34 +195,82 @@ class LaunchContinuityTimeline extends StatelessWidget {
               Text(
                 _copy(
                   language,
-                  en: 'ONE READING BECOMES A CONTINUING STORY.',
-                  es: 'UNA LECTURA SE CONVIERTE EN UNA HISTORIA CONTINUA.',
-                  fr: 'UN TIRAGE DEVIENT UNE HISTOIRE QUI CONTINUE.',
-                  pt: 'UMA LEITURA VIRA UMA HISTÓRIA CONTÍNUA.',
-                  tr: 'TEK OKUMA DEVAM EDEN BİR HİKÂYEYE DÖNÜŞÜR.',
+                  en: 'A READING SHOULD LEAVE EVIDENCE, NOT JUST A FEELING.',
+                  es: 'UNA LECTURA DEBE DEJAR EVIDENCIA, NO SOLO UNA SENSACIÓN.',
+                  fr: 'UN TIRAGE DOIT LAISSER DES INDICES, PAS SEULEMENT UNE IMPRESSION.',
+                  pt: 'UMA LEITURA DEVE DEIXAR EVIDÊNCIAS, NÃO SÓ UMA SENSAÇÃO.',
+                  tr: 'BİR OKUMA SADECE HİS DEĞİL, KANIT BIRAKMALI.',
                 ),
                 style: const TextStyle(
                   fontFamily: 'Arial',
                   color: MysticColors.lavender,
                   fontSize: 8,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: .75,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: .72,
                 ),
               ),
             ],
-            SizedBox(height: compact ? 12 : 15),
+            SizedBox(height: compact ? 13 : 16),
             for (var index = 0; index < steps.length; index++) ...[
-              _TimelineStepRow(step: steps[index], compact: compact),
+              _TimelineStepRow(
+                step: steps[index],
+                compact: compact,
+                index: index + 1,
+              ),
               if (index != steps.length - 1)
                 Padding(
-                  padding: EdgeInsets.only(left: compact ? 13 : 15),
+                  padding: EdgeInsets.only(left: compact ? 14 : 16),
                   child: Container(
                     width: 1,
-                    height: compact ? 8 : 11,
-                    color: MysticColors.gold.withValues(alpha: .2),
+                    height: compact ? 9 : 12,
+                    color: MysticColors.gold.withValues(alpha: .22),
                   ),
                 ),
             ],
+            SizedBox(height: compact ? 12 : 14),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 10 : 12,
+                vertical: compact ? 8 : 10,
+              ),
+              decoration: BoxDecoration(
+                color: MysticColors.gold.withValues(alpha: .075),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: MysticColors.gold.withValues(alpha: .15),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.verified_user_outlined,
+                    color: MysticColors.gold,
+                    size: 15,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _copy(
+                        language,
+                        en: 'No prediction score. No forced “accuracy.” Just your private pattern history.',
+                        es: 'Sin puntuación de predicción ni “precisión” forzada. Solo tu historial privado de patrones.',
+                        fr: 'Aucun score de prédiction ni « précision » forcée. Seulement votre historique privé de tendances.',
+                        pt: 'Sem pontuação de previsão ou “precisão” forçada. Só seu histórico privado de padrões.',
+                        tr: 'Kehanet puanı yok, zorlama “doğruluk” yok. Yalnızca sana ait özel örüntü geçmişi.',
+                      ),
+                      style: TextStyle(
+                        fontFamily: 'Arial',
+                        color: MysticColors.mist,
+                        fontSize: compact ? 9.5 : 10.5,
+                        height: 1.35,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -223,88 +290,90 @@ class PrivateByDesignCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    container: true,
-    label: _copy(
-      language,
-      en: 'Private by design',
-      es: 'Privado por diseño',
-      fr: 'Privé dès la conception',
-      pt: 'Privado desde a concepção',
-      tr: 'Tasarımı gereği özel',
-    ),
-    child: Container(
-      key: const ValueKey('private-by-design-card'),
-      width: double.infinity,
-      padding: EdgeInsets.all(compact ? 12 : 16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1E1830), Color(0xFF12101B)],
+        container: true,
+        label: _copy(
+          language,
+          en: 'Private by design',
+          es: 'Privado por diseño',
+          fr: 'Privé dès la conception',
+          pt: 'Privado desde a concepção',
+          tr: 'Tasarımı gereği özel',
         ),
-        borderRadius: BorderRadius.circular(compact ? 15 : 19),
-        border: Border.all(color: MysticColors.gold.withValues(alpha: .24)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: compact ? 34 : 40,
-            height: compact ? 34 : 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: MysticColors.gold.withValues(alpha: .11),
-              borderRadius: BorderRadius.circular(12),
+        child: Container(
+          key: const ValueKey('private-by-design-card'),
+          width: double.infinity,
+          padding: EdgeInsets.all(compact ? 12 : 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1D1830), Color(0xFF11101A)],
             ),
-            child: Icon(
-              Icons.shield_outlined,
-              size: compact ? 18 : 21,
-              color: MysticColors.gold,
+            borderRadius: BorderRadius.circular(compact ? 16 : 20),
+            border: Border.all(
+              color: MysticColors.lavender.withValues(alpha: .18),
             ),
           ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _copy(
-                    language,
-                    en: 'Private by design',
-                    es: 'Privado por diseño',
-                    fr: 'Privé dès la conception',
-                    pt: 'Privado desde a concepção',
-                    tr: 'Tasarımı gereği özel',
-                  ),
-                  style: TextStyle(
-                    color: MysticColors.gold,
-                    fontSize: compact ? 12 : 14,
-                    fontWeight: FontWeight.w900,
-                  ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: compact ? 35 : 42,
+                height: compact ? 35 : 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: MysticColors.gold.withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(13),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _copy(
-                    language,
-                    en: 'No account or cloud journal. Your private history stays on this device. Native ads follow the advertising privacy choices available to you; the public web edition is ad-free. You can also protect the whole app with an optional six-digit PIN and biometrics on supported devices.',
-                    es: 'Sin cuenta ni diario en la nube. Tu historial privado permanece en este dispositivo. Los anuncios nativos respetan las opciones de privacidad publicitaria disponibles; la versión web pública no tiene anuncios. También puedes proteger toda la app con un PIN opcional de seis dígitos y biometría en dispositivos compatibles.',
-                    fr: 'Aucun compte ni journal cloud. Votre historique privé reste sur cet appareil. Les publicités natives respectent les choix de confidentialité publicitaire disponibles ; la version web publique reste sans publicité. Vous pouvez aussi protéger toute l’app avec un code PIN facultatif à six chiffres et la biométrie sur les appareils compatibles.',
-                    pt: 'Sem conta ou diário na nuvem. Seu histórico privado fica neste dispositivo. Os anúncios nativos seguem as opções de privacidade de publicidade disponíveis; a versão web pública permanece sem anúncios. Você também pode proteger todo o app com PIN opcional de seis dígitos e biometria em dispositivos compatíveis.',
-                    tr: 'Hesap veya bulut günlüğü yok. Özel geçmişin bu cihazda kalır. Native reklamlar sana sunulan reklam gizlilik tercihlerini izler; herkese açık web sürümü reklamsızdır. İstersen tüm uygulamayı altı haneli PIN ve desteklenen cihazlarda biyometriyle de koruyabilirsin.',
-                  ),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: MysticColors.mist,
-                    fontSize: compact ? 10 : 12,
-                    height: 1.4,
-                  ),
+                child: Icon(
+                  Icons.shield_outlined,
+                  size: compact ? 18 : 21,
+                  color: MysticColors.gold,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _copy(
+                        language,
+                        en: 'Private by design',
+                        es: 'Privado por diseño',
+                        fr: 'Privé dès la conception',
+                        pt: 'Privado desde a concepção',
+                        tr: 'Tasarımı gereği özel',
+                      ),
+                      style: TextStyle(
+                        color: MysticColors.goldSoft,
+                        fontSize: compact ? 12 : 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _copy(
+                        language,
+                        en: 'No account or cloud journal. Your reading history stays on this device, with optional PIN and biometrics. Native ads respect available advertising privacy choices; the public web edition stays ad-free.',
+                        es: 'Sin cuenta ni diario en la nube. Tu historial permanece en este dispositivo, con PIN y biometría opcionales. Los anuncios nativos respetan las opciones de privacidad publicitaria disponibles; la web pública sigue sin anuncios.',
+                        fr: 'Aucun compte ni journal cloud. Votre historique reste sur cet appareil, avec code PIN et biométrie en option. Les publicités natives respectent les choix de confidentialité disponibles ; la version web publique reste sans publicité.',
+                        pt: 'Sem conta ou diário na nuvem. Seu histórico fica neste dispositivo, com PIN e biometria opcionais. Os anúncios nativos seguem as opções de privacidade disponíveis; a versão web pública continua sem anúncios.',
+                        tr: 'Hesap veya bulut günlüğü yok. Okuma geçmişin bu cihazda kalır; istersen PIN ve biyometriyle korursun. Native reklamlar mevcut reklam gizlilik tercihlerine uyar; herkese açık web sürümü reklamsızdır.',
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: MysticColors.mist,
+                            fontSize: compact ? 10 : 12,
+                            height: 1.4,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 }
 
 class _ContinuityStep {
@@ -320,62 +389,87 @@ class _ContinuityStep {
 }
 
 class _TimelineStepRow extends StatelessWidget {
-  const _TimelineStepRow({required this.step, required this.compact});
+  const _TimelineStepRow({
+    required this.step,
+    required this.compact,
+    required this.index,
+  });
 
   final _ContinuityStep step;
   final bool compact;
+  final int index;
 
   @override
   Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Container(
-        width: compact ? 27 : 31,
-        height: compact ? 27 : 31,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: MysticColors.gold.withValues(alpha: .1),
-          shape: BoxShape.circle,
-          border: Border.all(color: MysticColors.gold.withValues(alpha: .22)),
-        ),
-        child: Icon(
-          step.icon,
-          color: MysticColors.gold,
-          size: compact ? 15 : 17,
-        ),
-      ),
-      const SizedBox(width: 10),
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 1),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                step.label,
-                style: TextStyle(
-                  fontFamily: 'Arial',
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: compact ? 29 : 33,
+            height: compact ? 29 : 33,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: MysticColors.gold.withValues(alpha: .095),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: MysticColors.gold.withValues(alpha: .28),
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  step.icon,
                   color: MysticColors.gold,
-                  fontSize: compact ? 8 : 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: .8,
+                  size: compact ? 15 : 17,
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                step.body,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: MysticColors.mist,
-                  fontSize: compact ? 10 : 11,
-                  height: 1.35,
+                Positioned(
+                  right: 1,
+                  bottom: 0,
+                  child: Text(
+                    '$index',
+                    style: const TextStyle(
+                      fontFamily: 'Arial',
+                      color: MysticColors.lavender,
+                      fontSize: 6.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    ],
-  );
+          const SizedBox(width: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    step.label,
+                    style: TextStyle(
+                      fontFamily: 'Arial',
+                      color: MysticColors.gold,
+                      fontSize: compact ? 8 : 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .82,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    step.body,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: MysticColors.mist,
+                          fontSize: compact ? 10 : 11,
+                          height: 1.35,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
 }
 
 String _copy(
@@ -385,10 +479,11 @@ String _copy(
   required String fr,
   required String pt,
   required String tr,
-}) => switch (language) {
-  MysticLanguage.turkish => tr,
-  MysticLanguage.spanish => es,
-  MysticLanguage.french => fr,
-  MysticLanguage.portugueseBrazil => pt,
-  _ => en,
-};
+}) =>
+    switch (language) {
+      MysticLanguage.turkish => tr,
+      MysticLanguage.spanish => es,
+      MysticLanguage.french => fr,
+      MysticLanguage.portugueseBrazil => pt,
+      _ => en,
+    };
