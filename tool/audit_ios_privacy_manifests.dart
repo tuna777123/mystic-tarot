@@ -27,9 +27,7 @@ Future<void> main(List<String> arguments) async {
       const JsonEncoder.withIndent('  ').convert(result.toJson()),
     );
 
-    stdout.writeln(
-      'Verified ${result.manifestCount} iOS privacy manifest(s).',
-    );
+    stdout.writeln('Verified ${result.manifestCount} iOS privacy manifest(s).');
     for (final path in result.manifestPaths) {
       stdout.writeln('- $path');
     }
