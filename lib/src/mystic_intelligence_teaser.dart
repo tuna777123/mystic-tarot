@@ -19,6 +19,9 @@ class MysticIntelligenceTeaser extends StatelessWidget {
 
   final List<ReadingRecord> records;
   final MysticLanguage language;
+
+  /// Compatibility parameter retained from the former paid-tier UI. Pattern
+  /// Lab is part of the current ad-supported experience for everyone.
   final bool isPlus;
   final VoidCallback onOpen;
   final DateTime? now;
@@ -83,40 +86,44 @@ class MysticIntelligenceTeaser extends StatelessWidget {
       button: true,
       label: ready
           ? t(
-              en: 'Open your seven-day Mystic Intelligence report',
-              es: 'Abrir tu informe Mystic Intelligence de siete días',
-              fr: 'Ouvrir votre rapport Mystic Intelligence sur sept jours',
-              pt: 'Abrir seu relatório Mystic Intelligence de sete dias',
-              tr: 'Yedi günlük Mystic Intelligence raporunu aç',
+              en: 'Open your seven-day Pattern Lab evidence',
+              es: 'Abrir la evidencia de siete días de Pattern Lab',
+              fr: 'Ouvrir vos indices Pattern Lab sur sept jours',
+              pt: 'Abrir suas evidências de sete dias no Pattern Lab',
+              tr: 'Yedi günlük Pattern Lab kanıtını aç',
             )
           : t(
-              en: '$remaining more saved readings until your first Mystic Intelligence report',
-              es: 'Faltan $remaining lecturas guardadas para tu primer informe Mystic Intelligence',
-              fr: 'Encore $remaining tirages enregistrés avant votre premier rapport Mystic Intelligence',
-              pt: 'Faltam $remaining leituras salvas para seu primeiro relatório Mystic Intelligence',
-              tr: 'İlk Mystic Intelligence raporuna $remaining kayıtlı okuma kaldı',
+              en: '$remaining more saved readings until Pattern Lab has enough evidence to compare',
+              es: 'Faltan $remaining lecturas guardadas para que Pattern Lab tenga evidencia suficiente',
+              fr: 'Encore $remaining tirages enregistrés avant que Pattern Lab ait assez d’indices',
+              pt: 'Faltam $remaining leituras salvas para o Pattern Lab ter evidências suficientes',
+              tr: 'Pattern Lab karşılaştırması için $remaining kayıtlı okuma daha gerekiyor',
             ),
       child: InkWell(
         onTap: onOpen,
         borderRadius: BorderRadius.circular(24),
         child: Container(
+          key: const ValueKey('pattern-lab-teaser'),
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF49316E), Color(0xFF21152F)],
+              colors: [Color(0xFF3F2D5F), Color(0xFF21172F), Color(0xFF12101A)],
             ),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: MysticColors.gold.withValues(alpha: ready ? .5 : .28),
+              color: ready
+                  ? MysticColors.gold.withValues(alpha: .42)
+                  : MysticColors.lavender.withValues(alpha: .2),
             ),
             boxShadow: ready
                 ? [
                     BoxShadow(
-                      color: MysticColors.violet.withValues(alpha: .18),
+                      color: MysticColors.violet.withValues(alpha: .14),
                       blurRadius: 26,
+                      offset: const Offset(0, 8),
                     ),
                   ]
                 : null,
@@ -129,15 +136,16 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                 height: 50,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: MysticColors.gold.withValues(alpha: .11),
+                  borderRadius: BorderRadius.circular(17),
+                  color: MysticColors.gold.withValues(alpha: .09),
                   border: Border.all(
-                    color: MysticColors.gold.withValues(alpha: .5),
+                    color: MysticColors.gold.withValues(alpha: .3),
                   ),
                 ),
-                child: const Text(
-                  '◉',
-                  style: TextStyle(fontSize: 25, color: MysticColors.gold),
+                child: const Icon(
+                  Icons.insights_rounded,
+                  size: 24,
+                  color: MysticColors.gold,
                 ),
               ),
               const SizedBox(width: 14),
@@ -147,20 +155,27 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'MYSTIC INTELLIGENCE',
+                            t(
+                              en: 'PATTERN LAB',
+                              es: 'PATTERN LAB',
+                              fr: 'PATTERN LAB',
+                              pt: 'PATTERN LAB',
+                              tr: 'PATTERN LAB',
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
+                              fontFamily: 'Arial',
                               color: MysticColors.gold,
                               fontSize: 9,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 1.15,
+                              letterSpacing: 1.35,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 7),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -169,7 +184,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: ready
                                 ? MysticColors.gold
-                                : Colors.white.withValues(alpha: .08),
+                                : Colors.white.withValues(alpha: .07),
                             borderRadius: BorderRadius.circular(99),
                           ),
                           child: Text(
@@ -184,6 +199,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                                 : '${recent.length}/3',
                             maxLines: 1,
                             style: TextStyle(
+                              fontFamily: 'Arial',
                               color: ready
                                   ? MysticColors.ink
                                   : MysticColors.lavender,
@@ -199,11 +215,11 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                       ready
                           ? topCardName == null
                               ? t(
-                                  en: 'Your seven-day pattern report is ready',
-                                  es: 'Tu informe de patrones de siete días está listo',
-                                  fr: 'Votre rapport de schémas sur sept jours est prêt',
-                                  pt: 'Seu relatório de padrões de sete dias está pronto',
-                                  tr: 'Yedi günlük örüntü raporun hazır',
+                                  en: 'Your seven-day pattern comparison is ready',
+                                  es: 'Tu comparación de patrones de siete días está lista',
+                                  fr: 'Votre comparaison sur sept jours est prête',
+                                  pt: 'Sua comparação de padrões de sete dias está pronta',
+                                  tr: 'Yedi günlük örüntü karşılaştırman hazır',
                                 )
                               : t(
                                   en: '$topCardName has started repeating',
@@ -213,85 +229,104 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                                   tr: '$topCardName tekrar etmeye başladı',
                                 )
                           : t(
-                              en: 'Your private report is learning your pattern',
-                              es: 'Tu informe privado está aprendiendo tu patrón',
-                              fr: 'Votre rapport privé apprend votre schéma',
-                              pt: 'Seu relatório privado está aprendendo seu padrão',
-                              tr: 'Özel raporun örüntünü öğreniyor',
+                              en: 'Evidence first. Patterns second.',
+                              es: 'Primero evidencia. Después patrones.',
+                              fr: 'D’abord les indices. Ensuite les tendances.',
+                              pt: 'Primeiro evidências. Depois padrões.',
+                              tr: 'Önce kanıt. Sonra örüntü.',
                             ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
+                        color: MysticColors.mist,
                         fontWeight: FontWeight.w900,
                         fontSize: 15,
+                        height: 1.18,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 6),
                     Text(
                       ready
-                          ? isPlus
-                              ? t(
-                                  en: 'Open recurring symbols, reality-loop evidence, and emotional direction.',
-                                  es: 'Abre símbolos recurrentes, evidencia de realidad y dirección emocional.',
-                                  fr: 'Ouvrez les symboles récurrents, les preuves de réalité et la direction émotionnelle.',
-                                  pt: 'Abra símbolos recorrentes, evidências da realidade e direção emocional.',
-                                  tr: 'Tekrar eden sembolleri, gerçeklik kanıtını ve duygusal yönü aç.',
-                                )
-                              : t(
-                                  en: 'Preview the real signal your saved readings have already created.',
-                                  es: 'Previsualiza la señal real que tus lecturas ya han creado.',
-                                  fr: 'Découvrez le signal réel déjà créé par vos tirages.',
-                                  pt: 'Veja o sinal real que suas leituras já criaram.',
-                                  tr: 'Kayıtlı okumalarının oluşturduğu gerçek sinyali önizle.',
-                                )
+                          ? t(
+                              en: 'Compare recurring symbols and emotional direction from your own saved history — never a prediction score.',
+                              es: 'Compara símbolos recurrentes y dirección emocional de tu propio historial, nunca una puntuación de predicción.',
+                              fr: 'Comparez les symboles récurrents et la direction émotionnelle de votre historique, jamais un score de prédiction.',
+                              pt: 'Compare símbolos recorrentes e direção emocional do seu próprio histórico, nunca uma pontuação de previsão.',
+                              tr: 'Kendi kayıtlı geçmişindeki tekrar eden sembolleri ve duygusal yönü karşılaştır; kehanet puanı üretmez.',
+                            )
                           : t(
-                              en: '$remaining more saved reading${remaining == 1 ? '' : 's'} will unlock your first preview.',
-                              es: '$remaining lectura(s) guardada(s) más desbloquearán tu primera vista previa.',
-                              fr: '$remaining tirage(s) enregistré(s) de plus débloqueront votre premier aperçu.',
-                              pt: 'Mais $remaining leitura(s) salva(s) liberarão sua primeira prévia.',
-                              tr: '$remaining kayıtlı okuma daha ilk önizlemeni açacak.',
+                              en: '$remaining more saved reading${remaining == 1 ? '' : 's'} will give Pattern Lab enough evidence for its first comparison.',
+                              es: '$remaining lectura(s) guardada(s) más darán a Pattern Lab evidencia suficiente para su primera comparación.',
+                              fr: '$remaining tirage(s) enregistré(s) de plus donneront à Pattern Lab assez d’indices pour une première comparaison.',
+                              pt: 'Mais $remaining leitura(s) salva(s) darão ao Pattern Lab evidências suficientes para a primeira comparação.',
+                              tr: '$remaining kayıtlı okuma daha Pattern Lab’in ilk karşılaştırması için yeterli kanıtı oluşturacak.',
                             ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: MysticColors.mist,
-                            height: 1.35,
+                            height: 1.34,
+                            fontSize: 11.5,
                           ),
                     ),
-                    const SizedBox(height: 9),
+                    const SizedBox(height: 10),
                     Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Flexible(
+                        const Icon(
+                          Icons.lock_outline_rounded,
+                          size: 14,
+                          color: MysticColors.muted,
+                        ),
+                        const SizedBox(width: 5),
+                        Expanded(
                           child: Text(
-                            ready
-                                ? t(
-                                    en: 'Open report',
-                                    es: 'Abrir informe',
-                                    fr: 'Ouvrir le rapport',
-                                    pt: 'Abrir relatório',
-                                    tr: 'Raporu aç',
-                                  )
-                                : t(
-                                    en: 'See progress',
-                                    es: 'Ver progreso',
-                                    fr: 'Voir la progression',
-                                    pt: 'Ver progresso',
-                                    tr: 'İlerlemeyi gör',
-                                  ),
+                            t(
+                              en: 'Calculated privately on this device',
+                              es: 'Calculado en privado en este dispositivo',
+                              fr: 'Calculé en privé sur cet appareil',
+                              pt: 'Calculado em privado neste dispositivo',
+                              tr: 'Bu cihazda özel olarak hesaplanır',
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: MysticColors.gold,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                              fontFamily: 'Arial',
+                              color: MysticColors.muted,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 7),
+                        Text(
+                          ready
+                              ? t(
+                                  en: 'Open report',
+                                  es: 'Abrir informe',
+                                  fr: 'Ouvrir le rapport',
+                                  pt: 'Abrir relatório',
+                                  tr: 'Raporu aç',
+                                )
+                              : t(
+                                  en: 'See progress',
+                                  es: 'Ver progreso',
+                                  fr: 'Voir la progression',
+                                  pt: 'Ver progresso',
+                                  tr: 'İlerlemeyi gör',
+                                ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'Arial',
+                            color: MysticColors.gold,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
                         const Icon(
                           Icons.arrow_forward_rounded,
-                          size: 16,
+                          size: 15,
                           color: MysticColors.gold,
                         ),
                       ],
