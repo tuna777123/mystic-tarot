@@ -123,6 +123,13 @@ jobs:
           mkdir -p build/reports
           flutter build appbundle --release 2>&1 | tee build/reports/android-release.log
 
+      - name: Record Android Mobile Ads SDK evidence
+        run: |
+          dart run tool/collect_mobile_ads_sdk_evidence.dart \
+            --platform=android \
+            --output=build/reports/mobile-ads-sdk-evidence-android.json \
+            --android-report=build/reports/android-release-runtime-dependencies.txt
+
       - name: Audit Built-in Kotlin compatibility
         shell: bash
         run: |
@@ -186,4 +193,13 @@ jobs:
         with:
           name: mystic-tarot-built-in-kotlin-audit
           path: build/reports/built-in-kotlin-audit.md
+          if-no-files-found: error
+
+      - name: Upload Android Mobile Ads SDK evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-android-mobile-ads-sdk-evidence
+          path: |
+            build/reports/mobile-ads-sdk-evidence-android.json
+            build/reports/android-release-runtime-dependencies.txt
           if-no-files-found: error
