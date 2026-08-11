@@ -125,9 +125,9 @@ Future<void> main(List<String> arguments) async {
       File(
         '${output.parent.path}/ios-privacy-manifest-evidence.json',
       ).writeAsStringSync(
-        const JsonEncoder.withIndent('  ').convert(
-          iosPrivacyManifestAudit.toJson(),
-        ),
+        const JsonEncoder.withIndent(
+          '  ',
+        ).convert(iosPrivacyManifestAudit.toJson()),
       );
     }
     output.writeAsStringSync(
