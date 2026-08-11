@@ -32,29 +32,28 @@ class MysticIntelligenceTeaser extends StatelessWidget {
     required String fr,
     required String pt,
     required String tr,
-  }) =>
-      localized(
-        language.appLanguage,
-        english: en,
-        spanish: es,
-        french: fr,
-        portugueseBrazil: pt,
-        turkish: tr,
-        italian: en,
-        german: en,
-      );
+  }) => localized(
+    language.appLanguage,
+    english: en,
+    spanish: es,
+    french: fr,
+    portugueseBrazil: pt,
+    turkish: tr,
+    italian: en,
+    german: en,
+  );
 
   @override
   Widget build(BuildContext context) {
     final generatedAt = now ?? DateTime.now();
     final periodStart = generatedAt.subtract(const Duration(days: 7));
-    final recent = records
-        .where(
-          (record) =>
-              !record.createdAt.isBefore(periodStart) &&
-              !record.createdAt.isAfter(generatedAt),
-        )
-        .toList(growable: false);
+    final recent = <ReadingRecord>[];
+    for (final record in records) {
+      final isBeforeWindow = record.createdAt.isBefore(periodStart);
+      final isAfterWindow = record.createdAt.isAfter(generatedAt);
+      if (!isBeforeWindow && !isAfterWindow) recent.add(record);
+    }
+
     final cardCounts = <String, int>{};
     for (final record in recent) {
       for (final drawn in record.cards) {
@@ -65,14 +64,18 @@ class MysticIntelligenceTeaser extends StatelessWidget {
         );
       }
     }
-    final repeated = cardCounts.entries
-        .where((entry) => entry.value > 1)
-        .toList(growable: false)
-      ..sort((first, second) {
-        final byCount = second.value.compareTo(first.value);
-        return byCount != 0 ? byCount : first.key.compareTo(second.key);
-      });
-    final topCard = repeated.isEmpty ? null : repeated.first;
+
+    MapEntry<String, int>? topCard;
+    for (final entry in cardCounts.entries) {
+      if (entry.value <= 1) continue;
+      final current = topCard;
+      if (current == null ||
+          entry.value > current.value ||
+          (entry.value == current.value && entry.key.compareTo(current.key) < 0)) {
+        topCard = entry;
+      }
+    }
+
     final ready = recent.length >= 3;
     final remaining = ready ? 0 : 3 - recent.length;
     final topCardName = topCard == null
@@ -80,6 +83,27 @@ class MysticIntelligenceTeaser extends StatelessWidget {
         : localizedTarotCardName(
             topCard.key,
             languageCode: language.code,
+          );
+    final title = _title(
+      ready: ready,
+      topCardName: topCardName,
+      remaining: remaining,
+    );
+    final body = _body(ready: ready, remaining: remaining);
+    final actionLabel = ready
+        ? t(
+            en: 'Open report',
+            es: 'Abrir informe',
+            fr: 'Ouvrir le rapport',
+            pt: 'Abrir relatório',
+            tr: 'Raporu aç',
+          )
+        : t(
+            en: 'See progress',
+            es: 'Ver progreso',
+            fr: 'Voir la progression',
+            pt: 'Ver progresso',
+            tr: 'İlerlemeyi gör',
           );
 
     return Semantics(
@@ -93,11 +117,16 @@ class MysticIntelligenceTeaser extends StatelessWidget {
               tr: 'Yedi günlük Pattern Lab kanıtını aç',
             )
           : t(
-              en: '$remaining more saved readings until Pattern Lab has enough evidence to compare',
-              es: 'Faltan $remaining lecturas guardadas para que Pattern Lab tenga evidencia suficiente',
-              fr: 'Encore $remaining tirages enregistrés avant que Pattern Lab ait assez d’indices',
-              pt: 'Faltam $remaining leituras salvas para o Pattern Lab ter evidências suficientes',
-              tr: 'Pattern Lab karşılaştırması için $remaining kayıtlı okuma daha gerekiyor',
+              en:
+                  '$remaining more saved readings until Pattern Lab has enough evidence to compare',
+              es:
+                  'Faltan $remaining lecturas guardadas para que Pattern Lab tenga evidencia suficiente',
+              fr:
+                  'Encore $remaining tirages enregistrés avant que Pattern Lab ait assez d’indices',
+              pt:
+                  'Faltam $remaining leituras salvas para o Pattern Lab ter evidências suficientes',
+              tr:
+                  'Pattern Lab karşılaştırması için $remaining kayıtlı okuma daha gerekiyor',
             ),
       child: InkWell(
         onTap: onOpen,
@@ -110,7 +139,11 @@ class MysticIntelligenceTeaser extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF3F2D5F), Color(0xFF21172F), Color(0xFF12101A)],
+              colors: [
+                Color(0xFF3F2D5F),
+                Color(0xFF21172F),
+                Color(0xFF12101A),
+              ],
             ),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
@@ -153,88 +186,10 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            t(
-                              en: 'PATTERN LAB',
-                              es: 'PATTERN LAB',
-                              fr: 'PATTERN LAB',
-                              pt: 'PATTERN LAB',
-                              tr: 'PATTERN LAB',
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'Arial',
-                              color: MysticColors.gold,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.35,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 7),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ready
-                                ? MysticColors.gold
-                                : Colors.white.withValues(alpha: .07),
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                          child: Text(
-                            ready
-                                ? t(
-                                    en: 'READY',
-                                    es: 'LISTO',
-                                    fr: 'PRÊT',
-                                    pt: 'PRONTO',
-                                    tr: 'HAZIR',
-                                  )
-                                : '${recent.length}/3',
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontFamily: 'Arial',
-                              color: ready
-                                  ? MysticColors.ink
-                                  : MysticColors.lavender,
-                              fontSize: 8,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    _header(ready, recent.length),
                     const SizedBox(height: 7),
                     Text(
-                      ready
-                          ? topCardName == null
-                              ? t(
-                                  en: 'Your seven-day pattern comparison is ready',
-                                  es: 'Tu comparación de patrones de siete días está lista',
-                                  fr: 'Votre comparaison sur sept jours est prête',
-                                  pt: 'Sua comparação de padrões de sete dias está pronta',
-                                  tr: 'Yedi günlük örüntü karşılaştırman hazır',
-                                )
-                              : t(
-                                  en: '$topCardName has started repeating',
-                                  es: '$topCardName ha empezado a repetirse',
-                                  fr: '$topCardName commence à revenir',
-                                  pt: '$topCardName começou a se repetir',
-                                  tr: '$topCardName tekrar etmeye başladı',
-                                )
-                          : t(
-                              en: 'Evidence first. Patterns second.',
-                              es: 'Primero evidencia. Después patrones.',
-                              fr: 'D’abord les indices. Ensuite les tendances.',
-                              pt: 'Primeiro evidências. Depois padrões.',
-                              tr: 'Önce kanıt. Sonra örüntü.',
-                            ),
+                      title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -246,28 +201,14 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      ready
-                          ? t(
-                              en: 'Compare recurring symbols and emotional direction from your own saved history — never a prediction score.',
-                              es: 'Compara símbolos recurrentes y dirección emocional de tu propio historial, nunca una puntuación de predicción.',
-                              fr: 'Comparez les symboles récurrents et la direction émotionnelle de votre historique, jamais un score de prédiction.',
-                              pt: 'Compare símbolos recorrentes e direção emocional do seu próprio histórico, nunca uma pontuação de previsão.',
-                              tr: 'Kendi kayıtlı geçmişindeki tekrar eden sembolleri ve duygusal yönü karşılaştır; kehanet puanı üretmez.',
-                            )
-                          : t(
-                              en: '$remaining more saved reading${remaining == 1 ? '' : 's'} will give Pattern Lab enough evidence for its first comparison.',
-                              es: '$remaining lectura(s) guardada(s) más darán a Pattern Lab evidencia suficiente para su primera comparación.',
-                              fr: '$remaining tirage(s) enregistré(s) de plus donneront à Pattern Lab assez d’indices pour une première comparaison.',
-                              pt: 'Mais $remaining leitura(s) salva(s) darão ao Pattern Lab evidências suficientes para a primeira comparação.',
-                              tr: '$remaining kayıtlı okuma daha Pattern Lab’in ilk karşılaştırması için yeterli kanıtı oluşturacak.',
-                            ),
+                      body,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: MysticColors.mist,
-                            height: 1.34,
-                            fontSize: 11.5,
-                          ),
+                        color: MysticColors.mist,
+                        height: 1.34,
+                        fontSize: 11.5,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Row(
@@ -299,21 +240,7 @@ class MysticIntelligenceTeaser extends StatelessWidget {
                         ),
                         const SizedBox(width: 7),
                         Text(
-                          ready
-                              ? t(
-                                  en: 'Open report',
-                                  es: 'Abrir informe',
-                                  fr: 'Ouvrir le rapport',
-                                  pt: 'Abrir relatório',
-                                  tr: 'Raporu aç',
-                                )
-                              : t(
-                                  en: 'See progress',
-                                  es: 'Ver progreso',
-                                  fr: 'Voir la progression',
-                                  pt: 'Ver progresso',
-                                  tr: 'İlerlemeyi gör',
-                                ),
+                          actionLabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -338,6 +265,111 @@ class MysticIntelligenceTeaser extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _header(bool ready, int recentCount) {
+    final badge = ready
+        ? t(en: 'READY', es: 'LISTO', fr: 'PRÊT', pt: 'PRONTO', tr: 'HAZIR')
+        : '$recentCount/3';
+    return Row(
+      children: [
+        const Expanded(
+          child: Text(
+            'PATTERN LAB',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Arial',
+              color: MysticColors.gold,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.35,
+            ),
+          ),
+        ),
+        const SizedBox(width: 7),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: ready
+                ? MysticColors.gold
+                : Colors.white.withValues(alpha: .07),
+            borderRadius: BorderRadius.circular(99),
+          ),
+          child: Text(
+            badge,
+            maxLines: 1,
+            style: TextStyle(
+              fontFamily: 'Arial',
+              color: ready ? MysticColors.ink : MysticColors.lavender,
+              fontSize: 8,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _title({
+    required bool ready,
+    required String? topCardName,
+    required int remaining,
+  }) {
+    if (!ready) {
+      return t(
+        en: 'Evidence first. Patterns second.',
+        es: 'Primero evidencia. Después patrones.',
+        fr: 'D’abord les indices. Ensuite les tendances.',
+        pt: 'Primeiro evidências. Depois padrões.',
+        tr: 'Önce kanıt. Sonra örüntü.',
+      );
+    }
+    if (topCardName != null) {
+      return t(
+        en: '$topCardName has started repeating',
+        es: '$topCardName ha empezado a repetirse',
+        fr: '$topCardName commence à revenir',
+        pt: '$topCardName começou a se repetir',
+        tr: '$topCardName tekrar etmeye başladı',
+      );
+    }
+    return t(
+      en: 'Your seven-day pattern comparison is ready',
+      es: 'Tu comparación de patrones de siete días está lista',
+      fr: 'Votre comparaison sur sept jours est prête',
+      pt: 'Sua comparação de padrões de sete dias está pronta',
+      tr: 'Yedi günlük örüntü karşılaştırman hazır',
+    );
+  }
+
+  String _body({required bool ready, required int remaining}) {
+    if (ready) {
+      return t(
+        en:
+            'Compare recurring symbols and emotional direction from your own saved history — never a prediction score.',
+        es:
+            'Compara símbolos recurrentes y dirección emocional de tu propio historial, nunca una puntuación de predicción.',
+        fr:
+            'Comparez les symboles récurrents et la direction émotionnelle de votre historique, jamais un score de prédiction.',
+        pt:
+            'Compare símbolos recorrentes e direção emocional do seu próprio histórico, nunca uma pontuação de previsão.',
+        tr:
+            'Kendi kayıtlı geçmişindeki tekrar eden sembolleri ve duygusal yönü karşılaştır; kehanet puanı üretmez.',
+      );
+    }
+    return t(
+      en:
+          '$remaining more saved reading${remaining == 1 ? '' : 's'} will give Pattern Lab enough evidence for its first comparison.',
+      es:
+          '$remaining lectura(s) guardada(s) más darán a Pattern Lab evidencia suficiente para su primera comparación.',
+      fr:
+          '$remaining tirage(s) enregistré(s) de plus donneront à Pattern Lab assez d’indices pour une première comparaison.',
+      pt:
+          'Mais $remaining leitura(s) salva(s) darão ao Pattern Lab evidências suficientes para a primeira comparação.',
+      tr:
+          '$remaining kayıtlı okuma daha Pattern Lab’in ilk karşılaştırması için yeterli kanıtı oluşturacak.',
     );
   }
 }
