@@ -13,8 +13,21 @@ Tarot, Günlük ve Örüntüler
 **Tanıtım metni**  
 Kartları aç, yorumun nedenini gör ve 24 saat sonra gerçekte neyin değiştiğini özel Mystic Ayna’nda kaydet.
 
+**Açıklama**  
+Mystic Tarot, kart okumayı kartlar açıldıktan sonra da devam eden özel bir günlük düşünme pratiğine dönüştürür.
+
+Sana çağrıda bulunan kartları seç; her kartın konumunun, düz ya da ters gelişinin, sembolizminin ve somut sonraki adımının yorumu nasıl şekillendirdiğini gör. Mystic hiçbir okumayı teşhis, kesinlik veya garanti edilmiş gelecek bilgisi olarak sunmaz.
+
+24 saat sonra Mystic Ayna’ya dön ve gerçekte neyin değiştiğini kaydet. Zamanla tekrarlayan kartları, duygu geçişlerini, kaydedilmiş okumaları ve tamamlanmış Ayna kontrollerini özel geçmişinde karşılaştır. Örüntü Laboratuvarı ve Mystic Intelligence yalnızca gerçekten kaydettiğin kanıtlardan tekrar eden temaları görünür kılmaya yardımcı olur.
+
+78 kartlık Arkana’yı, Günlük Rehberlik’i, derin okumaları, Oracle diyaloğunu, Yaşayan Günlük’ü, Mystic Yol’u ve özel düşünme araçlarını keşfet. Ürün özelliklerine erişmek için ücretli abonelik gerekmez. Android ve iOS uygulamaları, geçerli gizlilik tercihlerine bağlı seyrek Google Mobile Ads reklamlarıyla desteklenir; herkese açık web sürümü reklamsızdır.
+
+Soruların, okumaların, Mystic Ayna notların, profil ayrıntıların ve ilerlemen öncelikle cihazında kalır. Yerel Mystic geçmişini uygulama içinden dışa aktarabilir veya silebilirsin.
+
+Mystic Tarot kişisel düşünme ve eğlence amacıyla geliştirilmiştir. Tıbbi, ruh sağlığı, hukuki, mali veya acil durum tavsiyesi sunmaz.
+
 **Anahtar kelimeler**  
-tarot,günlük kart,fal,günlük,arkana,öz farkındalık,ritüel,meditasyon,kişisel gelişim
+fal,kart,ayna,arkana,öz farkındalık,meditasyon,sembolizm,içgörü,kişisel gelişim
 
 **Birincil kategori:** Yaşam Tarzı  
 **İkincil kategori:** Eğlence
