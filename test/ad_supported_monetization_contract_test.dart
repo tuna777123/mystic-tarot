@@ -52,6 +52,12 @@ void main() {
       'docs/FINAL_DELIVERY.md': File(
         'docs/FINAL_DELIVERY.md',
       ).readAsStringSync(),
+      'docs/OWNER_FINAL_CHECKLIST.md': File(
+        'docs/OWNER_FINAL_CHECKLIST.md',
+      ).readAsStringSync(),
+      'docs/OWNER_GUIDE_A_TO_Z.md': File(
+        'docs/OWNER_GUIDE_A_TO_Z.md',
+      ).readAsStringSync(),
     };
 
     final combined = documents.values.join('\n');
@@ -67,6 +73,11 @@ void main() {
       'at least 30 seconds in the background',
       'once every two hours',
       'every-third-new-reading',
+      'reading 3 creates an eligible interstitial opportunity',
+      'no app-open before 3 readings',
+      'background <30 seconds',
+      '2-hour app-open minimum interval',
+      'first two new readings remain uninterrupted',
     ];
     for (final entry in documents.entries) {
       for (final stale in stalePhrases) {
