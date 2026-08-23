@@ -22,7 +22,7 @@ void main() {
     expect(workflow, contains('bash tool/verify_launch_surface.sh'));
     expect(
       workflow,
-      isNot(contains("sed -i")),
+      isNot(contains('sed -i')),
       reason:
           'Release Candidate must not maintain a second hand-written native '
           'identity materialization path.',
