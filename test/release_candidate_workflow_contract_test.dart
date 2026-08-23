@@ -54,25 +54,28 @@ void main() {
     }
   });
 
-  test('only the protected production workflow can produce signed store builds', () {
-    expect(
-      File('.github/workflows/store-android.yml').existsSync(),
-      isFalse,
-      reason:
-          'The obsolete parallel Android signing workflow must stay removed; '
-          'signed store candidates belong to store-release.yml only.',
-    );
+  test(
+    'only the protected production workflow can produce signed store builds',
+    () {
+      expect(
+        File('.github/workflows/store-android.yml').existsSync(),
+        isFalse,
+        reason:
+            'The obsolete parallel Android signing workflow must stay removed; '
+            'signed store candidates belong to store-release.yml only.',
+      );
 
-    final productionWorkflow = File(
-      '.github/workflows/store-release.yml',
-    ).readAsStringSync();
-    expect(productionWorkflow, contains('name: Production Store Release'));
-    expect(
-      RegExp(
-        r'^\s*environment:\s*production-stores\s*$',
-        multiLine: true,
-      ).allMatches(productionWorkflow).length,
-      2,
-    );
-  });
+      final productionWorkflow = File(
+        '.github/workflows/store-release.yml',
+      ).readAsStringSync();
+      expect(productionWorkflow, contains('name: Production Store Release'));
+      expect(
+        RegExp(
+          r'^\s*environment:\s*production-stores\s*$',
+          multiLine: true,
+        ).allMatches(productionWorkflow).length,
+        2,
+      );
+    },
+  );
 }
