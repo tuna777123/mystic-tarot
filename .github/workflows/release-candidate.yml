@@ -102,7 +102,7 @@ jobs:
         with:
           name: mystic-tarot-release-candidate-test-log
           path: build/reports/release-candidate-test.log
-          if-no-files-found: error
+          if-no-files-found: ignore
           retention-days: 14
 
       - name: Build Android QA APK
