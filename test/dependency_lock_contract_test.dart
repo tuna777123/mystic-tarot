@@ -66,7 +66,15 @@ void main() {
         ).allMatches(source).length;
       }
 
-      expect(lockedInstallCount, greaterThanOrEqualTo(12));
+      expect(
+        lockedInstallCount,
+        greaterThanOrEqualTo(11),
+        reason:
+            'All active build/release workflows must keep the committed lockfile '
+            'enforced. The obsolete parallel Android signing workflow was '
+            'removed, so the active workflow set contains at least 11 locked '
+            'dependency installs.',
+      );
     },
   );
 }
