@@ -78,4 +78,22 @@ void main() {
       );
     },
   );
+
+  test('only the canonical Pages workflow can deploy the public site', () {
+    expect(
+      File('.github/workflows/web-preview.yml').existsSync(),
+      isFalse,
+      reason:
+          'The obsolete Web Preview deployment must stay removed so it cannot '
+          'race the verified Pages deployment.',
+    );
+
+    final pagesWorkflow = File(
+      '.github/workflows/pages.yml',
+    ).readAsStringSync();
+    expect(pagesWorkflow, contains('name: Deploy GitHub Pages'));
+    expect(pagesWorkflow, contains('actions/deploy-pages@v5'));
+    expect(pagesWorkflow, contains('Verify live application'));
+    expect(pagesWorkflow, contains('context=pages/deployment'));
+  });
 }
