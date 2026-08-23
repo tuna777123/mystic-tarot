@@ -68,12 +68,12 @@ void main() {
 
       expect(
         lockedInstallCount,
-        greaterThanOrEqualTo(11),
+        greaterThanOrEqualTo(10),
         reason:
             'All active build/release workflows must keep the committed lockfile '
-            'enforced. The obsolete parallel Android signing workflow was '
-            'removed, so the active workflow set contains at least 11 locked '
-            'dependency installs.',
+            'enforced. Obsolete parallel Android signing and Pages preview '
+            'workflows were removed, leaving one canonical path per release '
+            'surface and at least 10 locked dependency installs.',
       );
     },
   );
