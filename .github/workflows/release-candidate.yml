@@ -7,9 +7,23 @@ on:
     paths:
       - "lib/**"
       - "test/**"
+      - "tool/**"
       - "assets/**"
       - "pubspec.yaml"
+      - "pubspec.lock"
       - ".github/workflows/release-candidate.yml"
+      - ".github/workflows/store-release.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "test/**"
+      - "tool/**"
+      - "assets/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/release-candidate.yml"
+      - ".github/workflows/store-release.yml"
 
 permissions:
   contents: read
@@ -21,15 +35,18 @@ concurrency:
 jobs:
   android-qa:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -40,14 +57,11 @@ jobs:
       - name: Generate native shells
         run: flutter create . --platforms=android,ios --org com.tunabozcali
 
-      - name: Set permanent store identifiers
-        run: |
-          find android ios -type f \( -name "*.kt" -o -name "*.gradle.kts" -o -name "project.pbxproj" \) -print0 \
-            | xargs -0 sed -i \
-                -e 's/com\.tunabozcali\.mystic_tarot/com.tunabozcali.mystictarot/g' \
-                -e 's/com\.tunabozcali\.mysticTarot/com.tunabozcali.mystictarot/g'
-          grep -R "com.tunabozcali.mystictarot" android/app
-          grep "com.tunabozcali.mystictarot" ios/Runner.xcodeproj/project.pbxproj
+      - name: Apply permanent store identifiers and AdMob configuration
+        run: dart run tool/configure_store_identifiers.dart
+
+      - name: Configure daily ritual notifications
+        run: dart run tool/configure_ritual_notifications.dart
 
       - name: Configure private app lock
         run: dart run tool/configure_app_lock.dart
@@ -58,18 +72,46 @@ jobs:
       - name: Generate branded launcher icon
         run: dart run flutter_launcher_icons
 
+      - name: Verify clean diff
+        run: git diff --check
+
+      - name: Verify public launch surface
+        run: bash tool/verify_launch_surface.sh
+
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze --fatal-infos
 
       - name: Test
-        run: flutter test
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build/reports
+          set +e
+          flutter test 2>&1 | tee build/reports/release-candidate-test.log
+          test_status=${PIPESTATUS[0]}
+          set -e
+          if (( test_status != 0 )); then
+            echo 'Concise release-candidate test failure summary:' >&2
+            grep -E '(^| )FAILED|Expected:|Actual:|Test failed|Some tests failed|test/.+\.dart|\[[Ee]\]' build/reports/release-candidate-test.log | tail -n 240 >&2 || true
+            exit "$test_status"
+          fi
+
+      - name: Upload release-candidate test log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mystic-tarot-release-candidate-test-log
+          path: build/reports/release-candidate-test.log
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Build Android QA APK
         run: flutter build apk --release
 
       - name: Upload Android QA APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mystic-tarot-android-qa
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
+          if-no-files-found: error
