@@ -57,6 +57,9 @@ jobs:
       - name: Generate native shells
         run: flutter create . --platforms=android,ios --org com.tunabozcali --no-pub
 
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
       - name: Apply permanent store identifiers and AdMob configuration
         run: dart run tool/configure_store_identifiers.dart
 
@@ -65,9 +68,6 @@ jobs:
 
       - name: Configure private app lock
         run: dart run tool/configure_app_lock.dart
-
-      - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
 
       - name: Generate branded launcher icon
         run: dart run flutter_launcher_icons
