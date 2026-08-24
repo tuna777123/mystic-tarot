@@ -57,7 +57,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate native project shells
-        run: flutter create . --platforms=android,ios --org com.tunabozcali
+        run: flutter create . --platforms=android,ios --org com.tunabozcali --no-pub
       - name: Apply permanent store identifiers
         run: dart run tool/configure_store_identifiers.dart
       - name: Install dependencies
@@ -105,7 +105,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate Android project shell
-        run: flutter create . --platforms=android --org com.tunabozcali
+        run: flutter create . --platforms=android --org com.tunabozcali --no-pub
       - name: Apply permanent store and AdMob identifiers
         run: dart run tool/configure_store_identifiers.dart
       - name: Validate protected Android release inputs
@@ -245,7 +245,7 @@ jobs:
           channel: stable
           cache: true
       - name: Generate iOS project shell
-        run: flutter create . --platforms=ios --org com.tunabozcali
+        run: flutter create . --platforms=ios --org com.tunabozcali --no-pub
       - name: Apply permanent store and AdMob identifiers
         run: dart run tool/configure_store_identifiers.dart
       - name: Validate protected iOS release inputs
