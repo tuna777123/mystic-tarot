@@ -73,6 +73,27 @@ void main() {
                 'the enforced lockfile install. Platform scaffolding must use '
                 '--no-pub so the committed dependency graph stays byte-stable.',
           );
+
+          final tail = source.substring(match.end);
+          final nextRun = RegExp(
+            r'^\s*run:\s*([^\n]+)$',
+            multiLine: true,
+          ).firstMatch(tail);
+          expect(
+            nextRun,
+            isNotNull,
+            reason:
+                '${workflow.path} has a scaffold step without a following '
+                'dependency installation.',
+          );
+          expect(
+            nextRun!.group(1)!.trim(),
+            'flutter pub get --enforce-lockfile',
+            reason:
+                '${workflow.path} runs another tool after flutter create before '
+                'the enforced dependency install. Dart/Flutter tooling can '
+                'otherwise resolve packages and rewrite pubspec.lock.',
+          );
         }
 
         lockedInstallCount += RegExp(
