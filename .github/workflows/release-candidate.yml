@@ -56,7 +56,7 @@ jobs:
           cache: true
 
       - name: Generate native shells
-        run: flutter create . --platforms=android,ios --org com.tunabozcali --no-pub
+        run: bash tool/scaffold_native_preserving_sources.sh --platforms=android,ios --org com.tunabozcali
 
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
