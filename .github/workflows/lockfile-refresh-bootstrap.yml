@@ -1,0 +1,37 @@
+name: Temporary Lockfile Refresh Bootstrap
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/lockfile-refresh-bootstrap.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up validated Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+      - name: Deliberately refresh lockfile once
+        run: flutter pub get
+      - name: Upload generated lockfile
+        uses: actions/upload-artifact@v7
+        with:
+          name: generated-pubspec-lock-3.44.9
+          path: pubspec.lock
+          if-no-files-found: error
+          retention-days: 1
