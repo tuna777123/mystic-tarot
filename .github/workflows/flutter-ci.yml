@@ -35,7 +35,7 @@ jobs:
           cache: true
 
       - name: Generate platform shells
-        run: flutter create . --platforms=android,ios --org com.tunabozcali
+        run: flutter create . --platforms=android,ios --org com.tunabozcali --no-pub
 
       - name: Set permanent store identifiers
         run: dart run tool/configure_store_identifiers.dart
