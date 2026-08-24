@@ -46,6 +46,9 @@ jobs:
       - name: Apply canonical store and platform configuration
         run: dart run tool/configure_store_identifiers.dart
 
+      - name: Configure private app lock
+        run: dart run tool/configure_app_lock.dart
+
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
 
