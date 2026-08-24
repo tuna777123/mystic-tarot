@@ -1,4 +1,4 @@
-name: Temporary Lockfile Refresh Bootstrap
+name: Temporary Scaffold Preservation Check
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  generate:
+  verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -26,12 +26,22 @@ jobs:
           flutter-version: '3.44.9'
           channel: stable
           cache: true
-      - name: Deliberately refresh lockfile once
-        run: flutter pub get
-      - name: Upload generated lockfile
-        uses: actions/upload-artifact@v7
-        with:
-          name: generated-pubspec-lock-3.44.9
-          path: pubspec.lock
-          if-no-files-found: error
-          retention-days: 1
+      - name: Prove scaffold mutates source manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp pubspec.yaml "$RUNNER_TEMP/pubspec.yaml.source"
+          cp pubspec.lock "$RUNNER_TEMP/pubspec.lock.source"
+          flutter create . --platforms=android,ios --org com.tunabozcali --no-pub
+          echo '--- scaffold diff for dependency sources ---'
+          git --no-pager diff -- pubspec.yaml pubspec.lock || true
+          cp "$RUNNER_TEMP/pubspec.yaml.source" pubspec.yaml
+          cp "$RUNNER_TEMP/pubspec.lock.source" pubspec.lock
+      - name: Verify restored source with enforced lockfile
+        run: flutter pub get --enforce-lockfile
+      - name: Verify dependency sources stayed byte-identical
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp -s pubspec.yaml "$RUNNER_TEMP/pubspec.yaml.source"
+          cmp -s pubspec.lock "$RUNNER_TEMP/pubspec.lock.source"
