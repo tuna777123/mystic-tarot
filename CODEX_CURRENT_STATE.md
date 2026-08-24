@@ -15,8 +15,8 @@ Read this file first, then `AGENTS.md` and `CODEX_HANDOFF.md`.
 - Release Candidate uses the same canonical store/platform materializers as the real release path.
 - Release Candidate runs on pull requests to `main` and watches release-relevant source, tool, lockfile and production-workflow inputs.
 - Flutter CI, iOS Release CI, Release Candidate and Production Store Release use `flutter create ... --no-pub` whenever native platform shells are generated.
-- Dependency resolution is deliberately separated from scaffolding and remains `flutter pub get --enforce-lockfile`.
-- `dependency_lock_contract_test.dart` fails if a workflow reintroduces a `flutter create` command without `--no-pub` or an unlocked `flutter pub get`.
+- The very next runnable command after every native scaffold is `flutter pub get --enforce-lockfile`; only after that may Dart/Flutter release tooling run.
+- `dependency_lock_contract_test.dart` fails if a workflow reintroduces a scaffold without `--no-pub`, an unlocked `flutter pub get`, or any tool execution between scaffolding and the enforced install.
 - The committed dependency graph remains intentionally frozen; do not refresh `pubspec.lock` merely because Flutter stable advances.
 - `google_mobile_ads` remains exact-pinned at `9.0.0`.
 - The obsolete parallel signed-Android workflow `.github/workflows/store-android.yml` is removed.
@@ -26,18 +26,18 @@ Read this file first, then `AGENTS.md` and `CODEX_HANDOFF.md`.
 - Regression coverage in `test/release_candidate_workflow_contract_test.dart` protects those canonical paths.
 - `tool/src/ios_privacy_manifest_audit.dart` includes the Flutter 3.47.1 compatibility fix required by current hosted runners.
 
-## Why the lockfile fix is `--no-pub`
+## Why the lockfile fix is `--no-pub` plus immediate enforcement
 
-GitHub hosted runners advanced to Flutter stable 3.47.1. A normal `flutter create` implicitly ran package resolution before the repository's later enforced install and rewrote transitive entries in `pubspec.lock`.
+GitHub hosted runners advanced to Flutter stable 3.47.1. A normal `flutter create` implicitly ran package resolution and rewrote transitive entries in `pubspec.lock` before the repository's explicit locked install.
 
-That was a workflow-ordering problem, not evidence that the production dependency graph needed a broad upgrade. The release-safe fix is therefore:
+Using `--no-pub` prevents that implicit resolution, but the enforced install must also happen before any later `dart run` or Flutter tool that could initialize package resolution itself. The release-safe order is therefore:
 
 1. generate platform scaffolding with `flutter create ... --no-pub`;
-2. apply Mystic's canonical platform materializers;
-3. resolve/install dependencies only through `flutter pub get --enforce-lockfile`;
+2. immediately run `flutter pub get --enforce-lockfile`;
+3. only then apply Mystic's canonical platform materializers and other Dart/Flutter tooling;
 4. fail if the committed lockfile changes unexpectedly.
 
-Do not weaken this contract and do not broad-upgrade dependencies just to satisfy a newer Flutter stable toolchain. If an intentional dependency/toolchain upgrade is later required, review and audit it as a separate release change.
+That was a workflow-ordering problem, not evidence that the production dependency graph needed a broad upgrade. Do not weaken this contract and do not broad-upgrade dependencies just to satisfy a newer Flutter stable toolchain. If an intentional dependency/toolchain upgrade is later required, review and audit it as a separate release change.
 
 ## First Codex action
 
