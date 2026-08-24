@@ -14,9 +14,10 @@ Read this file first, then `AGENTS.md` and `CODEX_HANDOFF.md`.
 
 - Release Candidate uses the same canonical store/platform materializers as the real release path.
 - Release Candidate runs on pull requests to `main` and watches release-relevant source, tool, lockfile and production-workflow inputs.
+- Every active GitHub Actions path that installs Flutter is pinned to the validated **Flutter 3.44.9** toolchain; no release path follows a moving `stable` version by itself.
 - Flutter CI, iOS Release CI, Release Candidate and Production Store Release use `flutter create ... --no-pub` whenever native platform shells are generated.
 - The very next runnable command after every native scaffold is `flutter pub get --enforce-lockfile`; only after that may Dart/Flutter release tooling run.
-- `dependency_lock_contract_test.dart` fails if a workflow reintroduces a scaffold without `--no-pub`, an unlocked `flutter pub get`, or any tool execution between scaffolding and the enforced install.
+- `dependency_lock_contract_test.dart` fails if a workflow drops the 3.44.9 pin, reintroduces a scaffold without `--no-pub`, uses an unlocked `flutter pub get`, or executes another tool between scaffolding and the enforced install.
 - The committed dependency graph remains intentionally frozen; do not refresh `pubspec.lock` merely because Flutter stable advances.
 - `google_mobile_ads` remains exact-pinned at `9.0.0`.
 - The obsolete parallel signed-Android workflow `.github/workflows/store-android.yml` is removed.
@@ -24,20 +25,21 @@ Read this file first, then `AGENTS.md` and `CODEX_HANDOFF.md`.
 - Signed store candidates belong only to `.github/workflows/store-release.yml`.
 - Public deployment belongs only to `.github/workflows/pages.yml`.
 - Regression coverage in `test/release_candidate_workflow_contract_test.dart` protects those canonical paths.
-- `tool/src/ios_privacy_manifest_audit.dart` includes the Flutter 3.47.1 compatibility fix required by current hosted runners.
+- `tool/src/ios_privacy_manifest_audit.dart` retains the compatibility hardening discovered while testing Flutter 3.47.1, so a future deliberate toolchain upgrade has a smaller migration surface.
 
-## Why the lockfile fix is `--no-pub` plus immediate enforcement
+## Why the toolchain is pinned
 
-GitHub hosted runners advanced to Flutter stable 3.47.1. A normal `flutter create` implicitly ran package resolution and rewrote transitive entries in `pubspec.lock` before the repository's explicit locked install.
+GitHub's moving Flutter `stable` advanced from the repository's validated 3.44.9 toolchain to 3.47.1. On 3.47.1, a normal scaffold rewrote transitive lock entries; when package resolution was isolated correctly, `flutter pub get --enforce-lockfile` proved that 3.47.1 would require a broad dependency-graph migration (125 dependency changes) rather than a harmless scaffold refresh.
 
-Using `--no-pub` prevents that implicit resolution, but the enforced install must also happen before any later `dart run` or Flutter tool that could initialize package resolution itself. The release-safe order is therefore:
+That is not an appropriate silent change for the final store candidate. The release-safe contract is therefore:
 
-1. generate platform scaffolding with `flutter create ... --no-pub`;
-2. immediately run `flutter pub get --enforce-lockfile`;
-3. only then apply Mystic's canonical platform materializers and other Dart/Flutter tooling;
-4. fail if the committed lockfile changes unexpectedly.
+1. install the reviewed Flutter **3.44.9** toolchain explicitly;
+2. generate platform scaffolding with `flutter create ... --no-pub`;
+3. immediately run `flutter pub get --enforce-lockfile`;
+4. only then apply Mystic's canonical platform materializers and other Dart/Flutter tooling;
+5. fail if the committed lockfile changes unexpectedly.
 
-That was a workflow-ordering problem, not evidence that the production dependency graph needed a broad upgrade. Do not weaken this contract and do not broad-upgrade dependencies just to satisfy a newer Flutter stable toolchain. If an intentional dependency/toolchain upgrade is later required, review and audit it as a separate release change.
+Do not weaken this contract and do not broad-upgrade dependencies just because the public stable channel advances. Any later Flutter/dependency upgrade must be a separate reviewed release change with a deliberate lockfile migration and complete Android/iOS artifact audits.
 
 ## First Codex action
 
