@@ -113,7 +113,7 @@ Future<IosPrivacyManifestAuditResult> verifyIosArtifactPrivacyManifests({
       );
     }
 
-    return verifyIosAppPrivacyManifests(
+    return await verifyIosAppPrivacyManifests(
       appBundle: appBundles.single,
       commandRunner: commandRunner,
     );
