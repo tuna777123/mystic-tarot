@@ -61,6 +61,21 @@ void main() {
           reason: '${workflow.path} contains an unlocked dependency install.',
         );
 
+        final flutterActionCount = RegExp(
+          r'uses:\s*subosito/flutter-action@v2',
+        ).allMatches(source).length;
+        final validatedToolchainCount = RegExp(
+          r"flutter-version:\s*'3\.44\.9'",
+        ).allMatches(source).length;
+        expect(
+          validatedToolchainCount,
+          flutterActionCount,
+          reason:
+              '${workflow.path} must pin every Flutter action to the validated '
+              '3.44.9 release toolchain. A moving stable channel can invalidate '
+              'the committed lockfile without any repository change.',
+        );
+
         for (final match in RegExp(
           r'^\s*run:\s*(flutter create[^\n]*)$',
           multiLine: true,
