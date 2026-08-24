@@ -60,13 +60,36 @@ void main() {
           isFalse,
           reason: '${workflow.path} contains an unlocked dependency install.',
         );
+
+        for (final match in RegExp(
+          r'^\s*run:\s*(flutter create[^\n]*)$',
+          multiLine: true,
+        ).allMatches(source)) {
+          expect(
+            match.group(1),
+            contains('--no-pub'),
+            reason:
+                '${workflow.path} lets flutter create resolve packages before '
+                'the enforced lockfile install. Platform scaffolding must use '
+                '--no-pub so the committed dependency graph stays byte-stable.',
+          );
+        }
+
         lockedInstallCount += RegExp(
           r'^\s*run:\s*flutter pub get --enforce-lockfile\s*$',
           multiLine: true,
         ).allMatches(source).length;
       }
 
-      expect(lockedInstallCount, greaterThanOrEqualTo(12));
+      expect(
+        lockedInstallCount,
+        greaterThanOrEqualTo(10),
+        reason:
+            'All active build/release workflows must keep the committed lockfile '
+            'enforced. Obsolete parallel Android signing and Pages preview '
+            'workflows were removed, leaving one canonical path per release '
+            'surface and at least 10 locked dependency installs.',
+      );
     },
   );
 }
