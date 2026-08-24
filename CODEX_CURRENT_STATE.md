@@ -1,76 +1,68 @@
 # Codex Current Starting State
 
-This file is intentionally short. Read `CODEX_HANDOFF.md` for the full release plan.
+Read this file first, then `AGENTS.md` and `CODEX_HANDOFF.md`.
 
-## Branch / PR
+## Canonical branch / PR
 
 - Open PR: **#162 — Finalize Release Candidate and Codex production handoff**
 - Working branch: `release/final-codex-handoff`
 - Base: `main`
 - Main before this PR: `ae7e87a2d52482e132ae2c970f3c91991764f91c`
+- PR #161 is closed as superseded. Do not revive or merge its parallel branch.
 
-## What is already fixed on this branch
+## Repository state prepared for Codex
 
-- Release Candidate now uses the canonical `tool/configure_store_identifiers.dart` platform materializer instead of stale manual `sed` rewrites.
-- Release Candidate preserves the explicit idempotent `dart run tool/configure_app_lock.dart` step required by the v1.20 release contract.
-- Release Candidate uses current action majors, locked dependency install, formatting, clean-diff, launch-surface and fatal-info analysis gates.
-- `tool/src/ios_privacy_manifest_audit.dart` is compatible with Flutter stable 3.47.1 (`await` inside the try/finally path).
-- Full Codex production/store handoff is in `CODEX_HANDOFF.md`.
+- Release Candidate uses the same canonical store/platform materializers as the real release path.
+- Release Candidate runs on pull requests to `main` and watches release-relevant source, tool, lockfile and production-workflow inputs.
+- Flutter CI, iOS Release CI, Release Candidate and Production Store Release use `flutter create ... --no-pub` whenever native platform shells are generated.
+- Dependency resolution is deliberately separated from scaffolding and remains `flutter pub get --enforce-lockfile`.
+- `dependency_lock_contract_test.dart` fails if a workflow reintroduces a `flutter create` command without `--no-pub` or an unlocked `flutter pub get`.
+- The committed dependency graph remains intentionally frozen; do not refresh `pubspec.lock` merely because Flutter stable advances.
+- `google_mobile_ads` remains exact-pinned at `9.0.0`.
+- The obsolete parallel signed-Android workflow `.github/workflows/store-android.yml` is removed.
+- The obsolete competing Pages deployment `.github/workflows/web-preview.yml` is removed.
+- Signed store candidates belong only to `.github/workflows/store-release.yml`.
+- Public deployment belongs only to `.github/workflows/pages.yml`.
+- Regression coverage in `test/release_candidate_workflow_contract_test.dart` protects those canonical paths.
+- `tool/src/ios_privacy_manifest_audit.dart` includes the Flutter 3.47.1 compatibility fix required by current hosted runners.
 
-## Exact remaining CI blocker at handoff
+## Why the lockfile fix is `--no-pub`
 
-GitHub hosted runners now resolve **Flutter stable 3.47.1**. The committed `pubspec.lock` was originally frozen under an older Flutter stable (3.44.9), so `flutter create . --platforms=android,ios --org com.tunabozcali` mutates transitive lock entries before the later `flutter pub get --enforce-lockfile` step.
+GitHub hosted runners advanced to Flutter stable 3.47.1. A normal `flutter create` implicitly ran package resolution before the repository's later enforced install and rewrote transitive entries in `pubspec.lock`.
 
-The latest observed mutation included transitive-only changes such as:
+That was a workflow-ordering problem, not evidence that the production dependency graph needed a broad upgrade. The release-safe fix is therefore:
 
-- `archive 4.0.9 -> 4.2.0`
-- `dbus 0.7.13 -> 0.7.15`
-- `image 4.9.1 -> 4.9.2`
-- `intl 0.20.2 -> 0.20.3`
-- `matcher 0.12.19 -> 0.12.20`
-- `meta 1.18.0 -> 1.18.3`
-- `synchronized 3.4.1+1 -> 3.4.1+2`
-- `test_api 0.7.11 -> 0.7.12`
-- `vector_math 2.2.0 -> 2.4.0`
-- `vm_service 15.2.0 -> 15.3.0`
-- `webview_flutter_android 4.13.0 -> 4.14.0`
+1. generate platform scaffolding with `flutter create ... --no-pub`;
+2. apply Mystic's canonical platform materializers;
+3. resolve/install dependencies only through `flutter pub get --enforce-lockfile`;
+4. fail if the committed lockfile changes unexpectedly.
 
-The direct launch-critical Mobile Ads wrapper remains intentionally exact-pinned at `google_mobile_ads: 9.0.0`.
+Do not weaken this contract and do not broad-upgrade dependencies just to satisfy a newer Flutter stable toolchain. If an intentional dependency/toolchain upgrade is later required, review and audit it as a separate release change.
 
-## First Codex task
+## First Codex action
 
-Do this from a real checkout of PR #162 / `release/final-codex-handoff`:
+1. Inspect PR #162 and confirm you are on `release/final-codex-handoff`.
+2. Read `AGENTS.md`, this file, `CODEX_HANDOFF.md`, issue #114 and `.github/workflows/store-release.yml`.
+3. Check the exact-head GitHub Actions results for Flutter CI, iOS Release CI and Release Candidate.
+4. If all three are green on the exact current head, merge PR #162 without adding product scope.
+5. If any check is red, fix the actual failing gate on this same branch. Do not bypass, skip, loosen or delete a release/privacy/dependency/signing test.
+6. After merge, verify Release Candidate again on canonical `main`.
+7. Then continue directly with the account/signing/store work in `CODEX_HANDOFF.md` and issue #114.
 
-1. Install/use the same current Flutter stable used by GitHub Actions (currently 3.47.1 unless stable has legitimately advanced again).
-2. Record `flutter --version`.
-3. Start from a clean tree.
-4. Run the same platform-generation/materialization path used by CI:
-   - `flutter create . --platforms=android,ios --org com.tunabozcali`
-   - `dart run tool/configure_store_identifiers.dart`
-   - `dart run tool/configure_app_lock.dart`
-5. Refresh the root `pubspec.lock` to the dependency graph resolved by that exact stable toolchain. Do **not** broad-upgrade direct dependencies merely because newer packages exist.
-6. Confirm direct launch pins and release identity did not drift, especially `google_mobile_ads: 9.0.0`.
-7. Run `flutter pub get --enforce-lockfile` and verify the lockfile stays byte-stable afterward.
-8. Run the full test suite and every PR validation workflow.
-9. Confirm Flutter CI, iOS Release CI, and Release Candidate are green on the exact final head.
-10. Merge PR #162 only at that exact green head.
-11. Verify Release Candidate again on canonical `main` after merge.
+## Owner-only blockers after repository validation
 
-Do not weaken `dependency_lock_contract_test.dart` just to get green CI. The intended fix is a legitimate lockfile refresh for the current validated Flutter stable toolchain.
+Ask the owner only when the next action genuinely requires account ownership or an irreversible external decision, including:
 
-## After PR #162 is green and merged
+- Google Play / Apple Developer enrollment or payment;
+- 2FA;
+- legal agreements;
+- tax or banking details;
+- real production AdMob IDs / publisher line;
+- production signing certificates, profiles, keystores or protected secrets;
+- final store publication / rollout approval.
 
-Proceed immediately with `CODEX_HANDOFF.md` and GitHub issue #114:
+Everything else should be handled autonomously from the repository state.
 
-- developer accounts;
-- AdMob production app/unit IDs and UMP;
-- root-hosted `app-ads.txt` with the real publisher line;
-- Android upload signing;
-- Apple distribution signing / provisioning;
-- protected `production-stores` secrets;
-- Production Store Release workflow;
-- exact signed-candidate QA;
-- Play testing track / TestFlight;
-- store forms and submission.
+## Completion rule
 
-Ask the owner only for account-owner actions such as 2FA, payment, legal agreements, tax/banking, production credentials, or an irreversible store publication decision.
+Do not call Mystic Tarot launched merely because repository CI is green. The final production definition remains the one in `CODEX_HANDOFF.md`: protected signed AAB/IPA, exact-candidate QA, live `app-ads.txt`, completed store forms/testing and actual submission/review handling.
