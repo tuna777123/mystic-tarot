@@ -1,0 +1,64 @@
+name: Final Handoff Maintenance
+
+on:
+  push:
+    branches: [release/final-codex-handoff]
+    paths:
+      - ".github/workflows/final-handoff-maintenance.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out handoff branch
+        uses: actions/checkout@v6
+        with:
+          ref: release/final-codex-handoff
+          fetch-depth: 0
+      - name: Set up validated Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+      - name: Apply exact release-path fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/store-release.yml')
+          source = path.read_text()
+          replacements = {
+              'run: flutter create . --platforms=android,ios --org com.tunabozcali --no-pub':
+                  'run: bash tool/scaffold_native_preserving_sources.sh --platforms=android,ios --org com.tunabozcali',
+              'run: flutter create . --platforms=android --org com.tunabozcali --no-pub':
+                  'run: bash tool/scaffold_native_preserving_sources.sh --platforms=android --org com.tunabozcali',
+              'run: flutter create . --platforms=ios --org com.tunabozcali --no-pub':
+                  'run: bash tool/scaffold_native_preserving_sources.sh --platforms=ios --org com.tunabozcali',
+          }
+          for old, new in replacements.items():
+              count = source.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one occurrence of {old!r}, found {count}')
+              source = source.replace(old, new)
+          path.write_text(source)
+          PY
+          dart format test/dependency_lock_contract_test.dart test/release_candidate_workflow_contract_test.dart
+          rm .github/workflows/final-handoff-maintenance.yml
+          git diff --check
+      - name: Commit maintenance result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Finish lock-safe release handoff"
+          git push origin HEAD:release/final-codex-handoff
