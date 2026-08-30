@@ -20,9 +20,10 @@ void main() {
     expect(
       workflow,
       contains(
-        'flutter create . --platforms=android,ios --org com.tunabozcali --no-pub',
+        'bash tool/scaffold_native_preserving_sources.sh --platforms=android,ios --org com.tunabozcali',
       ),
     );
+    expect(workflow, isNot(contains('flutter create .')));
     expect(workflow, contains('flutter pub get --enforce-lockfile'));
     expect(workflow, contains('flutter analyze --fatal-infos'));
     expect(workflow, contains('bash tool/verify_launch_surface.sh'));
