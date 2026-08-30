@@ -54,14 +54,15 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.44.9'
           channel: stable
           cache: true
       - name: Generate native project shells
-        run: flutter create . --platforms=android,ios --org com.tunabozcali
-      - name: Apply permanent store identifiers
-        run: dart run tool/configure_store_identifiers.dart
+        run: bash tool/scaffold_native_preserving_sources.sh --platforms=android,ios --org com.tunabozcali
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile
+      - name: Apply permanent store identifiers
+        run: dart run tool/configure_store_identifiers.dart
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
       - name: Verify Dart formatting
@@ -102,10 +103,13 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.44.9'
           channel: stable
           cache: true
       - name: Generate Android project shell
-        run: flutter create . --platforms=android --org com.tunabozcali
+        run: bash tool/scaffold_native_preserving_sources.sh --platforms=android --org com.tunabozcali
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
       - name: Apply permanent store and AdMob identifiers
         run: dart run tool/configure_store_identifiers.dart
       - name: Validate protected Android release inputs
@@ -137,8 +141,6 @@ jobs:
           chmod 600 android/key.properties
           dart run tool/configure_android_signing.dart
           grep -q 'signingConfigs.getByName("release")' android/app/build.gradle.kts
-      - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
       - name: Build signed Android bundle
@@ -242,10 +244,13 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.44.9'
           channel: stable
           cache: true
       - name: Generate iOS project shell
-        run: flutter create . --platforms=ios --org com.tunabozcali
+        run: bash tool/scaffold_native_preserving_sources.sh --platforms=ios --org com.tunabozcali
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
       - name: Apply permanent store and AdMob identifiers
         run: dart run tool/configure_store_identifiers.dart
       - name: Validate protected iOS release inputs
@@ -288,8 +293,6 @@ jobs:
           cp "$RUNNER_TEMP/profile.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
           echo "profile_uuid=$PROFILE_UUID" >> "$GITHUB_OUTPUT"
           echo "profile_name=$PROFILE_NAME" >> "$GITHUB_OUTPUT"
-      - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
       - name: Prepare Flutter iOS release

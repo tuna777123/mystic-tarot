@@ -27,11 +27,15 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.44.9'
           channel: stable
           cache: true
 
       - name: Generate native shells
-        run: flutter create . --platforms=android,ios --org com.tunabozcali
+        run: bash tool/scaffold_native_preserving_sources.sh --platforms=android,ios --org com.tunabozcali
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
 
       - name: Configure permanent store identity
         run: dart run tool/configure_store_identifiers.dart
@@ -41,9 +45,6 @@ jobs:
 
       - name: Configure private app lock
         run: dart run tool/configure_app_lock.dart
-
-      - name: Install dependencies
-        run: flutter pub get --enforce-lockfile
 
       - name: Generate branded native icons
         run: dart run flutter_launcher_icons
