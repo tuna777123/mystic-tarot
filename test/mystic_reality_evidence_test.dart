@@ -39,7 +39,9 @@ void main() {
     test('counts only readings whose 24h Mirror is eligible', () {
       final now = DateTime.utc(2026, 8, 31, 12);
       final mature = _reading(createdAt: now.subtract(const Duration(days: 2)));
-      final recent = _reading(createdAt: now.subtract(const Duration(hours: 6)));
+      final recent = _reading(
+        createdAt: now.subtract(const Duration(hours: 6)),
+      );
 
       final snapshot = MysticRealityEvidence.analyze(
         readings: [mature, recent],
@@ -92,9 +94,7 @@ void main() {
       final now = DateTime.utc(2026, 8, 31, 12);
       final readings = List.generate(
         3,
-        (index) => _reading(
-          createdAt: now.subtract(Duration(days: 5 - index)),
-        ),
+        (index) => _reading(createdAt: now.subtract(Duration(days: 5 - index))),
       );
 
       final twoMirrors = {
@@ -184,9 +184,7 @@ void main() {
       final now = DateTime.utc(2026, 8, 31, 12);
       final readings = List.generate(
         3,
-        (index) => _reading(
-          createdAt: now.subtract(Duration(days: 5 - index)),
-        ),
+        (index) => _reading(createdAt: now.subtract(Duration(days: 5 - index))),
       );
       final outcomes = [
         MysticMirrorOutcome.unchanged,
@@ -208,7 +206,10 @@ void main() {
         generatedAt: now,
       );
 
-      expect(snapshot.rankedOutcomes.first.outcome, MysticMirrorOutcome.unchanged);
+      expect(
+        snapshot.rankedOutcomes.first.outcome,
+        MysticMirrorOutcome.unchanged,
+      );
       expect(snapshot.rankedOutcomes.first.count, 2);
       expect(snapshot.rankedOutcomes[1].outcome, MysticMirrorOutcome.shifted);
     });
