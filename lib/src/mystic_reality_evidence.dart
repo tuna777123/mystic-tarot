@@ -32,20 +32,17 @@ class MysticRealityEvidenceSnapshot {
   List<OutcomeEvidence> get rankedOutcomes {
     final rows = MysticMirrorOutcome.values
         .map(
-          (outcome) => OutcomeEvidence(
-            outcome: outcome,
-            count: countFor(outcome),
-          ),
+          (outcome) =>
+              OutcomeEvidence(outcome: outcome, count: countFor(outcome)),
         )
         .where((row) => row.count > 0)
         .toList(growable: false);
-    return rows.toList()
-      ..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        return byCount != 0
-            ? byCount
-            : a.outcome.index.compareTo(b.outcome.index);
-      });
+    return rows.toList()..sort((a, b) {
+      final byCount = b.count.compareTo(a.count);
+      return byCount != 0
+          ? byCount
+          : a.outcome.index.compareTo(b.outcome.index);
+    });
   }
 
   List<EmotionTransitionEvidence> get rankedEmotionTransitions {
@@ -57,15 +54,14 @@ class MysticRealityEvidenceSnapshot {
           ),
         )
         .toList(growable: false);
-    return rows.toList()
-      ..sort((a, b) {
-        final byCount = b.count.compareTo(a.count);
-        if (byCount != 0) return byCount;
-        final from = a.transition.from.index.compareTo(b.transition.from.index);
-        return from != 0
-            ? from
-            : a.transition.to.index.compareTo(b.transition.to.index);
-      });
+    return rows.toList()..sort((a, b) {
+      final byCount = b.count.compareTo(a.count);
+      if (byCount != 0) return byCount;
+      final from = a.transition.from.index.compareTo(b.transition.from.index);
+      return from != 0
+          ? from
+          : a.transition.to.index.compareTo(b.transition.to.index);
+    });
   }
 }
 
@@ -126,20 +122,12 @@ abstract final class MysticRealityEvidence {
       final mirror = reflections[mysticMirrorRecordId(reading)];
       if (mirror == null) continue;
       completed++;
-      outcomes.update(
-        mirror.outcome,
-        (count) => count + 1,
-        ifAbsent: () => 1,
-      );
+      outcomes.update(mirror.outcome, (count) => count + 1, ifAbsent: () => 1);
       final transition = EmotionTransition(
         from: reading.emotion,
         to: mirror.emotion,
       );
-      transitions.update(
-        transition,
-        (count) => count + 1,
-        ifAbsent: () => 1,
-      );
+      transitions.update(transition, (count) => count + 1, ifAbsent: () => 1);
     }
 
     return MysticRealityEvidenceSnapshot(
