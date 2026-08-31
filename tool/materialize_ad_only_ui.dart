@@ -526,7 +526,9 @@ void materializeAdOnlyUi() {
   if (!journalSource.contains('MysticRealityEvidence.analyze(') ||
       journalSource.contains('Movement noticed') ||
       journalSource.contains('movementRate')) {
-    throw StateError('Reality Evidence journal insights were not materialized.');
+    throw StateError(
+      'Reality Evidence journal insights were not materialized.',
+    );
   }
   journal.writeAsStringSync(journalSource);
 
