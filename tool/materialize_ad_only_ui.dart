@@ -431,7 +431,7 @@ void materializeAdOnlyUi() {
                   fr: 'Mouvement observé',
                   pt: 'Mudança percebida',
                 ),
-                completedMirrors.isEmpty ? '—' : '$movementRate%',
+                completedMirrors.isEmpty ? '—' : '\$movementRate%',
               ),''',
     '''                realityEvidence.completedMirrorCount.toString(),
               ),
