@@ -340,6 +340,12 @@ void materializeAdOnlyUi() {
   var journalSource = journal.readAsStringSync();
   journalSource = _insertAfterRequired(
     journalSource,
+    "import 'mystic_mirror.dart';\n",
+    "import 'mystic_reality_evidence.dart';\n",
+    'Reality Evidence journal import',
+  );
+  journalSource = _insertAfterRequired(
+    journalSource,
     '                    subject: mysticMirrorShareSubject(widget.language),\n',
     '                    sharePositionOrigin: _mirrorShareOrigin(),\n',
     'iPad-safe Mirror share origin parameter',
@@ -370,6 +376,134 @@ void materializeAdOnlyUi() {
                                 );''',
     'Mirror 72-hour completion stage',
   );
+  journalSource = _replaceRequired(
+    journalSource,
+    '''    final completedMirrors = mirrors.values.toList();
+    final movementCount = completedMirrors.where((mirror) {
+      return mirror.outcome == MysticMirrorOutcome.shifted ||
+          mirror.outcome == MysticMirrorOutcome.partlyShifted;
+    }).length;
+    final movementRate = completedMirrors.isEmpty
+        ? 0
+        : ((movementCount / completedMirrors.length) * 100).round();
+    final transitionCounts = <String, int>{};
+    for (final record in widget.records) {
+      final mirror = mirrors[mysticMirrorRecordId(record)];
+      if (mirror == null) continue;
+      final transition =
+          '\${localizedEmotionLabel(record.emotion, languageCode: _languageCode)} → \${localizedEmotionLabel(mirror.emotion, languageCode: _languageCode)}';
+      transitionCounts.update(
+        transition,
+        (value) => value + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    final rankedTransitions = transitionCounts.entries.toList()
+      ..sort((first, second) => second.value.compareTo(first.value));''',
+    '''    final realityEvidence = MysticRealityEvidence.analyze(
+      readings: widget.records,
+      reflections: mirrors,
+      generatedAt: DateTime.now(),
+    );
+    final evidenceCoverage = realityEvidence.eligibleReadingCount == 0
+        ? '—'
+        : '\${(realityEvidence.completionRate * 100).round()}%';
+    final rankedOutcomes = realityEvidence.hasEnoughEvidence
+        ? realityEvidence.rankedOutcomes
+        : const <OutcomeEvidence>[];
+    final rankedTransitions = realityEvidence.hasEnoughEvidence
+        ? realityEvidence.rankedEmotionTransitions
+        : const <EmotionTransitionEvidence>[];''',
+    'prediction-like movement metric replacement',
+  );
+  journalSource = _replaceRequired(
+    journalSource,
+    '''                completedMirrors.length.toString(),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildMetric(
+                _mirrorCopy(
+                  en: 'Movement noticed',
+                  tr: 'Hareket fark edildi',
+                  es: 'Cambio observado',
+                  fr: 'Mouvement observé',
+                  pt: 'Mudança percebida',
+                ),
+                completedMirrors.isEmpty ? '—' : '$movementRate%',
+              ),''',
+    '''                realityEvidence.completedMirrorCount.toString(),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildMetric(
+                _mirrorCopy(
+                  en: 'Evidence captured',
+                  tr: 'Kaydedilen kanıt',
+                  es: 'Evidencia registrada',
+                  fr: 'Preuves consignées',
+                  pt: 'Evidência registrada',
+                ),
+                evidenceCoverage,
+              ),''',
+    'Reality Evidence coverage metric',
+  );
+  journalSource = _replaceRequired(
+    journalSource,
+    '''        _buildPatternCard(
+          title: _mirrorCopy(
+            en: 'How your emotional state shifted',
+            tr: 'Duygun nasıl değişti',
+            es: 'Cómo cambió tu estado emocional',
+            fr: 'Comment votre état émotionnel a évolué',
+            pt: 'Como seu estado emocional mudou',
+          ),
+          rows: rankedTransitions
+              .take(4)
+              .map((entry) => _InsightRow(entry.key, '\${entry.value}×'))
+              .toList(),
+        ),''',
+    '''        _buildPatternCard(
+          title: _mirrorCopy(
+            en: 'Reality outcomes · not a prediction score',
+            tr: 'Gerçeklik sonuçları · kehanet puanı değil',
+            es: 'Resultados reales · no es una puntuación predictiva',
+            fr: 'Résultats réels · pas un score de prédiction',
+            pt: 'Resultados reais · não é pontuação de previsão',
+          ),
+          rows: rankedOutcomes
+              .take(4)
+              .map(
+                (entry) => _InsightRow(
+                  _outcomeLabel(entry.outcome),
+                  '\${entry.count}×',
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 12),
+        _buildPatternCard(
+          title: _mirrorCopy(
+            en: 'How your emotional state changed',
+            tr: 'Duygusal durumun nasıl değişti',
+            es: 'Cómo cambió tu estado emocional',
+            fr: 'Comment votre état émotionnel a évolué',
+            pt: 'Como seu estado emocional mudou',
+          ),
+          rows: rankedTransitions
+              .take(4)
+              .map(
+                (entry) => _InsightRow(
+                  '\${localizedEmotionLabel(entry.transition.from, languageCode: _languageCode)} → \${localizedEmotionLabel(entry.transition.to, languageCode: _languageCode)}',
+                  '\${entry.count}×',
+                ),
+              )
+              .toList(),
+        ),''',
+    'Reality Evidence outcome and emotion cards',
+  );
   journalSource = _insertBeforeRequired(
     journalSource,
     '  Widget _buildDueMirrorAction(ReadingRecord record) {\n',
@@ -389,12 +523,18 @@ void materializeAdOnlyUi() {
   if (!journalSource.contains("'growth_stage': growthStage")) {
     throw StateError('Mirror 72-hour growth stage was not materialized.');
   }
+  if (!journalSource.contains('MysticRealityEvidence.analyze(') ||
+      journalSource.contains('Movement noticed') ||
+      journalSource.contains('movementRate')) {
+    throw StateError('Reality Evidence journal insights were not materialized.');
+  }
   journal.writeAsStringSync(journalSource);
 
   stdout.writeln(
     'Advertising-only UI materialized: paid-tier user copy removed, '
-    'growth events, mature Mirror cohort evidence and opt-in diagnostics '
-    'installed; narrow-screen and iPad share hardening retained.',
+    'growth events, mature Mirror cohort evidence, transparent Reality Evidence '
+    'and opt-in diagnostics installed; narrow-screen and iPad share hardening '
+    'retained.',
   );
 }
 
