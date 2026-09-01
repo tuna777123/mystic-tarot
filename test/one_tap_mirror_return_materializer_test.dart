@@ -14,7 +14,7 @@ class AppState {
           onOpenDestiny: _openDestinyHub,
           onOpenJournal: () => setState(() => tab = 2),
     );
-    MysticLivingJournalFeature(
+        MysticLivingJournalFeature(
           records: journal,
           language: language,
     );
