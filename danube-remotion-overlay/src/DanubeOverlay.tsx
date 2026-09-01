@@ -14,9 +14,8 @@ const outline:React.CSSProperties={WebkitTextStroke:`3px ${BLACK}`,paintOrder:'s
 type Beat={s:number;e:number;top:string;bottom?:string;accent?:'gold'|'red';pos?:'low'|'mid'|'high';align?:'left'|'center'};
 type Stat={s:number;e:number;big:string;label:string;sub?:string;side?:'left'|'right'};
 
-// V10: short information beats. No word-by-word TikTok captions; every text change lands on a new story beat.
 const beats:Beat[]=[
- {s:0,e:1.55,top:'THE DANUBE IS',bottom:'DRYING UP',accent:'gold',pos:'low'},
+ {s:.55,e:1.55,top:'THE DANUBE IS',bottom:'DRYING UP',accent:'gold',pos:'low'},
  {s:1.55,e:3.58,top:'WORLD WAR II',bottom:'IS SURFACING',accent:'gold',pos:'low'},
  {s:5.79,e:7.85,top:'THE RIVER FELL',bottom:'SO LOW',accent:'gold',pos:'low'},
  {s:7.85,e:10.27,top:'GERMAN SHIPS',bottom:'REAPPEARED',accent:'gold',pos:'low'},
