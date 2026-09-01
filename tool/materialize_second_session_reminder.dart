@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'materialize_one_tap_mirror_return.dart' as one_tap_mirror;
+
 void main() => materializeSecondSessionReminder();
 
 /// Keeps the first completed reading uninterrupted. The optional ritual
@@ -14,6 +16,8 @@ void materializeSecondSessionReminder() {
   final original = app.readAsStringSync();
   final updated = transformSecondSessionReminder(original);
   app.writeAsStringSync(updated);
+
+  one_tap_mirror.materializeOneTapMirrorReturn();
 }
 
 String transformSecondSessionReminder(String source) {
