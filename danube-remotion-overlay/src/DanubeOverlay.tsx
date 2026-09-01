@@ -66,15 +66,10 @@ const RetentionFlash:React.FC=()=>{const f=useCurrentFrame(); const {fps}=useVid
  return <AbsoluteFill style={{backgroundColor:`rgba(255,220,130,${a})`}}/>;
 };
 
-const DangerPulse:React.FC=()=>{const f=useCurrentFrame(); const {fps}=useVideoConfig(); const s=49.9*fps,e=52.83*fps; if(f<s||f>=e)return null;
- const local=f-s; const a=interpolate(local,[0,7,18,e-s],[0,.15,.05,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
- return <AbsoluteFill style={{background:`radial-gradient(circle at 50% 58%, rgba(255,54,45,${a}), rgba(255,54,45,0) 62%)`}}/>;
-};
-
 const EdgeGrade:React.FC=()=> <><AbsoluteFill style={{background:'linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,0) 42%,rgba(0,0,0,.23) 100%)'}}/><AbsoluteFill style={{boxShadow:'inset 0 0 120px rgba(0,0,0,.20)'}}/></>;
 
 export const DanubeOverlay:React.FC=()=> <AbsoluteFill>
- <EdgeGrade/><RetentionFlash/><DangerPulse/>
+ <EdgeGrade/><RetentionFlash/>
  {cards.map((c,i)=><Card key={i} c={c}/>)}
  {beats.map((b,i)=><Caption key={i} b={b}/>)}
 </AbsoluteFill>;
