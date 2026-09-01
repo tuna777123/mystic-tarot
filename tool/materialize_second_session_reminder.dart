@@ -22,7 +22,8 @@ String transformSecondSessionReminder(String source) {
   const sameDaySecondReadingAnchor =
       '''            final shouldOfferRitualReminder =
                 journal.isNotEmpty && record.kind == ReadingKind.daily;''';
-  const laterDailyReturnAnchor = '''            final shouldOfferRitualReminder =
+  const laterDailyReturnAnchor =
+      '''            final shouldOfferRitualReminder =
                 journal.any(
                   (saved) =>
                       saved.kind == ReadingKind.daily &&
