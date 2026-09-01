@@ -46,26 +46,18 @@ const pos:Record<Layout,React.CSSProperties>={
 const clamp={extrapolateLeft:'clamp' as const,extrapolateRight:'clamp' as const};
 const ease=Easing.bezier(.16,1,.3,1);
 
-const maskFor=(layout:Layout,reveal:number)=>{
- const p=(1-reveal)*100;
- if(layout==='lowerRight')return `inset(0 0 0 ${p}%)`;
- if(layout==='center')return `inset(0 ${p/2}% 0 ${p/2}%)`;
- return `inset(0 ${p}% 0 0)`;
-};
-
 const EditorialText:React.FC<{b:Beat}>=({b})=>{
  const frame=useCurrentFrame(); const {fps}=useVideoConfig();
  const s=b.s*fps,e=b.e*fps; if(frame<s||frame>=e)return null;
  const local=frame-s,d=e-s;
- const enter=interpolate(local,[0,9],[0,1],{...clamp,easing:ease});
- const exit=interpolate(local,[Math.max(0,d-5),d],[1,0],clamp);
- const reveal=Math.min(enter,exit);
- const y=interpolate(local,[0,10],[28,0],{...clamp,easing:ease});
+ const enterY=interpolate(local,[0,9],[30,0],{...clamp,easing:ease});
+ const exitY=interpolate(local,[Math.max(0,d-5),d],[0,-14],{...clamp,easing:ease});
+ const x=b.layout==='lowerRight'?interpolate(local,[0,9],[28,0],{...clamp,easing:ease}):b.layout==='center'?0:interpolate(local,[0,9],[-24,0],{...clamp,easing:ease});
  const line=interpolate(local,[3,14],[0,1],{...clamp,easing:ease});
  const accent=b.danger?RED:AMBER;
  const mainSize=b.layout==='hook'?104:b.layout==='center'?90:78;
  const accentSize=b.layout==='hook'?72:b.layout==='center'?88:80;
- return <div style={{position:'absolute',...pos[b.layout],transform:`translate3d(0,${y}px,0)`,clipPath:maskFor(b.layout,reveal),filter:'drop-shadow(0 4px 12px rgba(0,0,0,.86))'}}>
+ return <div style={{position:'absolute',...pos[b.layout],transform:`translate3d(${x}px,${enterY+exitY}px,0)`,filter:'drop-shadow(0 4px 12px rgba(0,0,0,.86))'}}>
    {b.eyebrow&&<div style={{fontFamily:FONT,fontWeight:700,fontSize:24,letterSpacing:5.2,lineHeight:1,color:b.danger?RED:MUTED,textTransform:'uppercase',marginBottom:14}}>{b.eyebrow}</div>}
    <div style={{fontFamily:FONT,fontWeight:900,fontSize:mainSize,lineHeight:.91,letterSpacing:-3.2,color:INK,textTransform:'uppercase'}}>{b.main}</div>
    {b.accent&&<div style={{fontFamily:FONT,fontWeight:900,fontSize:accentSize,lineHeight:.93,letterSpacing:-2.4,color:b.final?INK:accent,textTransform:'uppercase',marginTop:7}}>{b.accent}</div>}
@@ -78,13 +70,11 @@ const BigStat:React.FC<{c:Stat}>=({c})=>{
  const frame=useCurrentFrame(); const {fps}=useVideoConfig();
  const s=c.s*fps,e=c.e*fps; if(frame<s||frame>=e)return null;
  const local=frame-s,d=e-s;
- const enter=interpolate(local,[0,11],[0,1],{...clamp,easing:ease});
- const exit=interpolate(local,[Math.max(0,d-6),d],[1,0],clamp);
- const reveal=Math.min(enter,exit);
- const x=interpolate(local,[0,12],[c.side==='right'?58:-58,0],{...clamp,easing:ease});
+ const enterX=interpolate(local,[0,11],[c.side==='right'?72:-72,0],{...clamp,easing:ease});
+ const exitX=interpolate(local,[Math.max(0,d-6),d],[0,c.side==='right'?24:-24],{...clamp,easing:ease});
  const rule=interpolate(local,[4,16],[0,1],{...clamp,easing:ease});
  const left=c.side!=='right';
- return <div style={{position:'absolute',top:210,left:left?58:undefined,right:left?undefined:58,width:760,transform:`translate3d(${x}px,0,0)`,textAlign:left?'left':'right',clipPath:left?`inset(0 ${(1-reveal)*100}% 0 0)`:`inset(0 0 0 ${(1-reveal)*100}%)`,filter:'drop-shadow(0 4px 16px rgba(0,0,0,.82))'}}>
+ return <div style={{position:'absolute',top:210,left:left?58:undefined,right:left?undefined:58,width:760,transform:`translate3d(${enterX+exitX}px,0,0)`,textAlign:left?'left':'right',filter:'drop-shadow(0 4px 16px rgba(0,0,0,.82))'}}>
    <div style={{display:'flex',flexDirection:left?'row':'row-reverse',alignItems:'stretch',gap:22}}>
      <div style={{width:5,background:AMBER,transform:`scaleY(${rule})`,transformOrigin:'top',borderRadius:3}}/>
      <div>
@@ -100,12 +90,10 @@ const Warning:React.FC=()=>{
  const frame=useCurrentFrame(); const {fps}=useVideoConfig();
  const s=49.9*fps,e=52.83*fps; if(frame<s||frame>=e)return null;
  const local=frame-s,d=e-s;
- const enter=interpolate(local,[0,10],[0,1],{...clamp,easing:ease});
- const exit=interpolate(local,[d-6,d],[1,0],clamp);
- const reveal=Math.min(enter,exit);
- const y=interpolate(local,[0,10],[24,0],{...clamp,easing:ease});
+ const enterY=interpolate(local,[0,10],[28,0],{...clamp,easing:ease});
+ const exitY=interpolate(local,[Math.max(0,d-6),d],[0,-14],{...clamp,easing:ease});
  const bar=interpolate(local,[4,16],[0,1],{...clamp,easing:ease});
- return <div style={{position:'absolute',left:64,right:64,top:1070,transform:`translate3d(0,${y}px,0)`,clipPath:`inset(0 ${(1-reveal)*100}% 0 0)`,filter:'drop-shadow(0 5px 14px rgba(0,0,0,.88))'}}>
+ return <div style={{position:'absolute',left:64,right:64,top:1070,transform:`translate3d(0,${enterY+exitY}px,0)`,filter:'drop-shadow(0 5px 14px rgba(0,0,0,.88))'}}>
    <div style={{fontFamily:FONT,fontWeight:800,fontSize:25,letterSpacing:5.5,color:MUTED,textTransform:'uppercase',marginBottom:12}}>THE TERRIFYING PART</div>
    <div style={{fontFamily:FONT,fontWeight:900,fontSize:98,lineHeight:.86,letterSpacing:-3.5,color:RED,textTransform:'uppercase'}}>LIVE</div>
    <div style={{fontFamily:FONT,fontWeight:900,fontSize:92,lineHeight:.88,letterSpacing:-3.5,color:INK,textTransform:'uppercase'}}>AMMUNITION</div>
