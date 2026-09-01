@@ -47,6 +47,8 @@ class AdRevenueService with WidgetsBindingObserver {
   );
 
   static const _completedReadingsKey = 'ad_completed_readings_total_v1';
+  static const _completedReadingsSinceInterstitialKey =
+      'ad_completed_readings_since_interstitial_v1';
   static const _lastAppOpenShownKey = 'ad_last_app_open_shown_v1';
   static const _lastFullScreenShownKey = 'ad_last_full_screen_shown_v1';
 
@@ -131,8 +133,14 @@ class AdRevenueService with WidgetsBindingObserver {
   Future<void> _restoreCadence() async {
     final preferences = await SharedPreferences.getInstance();
     _completedReadingsTotal = preferences.getInt(_completedReadingsKey) ?? 0;
-    _completedReadingsSinceAd =
-        _completedReadingsTotal % AdExperiencePolicy.interstitialEveryReadings;
+    final persistedSinceInterstitial = preferences.getInt(
+      _completedReadingsSinceInterstitialKey,
+    );
+    _completedReadingsSinceAd = persistedSinceInterstitial == null
+        ? _completedReadingsTotal % AdExperiencePolicy.interstitialEveryReadings
+        : persistedSinceInterstitial < 0
+        ? 0
+        : persistedSinceInterstitial;
     final lastShownMillis = preferences.getInt(_lastAppOpenShownKey);
     if (lastShownMillis != null) {
       _lastAppOpenShownAt = DateTime.fromMillisecondsSinceEpoch(
@@ -192,9 +200,10 @@ class AdRevenueService with WidgetsBindingObserver {
   /// Called only when a genuinely new reading is persisted.
   ///
   /// The first three new readings remain uninterrupted; the fourth may show a
-  /// preloaded interstitial at the natural completion boundary. Counts persist
-  /// across launches so app-open eligibility and interstitial cadence do not
-  /// reset when the process is restarted.
+  /// preloaded interstitial at the natural completion boundary. If the ad is
+  /// unavailable or a shared full-screen cooldown blocks it, that opportunity
+  /// stays due and is retried only at a later reading-completion boundary. The
+  /// cadence resets only after an actual interstitial impression.
   void recordCompletedReading() {
     unawaited(
       MysticBusinessMetrics.record(
@@ -210,13 +219,17 @@ class AdRevenueService with WidgetsBindingObserver {
     _completedReadingsSinceAd += 1;
     final preferences = await SharedPreferences.getInstance();
     await preferences.setInt(_completedReadingsKey, _completedReadingsTotal);
+    await preferences.setInt(
+      _completedReadingsSinceInterstitialKey,
+      _completedReadingsSinceAd,
+    );
 
     if (!_initialized || _showingFullScreenAd) return;
-    if (_completedReadingsSinceAd <
-        AdExperiencePolicy.interstitialEveryReadings) {
+    if (!AdExperiencePolicy.interstitialDue(
+      completedReadingsSinceInterstitial: _completedReadingsSinceAd,
+    )) {
       return;
     }
-    _completedReadingsSinceAd = 0;
     unawaited(
       MysticBusinessMetrics.record(
         MysticBusinessEvent.adOpportunity,
@@ -352,6 +365,14 @@ class AdRevenueService with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _persistCompletedReadingsSinceInterstitial() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setInt(
+      _completedReadingsSinceInterstitialKey,
+      _completedReadingsSinceAd,
+    );
+  }
+
   void _loadInterstitial() {
     final id = _interstitialId;
     if (!_initialized || id == null || _interstitial != null) return;
@@ -380,6 +401,8 @@ class AdRevenueService with WidgetsBindingObserver {
     _showingFullScreenAd = true;
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdImpression: (_) {
+        _completedReadingsSinceAd = 0;
+        unawaited(_persistCompletedReadingsSinceInterstitial());
         _markFullScreenShown();
         unawaited(
           MysticBusinessMetrics.record(
