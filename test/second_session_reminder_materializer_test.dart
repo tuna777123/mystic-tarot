@@ -11,17 +11,41 @@ void complete() {
                 journal.isEmpty && record.kind == ReadingKind.daily;
 }
 ''';
+  const sameDaySecondReadingSource = '''
+void complete() {
+            final shouldOfferRitualReminder =
+                journal.isNotEmpty && record.kind == ReadingKind.daily;
+}
+''';
 
-  test('ritual reminder is deferred beyond the first completed reading', () {
+  test('ritual reminder requires a prior daily reading from another day', () {
     final transformed = transformSecondSessionReminder(firstSessionSource);
 
+    expect(transformed, contains('journal.any('));
+    expect(transformed, contains('saved.kind == ReadingKind.daily'));
     expect(
       transformed,
-      contains('journal.isNotEmpty && record.kind == ReadingKind.daily'),
+      contains('_dayKey(saved.createdAt) != _dayKey(record.createdAt)'),
+    );
+    expect(
+      transformed,
+      isNot(contains('journal.isNotEmpty && record.kind == ReadingKind.daily')),
     );
     expect(
       transformed,
       isNot(contains('journal.isEmpty && record.kind == ReadingKind.daily')),
+    );
+  });
+
+  test('previous same-day deferred form upgrades to later-day return', () {
+    final transformed = transformSecondSessionReminder(
+      sameDaySecondReadingSource,
+    );
+
+    expect(transformed, contains('journal.any('));
+    expect(
+      transformed,
+      contains('_dayKey(saved.createdAt) != _dayKey(record.createdAt)'),
     );
   });
 
