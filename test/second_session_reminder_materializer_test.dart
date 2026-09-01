@@ -17,9 +17,7 @@ void complete() {
 
     expect(
       transformed,
-      contains(
-        'journal.isNotEmpty && record.kind == ReadingKind.daily',
-      ),
+      contains('journal.isNotEmpty && record.kind == ReadingKind.daily'),
     );
     expect(
       transformed,
@@ -44,10 +42,7 @@ void complete() {
       optionalName,
       contains('second_session_reminder.materializeSecondSessionReminder();'),
     );
-    expect(
-      app,
-      contains('if (!mounted || settings.promptCompleted) return;'),
-    );
+    expect(app, contains('if (!mounted || settings.promptCompleted) return;'));
   });
 
   test('unexpected onboarding source fails closed', () {
