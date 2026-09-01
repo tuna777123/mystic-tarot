@@ -1,0 +1,42 @@
+name: Danube Native Remotion Overlay
+
+on:
+  push:
+    branches: [danube-remotion-native-render]
+    paths:
+      - 'danube-remotion-overlay/**'
+      - '.github/workflows/danube-remotion-overlay.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout render branch
+        uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Remotion
+        working-directory: danube-remotion-overlay
+        run: npm install --no-audit --no-fund
+      - name: Ensure Remotion browser
+        working-directory: danube-remotion-overlay
+        run: npx remotion browser ensure
+      - name: Native transparent Remotion render
+        working-directory: danube-remotion-overlay
+        run: npm run render
+      - name: Verify alpha overlay
+        run: |
+          ffprobe -v error -show_entries format=duration:stream=codec_type,codec_name,width,height,pix_fmt,r_frame_rate -of json danube-remotion-overlay/out/Danube_Remotion_Overlay.webm
+      - name: Upload Remotion overlay artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: danube-native-remotion-overlay
+          path: danube-remotion-overlay/out/Danube_Remotion_Overlay.webm
+          if-no-files-found: error
+          compression-level: 0

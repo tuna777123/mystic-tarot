@@ -1,0 +1,14 @@
+{
+  "name": "danube-remotion-overlay",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "render": "remotion render src/index.ts DanubeOverlay out/Danube_Remotion_Overlay.webm --image-format=png --pixel-format=yuva420p --codec=vp8 --concurrency=2"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.506",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "remotion": "4.0.506"
+  }
+}
