@@ -19,15 +19,27 @@ void materializeSecondSessionReminder() {
 String transformSecondSessionReminder(String source) {
   const firstSessionAnchor = '''            final shouldOfferRitualReminder =
                 journal.isEmpty && record.kind == ReadingKind.daily;''';
-  const secondSessionAnchor = '''            final shouldOfferRitualReminder =
+  const sameDaySecondReadingAnchor =
+      '''            final shouldOfferRitualReminder =
                 journal.isNotEmpty && record.kind == ReadingKind.daily;''';
+  const laterDailyReturnAnchor = '''            final shouldOfferRitualReminder =
+                journal.any(
+                  (saved) =>
+                      saved.kind == ReadingKind.daily &&
+                      _dayKey(saved.createdAt) != _dayKey(record.createdAt),
+                ) &&
+                record.kind == ReadingKind.daily;''';
 
-  if (source.contains(secondSessionAnchor)) return source;
-  if (!source.contains(firstSessionAnchor)) {
+  if (source.contains(laterDailyReturnAnchor)) return source;
+
+  final sourceAnchor = source.contains(sameDaySecondReadingAnchor)
+      ? sameDaySecondReadingAnchor
+      : firstSessionAnchor;
+  if (!source.contains(sourceAnchor)) {
     throw StateError(
       'First-session ritual reminder anchor changed unexpectedly.',
     );
   }
 
-  return source.replaceFirst(firstSessionAnchor, secondSessionAnchor);
+  return source.replaceFirst(sourceAnchor, laterDailyReturnAnchor);
 }
