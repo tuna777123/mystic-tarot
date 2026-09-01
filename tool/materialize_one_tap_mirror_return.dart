@@ -26,7 +26,9 @@ void materializeOneTapMirrorReturn() {
     throw StateError('Home does not expose the direct due-Mirror action.');
   }
   if (!journalSource.contains('final int mirrorOpenRequest;')) {
-    throw StateError('Living Journal does not expose the Mirror request token.');
+    throw StateError(
+      'Living Journal does not expose the Mirror request token.',
+    );
   }
   if (!journalSource.contains('_openRequestedMirrorWhenReady')) {
     throw StateError('Living Journal does not handle direct Mirror requests.');
