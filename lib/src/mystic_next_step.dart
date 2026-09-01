@@ -417,13 +417,16 @@ class _EvidenceMaturity extends StatelessWidget {
       );
     }
 
-    final firstLoop = stage == MysticGrowthStage.newUser ||
+    final firstLoop =
+        stage == MysticGrowthStage.newUser ||
         stage == MysticGrowthStage.activated;
     return _EvidenceContent(
       icon: firstLoop ? Icons.schedule_rounded : Icons.lock_outline_rounded,
       title: _copy(
         language,
-        en: firstLoop ? 'Your first Mirror builds this' : 'Built from completed Mirrors',
+        en: firstLoop
+            ? 'Your first Mirror builds this'
+            : 'Built from completed Mirrors',
         es: firstLoop
             ? 'Tu primer Mirror empieza a construirla'
             : 'Se construye con Mirrors completados',
