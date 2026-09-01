@@ -12,6 +12,11 @@ enum MysticNextActionType {
   /// advertising-only product this means "explore a deeper spread"; it does
   /// not imply a paid unlock.
   explorePremiumSpread,
+
+  /// Opens the private Journal. When a durable pattern exists this reviews the
+  /// pattern; immediately after the very first reading it reviews the saved
+  /// reading and reinforces the 24-hour Mystic Mirror return instead of
+  /// pushing the user into more content.
   reviewPattern,
 }
 
@@ -55,8 +60,8 @@ class MysticGrowthSnapshot {
   final String returnMessage;
 
   /// Legacy field name retained for compatibility with earlier releases.
-  /// The value now represents continuity/evidence maturity, not willingness
-  /// to pay or an entitlement score.
+  /// The value now represents continuity maturity, not willingness to pay,
+  /// entitlement, prediction accuracy, or completed-Mirror evidence.
   final int premiumValueScore;
   final bool hasVisiblePattern;
 }
@@ -174,6 +179,17 @@ class MysticGrowthEngine {
             'A brief return keeps your private pattern history alive without turning reflection into work.',
         cta: 'Reveal today’s card',
         priority: 95,
+      );
+    }
+
+    if (records.length == 1 && completedArcanaDays == 0) {
+      return const MysticNextAction(
+        type: MysticNextActionType.reviewPattern,
+        title: 'Your first reading is saved',
+        body:
+            'You are done for today. Review the grounded action if you want; the useful next step is tomorrow’s Mystic Mirror.',
+        cta: 'Review my saved reading',
+        priority: 92,
       );
     }
 

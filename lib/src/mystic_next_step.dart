@@ -34,12 +34,13 @@ class MysticNextStepCard extends StatelessWidget {
     final action = _actionContent(
       language,
       snapshot.nextAction.type,
+      stage: snapshot.stage,
+      hasVisiblePattern: snapshot.hasVisiblePattern,
       streak: streak,
       mirrorDueCount: mirrorDueCount,
       completedArcanaDays: completedArcanaDays,
     );
     final continuity = _returnMessage(language, snapshot.returnState, streak);
-    final maturity = snapshot.premiumValueScore.clamp(0, 100);
     final isMirror =
         snapshot.nextAction.type == MysticNextActionType.mirrorCheckIn;
 
@@ -95,7 +96,7 @@ class MysticNextStepCard extends StatelessWidget {
                     isMirror: isMirror,
                     icon: action.icon,
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 14),
                   Text(
                     continuity,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -121,22 +122,22 @@ class MysticNextStepCard extends StatelessWidget {
                       height: 1.38,
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 13),
                   _EvidenceMaturity(
                     language: language,
-                    maturity: maturity,
+                    stage: snapshot.stage,
                     hasVisiblePattern: snapshot.hasVisiblePattern,
                     mirrorDueCount: mirrorDueCount,
                   ),
                   if (snapshot.stage == MysticGrowthStage.activated) ...[
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 13),
                     LaunchContinuityTimeline(
                       language: language,
                       compact: true,
                       showTitle: false,
                     ),
                   ],
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 13),
                   _ActionButtonLabel(label: action.cta),
                 ],
               ),
@@ -271,22 +272,26 @@ class _ActionButtonLabel extends StatelessWidget {
   }
 }
 
+/// This keeps the historical source marker used by release contracts, but it
+/// intentionally does not render a percentage. Reality Evidence is earned by
+/// completed Mystic Mirror check-ins; reading volume, streaks and Arcana
+/// progress must never masquerade as evidence maturity.
 class _EvidenceMaturity extends StatelessWidget {
   const _EvidenceMaturity({
     required this.language,
-    required this.maturity,
+    required this.stage,
     required this.hasVisiblePattern,
     required this.mirrorDueCount,
   });
 
   final MysticLanguage language;
-  final int maturity;
+  final MysticGrowthStage stage;
   final bool hasVisiblePattern;
   final int mirrorDueCount;
 
   @override
   Widget build(BuildContext context) {
-    final status = _status();
+    final content = _content();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -295,13 +300,25 @@ class _EvidenceMaturity extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: Colors.white.withValues(alpha: .065)),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
+          Container(
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: MysticColors.gold.withValues(alpha: .09),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(content.icon, color: MysticColors.gold, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   _copy(
                     language,
                     en: 'PRIVATE EVIDENCE MEMORY',
@@ -310,8 +327,6 @@ class _EvidenceMaturity extends StatelessWidget {
                     pt: 'MEMÓRIA DE EVIDÊNCIA PRIVADA',
                     tr: 'ÖZEL KANIT HAFIZASI',
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: 'Arial',
                     color: MysticColors.muted,
@@ -320,34 +335,26 @@ class _EvidenceMaturity extends StatelessWidget {
                     letterSpacing: .85,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  status,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
+                const SizedBox(height: 4),
+                Text(
+                  content.title,
                   style: const TextStyle(
                     fontFamily: 'Arial',
-                    color: MysticColors.gold,
-                    fontSize: 9,
+                    color: MysticColors.goldSoft,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              value: maturity / 100,
-              minHeight: 5,
-              backgroundColor: Colors.white.withValues(alpha: .07),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                MysticColors.gold,
-              ),
+                const SizedBox(height: 3),
+                Text(
+                  content.body,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: MysticColors.lavender,
+                    fontSize: 10.5,
+                    height: 1.35,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -355,44 +362,106 @@ class _EvidenceMaturity extends StatelessWidget {
     );
   }
 
-  String _status() {
+  _EvidenceContent _content() {
     if (mirrorDueCount > 0) {
-      return _copy(
-        language,
-        en: mirrorDueCount == 1
-            ? '1 check-in ready'
-            : '$mirrorDueCount check-ins ready',
-        es: mirrorDueCount == 1
-            ? '1 revisión lista'
-            : '$mirrorDueCount revisiones listas',
-        fr: mirrorDueCount == 1
-            ? '1 bilan prêt'
-            : '$mirrorDueCount bilans prêts',
-        pt: mirrorDueCount == 1
-            ? '1 check-in pronto'
-            : '$mirrorDueCount check-ins prontos',
-        tr: '$mirrorDueCount kontrol hazır',
+      return _EvidenceContent(
+        icon: Icons.compare_arrows_rounded,
+        title: _copy(
+          language,
+          en: mirrorDueCount == 1
+              ? '1 reality check is ready'
+              : '$mirrorDueCount reality checks are ready',
+          es: mirrorDueCount == 1
+              ? '1 comprobación está lista'
+              : '$mirrorDueCount comprobaciones están listas',
+          fr: mirrorDueCount == 1
+              ? '1 bilan réel est prêt'
+              : '$mirrorDueCount bilans réels sont prêts',
+          pt: mirrorDueCount == 1
+              ? '1 check-in real está pronto'
+              : '$mirrorDueCount check-ins reais estão prontos',
+          tr: mirrorDueCount == 1
+              ? '1 gerçeklik kontrolü hazır'
+              : '$mirrorDueCount gerçeklik kontrolü hazır',
+        ),
+        body: _copy(
+          language,
+          en: 'Evidence starts with what actually happened after the reading.',
+          es: 'La evidencia empieza con lo que realmente ocurrió después de la lectura.',
+          fr: 'Les indices commencent par ce qui s’est réellement passé après le tirage.',
+          pt: 'A evidência começa com o que realmente aconteceu depois da leitura.',
+          tr: 'Kanıt, okumadan sonra gerçekte ne olduğuyla başlar.',
+        ),
       );
     }
+
     if (hasVisiblePattern) {
-      return _copy(
-        language,
-        en: 'Pattern visible',
-        es: 'Patrón visible',
-        fr: 'Tendance visible',
-        pt: 'Padrão visível',
-        tr: 'Örüntü görünür',
+      return _EvidenceContent(
+        icon: Icons.insights_outlined,
+        title: _copy(
+          language,
+          en: 'A reading-history theme is visible',
+          es: 'Hay un tema visible en tu historial',
+          fr: 'Un thème apparaît dans votre historique',
+          pt: 'Um tema aparece no seu histórico',
+          tr: 'Okuma geçmişinde bir tema görünür',
+        ),
+        body: _copy(
+          language,
+          en: 'Repeated cards can suggest a theme. Reality Evidence still comes only from completed Mirror check-ins.',
+          es: 'Las cartas repetidas pueden sugerir un tema. La evidencia real solo viene de check-ins Mirror completados.',
+          fr: 'Des cartes répétées peuvent suggérer un thème. Les indices réels viennent uniquement des bilans Mirror terminés.',
+          pt: 'Cartas repetidas podem sugerir um tema. Evidência real vem apenas de check-ins Mirror concluídos.',
+          tr: 'Tekrarlanan kartlar bir tema gösterebilir. Gerçeklik kanıtı yalnız tamamlanan Mirror kontrollerinden gelir.',
+        ),
       );
     }
-    return _copy(
-      language,
-      en: 'Evidence is building',
-      es: 'La evidencia crece',
-      fr: 'Les indices s’accumulent',
-      pt: 'As evidências crescem',
-      tr: 'Kanıt birikiyor',
+
+    final firstLoop =
+        stage == MysticGrowthStage.newUser ||
+        stage == MysticGrowthStage.activated;
+    return _EvidenceContent(
+      icon: firstLoop ? Icons.schedule_rounded : Icons.lock_outline_rounded,
+      title: _copy(
+        language,
+        en: firstLoop
+            ? 'Your first Mirror builds this'
+            : 'Built from completed Mirrors',
+        es: firstLoop
+            ? 'Tu primer Mirror empieza a construirla'
+            : 'Se construye con Mirrors completados',
+        fr: firstLoop
+            ? 'Votre premier Mirror commence à la construire'
+            : 'Construit à partir des Mirrors terminés',
+        pt: firstLoop
+            ? 'Seu primeiro Mirror começa a construir isso'
+            : 'Construído com Mirrors concluídos',
+        tr: firstLoop
+            ? 'Bunu ilk Mirror kontrolün oluşturmaya başlar'
+            : 'Tamamlanan Mirror kontrollerinden oluşur',
+      ),
+      body: _copy(
+        language,
+        en: 'No score is inferred from taps, streaks or reading volume.',
+        es: 'No se calcula ninguna puntuación a partir de toques, rachas o cantidad de lecturas.',
+        fr: 'Aucun score n’est déduit des interactions, séries ou du nombre de tirages.',
+        pt: 'Nenhuma pontuação é inferida de toques, sequências ou volume de leituras.',
+        tr: 'Dokunuşlardan, seriden veya okuma sayısından bir kanıt puanı çıkarılmaz.',
+      ),
     );
   }
+}
+
+class _EvidenceContent {
+  const _EvidenceContent({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
 }
 
 class _NextStepContent {
@@ -412,6 +481,8 @@ class _NextStepContent {
 _NextStepContent _actionContent(
   MysticLanguage language,
   MysticNextActionType type, {
+  required MysticGrowthStage stage,
+  required bool hasVisiblePattern,
   required int streak,
   required int mirrorDueCount,
   required int completedArcanaDays,
@@ -468,11 +539,11 @@ _NextStepContent _actionContent(
         title: title,
         body: _copy(
           language,
-          en: 'A short daily return keeps your private pattern history alive without turning reflection into another task.',
-          es: 'Un regreso breve mantiene vivo tu historial privado de patrones sin convertir la reflexión en otra tarea.',
+          en: 'A short daily return keeps your private history alive without turning reflection into another task.',
+          es: 'Un regreso breve mantiene vivo tu historial privado sin convertir la reflexión en otra tarea.',
           fr: 'Un bref retour quotidien garde votre historique privé vivant sans transformer la réflexion en corvée.',
-          pt: 'Um retorno breve mantém seu histórico privado de padrões vivo sem transformar a reflexão em obrigação.',
-          tr: 'Kısa bir günlük dönüş, düşünmeyi işe çevirmeden özel örüntü geçmişini canlı tutar.',
+          pt: 'Um retorno breve mantém seu histórico privado vivo sem transformar a reflexão em obrigação.',
+          tr: 'Kısa bir günlük dönüş, düşünmeyi işe çevirmeden özel geçmişini canlı tutar.',
         ),
         cta: _copy(
           language,
@@ -534,6 +605,35 @@ _NextStepContent _actionContent(
         ),
       );
     case MysticNextActionType.reviewPattern:
+      if (stage == MysticGrowthStage.activated && !hasVisiblePattern) {
+        return _NextStepContent(
+          icon: Icons.bookmark_added_outlined,
+          title: _copy(
+            language,
+            en: 'Your first reading is saved',
+            es: 'Tu primera lectura está guardada',
+            fr: 'Votre premier tirage est enregistré',
+            pt: 'Sua primeira leitura foi salva',
+            tr: 'İlk okuman kaydedildi',
+          ),
+          body: _copy(
+            language,
+            en: 'You are done for today. Review the grounded action if you want; Mystic Mirror becomes useful after 24 hours, when reality has had time to answer.',
+            es: 'Por hoy ya está. Si quieres, revisa la acción concreta; Mystic Mirror cobra sentido después de 24 horas, cuando la realidad ha tenido tiempo de responder.',
+            fr: 'Pour aujourd’hui, c’est suffisant. Relisez l’action concrète si vous le souhaitez ; Mystic Mirror devient utile après 24 heures, quand le réel a eu le temps de répondre.',
+            pt: 'Por hoje, está feito. Revise a ação concreta se quiser; Mystic Mirror ganha valor após 24 horas, quando a realidade teve tempo de responder.',
+            tr: 'Bugünlük tamam. İstersen seçtiğin somut adıma tekrar bak; Mystic Mirror 24 saat sonra, gerçekliğin cevap verecek zamanı olduğunda anlam kazanır.',
+          ),
+          cta: _copy(
+            language,
+            en: 'VIEW SAVED READING',
+            es: 'VER LECTURA GUARDADA',
+            fr: 'VOIR LE TIRAGE ENREGISTRÉ',
+            pt: 'VER LEITURA SALVA',
+            tr: 'KAYITLI OKUMAYI GÖR',
+          ),
+        );
+      }
       return _NextStepContent(
         icon: Icons.insights_rounded,
         title: _copy(
@@ -546,11 +646,11 @@ _NextStepContent _actionContent(
         ),
         body: _copy(
           language,
-          en: 'This is earned insight from your own history. Compare the cards, emotions, and choices that keep returning.',
-          es: 'Esta información nace de tu propio historial. Compara las cartas, emociones y decisiones que siguen volviendo.',
-          fr: 'Cet aperçu vient de votre propre historique. Comparez les cartes, émotions et choix qui reviennent.',
-          pt: 'Esse insight vem do seu próprio histórico. Compare as cartas, emoções e escolhas que continuam voltando.',
-          tr: 'Bu, kendi geçmişinden kazanılmış bir içgörü. Tekrar dönen kartları, duyguları ve seçimleri karşılaştır.',
+          en: 'This is a theme from your reading history. Compare the cards, emotions and choices that keep returning, then use Mirror outcomes for reality evidence.',
+          es: 'Este es un tema de tu historial de lecturas. Compara las cartas, emociones y decisiones que vuelven, y usa los resultados de Mirror como evidencia real.',
+          fr: 'C’est un thème de votre historique de tirages. Comparez les cartes, émotions et choix qui reviennent, puis utilisez les bilans Mirror comme indices réels.',
+          pt: 'Esse é um tema do seu histórico de leituras. Compare cartas, emoções e escolhas recorrentes e use os resultados do Mirror como evidência real.',
+          tr: 'Bu, okuma geçmişindeki bir tema. Tekrar eden kartları, duyguları ve seçimleri karşılaştır; gerçeklik kanıtı için Mirror sonuçlarını kullan.',
         ),
         cta: _copy(
           language,
@@ -574,11 +674,11 @@ _NextStepContent _actionContent(
         ),
         body: _copy(
           language,
-          en: 'Use a larger spread for context, not because the app needs another tap. Every reading remains part of the same private evidence loop.',
-          es: 'Usa una tirada mayor para ganar contexto, no porque la app necesite otro toque. Cada lectura sigue formando parte del mismo ciclo privado.',
-          fr: 'Utilisez un tirage plus large pour le contexte, pas pour multiplier les interactions. Chaque tirage reste dans la même boucle privée.',
-          pt: 'Use uma abertura maior por contexto, não porque o app precise de outro toque. Toda leitura continua no mesmo ciclo privado.',
-          tr: 'Daha geniş açılımı sadece bağlam gerektiğinde kullan. Her okuma aynı özel kanıt döngüsünün parçası olarak kalır.',
+          en: 'Use a larger spread for context, not because the app needs another tap. Every reading remains part of the same private reflection loop.',
+          es: 'Usa una tirada mayor para ganar contexto, no porque la app necesite otro toque. Cada lectura sigue en el mismo ciclo privado de reflexión.',
+          fr: 'Utilisez un tirage plus large pour le contexte, pas pour multiplier les interactions. Chaque tirage reste dans la même boucle privée de réflexion.',
+          pt: 'Use uma abertura maior por contexto, não porque o app precise de outro toque. Toda leitura continua no mesmo ciclo privado de reflexão.',
+          tr: 'Daha geniş açılımı sadece bağlam gerektiğinde kullan. Her okuma aynı özel düşünme döngüsünün parçası olarak kalır.',
         ),
         cta: _copy(
           language,
@@ -628,11 +728,11 @@ String _stageLabel(MysticLanguage language, MysticGrowthStage stage) {
     case MysticGrowthStage.activated:
       return _copy(
         language,
-        en: 'Your first evidence loop is forming',
-        es: 'Tu primer ciclo de evidencia se está formando',
-        fr: 'Votre première boucle d’indices se forme',
-        pt: 'Seu primeiro ciclo de evidências está se formando',
-        tr: 'İlk kanıt döngün oluşuyor',
+        en: 'Your first reality loop is forming',
+        es: 'Tu primer ciclo con la realidad se está formando',
+        fr: 'Votre première boucle avec le réel se forme',
+        pt: 'Seu primeiro ciclo com a realidade está se formando',
+        tr: 'İlk gerçeklik döngün oluşuyor',
       );
     case MysticGrowthStage.engaged:
       return _copy(
@@ -655,11 +755,11 @@ String _stageLabel(MysticLanguage language, MysticGrowthStage stage) {
     case MysticGrowthStage.powerUser:
       return _copy(
         language,
-        en: 'Your evidence trail has real depth now',
-        es: 'Tu historial de evidencia ya tiene profundidad',
-        fr: 'Votre trace d’indices a maintenant de la profondeur',
-        pt: 'Seu histórico de evidências já tem profundidade',
-        tr: 'Kanıt geçmişin artık gerçek bir derinliğe sahip',
+        en: 'Your private history has real depth now',
+        es: 'Tu historial privado ya tiene profundidad',
+        fr: 'Votre historique privé a maintenant de la profondeur',
+        pt: 'Seu histórico privado já tem profundidade',
+        tr: 'Özel geçmişin artık gerçek bir derinliğe sahip',
       );
   }
 }
@@ -682,11 +782,11 @@ String _returnMessage(
     case MysticReturnState.activeToday:
       return _copy(
         language,
-        en: 'Today is already in your private evidence trail.',
-        es: 'Hoy ya forma parte de tu historial privado.',
-        fr: 'Aujourd’hui fait déjà partie de votre trace privée.',
-        pt: 'Hoje já faz parte do seu histórico privado.',
-        tr: 'Bugün özel kanıt geçmişine çoktan eklendi.',
+        en: 'Today is saved. You do not need another reading to make it useful.',
+        es: 'Lo de hoy está guardado. No necesitas otra lectura para que sea útil.',
+        fr: 'Aujourd’hui est enregistré. Un autre tirage n’est pas nécessaire pour le rendre utile.',
+        pt: 'Hoje está salvo. Você não precisa de outra leitura para torná-lo útil.',
+        tr: 'Bugün kaydedildi. Faydalı olması için bir okuma daha yapman gerekmiyor.',
       );
     case MysticReturnState.returnedNextDay:
       return _copy(
