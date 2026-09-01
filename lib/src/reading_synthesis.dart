@@ -59,28 +59,13 @@ String buildReadingSynthesis({
   final relationship = _relationshipInsight(lenses, language);
 
   if (kind == ReadingKind.compatibility && lenses.length >= 5) {
-    return _compatibilitySynthesis(
-      lenses,
-      context,
-      relationship,
-      language,
-    );
+    return _compatibilitySynthesis(lenses, context, relationship, language);
   }
   if (kind == ReadingKind.timeline && lenses.length >= 6) {
-    return _timelineSynthesis(
-      lenses,
-      context,
-      relationship,
-      language,
-    );
+    return _timelineSynthesis(lenses, context, relationship, language);
   }
   if (kind == ReadingKind.celticCross && lenses.length >= 10) {
-    return _celticCrossSynthesis(
-      lenses,
-      context,
-      relationship,
-      language,
-    );
+    return _celticCrossSynthesis(lenses, context, relationship, language);
   }
 
   final first = lenses.first;
