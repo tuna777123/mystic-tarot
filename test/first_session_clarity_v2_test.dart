@@ -37,16 +37,19 @@ void main() {
     expect(snapshot.nextAction.body, contains('tomorrow’s Mystic Mirror'));
   });
 
-  test('next-step UI never turns continuity activity into evidence percent', () {
-    final source = File('lib/src/mystic_next_step.dart').readAsStringSync();
+  test(
+    'next-step UI never turns continuity activity into evidence percent',
+    () {
+      final source = File('lib/src/mystic_next_step.dart').readAsStringSync();
 
-    expect(source, contains('PRIVATE EVIDENCE MEMORY'));
-    expect(source, contains('Reality Evidence is earned'));
-    expect(source, contains('No score is inferred from taps, streaks'));
-    expect(source, contains('VIEW SAVED READING'));
-    expect(source, isNot(contains('snapshot.premiumValueScore')));
-    expect(source, isNot(contains('LinearProgressIndicator(')));
-  });
+      expect(source, contains('PRIVATE EVIDENCE MEMORY'));
+      expect(source, contains('Reality Evidence is earned'));
+      expect(source, contains('No score is inferred from taps, streaks'));
+      expect(source, contains('VIEW SAVED READING'));
+      expect(source, isNot(contains('snapshot.premiumValueScore')));
+      expect(source, isNot(contains('LinearProgressIndicator(')));
+    },
+  );
 
   test('reading-history themes are distinguished from Reality Evidence', () {
     final source = File('lib/src/mystic_next_step.dart').readAsStringSync();
