@@ -38,7 +38,7 @@ String buildReadingSynthesis({
       en: _cleanJoin([
         context,
         '${card.name} appears in ${card.position.toLowerCase()}.',
-        _sentence(card.meaning),
+        _sentence(_inline(card.meaning)),
         _sentence(card.contextMeaning),
         'Try this grounded action: ${_sentence(card.advice)}',
         _sentence(card.contextAction),
@@ -47,7 +47,7 @@ String buildReadingSynthesis({
       tr: _cleanJoin([
         context,
         '${card.name}, ${card.position.toLowerCase()} konumunda beliriyor.',
-        _sentence(card.meaning),
+        _sentence(_inline(card.meaning)),
         _sentence(card.contextMeaning),
         'Şu somut eylemi dene: ${_sentence(card.advice)}',
         _sentence(card.contextAction),
@@ -56,7 +56,7 @@ String buildReadingSynthesis({
       es: _cleanJoin([
         context,
         '${card.name} aparece en ${card.position.toLowerCase()}.',
-        _sentence(card.meaning),
+        _sentence(_inline(card.meaning)),
         _sentence(card.contextMeaning),
         'Prueba esta acción concreta: ${_sentence(card.advice)}',
         _sentence(card.contextAction),
@@ -65,7 +65,7 @@ String buildReadingSynthesis({
       fr: _cleanJoin([
         context,
         '${card.name} apparaît dans ${card.position.toLowerCase()}.',
-        _sentence(card.meaning),
+        _sentence(_inline(card.meaning)),
         _sentence(card.contextMeaning),
         'Essayez cette action concrète : ${_sentence(card.advice)}',
         _sentence(card.contextAction),
@@ -74,7 +74,7 @@ String buildReadingSynthesis({
       pt: _cleanJoin([
         context,
         '${card.name} aparece em ${card.position.toLowerCase()}.',
-        _sentence(card.meaning),
+        _sentence(_inline(card.meaning)),
         _sentence(card.contextMeaning),
         'Experimente esta ação concreta: ${_sentence(card.advice)}',
         _sentence(card.contextAction),
@@ -90,40 +90,40 @@ String buildReadingSynthesis({
       language,
       en: _cleanJoin([
         context,
-        '${first.name} frames ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-        '${second.name} frames ${second.position.toLowerCase()}: ${_sentence(second.meaning)} ${_sentence(second.contextMeaning)}',
+        '${first.name} frames ${first.position.toLowerCase()}: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+        '${second.name} frames ${second.position.toLowerCase()}: ${_sentence(_inline(second.meaning))} ${_sentence(second.contextMeaning)}',
         'Read together, the cards compare two emphases rather than naming a predetermined winner.',
         'Try this grounded action: ${_sentence(second.advice)} ${_sentence(second.contextAction)}',
         'Record what actually changes after twenty-four hours instead of treating either path as certainty.',
       ]),
       tr: _cleanJoin([
         context,
-        '${first.name}, ${first.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-        '${second.name}, ${second.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(second.meaning)} ${_sentence(second.contextMeaning)}',
+        '${first.name}, ${first.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+        '${second.name}, ${second.position.toLowerCase()} konumunu çerçeveliyor: ${_sentence(_inline(second.meaning))} ${_sentence(second.contextMeaning)}',
         'Birlikte okunduğunda kartlar önceden belirlenmiş bir kazanan söylemek yerine iki vurguyu karşılaştırıyor.',
         'Şu somut eylemi dene: ${_sentence(second.advice)} ${_sentence(second.contextAction)}',
         'İki yoldan birini kesinlik saymak yerine yirmi dört saat sonra gerçekte neyin değiştiğini kaydet.',
       ]),
       es: _cleanJoin([
         context,
-        '${first.name} enmarca ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-        '${second.name} enmarca ${second.position.toLowerCase()}: ${_sentence(second.meaning)} ${_sentence(second.contextMeaning)}',
+        '${first.name} enmarca ${first.position.toLowerCase()}: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+        '${second.name} enmarca ${second.position.toLowerCase()}: ${_sentence(_inline(second.meaning))} ${_sentence(second.contextMeaning)}',
         'Leídas juntas, las cartas comparan dos énfasis en lugar de declarar un resultado predeterminado.',
         'Prueba esta acción concreta: ${_sentence(second.advice)} ${_sentence(second.contextAction)}',
         'Registra qué cambia realmente después de veinticuatro horas sin tratar ninguno de los caminos como certeza.',
       ]),
       fr: _cleanJoin([
         context,
-        '${first.name} éclaire ${first.position.toLowerCase()} : ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-        '${second.name} éclaire ${second.position.toLowerCase()} : ${_sentence(second.meaning)} ${_sentence(second.contextMeaning)}',
+        '${first.name} éclaire ${first.position.toLowerCase()} : ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+        '${second.name} éclaire ${second.position.toLowerCase()} : ${_sentence(_inline(second.meaning))} ${_sentence(second.contextMeaning)}',
         'Ensemble, les cartes comparent deux accents sans désigner un résultat prédéterminé.',
         'Essayez cette action concrète : ${_sentence(second.advice)} ${_sentence(second.contextAction)}',
         'Notez ce qui change réellement après vingt-quatre heures sans traiter l’une des voies comme une certitude.',
       ]),
       pt: _cleanJoin([
         context,
-        '${first.name} enquadra ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-        '${second.name} enquadra ${second.position.toLowerCase()}: ${_sentence(second.meaning)} ${_sentence(second.contextMeaning)}',
+        '${first.name} enquadra ${first.position.toLowerCase()}: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+        '${second.name} enquadra ${second.position.toLowerCase()}: ${_sentence(_inline(second.meaning))} ${_sentence(second.contextMeaning)}',
         'Juntas, as cartas comparam duas ênfases em vez de declarar um resultado predeterminado.',
         'Experimente esta ação concreta: ${_sentence(second.advice)} ${_sentence(second.contextAction)}',
         'Registre o que realmente muda após vinte e quatro horas sem tratar nenhum caminho como certeza.',
@@ -191,9 +191,9 @@ String buildReadingSynthesis({
     language,
     en: _cleanJoin([
       context,
-      '${first.name} opens the reading through ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-      '${bridge.name} holds the central pressure through ${bridge.position.toLowerCase()}: ${_sentence(bridge.meaning)} ${_sentence(bridge.contextMeaning)}',
-      '${last.name} gives the direction of travel through ${last.position.toLowerCase()}: ${_sentence(last.meaning)} ${_sentence(last.contextMeaning)}',
+      '${first.name} opens the reading through ${first.position.toLowerCase()}: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+      '${bridge.name} holds the central pressure through ${bridge.position.toLowerCase()}: ${_sentence(_inline(bridge.meaning))} ${_sentence(bridge.contextMeaning)}',
+      '${last.name} gives the direction of travel through ${last.position.toLowerCase()}: ${_sentence(_inline(last.meaning))} ${_sentence(last.contextMeaning)}',
       relationship,
       'Taken together, the spread moves from the opening condition through the central pressure toward one testable direction.',
       'Use this grounded experiment: ${_sentence(last.advice)} ${_sentence(last.contextAction)}',
@@ -201,9 +201,9 @@ String buildReadingSynthesis({
     ]),
     tr: _cleanJoin([
       context,
-      '${first.name}, ${first.position.toLowerCase()} üzerinden okumayı açıyor: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-      '${bridge.name}, ${bridge.position.toLowerCase()} üzerinden merkezdeki baskıyı taşıyor: ${_sentence(bridge.meaning)} ${_sentence(bridge.contextMeaning)}',
-      '${last.name}, ${last.position.toLowerCase()} üzerinden yönü gösteriyor: ${_sentence(last.meaning)} ${_sentence(last.contextMeaning)}',
+      '${first.name}, ${first.position.toLowerCase()} üzerinden okumayı açıyor: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+      '${bridge.name}, ${bridge.position.toLowerCase()} üzerinden merkezdeki baskıyı taşıyor: ${_sentence(_inline(bridge.meaning))} ${_sentence(bridge.contextMeaning)}',
+      '${last.name}, ${last.position.toLowerCase()} üzerinden yönü gösteriyor: ${_sentence(_inline(last.meaning))} ${_sentence(last.contextMeaning)}',
       relationship,
       'Birlikte okunduğunda açılım başlangıç koşulundan merkezdeki baskıya, oradan da deneyebileceğin tek bir yöne ilerliyor.',
       'Şu somut deneyi uygula: ${_sentence(last.advice)} ${_sentence(last.contextAction)}',
@@ -211,9 +211,9 @@ String buildReadingSynthesis({
     ]),
     es: _cleanJoin([
       context,
-      '${first.name} abre la lectura desde ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-      '${bridge.name} sostiene la presión central desde ${bridge.position.toLowerCase()}: ${_sentence(bridge.meaning)} ${_sentence(bridge.contextMeaning)}',
-      '${last.name} marca la dirección desde ${last.position.toLowerCase()}: ${_sentence(last.meaning)} ${_sentence(last.contextMeaning)}',
+      '${first.name} abre la lectura desde ${first.position.toLowerCase()}: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+      '${bridge.name} sostiene la presión central desde ${bridge.position.toLowerCase()}: ${_sentence(_inline(bridge.meaning))} ${_sentence(bridge.contextMeaning)}',
+      '${last.name} marca la dirección desde ${last.position.toLowerCase()}: ${_sentence(_inline(last.meaning))} ${_sentence(last.contextMeaning)}',
       relationship,
       'En conjunto, la tirada avanza desde la condición inicial, atraviesa la presión central y llega a una dirección que puedes probar.',
       'Usa este experimento concreto: ${_sentence(last.advice)} ${_sentence(last.contextAction)}',
@@ -221,9 +221,9 @@ String buildReadingSynthesis({
     ]),
     fr: _cleanJoin([
       context,
-      '${first.name} ouvre le tirage à travers ${first.position.toLowerCase()} : ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-      '${bridge.name} porte la pression centrale à travers ${bridge.position.toLowerCase()} : ${_sentence(bridge.meaning)} ${_sentence(bridge.contextMeaning)}',
-      '${last.name} indique la direction à travers ${last.position.toLowerCase()} : ${_sentence(last.meaning)} ${_sentence(last.contextMeaning)}',
+      '${first.name} ouvre le tirage à travers ${first.position.toLowerCase()} : ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+      '${bridge.name} porte la pression centrale à travers ${bridge.position.toLowerCase()} : ${_sentence(_inline(bridge.meaning))} ${_sentence(bridge.contextMeaning)}',
+      '${last.name} indique la direction à travers ${last.position.toLowerCase()} : ${_sentence(_inline(last.meaning))} ${_sentence(last.contextMeaning)}',
       relationship,
       'Ensemble, les cartes vont de la condition initiale, traversent la pression centrale et aboutissent à une direction que vous pouvez tester.',
       'Utilisez cette expérience concrète : ${_sentence(last.advice)} ${_sentence(last.contextAction)}',
@@ -231,9 +231,9 @@ String buildReadingSynthesis({
     ]),
     pt: _cleanJoin([
       context,
-      '${first.name} abre a leitura por ${first.position.toLowerCase()}: ${_sentence(first.meaning)} ${_sentence(first.contextMeaning)}',
-      '${bridge.name} sustenta a pressão central por ${bridge.position.toLowerCase()}: ${_sentence(bridge.meaning)} ${_sentence(bridge.contextMeaning)}',
-      '${last.name} aponta a direção por ${last.position.toLowerCase()}: ${_sentence(last.meaning)} ${_sentence(last.contextMeaning)}',
+      '${first.name} abre a leitura por ${first.position.toLowerCase()}: ${_sentence(_inline(first.meaning))} ${_sentence(first.contextMeaning)}',
+      '${bridge.name} sustenta a pressão central por ${bridge.position.toLowerCase()}: ${_sentence(_inline(bridge.meaning))} ${_sentence(bridge.contextMeaning)}',
+      '${last.name} aponta a direção por ${last.position.toLowerCase()}: ${_sentence(_inline(last.meaning))} ${_sentence(last.contextMeaning)}',
       relationship,
       'Em conjunto, a tiragem parte da condição inicial, atravessa a pressão central e chega a uma direção que você pode testar.',
       'Use este experimento concreto: ${_sentence(last.advice)} ${_sentence(last.contextAction)}',
@@ -254,11 +254,11 @@ String _deepSpreadSynthesis({
     details.add(
       _copy(
         language,
-        en: '${lens.name} in ${lens.position.toLowerCase()}: ${_sentence(lens.meaning)} ${_sentence(lens.contextMeaning)}',
-        tr: '${lens.name}, ${lens.position.toLowerCase()} konumunda: ${_sentence(lens.meaning)} ${_sentence(lens.contextMeaning)}',
-        es: '${lens.name} en ${lens.position.toLowerCase()}: ${_sentence(lens.meaning)} ${_sentence(lens.contextMeaning)}',
-        fr: '${lens.name} dans ${lens.position.toLowerCase()} : ${_sentence(lens.meaning)} ${_sentence(lens.contextMeaning)}',
-        pt: '${lens.name} em ${lens.position.toLowerCase()}: ${_sentence(lens.meaning)} ${_sentence(lens.contextMeaning)}',
+        en: '${lens.name} in ${lens.position.toLowerCase()}: ${_sentence(_inline(lens.meaning))} ${_sentence(lens.contextMeaning)}',
+        tr: '${lens.name}, ${lens.position.toLowerCase()} konumunda: ${_sentence(_inline(lens.meaning))} ${_sentence(lens.contextMeaning)}',
+        es: '${lens.name} en ${lens.position.toLowerCase()}: ${_sentence(_inline(lens.meaning))} ${_sentence(lens.contextMeaning)}',
+        fr: '${lens.name} dans ${lens.position.toLowerCase()} : ${_sentence(_inline(lens.meaning))} ${_sentence(lens.contextMeaning)}',
+        pt: '${lens.name} em ${lens.position.toLowerCase()}: ${_sentence(_inline(lens.meaning))} ${_sentence(lens.contextMeaning)}',
       ),
     );
   }
@@ -698,6 +698,14 @@ String _localizedIntention(String intention, MysticLanguage language) {
     (MysticLanguage.portugueseBrazil, 'Clarity') => 'Clareza',
     _ => normalized,
   };
+}
+
+String _inline(String value) {
+  final text = value.trim();
+  if (text.isEmpty) return text;
+  return text
+      .replaceAll(RegExp(r'[.!?…]+\s+'), '; ')
+      .replaceAll(RegExp(r'[.!?…]+$'), '');
 }
 
 String _sentence(String value) {
