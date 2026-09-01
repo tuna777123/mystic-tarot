@@ -30,9 +30,7 @@ void main() {
     MysticLanguage.portugueseBrazil: 'reforçam o fio',
   };
 
-  final firstWand = tarotDeck.firstWhere(
-    (card) => card.name == 'Ace of Wands',
-  );
+  final firstWand = tarotDeck.firstWhere((card) => card.name == 'Ace of Wands');
   final secondWand = tarotDeck.firstWhere(
     (card) => card.name == 'Two of Wands',
   );
@@ -57,10 +55,7 @@ void main() {
         expect(
           result,
           contains(
-            localizedTarotCardName(
-              firstWand.name,
-              languageCode: language.code,
-            ),
+            localizedTarotCardName(firstWand.name, languageCode: language.code),
           ),
         );
         expect(
@@ -94,10 +89,7 @@ void main() {
           language: language,
         );
 
-        expect(
-          result.toLowerCase(),
-          contains(reinforcementTokens[language]!),
-        );
+        expect(result.toLowerCase(), contains(reinforcementTokens[language]!));
       },
     );
   }
