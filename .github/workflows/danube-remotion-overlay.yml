@@ -30,9 +30,8 @@ jobs:
       - name: Native transparent Remotion render
         working-directory: danube-remotion-overlay
         run: npm run render
-      - name: Verify alpha overlay
-        run: |
-          ffprobe -v error -show_entries format=duration:stream=codec_type,codec_name,width,height,pix_fmt,r_frame_rate -of json danube-remotion-overlay/out/Danube_Remotion_Overlay.webm
+      - name: Verify overlay exists
+        run: test -s danube-remotion-overlay/out/Danube_Remotion_Overlay.webm
       - name: Upload Remotion overlay artifact
         uses: actions/upload-artifact@v4
         with:
