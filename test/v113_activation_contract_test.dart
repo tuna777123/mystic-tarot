@@ -17,7 +17,8 @@ void main() {
 
   test('daily reminder remains private, contextual and user controlled', () {
     expect(app, contains('_maybeOfferRitualReminder'));
-    expect(app, contains('journal.isEmpty'));
+    expect(app, contains('journal.isNotEmpty'));
+    expect(app, isNot(contains('journal.isEmpty && record.kind == ReadingKind.daily')));
     expect(app, contains('record.kind == ReadingKind.daily'));
     expect(
       nativeService,
