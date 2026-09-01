@@ -88,8 +88,18 @@ class State {
 
     expect(transformed, contains('onOpenDueMirror: _openDueMirrorFromHome'));
     expect(transformed, contains('mirrorOpenRequest: _mirrorOpenRequest'));
-    expect(transformed, contains('case MysticNextActionType.mirrorCheckIn:\n        onOpenDueMirror();'));
-    expect(transformed, contains('case MysticNextActionType.reviewPattern:\n        onOpenJournal();'));
+    expect(
+      transformed,
+      contains(
+        'case MysticNextActionType.mirrorCheckIn:\n        onOpenDueMirror();',
+      ),
+    );
+    expect(
+      transformed,
+      contains(
+        'case MysticNextActionType.reviewPattern:\n        onOpenJournal();',
+      ),
+    );
   });
 
   test('Living Journal opens the oldest due Mirror after becoming visible', () {
