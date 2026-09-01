@@ -1,0 +1,44 @@
+name: Danube Native Remotion Render
+
+on:
+  push:
+    branches: [danube-remotion-native-render]
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out render branch
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install Remotion runtime
+        working-directory: remotion-danube
+        run: npm install --no-audit --no-fund
+
+      - name: Render 1080x1920 native Remotion master
+        working-directory: remotion-danube
+        run: |
+          mkdir -p out
+          npm run render
+
+      - name: Verify render
+        run: |
+          test -s remotion-danube/out/Danube_Ghost_Fleet_NATIVE_REMOTION.mp4
+          ls -lh remotion-danube/out/Danube_Ghost_Fleet_NATIVE_REMOTION.mp4
+
+      - name: Upload native Remotion artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: danube-native-remotion-master
+          path: remotion-danube/out/Danube_Ghost_Fleet_NATIVE_REMOTION.mp4
+          if-no-files-found: error
+          retention-days: 1
