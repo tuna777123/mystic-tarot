@@ -40,26 +40,29 @@ void main() {
   final card = tarotDeck.firstWhere((item) => item.name == 'Ace of Cups');
 
   for (final language in languages) {
-    test('same card changes meaning by reading context in ${language.code}', () {
-      final love = buildReadingSynthesis(
-        kind: ReadingKind.love,
-        cards: [DrawnCard(card, false)],
-        emotion: EmotionalState.curious,
-        intention: 'Love',
-        language: language,
-      );
-      final career = buildReadingSynthesis(
-        kind: ReadingKind.career,
-        cards: [DrawnCard(card, false)],
-        emotion: EmotionalState.curious,
-        intention: 'Purpose',
-        language: language,
-      );
+    test(
+      'same card changes meaning by reading context in ${language.code}',
+      () {
+        final love = buildReadingSynthesis(
+          kind: ReadingKind.love,
+          cards: [DrawnCard(card, false)],
+          emotion: EmotionalState.curious,
+          intention: 'Love',
+          language: language,
+        );
+        final career = buildReadingSynthesis(
+          kind: ReadingKind.career,
+          cards: [DrawnCard(card, false)],
+          emotion: EmotionalState.curious,
+          intention: 'Purpose',
+          language: language,
+        );
 
-      expect(love, isNot(career));
-      expect(love.toLowerCase(), contains(loveTokens[language]!));
-      expect(career.toLowerCase(), contains(careerTokens[language]!));
-    });
+        expect(love, isNot(career));
+        expect(love.toLowerCase(), contains(loveTokens[language]!));
+        expect(career.toLowerCase(), contains(careerTokens[language]!));
+      },
+    );
 
     test('reversal changes contextual framing in ${language.code}', () {
       final upright = buildReadingSynthesis(
