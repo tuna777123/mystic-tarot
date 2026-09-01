@@ -1,75 +1,148 @@
 import React from 'react';
 import {AbsoluteFill,Easing,interpolate,useCurrentFrame,useVideoConfig} from 'remotion';
 
-const beats=[
-{s:0,e:1.55,text:'THE DANUBE IS',hi:'DRYING UP',kind:'hook'},
-{s:1.55,e:3.58,text:'WORLD WAR II',sub:'IS SURFACING WITH IT',kind:'hook'},
-{s:3.58,e:5.79,text:'PRAHOVO, SERBIA',kind:'impact'},
-{s:5.79,e:7.85,text:'THE RIVER FELL',hi:'SO LOW'},
-{s:7.85,e:10.27,text:'GERMAN SHIPS',hi:'REAPPEARED'},
-{s:10.27,e:12.1,text:'NOT AN ACCIDENT',kind:'impact'},
-{s:12.1,e:14.81,text:'SEPTEMBER',hi:'1944',kind:'impact'},
-{s:14.81,e:17.35,text:'SOVIET FORCES',hi:'CLOSING IN'},
-{s:17.35,e:20.04,text:'A GERMAN CONVOY',hi:'NOWHERE TO GO'},
-{s:20.04,e:22.1,text:'THEY DID SOMETHING',hi:'EXTREME'},
-{s:22.1,e:24.64,text:'THEY SANK',hi:'THEIR OWN SHIPS',kind:'impact'},
-{s:24.64,e:26.4,text:'AROUND',hi:'200 VESSELS',kind:'impact'},
-{s:26.4,e:28.16,text:'SCUTTLED ACROSS',hi:'THE DANUBE'},
-{s:28.16,e:30.4,text:'BLOCKING THE',hi:'SHIPPING CHANNEL'},
-{s:30.4,e:32.7,text:'THE RIVER',hi:'SWALLOWED THEM',kind:'impact'},
-{s:32.7,e:35.05,text:'HIDDEN FOR',hi:'80+ YEARS',kind:'impact'},
-{s:35.05,e:38.24,text:'BENEATH THE WATER',hi:'UNTIL NOW'},
-{s:38.24,e:40.4,text:'EXTREME DROUGHT',kind:'impact'},
-{s:40.4,e:42.45,text:'RECORD-LOW',hi:'WATER LEVELS'},
-{s:42.45,e:44.9,text:'20+ WRECKS',sub:'EXPOSED',kind:'impact'},
-{s:44.9,e:47.82,text:'ALMOST COMPLETELY',hi:'OUT OF THE WATER'},
-{s:47.82,e:49.9,text:"HERE'S THE",hi:'TERRIFYING PART'},
-{s:49.9,e:52.83,text:'LIVE AMMUNITION',sub:'AND EXPLOSIVES',kind:'danger'},
-{s:52.83,e:55.3,text:'80+ YEARS',sub:'AFTER WWII'},
-{s:55.3,e:57.96,text:'THE GHOST FLEET',hi:'STILL DANGEROUS',kind:'final'}
+const INK='#f5f1e8';
+const MUTED='#c8c1b6';
+const AMBER='#d9ad5b';
+const RED='#d75b52';
+const FONT="'Arial Narrow','Helvetica Neue',Arial,sans-serif";
+
+type Layout='hook'|'lowerLeft'|'upperLeft'|'lowerRight'|'center';
+type Beat={s:number;e:number;eyebrow?:string;main:string;accent?:string;sub?:string;layout:Layout;danger?:boolean;final?:boolean};
+
+type Stat={s:number;e:number;big:string;label:string;sub?:string;side?:'left'|'right'};
+
+const beats:Beat[]=[
+ {s:0,e:1.55,eyebrow:'THE DANUBE',main:'IS DRYING UP',layout:'hook'},
+ {s:1.55,e:3.58,eyebrow:'AND NOW',main:'WORLD WAR II',accent:'IS SURFACING WITH IT',layout:'hook'},
+ {s:5.79,e:10.27,eyebrow:'LOW WATER • PRAHOVO',main:'RUSTING GERMAN SHIPS',accent:'ARE REAPPEARING',layout:'lowerLeft'},
+ {s:10.27,e:12.1,main:"THESE AREN'T",accent:'ORDINARY WRECKS',layout:'center'},
+ {s:14.81,e:17.35,eyebrow:'EASTERN FRONT',main:'SOVIET FORCES',accent:'CLOSING IN',layout:'upperLeft'},
+ {s:17.35,e:20.04,eyebrow:'THE CONVOY WAS TRAPPED',main:'NO WAY OUT',layout:'lowerRight'},
+ {s:20.04,e:24.64,eyebrow:'SO THE CREWS CHOSE THE EXTREME',main:'THEY SANK',accent:'THEIR OWN SHIPS',layout:'lowerLeft'},
+ {s:28.16,e:30.4,eyebrow:'THE RESULT',main:'THE SHIPPING CHANNEL',accent:'WAS BLOCKED',layout:'upperLeft'},
+ {s:30.4,e:32.7,main:'THE RIVER',accent:'SWALLOWED THEM',layout:'center'},
+ {s:38.24,e:42.45,eyebrow:'EIGHT DECADES LATER',main:'EXTREME DROUGHT',accent:'BROUGHT THEM BACK',layout:'lowerLeft'},
+ {s:47.82,e:49.9,eyebrow:'BUT THE STORY ISN’T OVER',main:"HERE'S THE PROBLEM",layout:'lowerLeft'},
+ {s:52.83,e:55.3,eyebrow:'MORE THAN 80 YEARS AFTER WWII',main:'THE WRECKS',accent:'ARE STILL ARMED',layout:'upperLeft'},
+ {s:55.3,e:57.96,main:'THE GHOST FLEET',accent:'IS STILL DANGEROUS',layout:'center',final:true},
 ];
 
-const cards=[
-{s:12.1,e:14.2,big:'1944',small:'SEPTEMBER'},
-{s:24.64,e:26.2,big:'200',small:'VESSELS'},
-{s:32.7,e:34.8,big:'80+',small:'YEARS HIDDEN'},
-{s:42.45,e:44.7,big:'20+',small:'WRECKS EXPOSED'}
+const stats:Stat[]=[
+ {s:12.1,e:14.81,big:'1944',label:'SEPTEMBER',sub:'SOVIET FORCES WERE CLOSING IN',side:'left'},
+ {s:24.64,e:28.16,big:'≈200',label:'VESSELS SCUTTLED',sub:'ACROSS THE DANUBE',side:'left'},
+ {s:32.7,e:38.24,big:'80+',label:'YEARS HIDDEN',sub:'BENEATH THE WATER',side:'right'},
+ {s:42.45,e:47.82,big:'20+',label:'WRECKS EXPOSED',sub:'SOME ALMOST COMPLETELY OUT OF THE WATER',side:'left'},
 ];
 
-const Caption:React.FC<{b:any}>=({b})=>{
- const frame=useCurrentFrame(); const {fps}=useVideoConfig(); const s=b.s*fps,e=b.e*fps;
- if(frame<s||frame>=e)return null; const f=frame-s,d=e-s;
- const pop=interpolate(f,[0,4,10],[.88,1.06,1],{extrapolateLeft:'clamp',extrapolateRight:'clamp',easing:Easing.bezier(.16,1,.3,1)});
- const op=interpolate(f,[0,2,d-4,d],[0,1,1,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
- const danger=b.kind==='danger', final=b.kind==='final';
- const accent=danger?'#ff5147':final?'#ffd56a':'#ffd15a';
- return <div style={{position:'absolute',left:62,right:62,top:1240,textAlign:'center',opacity:op,scale:pop,filter:'drop-shadow(0 5px 11px rgba(0,0,0,.82))'}}>
-  <div style={{fontFamily:'Arial,sans-serif',fontWeight:900,fontSize:b.kind==='hook'?90:74,lineHeight:.95,letterSpacing:-1.8,color:'#fff',textTransform:'uppercase'}}>{b.text}</div>
-  {b.hi&&<div style={{marginTop:9,fontFamily:'Arial,sans-serif',fontWeight:900,fontSize:b.kind==='hook'?96:80,lineHeight:.94,letterSpacing:-1.8,color:accent,textTransform:'uppercase'}}>{b.hi}</div>}
-  {b.sub&&<div style={{marginTop:8,fontFamily:'Arial,sans-serif',fontWeight:900,fontSize:64,lineHeight:.95,letterSpacing:-1,color:danger?accent:'#fff',textTransform:'uppercase'}}>{b.sub}</div>}
+const pos:Record<Layout,React.CSSProperties>={
+ hook:{left:64,right:70,top:1030,textAlign:'left'},
+ lowerLeft:{left:64,width:820,top:1160,textAlign:'left'},
+ upperLeft:{left:64,width:790,top:270,textAlign:'left'},
+ lowerRight:{right:64,width:760,top:1150,textAlign:'right'},
+ center:{left:70,right:70,top:910,textAlign:'center'},
+};
+
+const clamp={extrapolateLeft:'clamp' as const,extrapolateRight:'clamp' as const};
+
+const EditorialText:React.FC<{b:Beat}>=({b})=>{
+ const frame=useCurrentFrame();
+ const {fps}=useVideoConfig();
+ const s=b.s*fps,e=b.e*fps;
+ if(frame<s||frame>=e)return null;
+ const local=frame-s,d=e-s;
+ const enter=interpolate(local,[0,7],[0,1],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const exit=interpolate(local,[Math.max(0,d-6),d],[1,0],clamp);
+ const opacity=enter*exit;
+ const y=interpolate(local,[0,9],[30,0],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const blur=interpolate(local,[0,7],[9,0],clamp);
+ const line=interpolate(local,[2,12],[0,1],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const accent=b.danger?RED:AMBER;
+ const mainSize=b.layout==='hook'?104:b.layout==='center'?90:78;
+ const accentSize=b.layout==='hook'?72:b.layout==='center'?88:80;
+ return <div style={{position:'absolute',...pos[b.layout],opacity,transform:`translate3d(0,${y}px,0)`,filter:`blur(${blur}px) drop-shadow(0 4px 12px rgba(0,0,0,.72))`}}>
+   {b.eyebrow&&<div style={{fontFamily:FONT,fontWeight:700,fontSize:24,letterSpacing:5.2,lineHeight:1,color:b.danger?RED:MUTED,textTransform:'uppercase',marginBottom:14}}>{b.eyebrow}</div>}
+   <div style={{fontFamily:FONT,fontWeight:900,fontSize:mainSize,lineHeight:.91,letterSpacing:-3.2,color:INK,textTransform:'uppercase'}}>{b.main}</div>
+   {b.accent&&<div style={{fontFamily:FONT,fontWeight:900,fontSize:accentSize,lineHeight:.93,letterSpacing:-2.4,color:b.final?INK:accent,textTransform:'uppercase',marginTop:7}}>{b.accent}</div>}
+   {b.sub&&<div style={{fontFamily:FONT,fontWeight:700,fontSize:30,letterSpacing:2.5,lineHeight:1.05,color:MUTED,textTransform:'uppercase',marginTop:16}}>{b.sub}</div>}
+   <div style={{height:3,width:`${Math.round(line*140)}px`,background:b.danger?RED:AMBER,marginTop:18,marginLeft:b.layout==='lowerRight'?'auto':b.layout==='center'?'auto':0,marginRight:b.layout==='center'?'auto':0,opacity:.9}}/>
  </div>;
 };
 
-const Card:React.FC<{c:any}>=({c})=>{
- const frame=useCurrentFrame(); const {fps}=useVideoConfig(); const s=c.s*fps,e=c.e*fps; if(frame<s||frame>=e)return null;
- const f=frame-s; const op=interpolate(f,[0,3,e-s-3,e-s],[0,.96,.96,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp'});
- const y=interpolate(f,[0,8],[22,0],{extrapolateLeft:'clamp',extrapolateRight:'clamp',easing:Easing.bezier(.16,1,.3,1)});
- return <div style={{position:'absolute',top:164,left:58,opacity:op,translate:`0 ${y}px`,padding:'15px 22px 13px',borderLeft:'6px solid #ffd15a',background:'rgba(4,7,10,.64)',borderRadius:10,boxShadow:'0 8px 28px rgba(0,0,0,.25)'}}>
-  <div style={{fontFamily:'Arial,sans-serif',fontWeight:900,fontSize:82,lineHeight:.84,color:'#fff',letterSpacing:-3}}>{c.big}</div>
-  <div style={{fontFamily:'Arial,sans-serif',fontWeight:900,fontSize:27,lineHeight:1,color:'#ffd15a',letterSpacing:2.5,marginTop:11}}>{c.small}</div>
+const BigStat:React.FC<{c:Stat}>=({c})=>{
+ const frame=useCurrentFrame();
+ const {fps}=useVideoConfig();
+ const s=c.s*fps,e=c.e*fps;
+ if(frame<s||frame>=e)return null;
+ const local=frame-s,d=e-s;
+ const enter=interpolate(local,[0,9],[0,1],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const exit=interpolate(local,[Math.max(0,d-7),d],[1,0],clamp);
+ const x=interpolate(local,[0,12],[c.side==='right'?70:-70,0],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const rule=interpolate(local,[4,16],[0,1],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const left=c.side!=='right';
+ return <div style={{position:'absolute',top:210,left:left?58:undefined,right:left?undefined:58,width:760,opacity:enter*exit,transform:`translate3d(${x}px,0,0)`,textAlign:left?'left':'right',filter:'drop-shadow(0 4px 16px rgba(0,0,0,.65))'}}>
+   <div style={{display:'flex',flexDirection:left?'row':'row-reverse',alignItems:'stretch',gap:22}}>
+     <div style={{width:5,background:AMBER,transform:`scaleY(${rule})`,transformOrigin:'top',borderRadius:3}}/>
+     <div>
+       <div style={{fontFamily:FONT,fontWeight:900,fontSize:190,lineHeight:.78,letterSpacing:-8,color:INK}}>{c.big}</div>
+       <div style={{fontFamily:FONT,fontWeight:900,fontSize:42,lineHeight:.96,letterSpacing:2.8,color:AMBER,textTransform:'uppercase',marginTop:22}}>{c.label}</div>
+       {c.sub&&<div style={{fontFamily:FONT,fontWeight:700,fontSize:26,lineHeight:1.12,letterSpacing:2,color:MUTED,textTransform:'uppercase',marginTop:13,maxWidth:580,marginLeft:left?0:'auto'}}>{c.sub}</div>}
+     </div>
+   </div>
  </div>;
 };
 
-const RetentionFlash:React.FC=()=>{const f=useCurrentFrame(); const {fps}=useVideoConfig();
- const moments=[1.55,10.27,22.1,30.4,38.24,49.9,55.3]; let a=0;
- for(const m of moments){const d=Math.abs(f-m*fps); if(d<5)a=Math.max(a,interpolate(d,[0,5],[.16,0],{extrapolateRight:'clamp'}));}
- return <AbsoluteFill style={{backgroundColor:`rgba(255,220,130,${a})`}}/>;
+const Warning:React.FC=()=>{
+ const frame=useCurrentFrame();
+ const {fps}=useVideoConfig();
+ const s=49.9*fps,e=52.83*fps;
+ if(frame<s||frame>=e)return null;
+ const local=frame-s,d=e-s;
+ const enter=interpolate(local,[0,7],[0,1],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const exit=interpolate(local,[d-6,d],[1,0],clamp);
+ const y=interpolate(local,[0,10],[26,0],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ const bar=interpolate(local,[3,15],[0,1],{...clamp,easing:Easing.bezier(.16,1,.3,1)});
+ return <div style={{position:'absolute',left:64,right:64,top:1070,opacity:enter*exit,transform:`translate3d(0,${y}px,0)`,filter:'drop-shadow(0 5px 14px rgba(0,0,0,.78))'}}>
+   <div style={{fontFamily:FONT,fontWeight:800,fontSize:25,letterSpacing:5.5,color:MUTED,textTransform:'uppercase',marginBottom:12}}>THE TERRIFYING PART</div>
+   <div style={{fontFamily:FONT,fontWeight:900,fontSize:98,lineHeight:.86,letterSpacing:-3.5,color:RED,textTransform:'uppercase'}}>LIVE</div>
+   <div style={{fontFamily:FONT,fontWeight:900,fontSize:92,lineHeight:.88,letterSpacing:-3.5,color:INK,textTransform:'uppercase'}}>AMMUNITION</div>
+   <div style={{fontFamily:FONT,fontWeight:800,fontSize:34,letterSpacing:3.2,color:RED,textTransform:'uppercase',marginTop:16}}>AND EXPLOSIVES</div>
+   <div style={{height:3,width:`${Math.round(190*bar)}px`,background:RED,marginTop:18}}/>
+ </div>;
 };
 
-const EdgeGrade:React.FC=()=> <><AbsoluteFill style={{background:'linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,0) 42%,rgba(0,0,0,.23) 100%)'}}/><AbsoluteFill style={{boxShadow:'inset 0 0 120px rgba(0,0,0,.20)'}}/></>;
+const DocumentaryMeta:React.FC=()=>{
+ const f=useCurrentFrame(); const {fps}=useVideoConfig(); const t=f/fps;
+ let label='';
+ if(t>=3.58&&t<10.27)label='PRAHOVO / SERBIA';
+ else if(t>=12.1&&t<32.7)label='SEPTEMBER 1944';
+ else if(t>=38.24&&t<57.96)label='DANUBE / LOW WATER';
+ if(!label)return null;
+ const pulse=interpolate((f%90),[0,45,89],[.45,.9,.45],clamp);
+ return <div style={{position:'absolute',top:92,left:60,display:'flex',alignItems:'center',gap:12,opacity:.78}}>
+   <div style={{width:8,height:8,borderRadius:8,background:AMBER,opacity:pulse}}/>
+   <div style={{fontFamily:FONT,fontWeight:700,fontSize:19,letterSpacing:4.2,color:INK,textTransform:'uppercase'}}>{label}</div>
+ </div>;
+};
+
+const CutAccent:React.FC=()=>{
+ const frame=useCurrentFrame(); const {fps}=useVideoConfig();
+ const moments=[1.55,5.79,10.27,12.1,20.04,24.64,30.4,38.24,42.45,49.9,55.3];
+ let a=0;
+ for(const m of moments){const d=Math.abs(frame-m*fps);if(d<3)a=Math.max(a,interpolate(d,[0,3],[.065,0],clamp));}
+ return <AbsoluteFill style={{backgroundColor:`rgba(255,244,220,${a})`}}/>;
+};
+
+const EdgeGrade:React.FC=()=> <>
+ <AbsoluteFill style={{background:'linear-gradient(180deg,rgba(0,0,0,.11) 0%,rgba(0,0,0,0) 34%,rgba(0,0,0,.03) 58%,rgba(0,0,0,.27) 100%)'}}/>
+ <AbsoluteFill style={{boxShadow:'inset 0 0 95px rgba(0,0,0,.17)'}}/>
+</>;
 
 export const DanubeOverlay:React.FC=()=> <AbsoluteFill>
- <EdgeGrade/><RetentionFlash/>
- {cards.map((c,i)=><Card key={i} c={c}/>)}
- {beats.map((b,i)=><Caption key={i} b={b}/>)}
+ <EdgeGrade/>
+ <CutAccent/>
+ <DocumentaryMeta/>
+ {stats.map((c,i)=><BigStat key={`stat-${i}`} c={c}/>)}
+ {beats.map((b,i)=><EditorialText key={`beat-${i}`} b={b}/>)}
+ <Warning/>
 </AbsoluteFill>;
