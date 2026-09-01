@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'materialize_second_session_reminder.dart' as second_session_reminder;
+
 void main() => materializeOptionalNameOnboarding();
 
 /// Removes unnecessary identity friction from first-run onboarding.
@@ -26,6 +28,8 @@ void materializeOptionalNameOnboarding() {
   if (!updated.contains('Your first name (optional)')) {
     throw StateError('Optional-name field hint was not materialized.');
   }
+
+  second_session_reminder.materializeSecondSessionReminder();
 
   stdout.writeln(
     'Optional-name onboarding materialized: identity friction removed and '
