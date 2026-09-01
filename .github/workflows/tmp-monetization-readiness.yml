@@ -1,0 +1,56 @@
+name: Temporary Monetization Readiness Patch
+
+on:
+  push:
+    branches:
+      - revenue/deferred-interstitial-cadence
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: revenue/deferred-interstitial-cadence
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+      - name: Gate signed store releases on public app-ads ownership
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/store-release.yml')
+          text = path.read_text()
+          old_needs = '    needs: source-validation\n'
+          if text.count(old_needs) != 2:
+              raise SystemExit(f'expected two platform source-validation dependencies, found {text.count(old_needs)}')
+          text = text.replace(
+              old_needs,
+              '    needs: [source-validation, revenue-readiness]\n',
+          )
+          anchor = '  android-release:\n'
+          if text.count(anchor) != 1:
+              raise SystemExit('android-release anchor changed')
+          job = '''  revenue-readiness:\n    name: Verify production advertising ownership\n    needs: source-validation\n    runs-on: ubuntu-latest\n    timeout-minutes: 10\n    environment: production-stores\n    env:\n      ADMOB_PUBLISHER_ID: ${{ secrets.ADMOB_PUBLISHER_ID }}\n      APP_ADS_TXT_URL: ${{ secrets.APP_ADS_TXT_URL }}\n    steps:\n      - name: Check out source\n        uses: actions/checkout@v6\n      - name: Set up Flutter\n        uses: subosito/flutter-action@v2\n        with:\n          flutter-version: '3.44.9'\n          channel: stable\n          cache: true\n      - name: Verify public app-ads.txt ownership\n        run: dart run tool/verify_app_ads_readiness.dart\n\n'''
+          text = text.replace(anchor, job + anchor, 1)
+          path.write_text(text)
+          PY
+      - name: Apply canonical Dart formatting
+        run: dart format lib/src/ad_experience_policy.dart lib/src/ad_revenue_service.dart test/ad_experience_policy_test.dart test/deferred_interstitial_revenue_contract_test.dart tool/verify_app_ads_readiness.dart
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/workflows/store-release.yml lib/src/ad_experience_policy.dart lib/src/ad_revenue_service.dart test/ad_experience_policy_test.dart test/deferred_interstitial_revenue_contract_test.dart tool/verify_app_ads_readiness.dart
+          git commit -m "Harden production ad revenue readiness"
+          git push origin HEAD:revenue/deferred-interstitial-cadence
