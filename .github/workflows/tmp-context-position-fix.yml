@@ -1,0 +1,147 @@
+name: Temporary Context Position Fix
+
+on:
+  push:
+    branches:
+      - product/context-aware-meanings
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v6
+        with:
+          ref: product/context-aware-meanings
+          fetch-depth: 0
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.9'
+          channel: stable
+          cache: true
+      - name: Apply position-aware context patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('lib/src/reading_synthesis.dart')
+          text = path.read_text()
+
+          def replace_once(old, new):
+              global text
+              count = text.count(old)
+              if count == 0:
+                  if new in text:
+                      return
+                  raise SystemExit(f'missing expected anchor: {old[:120]!r}')
+              if count != 1:
+                  raise SystemExit(f'expected one anchor, found {count}: {old[:120]!r}')
+              text = text.replace(old, new, 1)
+
+          replace_once(
+              """  final family = _cardFamily(card.card.name);\n  return _ReadingLens(\n    name: localizedTarotCardName(card.card.name, languageCode: language.code),\n    position: localizedReadingPosition(\n      kind: kind,\n      index: index,\n      language: language,\n    ),\n""",
+              """  final family = _cardFamily(card.card.name);\n  final position = localizedReadingPosition(\n    kind: kind,\n    index: index,\n    language: language,\n  );\n  return _ReadingLens(\n    name: localizedTarotCardName(card.card.name, languageCode: language.code),\n    position: position,\n""",
+          )
+          replace_once(
+              """      family: family,\n      reversed: card.reversed,\n      language: language,\n""",
+              """      family: family,\n      reversed: card.reversed,\n      position: position,\n      language: language,\n""",
+          )
+          replace_once(
+              """  required _CardFamily family,\n  required bool reversed,\n  required MysticLanguage language,\n""",
+              """  required _CardFamily family,\n  required bool reversed,\n  required String position,\n  required MysticLanguage language,\n""",
+          )
+
+          replacements = {
+            "For today, notice how $theme is showing up before you react automatically.": "For today, in ${position.toLowerCase()}, notice how $theme is showing up before you react automatically.",
+            "Bugün $theme temasının otomatik tepki vermeden önce nasıl ortaya çıktığını fark et.": "Bugün ${position.toLowerCase()} konumunda $theme temasının otomatik tepki vermeden önce nasıl ortaya çıktığını fark et.",
+            "Para hoy, observa cómo aparece $theme antes de reaccionar en automático.": "Para hoy, en ${position.toLowerCase()}, observa cómo aparece $theme antes de reaccionar en automático.",
+            "Pour aujourd’hui, observez comment $theme se manifeste avant de réagir automatiquement.": "Pour aujourd’hui, dans ${position.toLowerCase()}, observez comment $theme se manifeste avant de réagir automatiquement.",
+            "Para hoje, observe como $theme aparece antes de reagir no automático.": "Para hoje, em ${position.toLowerCase()}, observe como $theme aparece antes de reagir no automático.",
+
+            "In a relationship context, test how $theme affects reciprocity, boundaries, and what is actually being communicated.": "In a relationship context, within ${position.toLowerCase()}, test how $theme affects reciprocity, boundaries, and what is actually being communicated.",
+            "İlişki bağlamında $theme temasının karşılıklılığı, sınırları ve gerçekten neyin iletişim kurulduğunu nasıl etkilediğini test et.": "İlişki bağlamında ${position.toLowerCase()} konumunda $theme temasının karşılıklılığı, sınırları ve gerçekten neyin iletişim kurulduğunu nasıl etkilediğini test et.",
+            "En un contexto relacional, prueba cómo $theme afecta la reciprocidad, los límites y lo que realmente se está comunicando.": "En un contexto relacional, dentro de ${position.toLowerCase()}, prueba cómo $theme afecta la reciprocidad, los límites y lo que realmente se está comunicando.",
+            "Dans un contexte relationnel, observez comment $theme agit sur la réciprocité, les limites et ce qui est réellement communiqué.": "Dans un contexte relationnel, dans ${position.toLowerCase()}, observez comment $theme agit sur la réciprocité, les limites et ce qui est réellement communiqué.",
+            "Em um contexto de relacionamento, teste como $theme afeta reciprocidade, limites e o que está sendo realmente comunicado.": "Em um contexto de relacionamento, em ${position.toLowerCase()}, teste como $theme afeta reciprocidade, limites e o que está sendo realmente comunicado.",
+
+            "In a career context, test how $theme affects responsibility, leverage, skill, and the next move you can control.": "In a career context, within ${position.toLowerCase()}, test how $theme affects responsibility, leverage, skill, and the next move you can control.",
+            "Kariyer bağlamında $theme temasının sorumluluğu, hareket alanını, beceriyi ve kontrol edebileceğin sıradaki hamleyi nasıl etkilediğini test et.": "Kariyer bağlamında ${position.toLowerCase()} konumunda $theme temasının sorumluluğu, hareket alanını, beceriyi ve kontrol edebileceğin sıradaki hamleyi nasıl etkilediğini test et.",
+            "En un contexto profesional, prueba cómo $theme afecta la responsabilidad, tu margen de acción, la habilidad y el siguiente movimiento que puedes controlar.": "En un contexto profesional, dentro de ${position.toLowerCase()}, prueba cómo $theme afecta la responsabilidad, tu margen de acción, la habilidad y el siguiente movimiento que puedes controlar.",
+            "Dans un contexte professionnel, observez comment $theme agit sur la responsabilité, votre marge de manœuvre, la compétence et la prochaine action contrôlable.": "Dans un contexte professionnel, dans ${position.toLowerCase()}, observez comment $theme agit sur la responsabilité, votre marge de manœuvre, la compétence et la prochaine action contrôlable.",
+            "Em um contexto profissional, teste como $theme afeta responsabilidade, margem de ação, habilidade e o próximo movimento que você controla.": "Em um contexto profissional, em ${position.toLowerCase()}, teste como $theme afeta responsabilidade, margem de ação, habilidade e o próximo movimento que você controla.",
+
+            "In a money context, test how $theme affects cash, risk, time, and the resources you can sustain.": "In a money context, within ${position.toLowerCase()}, test how $theme affects cash, risk, time, and the resources you can sustain.",
+            "Para bağlamında $theme temasının nakdi, riski, zamanı ve sürdürebildiğin kaynakları nasıl etkilediğini test et.": "Para bağlamında ${position.toLowerCase()} konumunda $theme temasının nakdi, riski, zamanı ve sürdürebildiğin kaynakları nasıl etkilediğini test et.",
+            "En un contexto financiero, prueba cómo $theme afecta el dinero disponible, el riesgo, el tiempo y los recursos que puedes sostener.": "En un contexto financiero, dentro de ${position.toLowerCase()}, prueba cómo $theme afecta el dinero disponible, el riesgo, el tiempo y los recursos que puedes sostener.",
+            "Dans un contexte financier, observez comment $theme agit sur la trésorerie, le risque, le temps et les ressources que vous pouvez soutenir.": "Dans un contexte financier, dans ${position.toLowerCase()}, observez comment $theme agit sur la trésorerie, le risque, le temps et les ressources que vous pouvez soutenir.",
+            "Em um contexto financeiro, teste como $theme afeta caixa, risco, tempo e os recursos que você consegue sustentar.": "Em um contexto financeiro, em ${position.toLowerCase()}, teste como $theme afeta caixa, risco, tempo e os recursos que você consegue sustentar.",
+
+            "For this decision, use $theme to compare trade-offs instead of searching for a yes-or-no command.": "For this decision, in ${position.toLowerCase()}, use $theme to compare trade-offs instead of searching for a yes-or-no command.",
+            "Bu kararda evet-hayır emri aramak yerine $theme temasını seçeneklerin bedellerini karşılaştırmak için kullan.": "Bu kararda ${position.toLowerCase()} konumunda evet-hayır emri aramak yerine $theme temasını seçeneklerin bedellerini karşılaştırmak için kullan.",
+            "Para esta decisión, usa $theme para comparar costes y beneficios en vez de buscar una orden de sí o no.": "Para esta decisión, en ${position.toLowerCase()}, usa $theme para comparar costes y beneficios en vez de buscar una orden de sí o no.",
+            "Pour cette décision, utilisez $theme pour comparer les compromis au lieu de chercher une réponse oui ou non.": "Pour cette décision, dans ${position.toLowerCase()}, utilisez $theme pour comparer les compromis au lieu de chercher une réponse oui ou non.",
+            "Para esta decisão, use $theme para comparar trocas e custos em vez de procurar uma ordem de sim ou não.": "Para esta decisão, em ${position.toLowerCase()}, use $theme para comparar trocas e custos em vez de procurar uma ordem de sim ou não.",
+
+            "For spiritual growth, notice how $theme appears in practice rather than treating symbolism as proof.": "For spiritual growth, in ${position.toLowerCase()}, notice how $theme appears in practice rather than treating symbolism as proof.",
+            "Ruhsal gelişimde sembolizmi kanıt saymak yerine $theme temasının günlük pratikte nasıl göründüğünü fark et.": "Ruhsal gelişimde ${position.toLowerCase()} konumunda sembolizmi kanıt saymak yerine $theme temasının günlük pratikte nasıl göründüğünü fark et.",
+            "Para el crecimiento espiritual, observa cómo $theme aparece en la práctica en lugar de tratar el simbolismo como prueba.": "Para el crecimiento espiritual, en ${position.toLowerCase()}, observa cómo $theme aparece en la práctica en lugar de tratar el simbolismo como prueba.",
+            "Pour la croissance spirituelle, observez comment $theme apparaît dans la pratique au lieu de traiter le symbole comme une preuve.": "Pour la croissance spirituelle, dans ${position.toLowerCase()}, observez comment $theme apparaît dans la pratique au lieu de traiter le symbole comme une preuve.",
+            "Para o crescimento espiritual, observe como $theme aparece na prática em vez de tratar simbolismo como prova.": "Para o crescimento espiritual, em ${position.toLowerCase()}, observe como $theme aparece na prática em vez de tratar simbolismo como prova.",
+
+            "For shadow work, look for observable behavior around $theme, especially what you avoid, over-control, or repeat.": "For shadow work, in ${position.toLowerCase()}, look for observable behavior around $theme, especially what you avoid, over-control, or repeat.",
+            "Gölge çalışmasında $theme çevresindeki gözlemlenebilir davranışlara, özellikle kaçındığın, aşırı kontrol ettiğin veya tekrarladığın şeylere bak.": "Gölge çalışmasında ${position.toLowerCase()} konumunda $theme çevresindeki gözlemlenebilir davranışlara, özellikle kaçındığın, aşırı kontrol ettiğin veya tekrarladığın şeylere bak.",
+            "Para el trabajo de sombra, busca conductas observables alrededor de $theme, sobre todo lo que evitas, controlas en exceso o repites.": "Para el trabajo de sombra, en ${position.toLowerCase()}, busca conductas observables alrededor de $theme, sobre todo lo que evitas, controlas en exceso o repites.",
+            "Pour le travail de l’ombre, cherchez les comportements observables autour de $theme, surtout ce que vous évitez, surcontrôlez ou répétez.": "Pour le travail de l’ombre, dans ${position.toLowerCase()}, cherchez les comportements observables autour de $theme, surtout ce que vous évitez, surcontrôlez ou répétez.",
+            "No trabalho de sombra, procure comportamentos observáveis em torno de $theme, especialmente o que você evita, controla demais ou repete.": "No trabalho de sombra, em ${position.toLowerCase()}, procure comportamentos observáveis em torno de $theme, especialmente o que você evita, controla demais ou repete.",
+
+            "For compatibility, read $theme as a relational dynamic to observe between two people, not as a score.": "For compatibility, in ${position.toLowerCase()}, read $theme as a relational dynamic to observe between two people, not as a score.",
+            "Uyum açılımında $theme temasını bir puan değil, iki kişi arasında gözlemlenecek ilişkisel bir dinamik olarak oku.": "Uyum açılımında ${position.toLowerCase()} konumunda $theme temasını bir puan değil, iki kişi arasında gözlemlenecek ilişkisel bir dinamik olarak oku.",
+            "Para la compatibilidad, lee $theme como una dinámica relacional que observar entre dos personas, no como una puntuación.": "Para la compatibilidad, en ${position.toLowerCase()}, lee $theme como una dinámica relacional que observar entre dos personas, no como una puntuación.",
+            "Pour la compatibilité, lisez $theme comme une dynamique relationnelle à observer entre deux personnes, pas comme un score.": "Pour la compatibilité, dans ${position.toLowerCase()}, lisez $theme comme une dynamique relationnelle à observer entre deux personnes, pas comme un score.",
+            "Na compatibilidade, leia $theme como uma dinâmica relacional a observar entre duas pessoas, não como uma pontuação.": "Na compatibilidade, em ${position.toLowerCase()}, leia $theme como uma dinâmica relacional a observar entre duas pessoas, não como uma pontuação.",
+
+            "On a timeline, $theme describes a condition that can change with choices; it does not name a fixed event.": "On a timeline, in ${position.toLowerCase()}, $theme describes a condition that can change with choices; it does not name a fixed event.",
+            "Zaman çizgisinde $theme, seçimlerle değişebilecek bir koşulu anlatır; sabit bir olayı ilan etmez.": "Zaman çizgisinde ${position.toLowerCase()} konumunda $theme, seçimlerle değişebilecek bir koşulu anlatır; sabit bir olayı ilan etmez.",
+            "En una línea de tiempo, $theme describe una condición que puede cambiar con las decisiones; no anuncia un hecho fijo.": "En una línea de tiempo, en ${position.toLowerCase()}, $theme describe una condición que puede cambiar con las decisiones; no anuncia un hecho fijo.",
+            "Sur une chronologie, $theme décrit une condition qui peut changer avec les choix ; il n’annonce pas un événement figé.": "Sur une chronologie, dans ${position.toLowerCase()}, $theme décrit une condition qui peut changer avec les choix ; il n’annonce pas un événement figé.",
+            "Em uma linha do tempo, $theme descreve uma condição que pode mudar com escolhas; não anuncia um evento fixo.": "Em uma linha do tempo, em ${position.toLowerCase()}, $theme descreve uma condição que pode mudar com escolhas; não anuncia um evento fixo.",
+
+            "Within the wider Celtic Cross, read $theme in relation to the surrounding positions rather than in isolation.": "Within the wider Celtic Cross, in ${position.toLowerCase()}, read $theme in relation to the surrounding positions rather than in isolation.",
+            "Geniş Kelt Haçı içinde $theme temasını tek başına değil, çevresindeki konumlarla ilişkili olarak oku.": "Geniş Kelt Haçı içinde ${position.toLowerCase()} konumunda $theme temasını tek başına değil, çevresindeki konumlarla ilişkili olarak oku.",
+            "Dentro de la Cruz Celta, lee $theme en relación con las posiciones que la rodean, no de forma aislada.": "Dentro de la Cruz Celta, en ${position.toLowerCase()}, lee $theme en relación con las posiciones que la rodean, no de forma aislada.",
+            "Dans la Croix celtique, lisez $theme en relation avec les positions voisines plutôt que de manière isolée.": "Dans la Croix celtique, dans ${position.toLowerCase()}, lisez $theme en relation avec les positions voisines plutôt que de manière isolée.",
+            "Na Cruz Celta, leia $theme em relação às posições ao redor, não de forma isolada.": "Na Cruz Celta, em ${position.toLowerCase()}, leia $theme em relação às posições ao redor, não de forma isolada.",
+
+            "Because the card is reversed, look first for delay, excess, avoidance, or inward pressure around this theme.": "Because the card is reversed, in ${position.toLowerCase()}, look first for delay, excess, avoidance, or inward pressure around this theme.",
+            "Kart ters olduğu için önce bu tema çevresinde gecikme, aşırılık, kaçınma veya içe dönük baskı olup olmadığına bak.": "Kart ters olduğu için ${position.toLowerCase()} konumunda önce bu tema çevresinde gecikme, aşırılık, kaçınma veya içe dönük baskı olup olmadığına bak.",
+            "Como la carta está invertida, busca primero retraso, exceso, evitación o presión interna alrededor de este tema.": "Como la carta está invertida, en ${position.toLowerCase()}, busca primero retraso, exceso, evitación o presión interna alrededor de este tema.",
+            "Comme la carte est renversée, cherchez d’abord retard, excès, évitement ou pression intérieure autour de ce thème.": "Comme la carte est renversée, dans ${position.toLowerCase()}, cherchez d’abord retard, excès, évitement ou pression intérieure autour de ce thème.",
+            "Como a carta está invertida, procure primeiro atraso, excesso, evitação ou pressão interna em torno desse tema.": "Como a carta está invertida, em ${position.toLowerCase()}, procure primeiro atraso, excesso, evitação ou pressão interna em torno desse tema.",
+            "Because the card is upright, start with the most usable and outwardly available expression of this theme.": "Because the card is upright, in ${position.toLowerCase()}, start with the most usable and outwardly available expression of this theme.",
+            "Kart düz olduğu için önce bu temanın kullanılabilir ve dışarıdan gözlemlenebilir ifadesine bak.": "Kart düz olduğu için ${position.toLowerCase()} konumunda önce bu temanın kullanılabilir ve dışarıdan gözlemlenebilir ifadesine bak.",
+            "Como la carta está derecha, empieza por la expresión más utilizable y visible de este tema.": "Como la carta está derecha, en ${position.toLowerCase()}, empieza por la expresión más utilizable y visible de este tema.",
+            "Comme la carte est à l’endroit, commencez par l’expression la plus utilisable et visible de ce thème.": "Comme la carte est à l’endroit, dans ${position.toLowerCase()}, commencez par l’expression la plus utilisable et visible de ce thème.",
+            "Como a carta está na posição normal, comece pela expressão mais utilizável e visível desse tema.": "Como a carta está na posição normal, em ${position.toLowerCase()}, comece pela expressão mais utilizável e visível desse tema.",
+          }
+          for old, new in replacements.items():
+              replace_once(old, new)
+
+          path.write_text(text)
+          PY
+          dart format lib/src/reading_synthesis.dart
+      - name: Commit patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add lib/src/reading_synthesis.dart
+          git commit -m "Make contextual readings position-aware"
+          git push origin HEAD:product/context-aware-meanings
