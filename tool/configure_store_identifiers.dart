@@ -3,6 +3,7 @@ import 'dart:io';
 import 'configure_app_lock.dart' as app_lock_config;
 import 'configure_ritual_notifications.dart' as ritual_config;
 import 'materialize_ad_only_ui.dart' as ad_only_ui;
+import 'materialize_home_focus.dart' as home_focus;
 import 'materialize_optional_name_onboarding.dart' as optional_name_onboarding;
 
 const permanentIdentifier = 'com.tunabozcali.mystictarot';
@@ -75,6 +76,7 @@ const generatedIdentifiers = <String>[
 void main() {
   ad_only_ui.materializeAdOnlyUi();
   optional_name_onboarding.materializeOptionalNameOnboarding();
+  home_focus.materializeHomeFocus();
 
   final roots = <Directory>[
     Directory('android'),
