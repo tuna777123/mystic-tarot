@@ -27,10 +27,7 @@ Future<void> main(List<String> arguments) async {
 
     if (platform == StoreReleasePlatform.android) {
       errors.addAll(
-        validateAdMobAppId(
-          adMobAppId,
-          label: 'Android AdMob application ID',
-        ),
+        validateAdMobAppId(adMobAppId, label: 'Android AdMob application ID'),
       );
       errors.addAll(
         validateAdMobAdUnitId(
@@ -58,10 +55,7 @@ Future<void> main(List<String> arguments) async {
       );
     } else {
       errors.addAll(
-        validateAdMobAppId(
-          adMobAppId,
-          label: 'iOS AdMob application ID',
-        ),
+        validateAdMobAppId(adMobAppId, label: 'iOS AdMob application ID'),
       );
       errors.addAll(
         validateAdMobAdUnitId(
