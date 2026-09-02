@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'src/app_ads_readiness.dart';
 import 'src/public_store_urls.dart';
 import 'src/store_release_contract.dart';
 
@@ -10,6 +11,9 @@ Future<void> main(List<String> arguments) async {
     final requiredNames = platform == StoreReleasePlatform.android
         ? StoreReleaseContract.androidRequiredEnvironment
         : StoreReleaseContract.iosRequiredEnvironment;
+    final adMobAppId = platform == StoreReleasePlatform.android
+        ? environment['ADMOB_ANDROID_APP_ID'] ?? ''
+        : environment['ADMOB_IOS_APP_ID'] ?? '';
     final missing = missingEnvironmentValues(environment, requiredNames);
     final errors = <String>[
       if (missing.isNotEmpty)
@@ -24,7 +28,7 @@ Future<void> main(List<String> arguments) async {
     if (platform == StoreReleasePlatform.android) {
       errors.addAll(
         validateAdMobAppId(
-          environment['ADMOB_ANDROID_APP_ID'] ?? '',
+          adMobAppId,
           label: 'Android AdMob application ID',
         ),
       );
@@ -55,7 +59,7 @@ Future<void> main(List<String> arguments) async {
     } else {
       errors.addAll(
         validateAdMobAppId(
-          environment['ADMOB_IOS_APP_ID'] ?? '',
+          adMobAppId,
           label: 'iOS AdMob application ID',
         ),
       );
@@ -119,6 +123,12 @@ Future<void> main(List<String> arguments) async {
       return;
     }
 
+    final appAdsErrors = await verifyPublicAppAds(appId: adMobAppId);
+    if (appAdsErrors.isNotEmpty) {
+      _fail(appAdsErrors);
+      return;
+    }
+
     stdout.writeln('Store release preflight passed for ${platform.name}.');
     stdout.writeln(
       'Validated protected value names: ${requiredNames.join(', ')}.',
@@ -126,6 +136,7 @@ Future<void> main(List<String> arguments) async {
     stdout.writeln(
       'Verified ${publicStoreEndpoints.length} live public store endpoints.',
     );
+    stdout.writeln('Verified public app-ads.txt ownership for production ads.');
     stdout.writeln(
       'Production AdMob IDs were validated without printing them.',
     );
