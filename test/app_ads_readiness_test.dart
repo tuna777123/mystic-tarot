@@ -6,10 +6,7 @@ void main() {
   const appId = 'ca-app-pub-1234567890123456~1234567890';
 
   test('publisher id is derived from the configured AdMob app id', () {
-    expect(
-      publisherIdFromAdMobAppId(appId),
-      'pub-1234567890123456',
-    );
+    expect(publisherIdFromAdMobAppId(appId), 'pub-1234567890123456');
     expect(publisherIdFromAdMobAppId('invalid'), isNull);
   });
 
@@ -18,8 +15,7 @@ void main() {
       appId: appId,
       response: const PublicStoreResponse(
         statusCode: 200,
-        body:
-            'google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n',
+        body: 'google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0\n',
       ),
     );
     expect(errors, isEmpty);
