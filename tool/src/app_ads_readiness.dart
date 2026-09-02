@@ -4,8 +4,7 @@ import 'public_store_urls.dart';
 
 const _googleSellerId = 'f08c47fec0942fa0';
 
-Uri get publicAppAdsUri =>
-    Uri.parse(publicStoreBaseUrl).resolve('app-ads.txt');
+Uri get publicAppAdsUri => Uri.parse(publicStoreBaseUrl).resolve('app-ads.txt');
 
 String? publisherIdFromAdMobAppId(String appId) {
   final match = RegExp(r'^ca-app-pub-(\d+)~\d+$').firstMatch(appId.trim());
@@ -20,7 +19,9 @@ List<String> validateAppAdsResponse({
 }) {
   final publisherId = publisherIdFromAdMobAppId(appId);
   if (publisherId == null) {
-    return const <String>['AdMob application ID could not yield a publisher ID.'];
+    return const <String>[
+      'AdMob application ID could not yield a publisher ID.',
+    ];
   }
 
   final errors = <String>[];
