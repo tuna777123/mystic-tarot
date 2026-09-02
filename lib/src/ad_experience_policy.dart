@@ -51,6 +51,18 @@ class AdExperiencePolicy {
     return now.difference(lastAppOpenShownAt) >= minimumAppOpenInterval;
   }
 
+  /// Once the natural four-reading boundary has been reached, the opportunity
+  /// remains due until an interstitial actually produces an impression.
+  ///
+  /// This intentionally uses >= rather than modulo arithmetic: a temporarily
+  /// unavailable ad or a shared full-screen cooldown must not silently consume
+  /// the next eligible monetization boundary.
+  static bool interstitialDue({
+    required int completedReadingsSinceInterstitial,
+  }) {
+    return completedReadingsSinceInterstitial >= interstitialEveryReadings;
+  }
+
   static bool appOpenEligible({
     required DateTime now,
     required int completedReadings,

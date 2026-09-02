@@ -72,4 +72,20 @@ void main() {
       const Duration(minutes: 1),
     );
   });
+
+  test('interstitial stays due after the four-reading boundary', () {
+    expect(
+      AdExperiencePolicy.interstitialDue(completedReadingsSinceInterstitial: 3),
+      isFalse,
+    );
+    expect(
+      AdExperiencePolicy.interstitialDue(completedReadingsSinceInterstitial: 4),
+      isTrue,
+    );
+    expect(
+      AdExperiencePolicy.interstitialDue(completedReadingsSinceInterstitial: 7),
+      isTrue,
+      reason: 'A missed ad load or cooldown must not consume the opportunity.',
+    );
+  });
 }
