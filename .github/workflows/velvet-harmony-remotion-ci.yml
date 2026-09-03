@@ -37,27 +37,6 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
 
-      - name: Probe private Drive asset access
-        run: |
-          set -euo pipefail
-          FILE_ID='1NCEQYP49Kc6Mc4gcnVG0V0QuQtY_2AIP'
-          rm -f /tmp/walnut-probe-1.bin /tmp/walnut-probe-2.bin
-          status1=$(curl -L --silent --show-error -o /tmp/walnut-probe-1.bin -w '%{http_code}' "https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download&confirm=t" || true)
-          bytes1=$(stat -c%s /tmp/walnut-probe-1.bin 2>/dev/null || echo 0)
-          head1=$(head -c 4 /tmp/walnut-probe-1.bin 2>/dev/null || true)
-          echo "drive.usercontent status=${status1} bytes=${bytes1} header=${head1}"
-          if [ "$bytes1" -gt 90000000 ] && [ "$head1" = 'RIFF' ]; then
-            echo 'DRIVE_PROBE_OK=usercontent'
-            exit 0
-          fi
-          status2=$(curl -L --silent --show-error -o /tmp/walnut-probe-2.bin -w '%{http_code}' "https://drive.google.com/uc?export=download&id=${FILE_ID}&confirm=t" || true)
-          bytes2=$(stat -c%s /tmp/walnut-probe-2.bin 2>/dev/null || echo 0)
-          head2=$(head -c 4 /tmp/walnut-probe-2.bin 2>/dev/null || true)
-          echo "drive.google status=${status2} bytes=${bytes2} header=${head2}"
-          test "$bytes2" -gt 90000000
-          test "$head2" = 'RIFF'
-          echo 'DRIVE_PROBE_OK=uc'
-
       - name: Generate private synthetic smoke assets
         run: |
           mkdir -p public/assets out
