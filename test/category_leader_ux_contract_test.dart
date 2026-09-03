@@ -17,7 +17,15 @@ void main() {
       expect(launch, contains('THE MYSTIC LOOP'));
       expect(launch, contains('No prediction score.'));
       expect(app, contains('Reveal my first card'));
-      expect(app, contains('PATTERN MEMORY'));
+      expect(app, contains('Read today.\\nCheck reality tomorrow.'));
+      expect(
+        app,
+        contains(
+          'One private reading. One grounded action. In 24 hours, Mystic Mirror asks what actually changed.',
+        ),
+      );
+      expect(app, contains('Start with one reading'));
+      expect(app, isNot(contains('PATTERN MEMORY')));
       expect(app, contains('PRIVATE JOURNAL'));
 
       final finishOnboarding = app.indexOf('Future<void> _finishOnboarding(');
