@@ -1,0 +1,23 @@
+{
+  "name": "velvet-harmony-video03-remotion",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts --no-open",
+    "render:visual": "remotion render src/index.ts VelvetHarmony out/Velvet_Harmony_Video_03_VISUAL_1440P.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p --log=verbose",
+    "render:final": "bash scripts/render-final.sh",
+    "qc": "bash scripts/qc-final.sh"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.506",
+    "@remotion/media": "4.0.506",
+    "remotion": "4.0.506",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.5",
+    "@types/react-dom": "18.3.0",
+    "typescript": "5.6.3"
+  }
+}
