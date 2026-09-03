@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'materialize_first_save_continuity.dart' as first_save_continuity;
+import 'materialize_minor_arcana_semantic_depth.dart' as minor_arcana_semantics;
 
 const _sourcePath = 'lib/src/app.dart';
 
@@ -18,6 +19,7 @@ void materializeResultCoreLoop() {
   if (updated != original) {
     file.writeAsStringSync(updated);
   }
+  minor_arcana_semantics.materializeMinorArcanaSemanticDepth();
 }
 
 String materializeResultCoreLoopInSource(String source) {
