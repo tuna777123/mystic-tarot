@@ -11,8 +11,8 @@ void main() {
     await tester.pumpWidget(const MysticApp());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('Your patterns are\nalready speaking.'), findsOneWidget);
-    expect(find.text('Begin my journey'), findsOneWidget);
+    expect(find.text('Read today.\nCheck reality tomorrow.'), findsOneWidget);
+    expect(find.text('Start with one reading'), findsOneWidget);
   });
 
   testWidgets('living fate map is visible in both launch languages', (
