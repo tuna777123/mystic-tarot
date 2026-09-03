@@ -37,6 +37,27 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
 
+      - name: Probe private Drive asset access without changing permissions
+        shell: bash
+        run: |
+          set +e
+          URL='https://drive.google.com/uc?export=download&id=1B4dtZcai6GY7CCl7yyDeIo1e3iLKa_1c'
+          curl -L --silent --show-error --max-time 45 "$URL" -o /tmp/drive-warm.bin
+          CURL_STATUS=$?
+          echo "curl_status=$CURL_STATUS"
+          ls -l /tmp/drive-warm.bin || true
+          file /tmp/drive-warm.bin || true
+          ffprobe -v error -show_entries format=format_name,duration,size -of default=nw=1 /tmp/drive-warm.bin || true
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/drive-warm.bin')
+          if p.exists():
+              data=p.read_bytes()[:160]
+              print('first_bytes_hex=', data[:32].hex())
+              print('looks_html=', b'<html' in data.lower() or b'<!doctype' in data.lower())
+          PY
+          exit 0
+
       - name: Generate private synthetic smoke assets
         run: |
           mkdir -p public/assets out
