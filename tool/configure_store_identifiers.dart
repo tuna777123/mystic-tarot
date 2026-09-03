@@ -3,6 +3,7 @@ import 'dart:io';
 import 'configure_app_lock.dart' as app_lock_config;
 import 'configure_ritual_notifications.dart' as ritual_config;
 import 'materialize_ad_only_ui.dart' as ad_only_ui;
+import 'materialize_first_save_continuity.dart' as first_save_continuity;
 import 'materialize_home_focus.dart' as home_focus;
 import 'materialize_onboarding_clarity.dart' as onboarding_clarity;
 import 'materialize_optional_name_onboarding.dart' as optional_name_onboarding;
@@ -78,6 +79,7 @@ void main() {
   ad_only_ui.materializeAdOnlyUi();
   optional_name_onboarding.materializeOptionalNameOnboarding();
   onboarding_clarity.materializeOnboardingClarity();
+  first_save_continuity.materializeFirstSaveContinuity();
   home_focus.materializeHomeFocus();
 
   final roots = <Directory>[
