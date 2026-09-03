@@ -41,7 +41,9 @@ void main() {
         "import 'materialize_first_save_continuity.dart' as first_save_continuity;",
       ),
     );
-    final resultPass = source.indexOf('materializeResultCoreLoopInSource(original)');
+    final resultPass = source.indexOf(
+      'materializeResultCoreLoopInSource(original)',
+    );
     final firstSavePass = source.indexOf(
       'first_save_continuity.materializeFirstSaveContinuitySource(updated)',
     );
