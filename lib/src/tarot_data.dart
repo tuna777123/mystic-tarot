@@ -1,4 +1,5 @@
 import 'models.dart';
+import 'tarot_minor_signatures.dart';
 
 final tarotDeck = <TarotCardData>[
   const TarotCardData(name: 'The Fool', number: '0', symbol: '✧', light: 'A new beginning asks for trust, curiosity, and one brave first step.', shadow: 'A leap may be tempting, but freedom without awareness becomes avoidance.', advice: 'Move forward, but take one honest look at where your feet will land.'),
@@ -53,15 +54,30 @@ List<TarotCardData> _minorArcana() {
   return [
     for (final suit in suits)
       for (var i = 0; i < ranks.length; i++)
-        TarotCardData(
-          name: '${ranks[i].$1} of ${suit.$1}',
-          number: '${i + 1}',
-          symbol: suit.$2,
-          light: 'This card carries ${ranks[i].$2} through ${suit.$3}.',
-          shadow: 'The same energy may be blocked, exaggerated, or seeking approval instead of alignment.',
-          advice: '${_capitalize(ranks[i].$3)} with intention: ${suit.$4} without abandoning your wider needs.',
-        ),
+        _minorCard(suit, ranks[i], i),
   ];
+}
+
+TarotCardData _minorCard(
+  (String, String, String, String) suit,
+  (String, String, String) rank,
+  int index,
+) {
+  final name = '${rank.$1} of ${suit.$1}';
+  final signature = minorArcanaSignature(name, 'EN');
+  if (signature == null) {
+    throw StateError('Missing English Minor Arcana signature for $name.');
+  }
+  return TarotCardData(
+    name: name,
+    number: '${index + 1}',
+    symbol: suit.$2,
+    light: '$signature This card carries ${rank.$2} through ${suit.$3}.',
+    shadow:
+        '$signature Under strain, the same energy may be blocked, exaggerated, or seeking approval instead of alignment.',
+    advice:
+        '${_capitalize(rank.$3)} with intention: ${suit.$4} without abandoning your wider needs.',
+  );
 }
 
 String _capitalize(String value) => '${value[0].toUpperCase()}${value.substring(1)}';
