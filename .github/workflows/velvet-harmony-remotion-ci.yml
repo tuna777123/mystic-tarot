@@ -37,26 +37,40 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
 
-      - name: Probe private Drive asset access without changing permissions
+      - name: Strict private Drive probe
         shell: bash
         run: |
-          set +e
+          set -euo pipefail
           URL='https://drive.google.com/uc?export=download&id=1B4dtZcai6GY7CCl7yyDeIo1e3iLKa_1c'
-          curl -L --silent --show-error --max-time 45 "$URL" -o /tmp/drive-warm.bin
-          CURL_STATUS=$?
-          echo "curl_status=$CURL_STATUS"
-          ls -l /tmp/drive-warm.bin || true
-          file /tmp/drive-warm.bin || true
-          ffprobe -v error -show_entries format=format_name,duration,size -of default=nw=1 /tmp/drive-warm.bin || true
+          curl --fail -L --silent --show-error --max-time 45 "$URL" -o /tmp/drive-warm.bin
+
+          ACTUAL_SIZE="$(stat -c%s /tmp/drive-warm.bin)"
+          EXPECTED_SIZE='2021836'
+          echo "actual_size=$ACTUAL_SIZE expected_size=$EXPECTED_SIZE"
+          test "$ACTUAL_SIZE" = "$EXPECTED_SIZE"
+
           python3 - <<'PY'
           from pathlib import Path
           p=Path('/tmp/drive-warm.bin')
-          if p.exists():
-              data=p.read_bytes()[:160]
-              print('first_bytes_hex=', data[:32].hex())
-              print('looks_html=', b'<html' in data.lower() or b'<!doctype' in data.lower())
+          data=p.read_bytes()[:512]
+          low=data.lower()
+          if b'<html' in low or b'<!doctype' in low:
+              raise SystemExit('FAIL: Drive returned HTML instead of MP4')
+          if b'ftyp' not in data[:64]:
+              raise SystemExit('FAIL: MP4 ftyp box missing')
+          print('container_signature=MP4')
           PY
-          exit 0
+
+          ffprobe -v error \
+            -show_entries format=format_name,duration,size \
+            -show_entries stream=codec_type,codec_name,width,height,r_frame_rate \
+            -of default=nw=1 /tmp/drive-warm.bin
+
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 /tmp/drive-warm.bin)" = "1280"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 /tmp/drive-warm.bin)" = "720"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 /tmp/drive-warm.bin)" = "24/1"
+
+          echo 'PRIVATE_DRIVE_RAW_ACCESS=PASS'
 
       - name: Generate private synthetic smoke assets
         run: |
