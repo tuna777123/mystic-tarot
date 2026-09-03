@@ -6,6 +6,7 @@ import 'materialize_ad_only_ui.dart' as ad_only_ui;
 import 'materialize_home_focus.dart' as home_focus;
 import 'materialize_onboarding_clarity.dart' as onboarding_clarity;
 import 'materialize_optional_name_onboarding.dart' as optional_name_onboarding;
+import 'materialize_result_core_loop.dart' as result_core_loop;
 
 const permanentIdentifier = 'com.tunabozcali.mystictarot';
 const androidAdMobTestAppId = 'ca-app-pub-3940256099942544~3347511713';
@@ -79,6 +80,7 @@ void main() {
   optional_name_onboarding.materializeOptionalNameOnboarding();
   onboarding_clarity.materializeOnboardingClarity();
   home_focus.materializeHomeFocus();
+  result_core_loop.materializeResultCoreLoop();
 
   final roots = <Directory>[
     Directory('android'),
