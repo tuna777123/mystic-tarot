@@ -47,10 +47,7 @@ void main() {
 
     expect(transformed, contains("import 'home_focus_policy.dart';"));
     expect(transformed, contains('HomeFocusPolicy.shouldFocus('));
-    expect(
-      RegExp(r'if \(!homeFocusMode\)').allMatches(transformed).length,
-      3,
-    );
+    expect(RegExp(r'if \(!homeFocusMode\)').allMatches(transformed).length, 3);
 
     final nextStepIndex = transformed.indexOf('MysticNextStepCard(');
     final firstGuardIndex = transformed.indexOf('if (!homeFocusMode)');
