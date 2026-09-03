@@ -49,7 +49,8 @@ String materializeResultCoreLoopInSource(String source) {
     );
   }
 
-  const legacySecondaryBlock = '''              if (revealComplete && widget.pastRecords.isNotEmpty)
+  const legacySecondaryBlock =
+      '''              if (revealComplete && widget.pastRecords.isNotEmpty)
                 const SizedBox(height: 14),
               if (revealComplete && widget.pastRecords.isNotEmpty)
                 _memoryBridge(context),
@@ -61,7 +62,8 @@ String materializeResultCoreLoopInSource(String source) {
 
   const coreLoopSpacer =
       '              if (revealComplete) const SizedBox(height: 14),\n';
-  const movedSecondaryBlock = '''              if (revealComplete && widget.pastRecords.isNotEmpty)
+  const movedSecondaryBlock =
+      '''              if (revealComplete && widget.pastRecords.isNotEmpty)
                 const SizedBox(height: 14),
               if (revealComplete && widget.pastRecords.isNotEmpty)
                 _memoryBridge(context),
