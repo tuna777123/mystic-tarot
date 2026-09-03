@@ -31,7 +31,8 @@ void materializeFirstSaveContinuity() {
 }
 
 String materializeFirstSaveContinuitySource(String source) {
-  const oldValue = '''              if (revealComplete && saved) const SizedBox(height: 10),
+  const oldValue =
+      '''              if (revealComplete && saved) const SizedBox(height: 10),
               if (revealComplete && saved)
                 SizedBox(
                   width: double.infinity,
@@ -51,7 +52,8 @@ String materializeFirstSaveContinuitySource(String source) {
                   ),
                 ),''';
 
-  const newValue = '''              if (revealComplete && saved) const SizedBox(height: 10),
+  const newValue =
+      '''              if (revealComplete && saved) const SizedBox(height: 10),
               if (revealComplete &&
                   saved &&
                   widget.pastRecords.isEmpty)
