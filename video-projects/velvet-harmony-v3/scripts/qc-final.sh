@@ -33,17 +33,26 @@ AV_DIFF=$(awk -v v="$V_DUR" -v a="$A_DUR" 'BEGIN{d=v-a; if(d<0)d=-d; printf "%.6
 echo "av_duration_diff=$AV_DIFF" | tee -a "$QC/core.txt"
 awk -v d="$AV_DIFF" 'BEGIN{exit !(d <= 0.050)}' || { echo "QC FAIL: A/V duration mismatch" >&2; exit 13; }
 
-# Verify the approved audio survived byte-for-byte at the decoded-audio level.
+# Verify the approved audio survived bit-identically at decoded-audio level.
 ffmpeg -v error -i public/assets/audio-master.mp4 -map 0:a:0 -f md5 - > "$QC/audio_source.md5"
 ffmpeg -v error -i "$FINAL" -map 0:a:0 -f md5 - > "$QC/audio_final.md5"
 cmp -s "$QC/audio_source.md5" "$QC/audio_final.md5" || { echo "QC FAIL: audio checksum mismatch" >&2; exit 14; }
 
 # Full decode / timestamp integrity scan.
 ffmpeg -v warning -i "$FINAL" -map 0:v:0 -map 0:a:0 -f null - 2> "$QC/decode_warnings.txt" || true
-if grep -Eqi 'non-monoton|invalid dts|corrupt|decode error|error while decoding' "$QC/decode_warnings.txt"; then
+if grep -Eqi 'non-monoton|invalid dts|invalid pts|corrupt|decode error|error while decoding' "$QC/decode_warnings.txt"; then
   echo "QC FAIL: decode/timestamp warning detected" >&2
   exit 15
 fi
+
+# Also reject timestamp/packet warnings emitted during packet-copy assembly or final mux.
+for LOG in "$QC/visual_concat_warnings.txt" "$QC/final_mux_warnings.txt"; do
+  if [[ -f "$LOG" ]] && grep -Eqi 'non-monoton|invalid dts|invalid pts|corrupt|error while decoding|packet corrupt' "$LOG"; then
+    echo "QC FAIL: assembly/mux warning detected in $LOG" >&2
+    cat "$LOG" >&2
+    exit 18
+  fi
+done
 
 # Strict freeze scan: no >=0.8s static/near-static events.
 ffmpeg -hide_banner -nostats -i "$FINAL" -vf 'freezedetect=n=-60dB:d=0.8' -an -f null - 2> "$QC/freeze.log" || true
@@ -89,6 +98,7 @@ Audio checksum: MATCH
 Freeze >=0.8s: 0
 Black-frame events: 0
 Decode/timestamp errors: 0
+Concat/mux timestamp errors: 0
 Transition centers: 44:03 and 1:23:37
 Loop: 172-frame natural main + 20-frame tail-to-head motion dissolve = 192-frame / 8s cycle
 EOF
