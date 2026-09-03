@@ -1,0 +1,6 @@
+node_modules/
+out/
+qc/
+public/assets/*.mp4
+public/assets/*.wav
+.DS_Store
