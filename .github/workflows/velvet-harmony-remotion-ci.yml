@@ -1,0 +1,35 @@
+name: Velvet Harmony Remotion CI
+
+on:
+  pull_request:
+    paths:
+      - 'video-projects/velvet-harmony-v3/**'
+      - '.github/workflows/velvet-harmony-remotion-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-remotion:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: video-projects/velvet-harmony-v3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: video-projects/velvet-harmony-v3/package-lock.json
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: TypeScript validation
+        run: npx tsc --noEmit
+
+      - name: Verify Remotion compositions
+        run: npx remotion compositions src/index.ts
