@@ -8,31 +8,46 @@ import '../tool/materialize_minor_arcana_semantic_depth.dart';
 void main() {
   const launchCodes = <String>['EN', 'TR', 'ES', 'FR', 'PT-BR'];
 
-  test('all 56 Minor Arcana have authored semantics in every launch language', () {
-    expect(minorArcanaSemanticsEnglish, hasLength(56));
-    final cardNames = minorArcanaSemanticsEnglish.keys.toSet();
+  test(
+    'all 56 Minor Arcana have authored semantics in every launch language',
+    () {
+      expect(minorArcanaSemanticsEnglish, hasLength(56));
+      final cardNames = minorArcanaSemanticsEnglish.keys.toSet();
 
-    for (final code in launchCodes) {
-      final lights = <String>{};
-      final shadows = <String>{};
-      final actions = <String>{};
-      for (final cardName in cardNames) {
-        final semantic = minorArcanaSemantic(cardName, code);
-        expect(semantic, isNotNull, reason: '$code: $cardName');
-        expect(semantic, hasLength(3), reason: '$code: $cardName');
-        expect(semantic![0].length, greaterThan(70), reason: '$code light: $cardName');
-        expect(semantic[1].length, greaterThan(70), reason: '$code shadow: $cardName');
-        expect(semantic[2].length, greaterThan(45), reason: '$code action: $cardName');
-        lights.add(semantic[0]);
-        shadows.add(semantic[1]);
-        actions.add(semantic[2]);
+      for (final code in launchCodes) {
+        final lights = <String>{};
+        final shadows = <String>{};
+        final actions = <String>{};
+        for (final cardName in cardNames) {
+          final semantic = minorArcanaSemantic(cardName, code);
+          expect(semantic, isNotNull, reason: '$code: $cardName');
+          expect(semantic, hasLength(3), reason: '$code: $cardName');
+          expect(
+            semantic![0].length,
+            greaterThan(70),
+            reason: '$code light: $cardName',
+          );
+          expect(
+            semantic[1].length,
+            greaterThan(70),
+            reason: '$code shadow: $cardName',
+          );
+          expect(
+            semantic[2].length,
+            greaterThan(45),
+            reason: '$code action: $cardName',
+          );
+          lights.add(semantic[0]);
+          shadows.add(semantic[1]);
+          actions.add(semantic[2]);
+        }
+
+        expect(lights, hasLength(56), reason: '$code upright meanings repeat');
+        expect(shadows, hasLength(56), reason: '$code shadow meanings repeat');
+        expect(actions, hasLength(56), reason: '$code actions repeat');
       }
-
-      expect(lights, hasLength(56), reason: '$code upright meanings repeat');
-      expect(shadows, hasLength(56), reason: '$code shadow meanings repeat');
-      expect(actions, hasLength(56), reason: '$code actions repeat');
-    }
-  });
+    },
+  );
 
   test('same rank no longer collapses into one generic cross-suit meaning', () {
     for (final code in launchCodes) {
@@ -64,10 +79,7 @@ void main() {
       minorArcanaSemantic('Ten of Wands', 'EN')![0],
       contains('heavy load'),
     );
-    expect(
-      minorArcanaSemantic('Five of Cups', 'TR')![0],
-      contains('Kayıp'),
-    );
+    expect(minorArcanaSemantic('Five of Cups', 'TR')![0], contains('Kayıp'));
     expect(
       minorArcanaSemantic('Seven of Swords', 'ES')![1],
       contains('engaño'),
@@ -103,20 +115,26 @@ void main() {
     expect(materializeTarotDataSemanticDepth(transformed), transformed);
   });
 
-  test('localization materializer routes launch languages to card semantics', () {
-    final source = File('lib/src/tarot_localization.dart').readAsStringSync();
-    final transformed = materializeTarotLocalizationSemanticDepth(source);
+  test(
+    'localization materializer routes launch languages to card semantics',
+    () {
+      final source = File('lib/src/tarot_localization.dart').readAsStringSync();
+      final transformed = materializeTarotLocalizationSemanticDepth(source);
 
-    expect(
-      'minorArcanaSemantic(drawn.card.name, code)'.allMatches(transformed),
-      hasLength(2),
-    );
-    expect(transformed, contains('if (semantic != null) return semantic[2];'));
-    expect(
-      materializeTarotLocalizationSemanticDepth(transformed),
-      transformed,
-    );
-  });
+      expect(
+        'minorArcanaSemantic(drawn.card.name, code)'.allMatches(transformed),
+        hasLength(2),
+      );
+      expect(
+        transformed,
+        contains('if (semantic != null) return semantic[2];'),
+      );
+      expect(
+        materializeTarotLocalizationSemanticDepth(transformed),
+        transformed,
+      );
+    },
+  );
 
   test('verified build chain always applies Minor Arcana semantic depth', () {
     final source = File(
