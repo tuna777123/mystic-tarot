@@ -30,9 +30,9 @@ void main() {
     expect(twice, once);
   });
 
-  test('store configuration applies first-save after result hierarchy', () {
+  test('result hierarchy chains first-save continuity in production', () {
     final source = File(
-      'tool/configure_store_identifiers.dart',
+      'tool/materialize_result_core_loop.dart',
     ).readAsStringSync();
 
     expect(
@@ -41,12 +41,12 @@ void main() {
         "import 'materialize_first_save_continuity.dart' as first_save_continuity;",
       ),
     );
-    final resultLoop = source.indexOf('result_core_loop.materializeResultCoreLoop();');
-    final firstSave = source.indexOf(
-      'first_save_continuity.materializeFirstSaveContinuity();',
+    final resultPass = source.indexOf('materializeResultCoreLoopInSource(original)');
+    final firstSavePass = source.indexOf(
+      'first_save_continuity.materializeFirstSaveContinuitySource(updated)',
     );
-    expect(resultLoop, greaterThanOrEqualTo(0));
-    expect(firstSave, greaterThan(resultLoop));
+    expect(resultPass, greaterThanOrEqualTo(0));
+    expect(firstSavePass, greaterThan(resultPass));
   });
 
   test('unexpected source fails closed', () {
