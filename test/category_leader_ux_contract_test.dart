@@ -3,40 +3,37 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test(
-    'first session makes the evidence loop clear and starts with action',
-    () {
-      final app = File('lib/src/app.dart').readAsStringSync();
-      final launch = File(
-        'lib/src/launch_differentiation.dart',
-      ).readAsStringSync();
+  test('first session makes the evidence loop clear and starts with action', () {
+    final app = File('lib/src/app.dart').readAsStringSync();
+    final launch = File(
+      'lib/src/launch_differentiation.dart',
+    ).readAsStringSync();
 
-      expect(launch, contains('Read today. Check reality tomorrow.'));
-      expect(launch, contains('Build private evidence over time.'));
-      expect(launch, contains('Mystic Mirror asks what actually happened'));
-      expect(launch, contains('THE MYSTIC LOOP'));
-      expect(launch, contains('No prediction score.'));
-      expect(app, contains('Reveal my first card'));
-      expect(app, contains('Read today.\\nCheck reality tomorrow.'));
-      expect(
-        app,
-        contains(
-          'One private reading. One grounded action. In 24 hours, Mystic Mirror asks what actually changed.',
-        ),
-      );
-      expect(app, contains('Start with one reading'));
-      expect(app, isNot(contains('PATTERN MEMORY')));
-      expect(app, contains('PRIVATE JOURNAL'));
+    expect(launch, contains('Read today. Check reality tomorrow.'));
+    expect(launch, contains('Build private evidence over time.'));
+    expect(launch, contains('Mystic Mirror asks what actually happened'));
+    expect(launch, contains('THE MYSTIC LOOP'));
+    expect(launch, contains('No prediction score.'));
+    expect(app, contains('Reveal my first card'));
+    expect(app, contains('Read today.\\nCheck reality tomorrow.'));
+    expect(
+      app,
+      contains(
+        'One private reading. One grounded action. In 24 hours, Mystic Mirror asks what actually changed.',
+      ),
+    );
+    expect(app, contains('Start with one reading'));
+    expect(app, isNot(contains('PATTERN MEMORY')));
+    expect(app, contains('PRIVATE JOURNAL'));
 
-      final finishOnboarding = app.indexOf('Future<void> _finishOnboarding(');
-      final startFirstDaily = app.indexOf(
-        '_startReading(ReadingKind.daily);',
-        finishOnboarding,
-      );
-      expect(finishOnboarding, greaterThanOrEqualTo(0));
-      expect(startFirstDaily, greaterThan(finishOnboarding));
-    },
-  );
+    final finishOnboarding = app.indexOf('Future<void> _finishOnboarding(');
+    final startFirstDaily = app.indexOf(
+      '_startReading(ReadingKind.daily);',
+      finishOnboarding,
+    );
+    expect(finishOnboarding, greaterThanOrEqualTo(0));
+    expect(startFirstDaily, greaterThan(finishOnboarding));
+  });
 
   test('selection and reveal preserve an intentional cinematic ritual', () {
     final app = File('lib/src/app.dart').readAsStringSync();
