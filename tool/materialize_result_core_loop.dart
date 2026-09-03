@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'materialize_first_save_continuity.dart' as first_save_continuity;
+
 const _sourcePath = 'lib/src/app.dart';
 
 void main() => materializeResultCoreLoop();
@@ -11,7 +13,8 @@ void materializeResultCoreLoop() {
   }
 
   final original = file.readAsStringSync();
-  final updated = materializeResultCoreLoopInSource(original);
+  var updated = materializeResultCoreLoopInSource(original);
+  updated = first_save_continuity.materializeFirstSaveContinuitySource(updated);
   if (updated != original) {
     file.writeAsStringSync(updated);
   }
