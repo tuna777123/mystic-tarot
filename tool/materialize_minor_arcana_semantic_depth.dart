@@ -54,7 +54,7 @@ String materializeTarotDataSemanticDepth(String source) {
     );
   }
   final end = tailStart + oldTail.length;
-  const replacement = '''List<TarotCardData> _minorArcana() {
+  const replacement = r'''List<TarotCardData> _minorArcana() {
   const suits = <(String, String)>[
     ('Wands', '♢'),
     ('Cups', '◡'),
