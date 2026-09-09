@@ -1,0 +1,178 @@
+name: Grant Caption Temp
+
+on:
+  push:
+    branches: [grant-caption-temp-20260909]
+
+permissions:
+  contents: write
+
+jobs:
+  pace-captions:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: grant-caption-temp-20260909
+      - name: Build 2-5 word captions from Cloudinary transcript
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, re, urllib.request, pathlib, math
+
+          URL = 'https://res.cloudinary.com/saojrfpq/raw/upload/v1788903783/grant_ep1_vo_timing_16k.transcript'
+          outdir = pathlib.Path('grant_caption_temp')
+          outdir.mkdir(exist_ok=True)
+          raw = urllib.request.urlopen(URL, timeout=60).read()
+          (outdir/'grant_ep1_vo_timing_16k.transcript').write_bytes(raw)
+          data = json.loads(raw.decode('utf-8'))
+
+          blocks=[]
+          def walk(x):
+              if isinstance(x, dict):
+                  if isinstance(x.get('words'), list) and x.get('words'):
+                      ws=x['words']
+                      if all(isinstance(w,dict) and 'start_time' in w and 'end_time' in w and 'word' in w for w in ws):
+                          blocks.append(x)
+                          return
+                  for v in x.values(): walk(v)
+              elif isinstance(x, list):
+                  for v in x: walk(v)
+          walk(data)
+
+          words=[]
+          seen=set()
+          for b in blocks:
+              for w in b['words']:
+                  key=(round(float(w['start_time']),3), round(float(w['end_time']),3), str(w['word']))
+                  if key in seen: continue
+                  seen.add(key)
+                  words.append({'text':str(w['word']).strip(),'start':float(w['start_time']),'end':float(w['end_time'])})
+          words.sort(key=lambda w:(w['start'],w['end']))
+
+          # Remove pathological overlaps/duplicates while preserving the ASR clock.
+          clean=[]
+          for w in words:
+              if not w['text']: continue
+              if clean and w['start'] < clean[-1]['start'] - 0.01: continue
+              if clean and abs(w['start']-clean[-1]['start'])<0.015 and re.sub(r'\W+','',w['text'].lower())==re.sub(r'\W+','',clean[-1]['text'].lower()):
+                  continue
+              clean.append(w)
+          words=clean
+
+          def norm(s): return re.sub(r"[^a-z0-9']+",'',s.lower())
+          strong_end=re.compile(r'[.!?][\"\']?$')
+          soft_end=re.compile(r'[,;:—-][\"\']?$')
+          impact={'declined','debt','investing','compound','compounding'}
+
+          # First make natural utterances from punctuation and real pauses.
+          utter=[]; cur=[]
+          for i,w in enumerate(words):
+              if cur and w['start']-cur[-1]['end'] > 0.72:
+                  utter.append(cur); cur=[]
+              cur.append(w)
+              if strong_end.search(w['text']) or (len(cur)>=2 and soft_end.search(w['text']) and (i+1>=len(words) or words[i+1]['start']-w['end']>0.18)):
+                  utter.append(cur); cur=[]
+          if cur: utter.append(cur)
+
+          # Split to 2-5 words, target 3-4. Keep only intentional one-word impact beats.
+          chunks=[]
+          for u in utter:
+              if len(u)==1:
+                  if norm(u[0]['text']) in impact:
+                      chunks.append(u)
+                  elif chunks and len(chunks[-1])<5 and u[0]['start']-chunks[-1][-1]['end']<0.45:
+                      chunks[-1].extend(u)
+                  else:
+                      chunks.append(u)
+                  continue
+              n=len(u); pos=0
+              sizes=[]
+              while n-pos>0:
+                  rem=n-pos
+                  if rem<=5:
+                      size=rem
+                  else:
+                      size=4
+                      # Prefer punctuation boundary between 2..5 words.
+                      for cand in range(2,6):
+                          if pos+cand<=n and (strong_end.search(u[pos+cand-1]['text']) or soft_end.search(u[pos+cand-1]['text'])):
+                              if n-(pos+cand) != 1:
+                                  size=cand; break
+                  if rem-size==1:
+                      if size<5: size+=1
+                      elif sizes and sizes[-1]>2:
+                          sizes[-1]-=1; size=2
+                  sizes.append(size); pos+=size
+              pos=0
+              for s in sizes:
+                  chunks.append(u[pos:pos+s]); pos+=s
+
+          # Repair accidental non-impact singletons by merging with nearest legal neighbor.
+          repaired=[]
+          for c in chunks:
+              if len(c)==1 and norm(c[0]['text']) not in impact:
+                  if repaired and len(repaired[-1])<5 and c[0]['start']-repaired[-1][-1]['end']<0.6:
+                      repaired[-1].extend(c)
+                  else:
+                      repaired.append(c)
+              else:
+                  repaired.append(c)
+          chunks=repaired
+
+          key_terms={'declined','system','systems','compound','compounding','emergency','fund','debt','investing','invest','income','skills','skill','time','wealth','habits','failure','market','save','savings','start','today'}
+          segments=[]
+          for c in chunks:
+              if not c: continue
+              text=' '.join(w['text'] for w in c).strip()
+              emph=[i for i,w in enumerate(c) if norm(w['text']) in key_terms]
+              seg={
+                  'start':round(c[0]['start'],3),
+                  'end':round(c[-1]['end'],3),
+                  'text':text,
+                  'words':[{'text':w['text'],'start':round(w['start'],3),'end':round(w['end'],3)} for w in c]
+              }
+              if emph: seg['emphasize']=emph
+              segments.append(seg)
+
+          # Prevent overlap and give a tiny readable tail without covering pauses.
+          for i,s in enumerate(segments):
+              if i+1<len(segments):
+                  nxt=segments[i+1]['start']
+                  s['end']=round(min(max(s['end'], s['start']+0.35), nxt-0.025 if nxt>s['start']+0.05 else s['end']),3)
+              if s['end']<=s['start']: s['end']=round(s['start']+0.25,3)
+
+          transcript={'segments':segments,'tags':{}}
+          (outdir/'GRANT_EP1_PACED_CAPTIONS_2_5_WORDS.json').write_text(json.dumps(transcript,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+
+          def ts(t):
+              ms=max(0,int(round(t*1000))); h=ms//3600000; ms%=3600000; m=ms//60000; ms%=60000; s=ms//1000; ms%=1000
+              return f'{h:02d}:{m:02d}:{s:02d},{ms:03d}'
+          srt=[]
+          for i,s in enumerate(segments,1):
+              srt += [str(i),f"{ts(s['start'])} --> {ts(s['end'])}",s['text'],'']
+          (outdir/'GRANT_EP1_PACED_CAPTIONS_2_5_WORDS.srt').write_text('\n'.join(srt),encoding='utf-8')
+
+          counts=[len(s['text'].split()) for s in segments]
+          durs=[s['end']-s['start'] for s in segments]
+          qc={
+              'source_words':len(words),'segments':len(segments),
+              'one_word_segments':sum(x==1 for x in counts),
+              'min_words':min(counts) if counts else 0,'max_words':max(counts) if counts else 0,
+              'mean_words':round(sum(counts)/len(counts),3) if counts else 0,
+              'min_duration':round(min(durs),3) if durs else 0,'max_duration':round(max(durs),3) if durs else 0,
+              'first_segment':segments[0] if segments else None,
+              'last_segment':segments[-1] if segments else None
+          }
+          (outdir/'GRANT_EP1_PACED_CAPTIONS_QC.json').write_text(json.dumps(qc,indent=2,ensure_ascii=False),encoding='utf-8')
+          print(json.dumps(qc,indent=2))
+          PY
+      - name: Commit generated caption files
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add grant_caption_temp/
+          git commit -m 'Generate paced Grant caption outputs' || exit 0
+          git push origin HEAD:grant-caption-temp-20260909
