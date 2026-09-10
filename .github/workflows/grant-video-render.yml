@@ -1,0 +1,148 @@
+name: Grant Video Final Render
+
+on:
+  push:
+    branches:
+      - grant-video-render
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg curl
+          ffmpeg -version | head -1
+
+      - name: Download professional edit parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          urls=(
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788976953/grant_pro_final_p01.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983639/grant_pro_final_p02.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983651/grant_pro_final_p03.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983661/grant_pro_final_p04.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983673/grant_pro_final_p05a.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983684/grant_pro_final_p05b.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983694/grant_pro_final_p06a.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983706/grant_pro_final_p06b.mp4"
+          )
+          : > concat.txt
+          for i in "${!urls[@]}"; do
+            n=$(printf "%02d" $((i+1)))
+            f="part_${n}.mp4"
+            echo "Downloading $f"
+            curl -L --fail --retry 5 --retry-delay 2 --connect-timeout 20 -o "$f" "${urls[$i]}"
+            test -s "$f"
+            printf "file '%s'\n" "$f" >> concat.txt
+          done
+          ls -lh part_*.mp4
+
+      - name: Validate source parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > source_qc.txt
+          for f in part_*.mp4; do
+            echo "=== $f ===" | tee -a source_qc.txt
+            ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height,r_frame_rate -of default=nw=1 "$f" | tee -a source_qc.txt
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels -of default=nw=1 "$f" | tee -a source_qc.txt
+            ffprobe -v error -show_entries format=duration,size -of default=nw=1 "$f" | tee -a source_qc.txt
+          done
+
+      - name: Assemble final master
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -y \
+            -f concat -safe 0 -i concat.txt \
+            -map 0:v:0 -map 0:a:0 \
+            -c:v copy \
+            -c:a aac -b:a 192k -ar 48000 -ac 2 \
+            -avoid_negative_ts make_zero \
+            -movflags +faststart \
+            GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4
+
+      - name: Technical QC
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4
+          DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT")
+          WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$OUT")
+          HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$OUT")
+          FPS=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$OUT")
+          FRAMES=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 "$OUT")
+          ACODEC=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$OUT")
+          ARATE=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of csv=p=0 "$OUT")
+          ACH=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of csv=p=0 "$OUT")
+          SIZE=$(stat -c%s "$OUT")
+          {
+            echo "Grant Episode 1 Pro Editorial Final QC"
+            echo "duration=$DUR"
+            echo "resolution=${WIDTH}x${HEIGHT}"
+            echo "fps=$FPS"
+            echo "decoded_frames=$FRAMES"
+            echo "audio_codec=$ACODEC"
+            echo "audio_sample_rate=$ARATE"
+            echo "audio_channels=$ACH"
+            echo "size_bytes=$SIZE"
+          } | tee final_qc.txt
+          python3 - <<'PY'
+          import subprocess, sys
+          out='GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4'
+          dur=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',out], text=True).strip())
+          if not (1033.3 <= dur <= 1034.1):
+              raise SystemExit(f'FAIL duration {dur}')
+          w=int(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width','-of','csv=p=0',out], text=True).strip())
+          h=int(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=height','-of','csv=p=0',out], text=True).strip())
+          if (w,h)!=(1920,1080): raise SystemExit(f'FAIL resolution {w}x{h}')
+          print('QC_CORE_PASS')
+          PY
+          ffmpeg -hide_banner -v error -i "$OUT" -f null - 2>decode_errors.txt
+          if [ -s decode_errors.txt ]; then
+            echo "Decode errors found:" | tee -a final_qc.txt
+            cat decode_errors.txt | tee -a final_qc.txt
+            exit 1
+          fi
+          echo "full_decode=PASS" | tee -a final_qc.txt
+
+      - name: Seam frame QC
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p seam_qc
+          OUT=GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4
+          for t in 179.90 180.10 359.90 360.10 539.90 540.10 719.90 720.10 809.90 810.10 899.90 900.10 969.90 970.10 1021.00; do
+            name=$(echo "$t" | tr '.' '_')
+            ffmpeg -hide_banner -loglevel error -ss "$t" -i "$OUT" -frames:v 1 -q:v 2 "seam_qc/frame_${name}.jpg"
+          done
+          echo "seam_frames=15" | tee -a final_qc.txt
+
+      - name: Detect suspicious black/freeze spans
+        shell: bash
+        continue-on-error: true
+        run: |
+          OUT=GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4
+          ffmpeg -hide_banner -i "$OUT" -vf "blackdetect=d=0.5:pix_th=0.02,freezedetect=n=-60dB:d=2.5" -an -f null - 2>visual_scan.log || true
+          grep -E "black_start|freeze_start|freeze_end" visual_scan.log > visual_flags.txt || true
+          echo "visual_flags_count=$(wc -l < visual_flags.txt)" | tee -a final_qc.txt
+
+      - name: Upload final artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: grant-episode1-pro-editorial-final
+          path: |
+            GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4
+            final_qc.txt
+            source_qc.txt
+            visual_flags.txt
+            seam_qc/
+          compression-level: 0
+          retention-days: 7
