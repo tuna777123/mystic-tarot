@@ -1,0 +1,203 @@
+name: Grant Motion Fix Final
+
+on:
+  push:
+    branches:
+      - grant-video-motionfix
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install render dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg python3-pil curl
+          ffmpeg -version | head -1
+          python3 - <<'PY'
+          from PIL import Image
+          print('Pillow OK')
+          PY
+
+      - name: Download professional source parts
+        shell: bash
+        run: |
+          set -euo pipefail
+          urls=(
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788976953/grant_pro_final_p01.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983639/grant_pro_final_p02.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983651/grant_pro_final_p03.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983661/grant_pro_final_p04.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983673/grant_pro_final_p05a.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983684/grant_pro_final_p05b.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983694/grant_pro_final_p06a.mp4"
+            "https://res.cloudinary.com/saojrfpq/video/upload/v1788983706/grant_pro_final_p06b.mp4"
+          )
+          names=(part_01 part_02 part_03 part_04 part_05a part_05b part_06a part_06b)
+          for i in "${!urls[@]}"; do
+            f="${names[$i]}.mp4"
+            curl -L --fail --retry 5 --retry-delay 2 --connect-timeout 20 -o "$f" "${urls[$i]}"
+            test -s "$f"
+          done
+          ls -lh part_*.mp4
+
+      - name: Generate professional motion graphics
+        run: |
+          python3 tools/grant_motion_cards.py
+          for f in motion/*.mp4; do
+            ffprobe -v error -show_entries format=duration -of csv=p=0 "$f"
+          done
+
+      - name: Patch part 03 - compounding and emergency fund
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel warning -y \
+            -i part_03.mp4 -i motion/compounding.mp4 -i motion/emergency.mp4 \
+            -filter_complex "[0:v]trim=start=0:end=48.6,setpts=PTS-STARTPTS[v0];[1:v]setpts=PTS-STARTPTS[v1];[0:v]trim=start=54.2:end=152.1,setpts=PTS-STARTPTS[v2];[2:v]setpts=PTS-STARTPTS[v3];[0:v]trim=start=158.2:end=180,setpts=PTS-STARTPTS[v4];[v0][v1][v2][v3][v4]concat=n=5:v=1:a=0[outv]" \
+            -map "[outv]" -map 0:a:0 \
+            -c:v libx264 -profile:v main -preset fast -crf 17 -pix_fmt yuv420p -r 30 \
+            -c:a copy -t 180 -movflags +faststart revised_03.mp4
+
+      - name: Patch part 05a - market drop
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel warning -y \
+            -i part_05a.mp4 -i motion/market.mp4 \
+            -filter_complex "[0:v]trim=start=0:end=33.5,setpts=PTS-STARTPTS[v0];[1:v]setpts=PTS-STARTPTS[v1];[0:v]trim=start=52.6:end=90,setpts=PTS-STARTPTS[v2];[v0][v1][v2]concat=n=3:v=1:a=0[outv]" \
+            -map "[outv]" -map 0:a:0 \
+            -c:v libx264 -profile:v main -preset fast -crf 17 -pix_fmt yuv420p -r 30 \
+            -c:a copy -t 90 -movflags +faststart revised_05a.mp4
+
+      - name: Patch part 05b - debt and multiple income
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel warning -y \
+            -i part_05b.mp4 -i motion/income.mp4 \
+            -filter_complex "[0:v]trim=start=0:end=48.6,setpts=PTS-STARTPTS[v0];[1:v]setpts=PTS-STARTPTS[v1];[0:v]trim=start=89:end=90,setpts=PTS-STARTPTS[v2];[v0][v1][v2]concat=n=3:v=1:a=0[outv]" \
+            -map "[outv]" -map 0:a:0 \
+            -c:v libx264 -profile:v main -preset fast -crf 17 -pix_fmt yuv420p -r 30 \
+            -c:a copy -t 90 -movflags +faststart revised_05b.mp4
+
+      - name: Assemble revised final master
+        shell: bash
+        run: |
+          cat > concat.txt <<'EOF'
+          file 'part_01.mp4'
+          file 'part_02.mp4'
+          file 'revised_03.mp4'
+          file 'part_04.mp4'
+          file 'revised_05a.mp4'
+          file 'revised_05b.mp4'
+          file 'part_06a.mp4'
+          file 'part_06b.mp4'
+          EOF
+          ffmpeg -hide_banner -loglevel warning -y \
+            -f concat -safe 0 -i concat.txt \
+            -map 0:v:0 -map 0:a:0 \
+            -c:v copy \
+            -c:a aac -b:a 192k -ar 48000 -ac 2 \
+            -avoid_negative_ts make_zero -movflags +faststart \
+            GRANT_EPISODE1_PRO_EDITORIAL_MOTIONFIX_FINAL_1080P.mp4
+
+      - name: Core and full decode QC
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=GRANT_EPISODE1_PRO_EDITORIAL_MOTIONFIX_FINAL_1080P.mp4
+          DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT")
+          WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$OUT")
+          HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$OUT")
+          FPSR=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$OUT")
+          FRAMES=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 "$OUT")
+          ACODEC=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$OUT")
+          ARATE=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of csv=p=0 "$OUT")
+          ACH=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of csv=p=0 "$OUT")
+          SIZE=$(stat -c%s "$OUT")
+          SHA=$(sha256sum "$OUT" | awk '{print $1}')
+          {
+            echo "Grant Episode 1 Motion-Fix Final QC"
+            echo "duration=$DUR"
+            echo "resolution=${WIDTH}x${HEIGHT}"
+            echo "fps=$FPSR"
+            echo "decoded_frames=$FRAMES"
+            echo "audio_codec=$ACODEC"
+            echo "audio_sample_rate=$ARATE"
+            echo "audio_channels=$ACH"
+            echo "size_bytes=$SIZE"
+            echo "sha256=$SHA"
+          } | tee final_qc.txt
+          python3 - <<'PY'
+          import subprocess
+          out='GRANT_EPISODE1_PRO_EDITORIAL_MOTIONFIX_FINAL_1080P.mp4'
+          dur=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',out], text=True).strip())
+          if not (1033.60 <= dur <= 1033.90): raise SystemExit(f'FAIL duration {dur}')
+          w=int(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width','-of','csv=p=0',out], text=True).strip())
+          h=int(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=height','-of','csv=p=0',out], text=True).strip())
+          if (w,h)!=(1920,1080): raise SystemExit(f'FAIL resolution {w}x{h}')
+          print('QC_CORE_PASS')
+          PY
+          ffmpeg -hide_banner -v error -i "$OUT" -f null - 2>decode_errors.txt
+          test ! -s decode_errors.txt
+          echo "full_decode=PASS" | tee -a final_qc.txt
+
+      - name: Static black and freeze QC
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT=GRANT_EPISODE1_PRO_EDITORIAL_MOTIONFIX_FINAL_1080P.mp4
+          ffmpeg -hide_banner -i "$OUT" -vf "blackdetect=d=0.5:pix_th=0.02,freezedetect=n=-60dB:d=2.5" -an -f null - 2>visual_scan.log || true
+          grep -E "black_start|freeze_start|freeze_end|freeze_duration" visual_scan.log > visual_flags.txt || true
+          echo "visual_flags_count=$(wc -l < visual_flags.txt)" | tee -a final_qc.txt
+          python3 - <<'PY'
+          import re
+          txt=open('visual_scan.log',errors='ignore').read().splitlines()
+          starts=[]; freezes=[]; cur=None
+          for line in txt:
+              m=re.search(r'freeze_start:\s*([0-9.]+)',line)
+              if m: cur=float(m.group(1))
+              m=re.search(r'freeze_end:\s*([0-9.]+).*freeze_duration:\s*([0-9.]+)',line)
+              if m and cur is not None:
+                  freezes.append((cur,float(m.group(1)),float(m.group(2)))); cur=None
+          targets=[(408.6,414.2),(512.1,518.2),(753.5,772.6),(858.6,899.0)]
+          bad=[]
+          for f in freezes:
+              for a,b in targets:
+                  if max(f[0],a) < min(f[1],b): bad.append(f)
+          print('freezes=',freezes)
+          if bad: raise SystemExit(f'TARGET_FREEZE_FAIL {bad}')
+          print('TARGET_FREEZE_PASS')
+          PY
+          echo "target_static_blocks=PASS" | tee -a final_qc.txt
+
+      - name: Editorial replacement frame QC
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p replacement_qc
+          OUT=GRANT_EPISODE1_PRO_EDITORIAL_MOTIONFIX_FINAL_1080P.mp4
+          for t in 409.0 412.0 513.0 516.0 754.0 760.0 766.0 771.0 859.0 864.0 870.0 876.0 884.0 892.0 898.0; do
+            n=$(echo "$t" | tr '.' '_')
+            ffmpeg -hide_banner -loglevel error -ss "$t" -i "$OUT" -frames:v 1 -q:v 2 "replacement_qc/frame_${n}.jpg"
+          done
+          echo "replacement_qc_frames=15" | tee -a final_qc.txt
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: grant-episode1-motionfix-publish-final
+          path: |
+            GRANT_EPISODE1_PRO_EDITORIAL_MOTIONFIX_FINAL_1080P.mp4
+            final_qc.txt
+            visual_flags.txt
+            replacement_qc/
+          compression-level: 0
+          retention-days: 7
