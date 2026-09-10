@@ -1,0 +1,59 @@
+name: Grant Video Private Delivery
+
+on:
+  push:
+    branches:
+      - grant-video-render
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download passed full-QC artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: grant-episode1-pro-editorial-final
+          run-id: 34484277360
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: final_package
+
+      - name: Inspect QC package and checksum final
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== FINAL QC ==='
+          cat final_package/final_qc.txt
+          echo '=== VISUAL FLAGS ==='
+          cat final_package/visual_flags.txt || true
+          sha256sum final_package/GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4 | tee final_package/SHA256.txt
+          ls -lh final_package/GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4
+
+      - name: Create unpublished draft delivery
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='grant-episode1-pro-editorial-delivery'
+          gh release delete "$TAG" --yes --cleanup-tag >/dev/null 2>&1 || true
+          gh release create "$TAG" \
+            --draft \
+            --target grant-video-render \
+            --title 'Grant Episode 1 — Pro Editorial Final Delivery' \
+            --notes 'Unpublished temporary delivery. Full technical QC passed before upload.'
+          gh release upload "$TAG" \
+            final_package/GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4 \
+            final_package/final_qc.txt \
+            final_package/visual_flags.txt \
+            final_package/SHA256.txt
+
+      - name: Show draft release metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view grant-episode1-pro-editorial-delivery --json url,isDraft,assets,tagName,name
