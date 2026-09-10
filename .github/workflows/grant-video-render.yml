@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Install FFmpeg
+      - name: Verify FFmpeg
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg curl
           ffmpeg -version | head -1
+          ffprobe -version | head -1
+          curl --version | head -1
 
       - name: Download professional edit parts
         shell: bash
@@ -95,7 +95,7 @@ jobs:
             echo "size_bytes=$SIZE"
           } | tee final_qc.txt
           python3 - <<'PY'
-          import subprocess, sys
+          import subprocess
           out='GRANT_EPISODE1_PRO_EDITORIAL_FINAL_1080P.mp4'
           dur=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',out], text=True).strip())
           if not (1033.3 <= dur <= 1034.1):
