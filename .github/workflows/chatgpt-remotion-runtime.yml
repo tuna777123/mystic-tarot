@@ -1,0 +1,34 @@
+name: Build ChatGPT Remotion Runtime
+
+on:
+  push:
+    branches:
+      - chatgpt-remotion-runtime
+
+jobs:
+  build-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Remotion runtime
+        working-directory: chatgpt-remotion-runtime
+        run: npm install --no-audit --no-fund
+      - name: Verify runtime
+        working-directory: chatgpt-remotion-runtime
+        run: |
+          npx remotion --version
+          node -e "console.log(require('remotion/package.json').version)"
+      - name: Pack runtime
+        working-directory: chatgpt-remotion-runtime
+        run: tar -czf ../remotion-runtime.tgz node_modules package.json package-lock.json
+      - name: Upload runtime artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: remotion-runtime-4.0.506
+          path: remotion-runtime.tgz
+          compression-level: 0
+          retention-days: 1
