@@ -20,8 +20,8 @@ jobs:
       - name: Verify runtime
         working-directory: chatgpt-remotion-runtime
         run: |
-          npx remotion --version
-          node -e "console.log(require('remotion/package.json').version)"
+          node -e "console.log('remotion', require('remotion/package.json').version)"
+          node -e "console.log('@remotion/cli', require('@remotion/cli/package.json').version)"
       - name: Pack runtime
         working-directory: chatgpt-remotion-runtime
         run: tar -czf ../remotion-runtime.tgz node_modules package.json package-lock.json
