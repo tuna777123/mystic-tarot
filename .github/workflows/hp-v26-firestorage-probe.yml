@@ -1,0 +1,23 @@
+name: HP V26 Firestorage Probe
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+    paths: ['.github/workflows/hp-v26-firestorage-probe.yml']
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect score share page
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://firestorage.ai/ja/f/0x2coGZcogaj'
+          curl -L --compressed -sS "$URL" -o /tmp/page.html
+          echo "bytes=$(wc -c </tmp/page.html)"
+          echo '--- candidate urls / api paths ---'
+          grep -Eo 'https?://[^"<> ]+|/(api|download|file|object|storage)[^"<> ]*' /tmp/page.html | head -n 120 || true
+          echo '--- download-related lines ---'
+          grep -niE 'download|ダウンロード|01a0a6151ae871ee955966f8ecda9583|Bx1dVSOY4d8UCfbY|Abandoned' /tmp/page.html | head -n 120 || true
