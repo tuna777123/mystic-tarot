@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   render:
@@ -107,7 +107,7 @@ jobs:
           grep -E 'black_start|black_end|black_duration' out/blackdetect.txt || true
           grep -E 'silence_start|silence_end|silence_duration' out/silencedetect.txt || true
 
-      - name: Upload proof and QC
+      - name: Upload proof and QC artifact
         uses: actions/upload-artifact@v4
         with:
           name: hp-v26-proof-first37s-v2
@@ -120,3 +120,32 @@ jobs:
             hidden-perspective-v26/out/qc_frames/*.jpg
           if-no-files-found: error
           retention-days: 3
+
+      - name: Publish temporary visual-QC prerelease
+        working-directory: hidden-perspective-v26
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='hp-v26-proof-37s-v2'
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title 'Hidden Perspective V26 — 37s Visual QC Proof' \
+            --notes 'Temporary Remotion V26 proof for visual QC. Not a publish master.' \
+            out/HP_V26_PROOF_FIRST37S.mp4 \
+            out/HP_V26_PROOF_CONTACT.jpg \
+            out/HP_V26_PROOF_FIRST37S_FFPROBE.json \
+            out/blackdetect.txt \
+            out/silencedetect.txt \
+            out/qc_frames/frame_12.2.jpg \
+            out/qc_frames/frame_20.6.jpg \
+            out/qc_frames/frame_24.6.jpg \
+            out/qc_frames/frame_29.0.jpg \
+            out/qc_frames/frame_32.6.jpg \
+            out/qc_frames/frame_33.4.jpg \
+            out/qc_frames/frame_34.4.jpg \
+            out/qc_frames/frame_35.7.jpg \
+            out/qc_frames/frame_37.2.jpg
