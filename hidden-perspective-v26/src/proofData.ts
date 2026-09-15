@@ -35,18 +35,19 @@ export const proofShots: Shot[] = [
   // Chapter reveal holds on one clean hero shot instead of bouncing between repeated stills.
   {start:33.851,end:37.467,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pull',objectPosition:'58% 48%'},
 
+  // 12 consecutive Maunsell shots, 12 distinct source images. Historical synthetic scenes are labelled.
   {start:37.467,end:40.867,asset:'Rusting Catwalk at Maunsell Sea Fort.png',motion:'pan_left'},
   {start:40.867,end:44.3,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'push'},
-  {start:44.3,end:48.767,asset:'Maunsell Fort Anti-Aircraft Gun, 1943.png',motion:'pan_right'},
-  {start:48.767,end:53.367,asset:'Rusting Catwalk at Maunsell Sea Fort.png',motion:'pull'},
-  {start:53.367,end:58,asset:'Maunsell Fort Anti-Aircraft Gun, 1943.png',motion:'push'},
-  {start:58,end:61.133,asset:'Corroded Catwalk Between Maunsell Towers.png',motion:'pull'},
-  {start:61.133,end:65.333,asset:'Maunsell Pirate Radio Detail Reconstruction.png',motion:'pan_left',reconstruction:true},
-  {start:65.333,end:69.5,asset:'Beneath the Maunsell Sea Forts.png',motion:'push'},
-  {start:69.5,end:73.433,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pan_right'},
-  {start:73.433,end:76,asset:'Beneath the Maunsell Sea Forts.png',motion:'pull'},
-  {start:76,end:80.5,asset:'Rusting Catwalk at Maunsell Sea Fort.png',motion:'push'},
-  {start:80.5,end:85,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pull'},
+  {start:44.3,end:48.767,asset:'Maunsell Wartime Gun Reconstruction.png',motion:'pull',reconstruction:true},
+  {start:48.767,end:53.367,asset:'Maunsell Fort Anti-Aircraft Gun, 1943.png',motion:'pan_right',reconstruction:true},
+  {start:53.367,end:58,asset:'Dawn Watch on the Thames Sea Fort.png',motion:'push',reconstruction:true},
+  {start:58,end:61.133,asset:'Maunsell Postwar Empty Gun Mount Reconstruction.png',motion:'pull',reconstruction:true},
+  {start:61.133,end:65.333,asset:'Pirate Radio Inside a Sea Fort.png',motion:'pan_left',reconstruction:true},
+  {start:65.333,end:69.5,asset:'1960s Pirate Radio in a Sea Fort.png',motion:'push',reconstruction:true},
+  {start:69.5,end:73.433,asset:'Maunsell Pirate Radio Detail Reconstruction.png',motion:'pull',reconstruction:true},
+  {start:73.433,end:76,asset:'Maunsell Understructure Reconstruction.png',motion:'pan_right',reconstruction:true},
+  {start:76,end:80.5,asset:'Corroded Catwalk Between Maunsell Towers.png',motion:'push'},
+  {start:80.5,end:85,asset:'Beneath the Maunsell Sea Forts.png',motion:'pull'},
 
   // Houtouwan chapter opens on three unique sources — no repeated hero still.
   {start:85,end:86.545,asset:'Misty Shoreline Above Abandoned Houtouwan.png',motion:'pull'},
