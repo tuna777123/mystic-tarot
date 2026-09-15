@@ -47,9 +47,11 @@ export const proofShots: Shot[] = [
   {start:73.433,end:76,asset:'Beneath the Maunsell Sea Forts.png',motion:'pull'},
   {start:76,end:80.5,asset:'Rusting Catwalk at Maunsell Sea Fort.png',motion:'push'},
   {start:80.5,end:85,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pull'},
-  {start:85,end:86.545,asset:'Houtouwan Reclaimed by Nature.png',motion:'push'},
-  {start:86.545,end:88.08,asset:'Houtouwan Reclaimed by Nature.png',motion:'pan_left'},
-  {start:88.08,end:90,asset:'Houtouwan Reclaimed by Nature.png',motion:'push'}
+
+  // Houtouwan chapter opens on three unique sources — no repeated hero still.
+  {start:85,end:86.545,asset:'Misty Shoreline Above Abandoned Houtouwan.png',motion:'pull'},
+  {start:86.545,end:88.08,asset:"Houtouwan's Ivy-Swallowed Fishing Village.png",motion:'push'},
+  {start:88.08,end:90,asset:'Ivy-reclaimed room overlooking Houtouwan coast.png',motion:'pan_left'}
 ];
 
 // V19 speech-timed cue boundaries remain the timing source of truth.
