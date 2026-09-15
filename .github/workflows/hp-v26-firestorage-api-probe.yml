@@ -1,0 +1,33 @@
+name: HP V26 Firestorage API Probe
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+    paths: ['.github/workflows/hp-v26-firestorage-api-probe.yml']
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve API base and download flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          JS='https://firestorage.ai/_next/static/chunks/4899-d89df949f2dbd5af.js'
+          curl -L --compressed -sS "$JS" -o /tmp/c.js
+          python - <<'PY'
+          import re
+          s=open('/tmp/c.js','r',encoding='utf-8').read()
+          for pat in [r'https?://[^"\'`]+', r'[^,;]{0,180}/shares/[^,;]{0,260}', r'[^,;]{0,180}function v\(\)[^;]{0,1000}']:
+              print('\nPATTERN',pat)
+              for x in re.findall(pat,s)[:80]: print(x)
+          for key in ['NEXT_PUBLIC','api','API','/shares/','/files?maxResults']:
+              print('\nKEY',key)
+              pos=0
+              while True:
+                  i=s.find(key,pos)
+                  if i<0: break
+                  print(s[max(0,i-300):min(len(s),i+500)])
+                  pos=i+len(key)
+                  if pos>0 and pos>i+1 and pos>len(s): break
+          PY
