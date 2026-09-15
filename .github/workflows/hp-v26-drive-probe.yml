@@ -1,0 +1,23 @@
+name: HP V26 Drive Probe
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+    paths: ['.github/workflows/hp-v26-drive-probe.yml']
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test direct Drive asset fetch
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in \
+            'classroom|199b_E5-YIUMqY2vHmRnocsGj9_7g5Jrt' \
+            'narration|1lUTXYccflY6N4vvAuahI46tbjCgtzsXi'; do
+            name=${spec%%|*}; id=${spec#*|}
+            url="https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t"
+            code=$(curl -L -sS -o "/tmp/${name}" -w '%{http_code}' "$url")
+            echo "$name http=$code bytes=$(wc -c </tmp/${name}) type=$(file -b --mime-type /tmp/${name})"
+          done
