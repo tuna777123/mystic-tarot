@@ -1,0 +1,54 @@
+name: HP V26 Publish Proof Assets
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    if: github.event.head_commit.message == 'HP V26: publish proof assets for visual QC'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download successful proof artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/proof
+          gh api -H 'Accept: application/vnd.github+json' \
+            /repos/${GITHUB_REPOSITORY}/actions/artifacts/10410772329/zip > /tmp/proof.zip
+          unzip -q /tmp/proof.zip -d /tmp/proof
+          find /tmp/proof -maxdepth 2 -type f -printf '%P | %s bytes\n' | sort
+
+      - name: Publish temporary prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG='hp-v26-proof-37s-v2'
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" \
+            --target hidden-perspective-v26 \
+            --prerelease \
+            --title 'Hidden Perspective V26 — 37s Visual QC Proof' \
+            --notes 'Temporary proof release for visual QC. Not a publish master.' \
+            /tmp/proof/HP_V26_PROOF_FIRST37S.mp4 \
+            /tmp/proof/HP_V26_PROOF_CONTACT.jpg \
+            /tmp/proof/HP_V26_PROOF_FIRST37S_FFPROBE.json \
+            /tmp/proof/blackdetect.txt \
+            /tmp/proof/silencedetect.txt \
+            /tmp/proof/qc_frames/frame_12.2.jpg \
+            /tmp/proof/qc_frames/frame_20.6.jpg \
+            /tmp/proof/qc_frames/frame_24.6.jpg \
+            /tmp/proof/qc_frames/frame_29.0.jpg \
+            /tmp/proof/qc_frames/frame_32.6.jpg \
+            /tmp/proof/qc_frames/frame_33.4.jpg \
+            /tmp/proof/qc_frames/frame_34.4.jpg \
+            /tmp/proof/qc_frames/frame_35.7.jpg \
+            /tmp/proof/qc_frames/frame_37.2.jpg
