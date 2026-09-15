@@ -251,7 +251,13 @@ const MusicBed: React.FC = () => {
 };
 
 export const HiddenPerspectiveV26Proof: React.FC = () => {
-  const visibleCaptions = proofCaptions.filter((c) => !(c.start >= 33.851 && c.end <= 37.45));
+  const visibleCaptions = proofCaptions.filter(
+    (c) =>
+      !(
+        (c.start >= 33.851 && c.end <= 37.45) ||
+        (c.start >= 85.003 && c.end <= 88.08)
+      ),
+  );
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.bg}}>
