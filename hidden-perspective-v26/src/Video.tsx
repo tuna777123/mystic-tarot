@@ -10,15 +10,15 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
-import {proofCaptions, proofShots, type Motion, type Shot} from './proofData';
+import {proofCaptions, proofShots, type Crop, type Motion, type Shot} from './proofData';
 
 const FPS = 30;
 
 const COLORS = {
   bg: '#07090d',
-  text: '#f6f7f8',
-  muted: '#c6cad0',
-  accent: '#c9a96a',
+  text: '#f7f7f5',
+  muted: '#c9ccd1',
+  accent: '#d0ad68',
 };
 
 const smooth = (frame: number, duration: number) =>
@@ -29,34 +29,79 @@ const smooth = (frame: number, duration: number) =>
   });
 
 const motionTransform = (motion: Motion, p: number) => {
+  // Deliberately restrained documentary movement: no oscillation, no push-pull shake.
   const s = {
-    push: 1.035 + p * 0.055,
-    pull: 1.09 - p * 0.055,
-    pan_left: 1.065,
-    pan_right: 1.065,
+    push: 1.025 + p * 0.035,
+    pull: 1.065 - p * 0.035,
+    pan_left: 1.045,
+    pan_right: 1.045,
   }[motion];
-  const x = motion === 'pan_left' ? 2.6 - p * 5.2 : motion === 'pan_right' ? -2.6 + p * 5.2 : 0;
-  const y = motion === 'push' ? 0.7 - p * 1.4 : motion === 'pull' ? -0.6 + p * 1.2 : 0;
+  const x = motion === 'pan_left' ? 1.6 - p * 3.2 : motion === 'pan_right' ? -1.6 + p * 3.2 : 0;
+  const y = motion === 'push' ? 0.35 - p * 0.7 : motion === 'pull' ? -0.3 + p * 0.6 : 0;
   return `translate3d(${x}%, ${y}%, 0) scale(${s})`;
 };
 
 const reconstructionAssets = new Set([
   'Buses line Pripyat for evacuation.png',
   'Ordinary Life in Pripyat, 1985.png',
+  'Villa Epecuén Beneath the Floodwaters.png',
   'Centralia mine fire, four documentary views.png',
   'Plymouth Buried in Volcanic Ash.png',
 ]);
 
-const getGridCrop = (asset: string): 'tl' | 'tr' | null => {
-  if (asset === 'Centralia mine fire, four documentary views.png') return 'tl';
-  if (asset === 'Plymouth Buried in Volcanic Ash.png') return 'tr';
-  return null;
+const cropStyle = (crop?: Crop): React.CSSProperties => {
+  if (!crop) return {width: '100%', height: '100%', left: 0, top: 0};
+  const left = crop === 'tr' || crop === 'br' ? '-100%' : '0%';
+  const top = crop === 'bl' || crop === 'br' ? '-100%' : '0%';
+  return {width: '200%', height: '200%', left, top};
 };
+
+const cropOrigin = (crop?: Crop) => {
+  if (crop === 'tl') return '25% 25%';
+  if (crop === 'tr') return '75% 25%';
+  if (crop === 'bl') return '25% 75%';
+  if (crop === 'br') return '75% 75%';
+  return '50% 50%';
+};
+
+const gradeFor = (asset: string) => {
+  if (asset.includes('Houtouwan')) return 'contrast(1.08) saturate(0.78) brightness(0.97)';
+  if (asset.includes('Classroom') || asset.includes('Lessons')) return 'contrast(1.08) saturate(0.84) brightness(1.035)';
+  if (asset.includes('Floodwaters')) return 'contrast(1.12) saturate(0.78) brightness(1.10)';
+  if (asset.includes('Pripyat, 1985') || asset.includes('Buses line Pripyat'))
+    return 'contrast(1.12) saturate(0.74) brightness(0.98) sepia(0.06)';
+  if (asset.includes('Buzludzha')) return 'contrast(1.10) saturate(0.78) brightness(0.98)';
+  if (asset.includes('Maunsell')) return 'contrast(1.09) saturate(0.80) brightness(0.98)';
+  return 'contrast(1.075) saturate(0.86) brightness(0.985)';
+};
+
+const ReconstructionLabel: React.FC = () => (
+  <div
+    style={{
+      position: 'absolute',
+      top: 64,
+      left: 72,
+      padding: '11px 16px 10px',
+      border: '1px solid rgba(255,255,255,.30)',
+      borderRadius: 8,
+      background: 'rgba(7,9,13,.78)',
+      color: 'rgba(255,255,255,.94)',
+      fontFamily: 'Arial, Helvetica, sans-serif',
+      fontSize: 30,
+      lineHeight: 1,
+      fontWeight: 800,
+      letterSpacing: 1.5,
+      textTransform: 'uppercase',
+      boxShadow: '0 8px 28px rgba(0,0,0,.28)',
+    }}
+  >
+    AI-assisted reconstruction
+  </div>
+);
 
 const StillShot: React.FC<{shot: Shot; durationInFrames: number}> = ({shot, durationInFrames}) => {
   const frame = useCurrentFrame();
   const p = smooth(frame, durationInFrames);
-  const crop = getGridCrop(shot.asset);
   const isReconstruction = Boolean(shot.reconstruction) || reconstructionAssets.has(shot.asset);
 
   return (
@@ -65,120 +110,119 @@ const StillShot: React.FC<{shot: Shot; durationInFrames: number}> = ({shot, dura
         src={staticFile(`assets/${shot.asset}`)}
         style={{
           position: 'absolute',
-          width: crop ? '200%' : '100%',
-          height: crop ? '200%' : '100%',
-          left: crop === 'tr' ? '-100%' : '0%',
-          top: '0%',
+          ...cropStyle(shot.crop),
           objectFit: 'cover',
+          objectPosition: shot.objectPosition ?? '50% 50%',
           transform: motionTransform(shot.motion, p),
-          transformOrigin: crop === 'tr' ? '75% 25%' : crop === 'tl' ? '25% 25%' : '50% 50%',
-          filter: 'contrast(1.045) saturate(0.94) brightness(0.96)',
+          transformOrigin: cropOrigin(shot.crop),
+          filter: gradeFor(shot.asset),
           willChange: 'transform',
         }}
       />
       <AbsoluteFill
         style={{
           background:
-            'linear-gradient(180deg, rgba(2,4,8,.16) 0%, rgba(2,4,8,.02) 44%, rgba(2,4,8,.40) 100%)',
+            'linear-gradient(180deg, rgba(3,5,8,.18) 0%, rgba(3,5,8,.015) 42%, rgba(3,5,8,.18) 70%, rgba(3,5,8,.50) 100%)',
         }}
       />
-      <AbsoluteFill
-        style={{
-          boxShadow: 'inset 0 0 150px rgba(0,0,0,.32)',
-          pointerEvents: 'none',
-        }}
-      />
+      <AbsoluteFill style={{boxShadow: 'inset 0 0 145px rgba(0,0,0,.27)', pointerEvents: 'none'}} />
       {isReconstruction ? <ReconstructionLabel /> : null}
     </AbsoluteFill>
   );
 };
 
-const ReconstructionLabel: React.FC = () => (
-  <div
-    style={{
-      position: 'absolute',
-      top: 46,
-      left: 54,
-      padding: '8px 13px',
-      border: '1px solid rgba(255,255,255,.26)',
-      borderRadius: 7,
-      background: 'rgba(8,10,14,.62)',
-      color: 'rgba(255,255,255,.82)',
-      fontFamily: 'Arial, Helvetica, sans-serif',
-      fontSize: 20,
-      fontWeight: 700,
-      letterSpacing: 2.1,
-      textTransform: 'uppercase',
-      backdropFilter: 'blur(7px)',
-    }}
-  >
-    AI-assisted reconstruction
-  </div>
-);
-
 const Caption: React.FC<{text: string; durationInFrames: number}> = ({text, durationInFrames}) => {
   const frame = useCurrentFrame();
-  const enter = interpolate(frame, [0, 4], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const exit = interpolate(frame, [Math.max(0, durationInFrames - 4), durationInFrames], [1, 0], {
+  const enter = interpolate(frame, [0, 3], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const exit = interpolate(frame, [Math.max(0, durationInFrames - 3), durationInFrames], [1, 0], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
   const opacity = Math.min(enter, exit);
+
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: '50%',
-        bottom: 74,
-        transform: `translateX(-50%) translateY(${(1 - enter) * 4}px)`,
-        opacity,
-        width: 1460,
-        maxWidth: '84%',
-        textAlign: 'center',
-        color: COLORS.text,
-        fontFamily: 'Arial, Helvetica, sans-serif',
-        fontSize: 54,
-        lineHeight: 1.14,
-        fontWeight: 800,
-        letterSpacing: -0.8,
-        textShadow: '0 2px 4px rgba(0,0,0,.95), 0 8px 24px rgba(0,0,0,.72)',
-      }}
-    >
-      <span
+    <>
+      <div
         style={{
-          display: 'inline',
-          boxDecorationBreak: 'clone',
-          WebkitBoxDecorationBreak: 'clone',
-          padding: '5px 13px 7px',
-          borderRadius: 9,
-          background: 'rgba(4,6,9,.42)',
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 250,
+          background: 'linear-gradient(180deg, rgba(4,6,10,0) 0%, rgba(4,6,10,.47) 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          bottom: 102,
+          transform: `translateX(-50%) translateY(${(1 - enter) * 3}px)`,
+          opacity,
+          width: 1510,
+          maxWidth: '80%',
+          textAlign: 'center',
+          color: COLORS.text,
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: 50,
+          lineHeight: 1.17,
+          fontWeight: 750,
+          letterSpacing: -0.55,
+          textShadow: '0 2px 4px rgba(0,0,0,.92), 0 7px 22px rgba(0,0,0,.68)',
         }}
       >
-        {text}
-      </span>
-    </div>
+        <span
+          style={{
+            display: 'inline',
+            boxDecorationBreak: 'clone',
+            WebkitBoxDecorationBreak: 'clone',
+            padding: '6px 15px 8px',
+            borderRadius: 8,
+            background: 'rgba(5,7,10,.54)',
+          }}
+        >
+          {text}
+        </span>
+      </div>
+    </>
   );
 };
 
-const ChapterReveal: React.FC<{rank: string; title: string}> = ({rank, title}) => {
+const ChapterReveal: React.FC<{rank: string; title: string; subtitle: string}> = ({rank, title, subtitle}) => {
   const frame = useCurrentFrame();
-  const p = interpolate(frame, [0, 9, 18], [0, 1, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const p = interpolate(frame, [0, 10, 20], [0, 1, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: 74,
-        top: 96,
-        opacity: p,
-        transform: `translateX(${(1 - p) * -18}px)`,
-        color: COLORS.text,
-        fontFamily: 'Arial, Helvetica, sans-serif',
-      }}
-    >
-      <div style={{fontSize: 27, fontWeight: 800, letterSpacing: 5.5, color: COLORS.accent}}>{rank}</div>
-      <div style={{marginTop: 8, fontSize: 54, lineHeight: 1, fontWeight: 900, letterSpacing: -1.8}}>{title}</div>
-      <div style={{marginTop: 17, width: 118, height: 3, background: COLORS.accent, opacity: 0.85}} />
-    </div>
+    <>
+      <AbsoluteFill
+        style={{
+          background: 'linear-gradient(90deg, rgba(4,6,9,.88) 0%, rgba(4,6,9,.68) 31%, rgba(4,6,9,.17) 58%, rgba(4,6,9,0) 76%)',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          left: 104,
+          top: 142,
+          width: 1040,
+          opacity: p,
+          transform: `translateX(${(1 - p) * -24}px)`,
+          color: COLORS.text,
+          fontFamily: 'Arial, Helvetica, sans-serif',
+        }}
+      >
+        <div style={{fontSize: 25, fontWeight: 800, letterSpacing: 6, color: COLORS.accent}}>ABANDONED PLACE</div>
+        <div style={{marginTop: 23, fontSize: 150, lineHeight: 0.88, fontWeight: 900, letterSpacing: -7, color: COLORS.accent}}>{rank}</div>
+        <div style={{marginTop: 20, fontSize: 79, lineHeight: 0.98, fontWeight: 900, letterSpacing: -2.4}}>{title}</div>
+        <div style={{marginTop: 22, fontSize: 31, lineHeight: 1.15, fontWeight: 600, letterSpacing: 1.1, color: COLORS.muted}}>{subtitle}</div>
+        <div style={{marginTop: 26, width: 160, height: 4, background: COLORS.accent}} />
+      </div>
+    </>
   );
 };
 
@@ -191,14 +235,16 @@ const MusicBed: React.FC = () => {
         const sec = frame / fps;
         const intro = Math.min(1, sec / 2.2);
         const end = Math.max(0, Math.min(1, (90 - sec) / 1.5));
-        const titleLift = sec >= 28.5 && sec <= 37.5 ? 1.18 : 1;
-        return 0.078 * intro * end * titleLift;
+        const titleLift = sec >= 28.5 && sec <= 37.5 ? 1.14 : 1;
+        return 0.074 * intro * end * titleLift;
       }}
     />
   );
 };
 
 export const HiddenPerspectiveV26Proof: React.FC = () => {
+  const visibleCaptions = proofCaptions.filter((c) => !(c.start >= 33.851 && c.end <= 37.45));
+
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.bg}}>
       {proofShots.map((shot, i) => {
@@ -212,13 +258,13 @@ export const HiddenPerspectiveV26Proof: React.FC = () => {
       })}
 
       <Sequence from={Math.round(33.851 * FPS)} durationInFrames={Math.round(3.6 * FPS)}>
-        <ChapterReveal rank="#20" title="MAUNSELL SEA FORTS" />
+        <ChapterReveal rank="#20" title="MAUNSELL SEA FORTS" subtitle="THAMES ESTUARY · UNITED KINGDOM" />
       </Sequence>
       <Sequence from={Math.round(85.003 * FPS)} durationInFrames={Math.round(3.1 * FPS)}>
-        <ChapterReveal rank="#19" title="HOUTOUWAN" />
+        <ChapterReveal rank="#19" title="HOUTOUWAN" subtitle="SHENGSHAN ISLAND · CHINA" />
       </Sequence>
 
-      {proofCaptions.map((c, i) => {
+      {visibleCaptions.map((c, i) => {
         const from = Math.round(c.start * FPS);
         const durationInFrames = Math.max(1, Math.round((c.end - c.start) * FPS));
         return (
