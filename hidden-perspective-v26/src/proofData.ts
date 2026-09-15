@@ -26,9 +26,10 @@ export const proofShots: Shot[] = [
   {start:26.743,end:28.634,asset:"Pripyat's Empty Avenue and Rusted Ferris Wheel.png",motion:'push'},
 
   // Five unique escalation shots — no exact still reuse in the hook.
-  {start:28.634,end:29.934,asset:'Beneath the Maunsell Sea Forts.png',motion:'pan_left'},
+  // Short montage shots use restrained push/pull instead of long-distance pans.
+  {start:28.634,end:29.934,asset:'Beneath the Maunsell Sea Forts.png',motion:'pull'},
   {start:29.934,end:31.234,asset:'Buzludzha in winter fog.png',motion:'push'},
-  {start:31.234,end:32.534,asset:'Centralia mine fire, four documentary views.png',motion:'pan_right',reconstruction:true,crop:'br'},
+  {start:31.234,end:32.534,asset:'Centralia mine fire, four documentary views.png',motion:'pull',reconstruction:true,crop:'br'},
   {start:32.534,end:33.851,asset:'Plymouth Buried in Volcanic Ash.png',motion:'push',reconstruction:true,crop:'tl'},
 
   // Chapter reveal holds on one clean hero shot instead of bouncing between repeated stills.
