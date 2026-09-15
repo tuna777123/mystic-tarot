@@ -1,0 +1,25 @@
+name: HP V26 Firestorage JS Probe 2
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+    paths: ['.github/workflows/hp-v26-firestorage-js-probe2.yml']
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch share page and client chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAGE='https://firestorage.ai/ja/f/0x2coGZcogaj'
+          curl -L --compressed -sS "$PAGE" -o /tmp/page.html
+          grep -Eo 'src="[^"]+\.js"' /tmp/page.html | sed 's/src="//;s/"$//' > /tmp/chunks.txt
+          cat /tmp/chunks.txt
+          while IFS= read -r p; do
+            echo "=== $p ==="
+            curl -L --compressed -sS "https://firestorage.ai$p" -o /tmp/c.js
+            echo "size=$(wc -c </tmp/c.js)"
+            grep -Eo '.{0,120}(download|presign|shareId|publicId|/api/).{0,220}' /tmp/c.js | head -n 80 || true
+          done </tmp/chunks.txt
