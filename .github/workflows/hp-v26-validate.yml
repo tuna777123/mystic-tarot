@@ -1,0 +1,30 @@
+name: HP V26 Remotion Validate
+
+on:
+  push:
+    branches:
+      - hidden-perspective-v26
+    paths:
+      - 'hidden-perspective-v26/**'
+      - '.github/workflows/hp-v26-validate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hidden-perspective-v26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: hidden-perspective-v26/package.json
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Bundle and list compositions
+        run: npx remotion compositions src/index.ts
