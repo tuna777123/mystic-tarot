@@ -29,7 +29,6 @@ const smooth = (frame: number, duration: number) =>
   });
 
 const motionTransform = (motion: Motion, p: number) => {
-  // Deliberately restrained documentary movement: no oscillation, no push-pull shake.
   const s = {
     push: 1.025 + p * 0.035,
     pull: 1.065 - p * 0.035,
@@ -131,6 +130,13 @@ const StillShot: React.FC<{shot: Shot; durationInFrames: number}> = ({shot, dura
   );
 };
 
+const captionTypography = (text: string) => {
+  const len = text.length;
+  if (len >= 64) return {fontSize: 46, width: 1280};
+  if (len >= 52) return {fontSize: 48, width: 1380};
+  return {fontSize: 50, width: 1480};
+};
+
 const Caption: React.FC<{text: string; durationInFrames: number}> = ({text, durationInFrames}) => {
   const frame = useCurrentFrame();
   const enter = interpolate(frame, [0, 3], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
@@ -139,6 +145,7 @@ const Caption: React.FC<{text: string; durationInFrames: number}> = ({text, dura
     extrapolateRight: 'clamp',
   });
   const opacity = Math.min(enter, exit);
+  const type = captionTypography(text);
 
   return (
     <>
@@ -160,12 +167,13 @@ const Caption: React.FC<{text: string; durationInFrames: number}> = ({text, dura
           bottom: 102,
           transform: `translateX(-50%) translateY(${(1 - enter) * 3}px)`,
           opacity,
-          width: 1510,
-          maxWidth: '80%',
+          width: type.width,
+          maxWidth: '88%',
           textAlign: 'center',
+          textWrap: 'balance',
           color: COLORS.text,
           fontFamily: 'Arial, Helvetica, sans-serif',
-          fontSize: 50,
+          fontSize: type.fontSize,
           lineHeight: 1.17,
           fontWeight: 750,
           letterSpacing: -0.55,
