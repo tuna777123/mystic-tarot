@@ -1,0 +1,15 @@
+{
+  "name": "hidden-perspective-v26",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render:proof": "remotion render src/index.jsx V26Proof out/HIDDEN_PERSPECTIVE_V26_PROOF_90S.mp4 --codec=h264 --audio-codec=aac --crf=18 --pixel-format=yuv420p --log=verbose"
+  },
+  "dependencies": {
+    "@remotion/cli": "latest",
+    "playwright": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "remotion": "latest"
+  }
+}
