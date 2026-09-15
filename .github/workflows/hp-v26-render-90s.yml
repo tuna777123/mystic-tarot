@@ -1,0 +1,125 @@
+name: HP V26 Render 90s Continuity Proof
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+  workflow_dispatch:
+
+jobs:
+  render90:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: hidden-perspective-v26/package.json
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Fetch 90s proof media
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p hidden-perspective-v26/public/assets hidden-perspective-v26/public/audio
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.parse
+          base='https://api.firestorage.ai/dev/file/shares/0x2coGZcogaj'
+          targets={
+            'Abandoned Classroom with Open Book.png':'assets',
+            'Forgotten Lessons in an Abandoned Classroom.png':'assets',
+            'The Street They Left Behind.png':'assets',
+            'Houtouwan Reclaimed by Nature.png':'assets',
+            'Buses line Pripyat for evacuation.png':'assets',
+            "Smoke Beneath Centralia's Cracked Road.png":'assets',
+            'Villa Epecuén Beneath the Floodwaters.png':'assets',
+            'Ordinary Life in Pripyat, 1985.png':'assets',
+            'Pripyat’s Silent Ferris Wheel.png':'assets',
+            "Pripyat's Empty Avenue and Rusted Ferris Wheel.png":'assets',
+            'Beneath the Maunsell Sea Forts.png':'assets',
+            'Buzludzha in winter fog.png':'assets',
+            'Centralia mine fire, four documentary views.png':'assets',
+            'Plymouth Buried in Volcanic Ash.png':'assets',
+            'Maunsell Sea Forts in Grey Mist.png':'assets',
+            'Rusting Catwalk at Maunsell Sea Fort.png':'assets',
+            'Maunsell Fort Anti-Aircraft Gun, 1943.png':'assets',
+            'Corroded Catwalk Between Maunsell Towers.png':'assets',
+            'Maunsell Pirate Radio Detail Reconstruction.png':'assets',
+            'Misty Shoreline Above Abandoned Houtouwan.png':'assets',
+            "Houtouwan's Ivy-Swallowed Fishing Village.png":'assets',
+            'Ivy-reclaimed room overlooking Houtouwan coast.png':'assets',
+            'abandoned-1.mp3':'audio',
+            'Abandoned 1.wav':'audio',
+          }
+          def jreq(url, method='GET'):
+            req=urllib.request.Request(url,method=method,headers={'User-Agent':'HP-V26-90S/1','Accept':'application/json'})
+            with urllib.request.urlopen(req,timeout=90) as r:return json.load(r)
+          listing=jreq(base+'/files?maxResults=1000').get('files',[])
+          by={}
+          for x in listing:
+            n=x.get('fileName') or x.get('name') or x.get('title')
+            if n:by.setdefault(n,[]).append(x)
+          missing=[n for n in targets if n not in by]
+          if missing:raise SystemExit('Missing: '+repr(missing))
+          for name,kind in targets.items():
+            fid=by[name][-1]['fileId']
+            ticket=jreq(base+'/files/'+urllib.parse.quote(str(fid),safe='')+'/download','POST')
+            dest=os.path.join('hidden-perspective-v26','public',kind,name)
+            req=urllib.request.Request(ticket['downloadUrl'],headers={'User-Agent':'HP-V26-90S/1'})
+            with urllib.request.urlopen(req,timeout=240) as r,open(dest,'wb') as f:
+              while True:
+                b=r.read(1024*1024)
+                if not b:break
+                f.write(b)
+            print(name, os.path.getsize(dest))
+          PY
+
+      - name: Install and validate
+        working-directory: hidden-perspective-v26
+        run: |
+          npm install --no-audit --no-fund
+          npx tsc --noEmit
+
+      - name: Render 90 seconds
+        working-directory: hidden-perspective-v26
+        run: |
+          mkdir -p out/qc90
+          npx remotion render src/index.ts HiddenPerspectiveV26Proof out/HP_V26_PROOF_FIRST90S.mp4 --codec=h264 --crf=16 --audio-bitrate=192k --frames=0-2699 --concurrency=2
+
+      - name: Technical and continuity QC
+        working-directory: hidden-perspective-v26
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffprobe -v error -show_entries format=duration,size,bit_rate -show_entries stream=index,codec_name,codec_type,width,height,r_frame_rate,sample_rate,channels -of json out/HP_V26_PROOF_FIRST90S.mp4 | tee out/HP_V26_PROOF_FIRST90S_FFPROBE.json
+          ffmpeg -v error -i out/HP_V26_PROOF_FIRST90S.mp4 -f null -
+          ffmpeg -hide_banner -v info -i out/HP_V26_PROOF_FIRST90S.mp4 -vf "blackdetect=d=0.35:pix_th=0.02" -an -f null - 2> out/blackdetect90.txt || true
+          ffmpeg -hide_banner -v info -i out/HP_V26_PROOF_FIRST90S.mp4 -af "silencedetect=n=-45dB:d=0.8" -vn -f null - 2> out/silencedetect90.txt || true
+          ffmpeg -hide_banner -nostats -i out/HP_V26_PROOF_FIRST90S.mp4 -af "loudnorm=I=-14:TP=-2:LRA=7:print_format=json" -f null - 2> out/loudnorm90.txt || true
+          for t in 0.5 12.2 24.6 29.0 34.4 38.5 44.8 50.5 58.6 62.5 69.8 74.2 80.8 84.8 85.5 86.8 88.5 89.7; do
+            ffmpeg -hide_banner -loglevel error -ss "$t" -i out/HP_V26_PROOF_FIRST90S.mp4 -frames:v 1 -q:v 2 "out/qc90/frame_${t}.jpg"
+          done
+          ffmpeg -hide_banner -loglevel error -i out/HP_V26_PROOF_FIRST90S.mp4 -vf "fps=1/9,scale=480:-2,tile=5x2:padding=4:margin=4" -frames:v 1 -q:v 2 out/HP_V26_PROOF_90S_CONTACT.jpg
+          grep -E 'black_start|black_end|black_duration' out/blackdetect90.txt || true
+          grep -E 'silence_start|silence_end|silence_duration' out/silencedetect90.txt || true
+
+      - name: Upload 90s proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hp-v26-proof-first90s-v3
+          path: |
+            hidden-perspective-v26/out/HP_V26_PROOF_FIRST90S.mp4
+            hidden-perspective-v26/out/HP_V26_PROOF_FIRST90S_FFPROBE.json
+            hidden-perspective-v26/out/blackdetect90.txt
+            hidden-perspective-v26/out/silencedetect90.txt
+            hidden-perspective-v26/out/loudnorm90.txt
+            hidden-perspective-v26/out/HP_V26_PROOF_90S_CONTACT.jpg
+            hidden-perspective-v26/out/qc90/*.jpg
+          if-no-files-found: error
+          retention-days: 3
