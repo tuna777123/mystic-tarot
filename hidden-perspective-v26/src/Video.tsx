@@ -40,19 +40,38 @@ const motionTransform = (motion: Motion, p: number) => {
   return `translate3d(${x}%, ${y}%, 0) scale(${s})`;
 };
 
+const reconstructionAssets = new Set([
+  'Buses line Pripyat for evacuation.png',
+  'Ordinary Life in Pripyat, 1985.png',
+  'Centralia mine fire, four documentary views.png',
+  'Plymouth Buried in Volcanic Ash.png',
+]);
+
+const getGridCrop = (asset: string): 'tl' | 'tr' | null => {
+  if (asset === 'Centralia mine fire, four documentary views.png') return 'tl';
+  if (asset === 'Plymouth Buried in Volcanic Ash.png') return 'tr';
+  return null;
+};
+
 const StillShot: React.FC<{shot: Shot; durationInFrames: number}> = ({shot, durationInFrames}) => {
   const frame = useCurrentFrame();
   const p = smooth(frame, durationInFrames);
+  const crop = getGridCrop(shot.asset);
+  const isReconstruction = Boolean(shot.reconstruction) || reconstructionAssets.has(shot.asset);
+
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.bg, overflow: 'hidden'}}>
       <Img
         src={staticFile(`assets/${shot.asset}`)}
         style={{
-          width: '100%',
-          height: '100%',
+          position: 'absolute',
+          width: crop ? '200%' : '100%',
+          height: crop ? '200%' : '100%',
+          left: crop === 'tr' ? '-100%' : '0%',
+          top: '0%',
           objectFit: 'cover',
           transform: motionTransform(shot.motion, p),
-          transformOrigin: '50% 50%',
+          transformOrigin: crop === 'tr' ? '75% 25%' : crop === 'tl' ? '25% 25%' : '50% 50%',
           filter: 'contrast(1.045) saturate(0.94) brightness(0.96)',
           willChange: 'transform',
         }}
@@ -69,7 +88,7 @@ const StillShot: React.FC<{shot: Shot; durationInFrames: number}> = ({shot, dura
           pointerEvents: 'none',
         }}
       />
-      {shot.reconstruction ? <ReconstructionLabel /> : null}
+      {isReconstruction ? <ReconstructionLabel /> : null}
     </AbsoluteFill>
   );
 };
@@ -172,8 +191,8 @@ const MusicBed: React.FC = () => {
         const sec = frame / fps;
         const intro = Math.min(1, sec / 2.2);
         const end = Math.max(0, Math.min(1, (90 - sec) / 1.5));
-        const titleLift = sec >= 28.5 && sec <= 36 ? 1.22 : 1;
-        return 0.082 * intro * end * titleLift;
+        const titleLift = sec >= 28.5 && sec <= 37.5 ? 1.18 : 1;
+        return 0.078 * intro * end * titleLift;
       }}
     />
   );
