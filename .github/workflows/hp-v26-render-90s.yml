@@ -51,6 +51,12 @@ jobs:
             'Maunsell Fort Anti-Aircraft Gun, 1943.png':'assets',
             'Corroded Catwalk Between Maunsell Towers.png':'assets',
             'Maunsell Pirate Radio Detail Reconstruction.png':'assets',
+            'Maunsell Understructure Reconstruction.png':'assets',
+            'Maunsell Wartime Gun Reconstruction.png':'assets',
+            'Maunsell Postwar Empty Gun Mount Reconstruction.png':'assets',
+            '1960s Pirate Radio in a Sea Fort.png':'assets',
+            'Pirate Radio Inside a Sea Fort.png':'assets',
+            'Dawn Watch on the Thames Sea Fort.png':'assets',
             'Misty Shoreline Above Abandoned Houtouwan.png':'assets',
             "Houtouwan's Ivy-Swallowed Fishing Village.png":'assets',
             'Ivy-reclaimed room overlooking Houtouwan coast.png':'assets',
@@ -102,7 +108,7 @@ jobs:
           ffmpeg -hide_banner -v info -i out/HP_V26_PROOF_FIRST90S.mp4 -vf "blackdetect=d=0.35:pix_th=0.02" -an -f null - 2> out/blackdetect90.txt || true
           ffmpeg -hide_banner -v info -i out/HP_V26_PROOF_FIRST90S.mp4 -af "silencedetect=n=-45dB:d=0.8" -vn -f null - 2> out/silencedetect90.txt || true
           ffmpeg -hide_banner -nostats -i out/HP_V26_PROOF_FIRST90S.mp4 -af "loudnorm=I=-14:TP=-2:LRA=7:print_format=json" -f null - 2> out/loudnorm90.txt || true
-          for t in 0.5 12.2 24.6 29.0 34.4 38.5 44.8 50.5 58.6 62.5 69.8 74.2 80.8 84.8 85.5 86.8 88.5 89.7; do
+          for t in 0.5 12.2 24.6 29.0 34.4 38.5 42.0 45.6 50.5 54.8 59.3 62.5 66.8 70.8 74.5 78.0 82.0 84.8 85.5 86.8 88.5 89.7; do
             ffmpeg -hide_banner -loglevel error -ss "$t" -i out/HP_V26_PROOF_FIRST90S.mp4 -frames:v 1 -q:v 2 "out/qc90/frame_${t}.jpg"
           done
           ffmpeg -hide_banner -loglevel error -i out/HP_V26_PROOF_FIRST90S.mp4 -vf "fps=1/9,scale=480:-2,tile=5x2:padding=4:margin=4" -frames:v 1 -q:v 2 out/HP_V26_PROOF_90S_CONTACT.jpg
@@ -112,7 +118,7 @@ jobs:
       - name: Upload 90s proof artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hp-v26-proof-first90s-v3
+          name: hp-v26-proof-first90s-v4
           path: |
             hidden-perspective-v26/out/HP_V26_PROOF_FIRST90S.mp4
             hidden-perspective-v26/out/HP_V26_PROOF_FIRST90S_FFPROBE.json
