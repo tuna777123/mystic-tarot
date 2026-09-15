@@ -1,4 +1,5 @@
 export type Motion = 'push' | 'pull' | 'pan_left' | 'pan_right';
+export type Crop = 'tl' | 'tr' | 'bl' | 'br';
 
 export type Shot = {
   start: number;
@@ -6,6 +7,8 @@ export type Shot = {
   asset: string;
   motion: Motion;
   reconstruction?: boolean;
+  crop?: Crop;
+  objectPosition?: string;
 };
 
 export type Caption = {start: number; end: number; text: string};
@@ -14,21 +17,23 @@ export const proofShots: Shot[] = [
   {start:0,end:3.233,asset:'Abandoned Classroom with Open Book.png',motion:'push'},
   {start:3.233,end:6.5,asset:'Forgotten Lessons in an Abandoned Classroom.png',motion:'pan_left'},
   {start:6.5,end:9.733,asset:'The Street They Left Behind.png',motion:'pan_right'},
-  {start:9.733,end:12,asset:'Houtouwan Reclaimed by Nature.png',motion:'push'},
-  {start:12,end:14.767,asset:'Buses line Pripyat for evacuation.png',motion:'pan_left'},
+  {start:9.733,end:12,asset:'Houtouwan Reclaimed by Nature.png',motion:'pull'},
+  {start:12,end:14.767,asset:'Buses line Pripyat for evacuation.png',motion:'push',reconstruction:true,objectPosition:'44% 50%'},
   {start:14.767,end:17.633,asset:"Smoke Beneath Centralia's Cracked Road.png",motion:'pan_right'},
-  {start:17.633,end:20.167,asset:'Villa Epecuén Beneath the Floodwaters.png',motion:'push'},
-  {start:20.167,end:23.433,asset:'Ordinary Life in Pripyat, 1985.png',motion:'pan_left'},
-  {start:23.433,end:26.733,asset:'Buses line Pripyat for evacuation.png',motion:'pan_right'},
-  {start:26.733,end:28.633,asset:'Pripyat’s Silent Ferris Wheel.png',motion:'push'},
-  {start:28.633,end:29.667,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pan_left'},
-  {start:29.667,end:30.667,asset:'Houtouwan Reclaimed by Nature.png',motion:'pan_right'},
-  {start:30.667,end:31.7,asset:'Buzludzha in winter fog.png',motion:'push'},
-  {start:31.7,end:32.433,asset:"Pripyat's Empty Avenue and Rusted Ferris Wheel.png",motion:'pan_left'},
-  {start:32.433,end:33.133,asset:'Centralia mine fire, four documentary views.png',motion:'pan_right'},
-  {start:33.133,end:33.867,asset:'Plymouth Buried in Volcanic Ash.png',motion:'push'},
-  {start:33.867,end:35.267,asset:'Beneath the Maunsell Sea Forts.png',motion:'push'},
-  {start:35.267,end:37.467,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pull'},
+  {start:17.633,end:20.167,asset:'Villa Epecuén Beneath the Floodwaters.png',motion:'push',reconstruction:true,objectPosition:'50% 44%'},
+  {start:20.167,end:23.433,asset:'Ordinary Life in Pripyat, 1985.png',motion:'pan_left',reconstruction:true},
+  {start:23.433,end:26.743,asset:'Pripyat’s Silent Ferris Wheel.png',motion:'pull'},
+  {start:26.743,end:28.634,asset:"Pripyat's Empty Avenue and Rusted Ferris Wheel.png",motion:'push'},
+
+  // Five unique escalation shots — no exact still reuse in the hook.
+  {start:28.634,end:29.934,asset:'Beneath the Maunsell Sea Forts.png',motion:'pan_left'},
+  {start:29.934,end:31.234,asset:'Buzludzha in winter fog.png',motion:'push'},
+  {start:31.234,end:32.534,asset:'Centralia mine fire, four documentary views.png',motion:'pan_right',reconstruction:true,crop:'br'},
+  {start:32.534,end:33.851,asset:'Plymouth Buried in Volcanic Ash.png',motion:'push',reconstruction:true,crop:'tl'},
+
+  // Chapter reveal holds on one clean hero shot instead of bouncing between repeated stills.
+  {start:33.851,end:37.467,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pull',objectPosition:'58% 48%'},
+
   {start:37.467,end:40.867,asset:'Rusting Catwalk at Maunsell Sea Fort.png',motion:'pan_left'},
   {start:40.867,end:44.3,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'push'},
   {start:44.3,end:48.767,asset:'Maunsell Fort Anti-Aircraft Gun, 1943.png',motion:'pan_right'},
@@ -46,6 +51,7 @@ export const proofShots: Shot[] = [
   {start:88.08,end:90,asset:'Houtouwan Reclaimed by Nature.png',motion:'push'}
 ];
 
+// V19 speech-timed cue boundaries remain the timing source of truth.
 export const proofCaptions: Caption[] = [
   {start:0,end:4.279,text:'Imagine returning to your hometown and finding dinner plates still'},
   {start:4.279,end:8.559,text:'on tables, schoolbooks left behind, and entire streets with no one'},
