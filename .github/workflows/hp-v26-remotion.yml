@@ -1,0 +1,68 @@
+name: Hidden Perspective V26 Remotion Proof
+
+on:
+  push:
+    branches:
+      - hidden-perspective-v26-render
+    paths:
+      - 'hidden-perspective-v26/**'
+      - '.github/workflows/hp-v26-remotion.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: hidden-perspective-v26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for asset bridge
+        run: npx playwright install chromium --with-deps
+
+      - name: Download temporary V26 proof assets
+        env:
+          FIRESTORAGE_SHARE_URL: https://firestorage.ai/ja/f/yk1Vw2A883H5
+        run: node scripts/download-firestorage.mjs
+
+      - name: Upload bridge diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v26-asset-bridge-diagnostics
+          path: hidden-perspective-v26/diagnostics
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Ensure Remotion browser
+        run: npx remotion browser ensure
+
+      - name: Render V26 proof
+        run: npm run render:proof
+
+      - name: Technical probe
+        run: |
+          ffprobe -v error -show_entries format=duration:stream=index,codec_name,width,height,r_frame_rate -of json out/HIDDEN_PERSPECTIVE_V26_PROOF_90S.mp4
+          ffmpeg -v error -i out/HIDDEN_PERSPECTIVE_V26_PROOF_90S.mp4 -f null -
+
+      - name: Upload V26 proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: HIDDEN_PERSPECTIVE_V26_PROOF_90S
+          path: hidden-perspective-v26/out/HIDDEN_PERSPECTIVE_V26_PROOF_90S.mp4
+          if-no-files-found: error
+          retention-days: 7
