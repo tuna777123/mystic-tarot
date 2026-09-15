@@ -1,0 +1,21 @@
+name: HP V26 Firestorage JS Probe
+
+on:
+  push:
+    branches: [hidden-perspective-v26]
+    paths: ['.github/workflows/hp-v26-firestorage-js-probe.yml']
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect download client chunk
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://firestorage.ai'
+          CHUNK='/_next/static/chunks/app/(files)/ja/f/page-4d19ae0a4ce39d79.js'
+          curl -L --compressed -sS "$BASE$CHUNK" -o /tmp/chunk.js
+          echo "bytes=$(wc -c </tmp/chunk.js)"
+          tr ';' ';\n' </tmp/chunk.js | grep -niE 'fetch\(|/api/|download|share|file|presign|signed|publicId|shareId' | head -n 180 || true
