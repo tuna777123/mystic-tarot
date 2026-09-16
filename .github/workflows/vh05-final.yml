@@ -1,0 +1,94 @@
+name: VH05 Final 4K Render
+
+on:
+  push:
+    paths:
+      - '.github/workflows/vh05-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Check ffmpeg
+        run: |
+          ffmpeg -version
+          ffmpeg -encoders | grep -q libx265
+
+      - name: Download sources
+        env:
+          AUDIO_URL: "https://oaisdmntprnortheu.blob.core.windows.net/files/00000000-b404-81f4-a371-55e90ac8093d/raw?se=2026-09-16T17%3A24%3A11Z&sp=r&sv=2026-02-06&sr=b&scid=7f72006e-2145-409e-897c-0efa5bff0138&skoid=9b41a688-1b44-4731-856e-b0efcf3660ed&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-16T06%3A43%3A56Z&ske=2026-09-17T06%3A43%3A56Z&sks=b&skv=2026-02-06&sig=%2B5Wrovun/AY3AOGbCJqg%2Bo4bjXLtXnTU%2BV703lgJLA4%3D"
+          VIDEO_URL: "https://res.cloudinary.com/saojrfpq/video/upload/v1789492056/velvet_harmony/vh05_flow_master_loop_4k_h264.mp4"
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-delay 3 "$VIDEO_URL" -o loop_source.mp4
+          curl -fL --retry 5 --retry-delay 3 "$AUDIO_URL" -o audio_master.m4a
+          test $(stat -c%s loop_source.mp4) -gt 40000000
+          test $(stat -c%s audio_master.m4a) -gt 470000000
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration,size -of json loop_source.mp4
+          ffprobe -v error -show_entries stream=codec_name,sample_rate,channels -show_entries format=duration,size -of json audio_master.m4a
+
+      - name: Encode one clean 30-second 4K HEVC loop
+        run: |
+          set -euo pipefail
+          ffmpeg -y -i loop_source.mp4 -an \
+            -c:v libx265 -preset fast -b:v 1000k -maxrate 1200k -bufsize 2400k \
+            -pix_fmt yuv420p -tag:v hvc1 \
+            loop_4k_delivery.mp4
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -show_entries format=duration,size -of json loop_4k_delivery.mp4
+
+      - name: Build exact 3-hour final without re-encoding audio
+        run: |
+          set -euo pipefail
+          ffmpeg -y -stream_loop 359 -i loop_4k_delivery.mp4 -i audio_master.m4a \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy \
+            -t 10800 -shortest -map_metadata -1 \
+            VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4
+
+      - name: QC final master
+        run: |
+          set -euo pipefail
+          ffprobe -v error \
+            -show_entries format=duration,size,bit_rate \
+            -show_entries stream=index,codec_type,codec_name,width,height,r_frame_rate,avg_frame_rate,sample_rate,channels,start_time,duration \
+            -of json VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4 | tee VH05_FINAL_QC.json
+
+          WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4)
+          HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4)
+          FPS=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4)
+          ACODEC=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4)
+          DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4)
+          SIZE=$(stat -c%s VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4)
+
+          test "$WIDTH" = "3840"
+          test "$HEIGHT" = "2160"
+          test "$FPS" = "24/1"
+          test -n "$ACODEC"
+          awk -v d="$DUR" 'BEGIN{exit !(d >= 10799.5 && d <= 10800.5)}'
+          test "$SIZE" -gt 1000000000
+          test "$SIZE" -lt 2000000000
+
+          for T in 0 30 60 3595 7195 10780; do
+            ffmpeg -v error -ss "$T" -i VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4 -t 5 -map 0:v:0 -map 0:a:0 -f null -
+          done
+
+          ffmpeg -hide_banner -ss 0 -i VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4 -t 30 -map 0:a:0 -af volumedetect -f null - 2> audio_qc.txt || true
+          grep -E 'mean_volume|max_volume' audio_qc.txt | tee -a VH05_FINAL_QC.txt
+          echo "WIDTH=$WIDTH HEIGHT=$HEIGHT FPS=$FPS AUDIO=$ACODEC DURATION=$DUR SIZE=$SIZE" | tee -a VH05_FINAL_QC.txt
+
+      - name: Publish direct MP4 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="vh05-final-${GITHUB_RUN_ID}"
+          gh release create "$TAG" \
+            VH05_FINAL_PUBLISH_MASTER_4K_3H.mp4 \
+            VH05_FINAL_QC.json \
+            VH05_FINAL_QC.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Velvet Harmony Video 05 Final 4K 3H" \
+            --notes "Automated final master. 3840x2160, 24 fps, 3 hours, HEVC video with the approved final audio master from 0:00. QC files included."
