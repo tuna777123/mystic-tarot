@@ -1,0 +1,120 @@
+name: Velvet Harmony Remotion CI
+
+on:
+  pull_request:
+    paths:
+      - 'video-projects/velvet-harmony-v3/**'
+      - '.github/workflows/velvet-harmony-remotion-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-remotion:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: video-projects/velvet-harmony-v3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: TypeScript validation
+        run: npx tsc --noEmit
+
+      - name: Verify Remotion compositions
+        run: npx remotion compositions src/index.ts
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+
+      - name: Strict private Drive probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://drive.google.com/uc?export=download&id=1B4dtZcai6GY7CCl7yyDeIo1e3iLKa_1c'
+          curl --fail -L --silent --show-error --max-time 45 "$URL" -o /tmp/drive-warm.bin
+
+          ACTUAL_SIZE="$(stat -c%s /tmp/drive-warm.bin)"
+          EXPECTED_SIZE='2021836'
+          echo "actual_size=$ACTUAL_SIZE expected_size=$EXPECTED_SIZE"
+          test "$ACTUAL_SIZE" = "$EXPECTED_SIZE"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/drive-warm.bin')
+          data=p.read_bytes()[:512]
+          low=data.lower()
+          if b'<html' in low or b'<!doctype' in low:
+              raise SystemExit('FAIL: Drive returned HTML instead of MP4')
+          if b'ftyp' not in data[:64]:
+              raise SystemExit('FAIL: MP4 ftyp box missing')
+          print('container_signature=MP4')
+          PY
+
+          ffprobe -v error \
+            -show_entries format=format_name,duration,size \
+            -show_entries stream=codec_type,codec_name,width,height,r_frame_rate \
+            -of default=nw=1 /tmp/drive-warm.bin
+
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 /tmp/drive-warm.bin)" = "1280"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 /tmp/drive-warm.bin)" = "720"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 /tmp/drive-warm.bin)" = "24/1"
+
+          echo 'PRIVATE_DRIVE_RAW_ACCESS=PASS'
+
+      - name: Generate private synthetic smoke assets
+        run: |
+          mkdir -p public/assets out
+          ffmpeg -y -loglevel error -f lavfi -i 'testsrc2=size=1280x720:rate=24' -t 10 -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p public/assets/warm.mp4
+          ffmpeg -y -loglevel error -f lavfi -i 'testsrc2=size=1280x720:rate=24' -vf 'hue=h=90' -t 10 -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p public/assets/blue-hour.mp4
+          ffmpeg -y -loglevel error -f lavfi -i 'testsrc2=size=1280x720:rate=24' -vf 'hue=h=180' -t 10 -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p public/assets/night.mp4
+
+      - name: Smoke render seamless loop
+        run: |
+          npx remotion render src/index.ts WarmLoop out/smoke-warm-loop.mp4 \
+            --codec=h264 \
+            --crf=28 \
+            --pixel-format=yuv420p \
+            --color-space=bt709 \
+            --gop=192 \
+            --concurrency=50% \
+            --log=verbose
+
+      - name: Smoke render scene transition
+        run: |
+          npx remotion render src/index.ts TransitionWarmBlue out/smoke-transition.mp4 \
+            --codec=h264 \
+            --crf=28 \
+            --pixel-format=yuv420p \
+            --color-space=bt709 \
+            --gop=192 \
+            --concurrency=50% \
+            --log=verbose
+
+      - name: Validate smoke outputs
+        run: |
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate -of default=nw=1 out/smoke-warm-loop.mp4
+          ffprobe -v error -show_entries stream=width,height,r_frame_rate -of default=nw=1 out/smoke-transition.mp4
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 out/smoke-warm-loop.mp4)" = "2560"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 out/smoke-warm-loop.mp4)" = "1440"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 out/smoke-warm-loop.mp4)" = "24/1"
+
+      - name: Upload smoke renders
+        uses: actions/upload-artifact@v4
+        with:
+          name: velvet-remotion-smoke-renders
+          path: |
+            video-projects/velvet-harmony-v3/out/smoke-warm-loop.mp4
+            video-projects/velvet-harmony-v3/out/smoke-transition.mp4
+          if-no-files-found: error
+          retention-days: 3
