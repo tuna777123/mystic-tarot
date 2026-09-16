@@ -64,8 +64,19 @@ jobs:
             'Abandoned 1.wav':'audio',
           }
           def jreq(url, method='GET'):
-            req=urllib.request.Request(url,method=method,headers={'User-Agent':'HP-V26-90S/1','Accept':'application/json'})
+            req=urllib.request.Request(url,method=method,headers={'User-Agent':'HP-V26-90S/2','Accept':'application/json'})
             with urllib.request.urlopen(req,timeout=90) as r:return json.load(r)
+          def download(by, source_name, dest_name, kind):
+            fid=by[source_name][-1]['fileId']
+            ticket=jreq(base+'/files/'+urllib.parse.quote(str(fid),safe='')+'/download','POST')
+            dest=os.path.join('hidden-perspective-v26','public',kind,dest_name)
+            req=urllib.request.Request(ticket['downloadUrl'],headers={'User-Agent':'HP-V26-90S/2'})
+            with urllib.request.urlopen(req,timeout=240) as r,open(dest,'wb') as f:
+              while True:
+                b=r.read(1024*1024)
+                if not b:break
+                f.write(b)
+            print(source_name,'=>',dest_name,os.path.getsize(dest))
           listing=jreq(base+'/files?maxResults=1000').get('files',[])
           by={}
           for x in listing:
@@ -74,16 +85,14 @@ jobs:
           missing=[n for n in targets if n not in by]
           if missing:raise SystemExit('Missing: '+repr(missing))
           for name,kind in targets.items():
-            fid=by[name][-1]['fileId']
-            ticket=jreq(base+'/files/'+urllib.parse.quote(str(fid),safe='')+'/download','POST')
-            dest=os.path.join('hidden-perspective-v26','public',kind,name)
-            req=urllib.request.Request(ticket['downloadUrl'],headers={'User-Agent':'HP-V26-90S/1'})
-            with urllib.request.urlopen(req,timeout=240) as r,open(dest,'wb') as f:
-              while True:
-                b=r.read(1024*1024)
-                if not b:break
-                f.write(b)
-            print(name, os.path.getsize(dest))
+            download(by,name,name,kind)
+          extra_candidates=['Maunsell Forts Wide Reconstruction.png','Maunsell Catwalk Reconstruction.png']
+          extra=next((n for n in extra_candidates if n in by),None)
+          if not extra:
+            known=sorted(n for n in by if 'maunsell' in n.lower())
+            raise SystemExit('Missing extra Maunsell variety candidate. Available Maunsell files: '+repr(known))
+          download(by,extra,'Maunsell Variety Extra.png','assets')
+          print('EXTRA_MAUNSELL_SELECTED',extra)
           PY
 
       - name: Install and validate
@@ -118,7 +127,7 @@ jobs:
       - name: Upload 90s proof artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hp-v26-proof-first90s-v4
+          name: hp-v26-proof-first90s-v5
           path: |
             hidden-perspective-v26/out/HP_V26_PROOF_FIRST90S.mp4
             hidden-perspective-v26/out/HP_V26_PROOF_FIRST90S_FFPROBE.json
