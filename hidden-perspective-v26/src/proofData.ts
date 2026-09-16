@@ -25,19 +25,18 @@ export const proofShots: Shot[] = [
   {start:23.433,end:26.743,asset:'Pripyat’s Silent Ferris Wheel.png',motion:'pull'},
   {start:26.743,end:28.634,asset:"Pripyat's Empty Avenue and Rusted Ferris Wheel.png",motion:'push'},
 
-  // Five unique escalation shots — no exact still reuse in the hook.
-  // Short montage shots use restrained push/pull instead of long-distance pans.
+  // Four unique escalation shots — no exact still reuse in the hook itself.
   {start:28.634,end:29.934,asset:'Beneath the Maunsell Sea Forts.png',motion:'pull'},
   {start:29.934,end:31.234,asset:'Buzludzha in winter fog.png',motion:'push'},
   {start:31.234,end:32.534,asset:'Centralia mine fire, four documentary views.png',motion:'pull',reconstruction:true,crop:'br'},
   {start:32.534,end:33.851,asset:'Plymouth Buried in Volcanic Ash.png',motion:'push',reconstruction:true,crop:'tl'},
 
-  // Chapter reveal holds on one clean hero shot instead of bouncing between repeated stills.
+  // Chapter reveal holds on one clean hero shot.
   {start:33.851,end:37.467,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'pull',objectPosition:'58% 48%'},
 
-  // 12 consecutive Maunsell shots, 12 distinct source images. Historical synthetic scenes are labelled.
+  // Maunsell continuity: every consecutive source is visually distinct. Historical synthetic scenes are labelled.
   {start:37.467,end:40.867,asset:'Rusting Catwalk at Maunsell Sea Fort.png',motion:'pan_left'},
-  {start:40.867,end:44.3,asset:'Maunsell Sea Forts in Grey Mist.png',motion:'push'},
+  {start:40.867,end:44.3,asset:'Maunsell Understructure Reconstruction.png',motion:'push',reconstruction:true},
   {start:44.3,end:48.767,asset:'Maunsell Wartime Gun Reconstruction.png',motion:'pull',reconstruction:true},
   {start:48.767,end:53.367,asset:'Maunsell Fort Anti-Aircraft Gun, 1943.png',motion:'pan_right',reconstruction:true},
   {start:53.367,end:58,asset:'Dawn Watch on the Thames Sea Fort.png',motion:'push',reconstruction:true},
@@ -45,9 +44,9 @@ export const proofShots: Shot[] = [
   {start:61.133,end:65.333,asset:'Pirate Radio Inside a Sea Fort.png',motion:'pan_left',reconstruction:true},
   {start:65.333,end:69.5,asset:'1960s Pirate Radio in a Sea Fort.png',motion:'push',reconstruction:true},
   {start:69.5,end:73.433,asset:'Maunsell Pirate Radio Detail Reconstruction.png',motion:'pull',reconstruction:true},
-  {start:73.433,end:76,asset:'Maunsell Understructure Reconstruction.png',motion:'pan_right',reconstruction:true},
+  {start:73.433,end:76,asset:'Beneath the Maunsell Sea Forts.png',motion:'pan_right'},
   {start:76,end:80.5,asset:'Corroded Catwalk Between Maunsell Towers.png',motion:'push'},
-  {start:80.5,end:85,asset:'Beneath the Maunsell Sea Forts.png',motion:'pull'},
+  {start:80.5,end:85,asset:'Maunsell Variety Extra.png',motion:'pull',reconstruction:true},
 
   // Houtouwan chapter opens on three unique sources — no repeated hero still.
   {start:85,end:86.545,asset:'Misty Shoreline Above Abandoned Houtouwan.png',motion:'pull'},
