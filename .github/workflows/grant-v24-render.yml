@@ -1,0 +1,127 @@
+name: Grant V24 Competition Master
+
+on:
+  push:
+    branches: [grant-render-v24]
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify FFmpeg
+        run: |
+          ffmpeg -version | head -1
+          ffprobe -version | head -1
+
+      - name: Download clean timeline sources
+        run: |
+          set -euxo pipefail
+          mkdir -p media out qc
+          curl -L --retry 5 --retry-delay 2 -o media/00_000_180.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789650490/GRANT_V22_PAIR_A2_000_180.mp4'
+          curl -L --retry 5 --retry-delay 2 -o media/01_180_360.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581078/GRANT_V22_BODY_180_360.mp4'
+          curl -L --retry 5 --retry-delay 2 -o media/02_360_540.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581138/GRANT_V22_BODY_360_540.mp4'
+          curl -L --retry 5 --retry-delay 2 -o media/03_540_720.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581197/GRANT_V22_BODY_540_720.mp4'
+          curl -L --retry 5 --retry-delay 2 -o media/04_720_900.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581275/GRANT_V22_BODY_720_900.mp4'
+          curl -L --retry 5 --retry-delay 2 -o media/05_900_end.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789583337/GRANT_V22_BODY_900_END.mp4'
+          curl -L --retry 5 --retry-delay 2 -o media/audio_master.mp3 'https://res.cloudinary.com/saojrfpq/video/upload/v1789496493/GRANT_V19_AUDIO_MASTER.mp3'
+
+      - name: Build premium V24 master
+        run: |
+          set -euxo pipefail
+          cat > filter.txt <<'EOF'
+          [0:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v0];
+          [1:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v1];
+          [2:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v2];
+          [3:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v3];
+          [4:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v4];
+          [5:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=133.7,setpts=PTS-STARTPTS[v5];
+          [v0][v1][v2][v3][v4][v5]concat=n=6:v=1:a=0[base];
+          [base]
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='SELL TIME.':fontsize=62:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,76,79.2)':alpha='if(lt(t,76.25),(t-76)/0.25,if(lt(t,78.95),1,(79.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='OR BUILD SYSTEMS.':fontsize=34:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,76.2,79.2)':alpha='if(lt(t,76.45),(t-76.2)/0.25,if(lt(t,78.95),1,(79.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='COMPOUNDING STARTS SLOW.':fontsize=56:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,190,193.2)':alpha='if(lt(t,190.25),(t-190)/0.25,if(lt(t,192.95),1,(193.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='TIME DOES THE HEAVY LIFTING.':fontsize=32:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,190.2,193.2)':alpha='if(lt(t,190.45),(t-190.2)/0.25,if(lt(t,192.95),1,(193.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='EMERGENCY FUND FIRST.':fontsize=58:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,257,260.2)':alpha='if(lt(t,257.25),(t-257)/0.25,if(lt(t,259.95),1,(260.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='BUILD 3-6 MONTHS OF RUNWAY.':fontsize=32:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,257.2,260.2)':alpha='if(lt(t,257.45),(t-257.2)/0.25,if(lt(t,259.95),1,(260.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='REAL WEALTH GROWS QUIETLY.':fontsize=54:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,437,440.2)':alpha='if(lt(t,437.25),(t-437)/0.25,if(lt(t,439.95),1,(440.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='BORING IS WHAT WORKS.':fontsize=32:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,437.2,440.2)':alpha='if(lt(t,437.45),(t-437.2)/0.25,if(lt(t,439.95),1,(440.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='PAY YOURSELF FIRST.':fontsize=60:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,548,551.2)':alpha='if(lt(t,548.25),(t-548)/0.25,if(lt(t,550.95),1,(551.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='AUTOMATE IT BEFORE YOU SPEND.':fontsize=31:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,548.2,551.2)':alpha='if(lt(t,548.45),(t-548.2)/0.25,if(lt(t,550.95),1,(551.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='SKILLS ARE CAPITAL.':fontsize=60:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,589,592.2)':alpha='if(lt(t,589.25),(t-589)/0.25,if(lt(t,591.95),1,(592.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='LEARN. PRACTICE. GET PAID.':fontsize=32:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,589.2,592.2)':alpha='if(lt(t,589.45),(t-589.2)/0.25,if(lt(t,591.95),1,(592.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='DEBT BORROWS FROM FUTURE YOU.':fontsize=52:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=76:y=756:enable='between(t,639,642.4)':alpha='if(lt(t,639.25),(t-639)/0.25,if(lt(t,642.15),1,(642.4-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='INVESTING PAYS FUTURE YOU.':fontsize=31:fontcolor=0xC9A64A:x=80:y=906:enable='between(t,639.2,642.4)':alpha='if(lt(t,639.45),(t-639.2)/0.25,if(lt(t,642.15),1,(642.4-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='ONE INCOME IS FRAGILE.':fontsize=57:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,700,703.2)':alpha='if(lt(t,700.25),(t-700)/0.25,if(lt(t,702.95),1,(703.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='BUILD MORE THAN ONE SMALL SOURCE.':fontsize=30:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,700.2,703.2)':alpha='if(lt(t,700.45),(t-700.2)/0.25,if(lt(t,702.95),1,(703.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='SMALL HABIT. FIRST HOME.':fontsize=56:fontcolor=0xF5F3EE:box=1:boxcolor=0x11151D@0.90:boxborderw=22:x=96:y=756:enable='between(t,779,782.2)':alpha='if(lt(t,779.25),(t-779)/0.25,if(lt(t,781.95),1,(782.2-t)/0.25))',
+          drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='REPETITION BEATS MOTIVATION.':fontsize=31:fontcolor=0xC9A64A:x=100:y=906:enable='between(t,779.2,782.2)':alpha='if(lt(t,779.45),(t-779.2)/0.25,if(lt(t,781.95),1,(782.2-t)/0.25))'[vout]
+          EOF
+
+          ffmpeg -hide_banner -y \
+            -i media/00_000_180.mp4 \
+            -i media/01_180_360.mp4 \
+            -i media/02_360_540.mp4 \
+            -i media/03_540_720.mp4 \
+            -i media/04_720_900.mp4 \
+            -i media/05_900_end.mp4 \
+            -i media/audio_master.mp3 \
+            -filter_complex_script filter.txt \
+            -map '[vout]' -map 6:a:0 \
+            -t 1033.7 -r 30 \
+            -c:v libx264 -preset slow -crf 16 -profile:v high -level 4.1 -pix_fmt yuv420p \
+            -c:a aac -b:a 256k -ar 48000 -ac 2 \
+            -movflags +faststart \
+            out/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4
+
+      - name: Technical QC
+        run: |
+          set -euxo pipefail
+          FILE='out/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4'
+          ffprobe -v error -show_streams -show_format -of json "$FILE" > qc/ffprobe.json
+          ffmpeg -v error -i "$FILE" -f null - 2> qc/decode_errors.txt
+          test ! -s qc/decode_errors.txt
+          ffmpeg -hide_banner -i "$FILE" -vf "blackdetect=d=0.5:pix_th=0.02" -an -f null - 2> qc/blackdetect.log || true
+          ffmpeg -hide_banner -i "$FILE" -vf "freezedetect=n=-50dB:d=2.5" -an -f null - 2> qc/freezedetect.log || true
+          ffmpeg -hide_banner -i "$FILE" -af "ebur128=peak=true" -f null - 2> qc/loudness.log || true
+          if grep -q 'black_start:' qc/blackdetect.log; then echo 'BLACK FRAME DETECTED' | tee qc/FAIL_BLACK.txt; exit 1; fi
+          if grep -q 'freeze_start:' qc/freezedetect.log; then echo 'FREEZE >=2.5S DETECTED' | tee qc/FAIL_FREEZE.txt; exit 1; fi
+          {
+            echo 'GRANT V24 FINAL QC'
+            echo '=================='
+            echo 'Full decode: PASS'
+            echo 'Black >=0.5s: 0'
+            echo 'Freeze >=2.5s: 0'
+            echo 'Target: 1920x1080 / 30 fps / H.264 High / AAC 48k stereo'
+            echo
+            ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height,r_frame_rate,avg_frame_rate,nb_frames,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$FILE"
+            echo
+            grep -E 'I:|Peak:' qc/loudness.log | tail -8 || true
+          } > qc/QC_REPORT.txt
+
+      - name: Visual QC sheets
+        run: |
+          set -euxo pipefail
+          FILE='out/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4'
+          ffmpeg -hide_banner -y -i "$FILE" -vf "fps=1/90,scale=480:-1,tile=4x3" -frames:v 1 qc/full_timeline_contact_sheet.jpg
+          ffmpeg -hide_banner -y -ss 0 -t 40 -i "$FILE" -vf "fps=1/4,scale=480:-1,tile=5x2" -frames:v 1 qc/opening_40s_contact_sheet.jpg
+          ffmpeg -hide_banner -y -ss 1020 -t 13.7 -i "$FILE" -vf "fps=1/2,scale=480:-1,tile=4x2" -frames:v 1 qc/final_14s_contact_sheet.jpg
+
+      - name: Upload final master and QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: GRANT_V24_FINAL_DELIVERY
+          path: |
+            out/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4
+            qc/QC_REPORT.txt
+            qc/ffprobe.json
+            qc/full_timeline_contact_sheet.jpg
+            qc/opening_40s_contact_sheet.jpg
+            qc/final_14s_contact_sheet.jpg
+          retention-days: 7
