@@ -1,0 +1,99 @@
+name: Grant V25 Final Master
+
+on:
+  push:
+    branches: [grant-v25-final]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Download V24 approved master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euxo pipefail
+          mkdir -p media out qc
+          gh release download grant-v24-final -p 'GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4' -D media
+
+      - name: Patch all detected static holds with subtle editorial motion
+        run: |
+          set -euxo pipefail
+          IN='media/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4'
+          OUT='out/GRANT_EPISODE1_V25_FINAL_MASTER_1080P.mp4'
+          ffmpeg -hide_banner -y -i "$IN" -filter_complex "\
+          [0:v]split=7[s0][s1][s2][s3][s4][s5][s6];\
+          [s0]trim=start=0:end=855.233,setpts=PTS-STARTPTS[v0];\
+          [s1]trim=start=855.233:end=859.1,setpts=PTS-STARTPTS,scale=1960:-2:flags=lanczos,crop=1920:1080:x='(iw-ow)/2+10*sin(2*PI*n/120)':y='(ih-oh)/2+6*cos(2*PI*n/150)'[v1];\
+          [s2]trim=start=859.1:end=940.133,setpts=PTS-STARTPTS[v2];\
+          [s3]trim=start=940.133:end=945.133,setpts=PTS-STARTPTS,scale=1960:-2:flags=lanczos,crop=1920:1080:x='(iw-ow)/2+10*sin(2*PI*n/150)':y='(ih-oh)/2+6*cos(2*PI*n/180)'[v3];\
+          [s4]trim=start=945.133:end=1013.63,setpts=PTS-STARTPTS[v4];\
+          [s5]trim=start=1013.63:end=1017.63,setpts=PTS-STARTPTS,scale=1960:-2:flags=lanczos,crop=1920:1080:x='(iw-ow)/2+10*sin(2*PI*n/120)':y='(ih-oh)/2+6*cos(2*PI*n/150)'[v5];\
+          [s6]trim=start=1017.63:end=1033.7,setpts=PTS-STARTPTS[v6];\
+          [v0][v1][v2][v3][v4][v5][v6]concat=n=7:v=1:a=0[vout]" \
+          -map '[vout]' -map 0:a:0 \
+          -r 30 -t 1033.7 \
+          -c:v libx264 -preset medium -crf 14 -profile:v high -level 4.1 -pix_fmt yuv420p \
+          -c:a copy -movflags +faststart "$OUT"
+
+      - name: Full technical QC
+        run: |
+          set -euxo pipefail
+          FILE='out/GRANT_EPISODE1_V25_FINAL_MASTER_1080P.mp4'
+          ffprobe -v error -show_streams -show_format -of json "$FILE" > qc/ffprobe.json
+          ffmpeg -v error -i "$FILE" -f null - 2> qc/decode_errors.txt
+          test ! -s qc/decode_errors.txt
+          ffmpeg -hide_banner -i "$FILE" -vf 'blackdetect=d=0.5:pix_th=0.02' -an -f null - 2> qc/blackdetect.log || true
+          ffmpeg -hide_banner -i "$FILE" -vf 'freezedetect=n=-50dB:d=2.5' -an -f null - 2> qc/freezedetect.log || true
+          ffmpeg -hide_banner -i "$FILE" -af 'ebur128=peak=true' -f null - 2> qc/loudness.log || true
+          BLACK_COUNT=$(grep -c 'black_start:' qc/blackdetect.log || true)
+          FREEZE_COUNT=$(grep -c 'freeze_start:' qc/freezedetect.log || true)
+          echo "BLACK_COUNT=$BLACK_COUNT"
+          echo "FREEZE_COUNT=$FREEZE_COUNT"
+          test "$BLACK_COUNT" -eq 0
+          test "$FREEZE_COUNT" -eq 0
+          ffmpeg -hide_banner -y -ss 852 -t 10 -i "$FILE" -vf 'fps=1,scale=640:-1,tile=5x2' -frames:v 1 qc/patch_1415.jpg
+          ffmpeg -hide_banner -y -ss 937 -t 11 -i "$FILE" -vf 'fps=1,scale=640:-1,tile=6x2' -frames:v 1 qc/patch_1540.jpg
+          ffmpeg -hide_banner -y -ss 1010 -t 10 -i "$FILE" -vf 'fps=1,scale=640:-1,tile=5x2' -frames:v 1 qc/patch_1653.jpg
+          ffmpeg -hide_banner -y -ss 0 -t 40 -i "$FILE" -vf 'fps=1/4,scale=480:-1,tile=5x2' -frames:v 1 qc/opening.jpg
+          ffmpeg -hide_banner -y -ss 1020 -t 13.7 -i "$FILE" -vf 'fps=1/2,scale=480:-1,tile=4x2' -frames:v 1 qc/final.jpg
+          {
+            echo 'GRANT V25 FINAL QC'
+            echo 'Full decode: PASS'
+            echo "Black >=0.5s: $BLACK_COUNT"
+            echo "Freeze >=2.5s: $FREEZE_COUNT"
+            ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height,r_frame_rate,avg_frame_rate,nb_frames,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels,bit_rate -of default=nw=1 "$FILE"
+            grep -E 'I:|Peak:' qc/loudness.log | tail -8 || true
+          } | tee qc/QC_REPORT.txt
+
+      - name: Publish V25 final release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euxo pipefail
+          gh release delete grant-v25-final -y --cleanup-tag || true
+          gh release create grant-v25-final \
+            out/GRANT_EPISODE1_V25_FINAL_MASTER_1080P.mp4 \
+            qc/QC_REPORT.txt \
+            qc/ffprobe.json \
+            qc/opening.jpg \
+            qc/final.jpg \
+            qc/patch_1415.jpg \
+            qc/patch_1540.jpg \
+            qc/patch_1653.jpg \
+            --title 'Grant Episode 1 — V25 Final Master' \
+            --notes 'Final 1080p30 master. All previously detected >=2.5s static holds patched with subtle editorial motion. Full decode, black-frame, freeze and loudness QC included.'
