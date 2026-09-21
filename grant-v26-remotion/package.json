@@ -1,0 +1,14 @@
+{
+  "name": "grant-v26-premium-motion",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "render": "remotion render"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.506",
+    "remotion": "4.0.506",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  }
+}
