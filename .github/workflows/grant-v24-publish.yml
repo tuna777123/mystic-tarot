@@ -1,0 +1,41 @@
+name: Grant V24 Publish Final
+
+on:
+  push:
+    branches: [grant-publish-v24]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download approved render artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euxo pipefail
+          mkdir -p delivery
+          gh run download 35640853766 -n GRANT_V24_FAST_HQ_FINAL -D delivery
+          find delivery -maxdepth 3 -type f -printf '%p %s bytes\n' | sort
+          echo '--- QC REPORT ---'
+          cat delivery/qc/QC_REPORT.txt
+      - name: Publish final release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euxo pipefail
+          gh release delete grant-v24-final -y --cleanup-tag || true
+          gh release create grant-v24-final \
+            delivery/out/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4 \
+            delivery/qc/QC_REPORT.txt \
+            delivery/qc/ffprobe.json \
+            delivery/qc/full_timeline.jpg \
+            delivery/qc/opening.jpg \
+            delivery/qc/final.jpg \
+            --title 'Grant Episode 1 — V24 Final Master' \
+            --notes 'Approved V24 render with technical QC and visual contact sheets.'
