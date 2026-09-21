@@ -1,0 +1,50 @@
+name: Grant V24 Freeze QC
+
+on:
+  push:
+    branches: [grant-qc-v24]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+      - name: Download V24 release master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p media qc
+          gh release download grant-v24-final -p 'GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4' -D media
+      - name: Detailed freeze scan
+        run: |
+          set -euxo pipefail
+          FILE='media/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4'
+          ffmpeg -hide_banner -i "$FILE" -vf "freezedetect=n=-50dB:d=2.5" -an -f null - 2> qc/freezedetect.log || true
+          echo '=== FREEZE EVENTS ==='
+          grep -E 'freeze_(start|duration|end):' qc/freezedetect.log || true
+          python3 - <<'PY'
+          import re, pathlib, subprocess, os
+          txt=pathlib.Path('qc/freezedetect.log').read_text(errors='ignore')
+          starts=[float(x) for x in re.findall(r'freeze_start: ([0-9.]+)',txt)]
+          ends=[float(x) for x in re.findall(r'freeze_end: ([0-9.]+)',txt)]
+          print('starts',starts)
+          print('ends',ends)
+          for i,s in enumerate(starts,1):
+              a=max(0,s-2.0)
+              subprocess.run(['ffmpeg','-hide_banner','-y','-ss',str(a),'-t','8','-i','media/GRANT_EPISODE1_V24_COMPETITION_MASTER_1080P.mp4','-vf','fps=1,scale=640:-1,tile=4x2','-frames:v','1',f'qc/freeze_{i}.jpg'],check=True)
+          PY
+      - name: Upload freeze QC
+        uses: actions/upload-artifact@v4
+        with:
+          name: GRANT_V24_FREEZE_QC
+          path: qc/
+          retention-days: 7
