@@ -1,0 +1,156 @@
+name: Grant V28 Competitor-Informed Master
+
+on:
+  push:
+    branches: [grant-v28-competitor-informed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FFmpeg and Node
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: grant-v26-remotion/package.json
+
+      - name: Install Remotion
+        working-directory: grant-v26-remotion
+        run: npm install --no-audit --no-fund
+
+      - name: Render original simple-finance animation resets
+        working-directory: grant-v26-remotion
+        run: |
+          set -euxo pipefail
+          mkdir -p ../renders ../motion_norm ../media ../out ../qc ../segments
+          for ID in Systems Compound Emergency Quiet SaveFirst Skills Debt Income Home Compare Perfect Time; do
+            npx remotion render src/index.jsx "$ID" "../renders/${ID}.mp4" --codec=h264 --crf=10 --pixel-format=yuv420p --overwrite
+            ffmpeg -hide_banner -loglevel error -y -i "../renders/${ID}.mp4" -an -frames:v 96 -r 30 -c:v libx264 -preset fast -crf 12 -profile:v high -level 4.1 -pix_fmt yuv420p -g 60 -keyint_min 60 -sc_threshold 0 "../motion_norm/${ID}.mp4"
+          done
+          printf "" > ../renders/list.txt
+          for ID in Systems Compound Emergency Quiet SaveFirst Skills Debt Income Home Compare Perfect Time; do echo "file '${ID}.mp4'" >> ../renders/list.txt; done
+          ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i ../renders/list.txt -an -c copy ../renders/all_motion.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 1.6 -i ../renders/all_motion.mp4 -vf "fps=1/3.2,scale=480:-1,tile=4x3" -frames:v 1 -update 1 ../qc/motion_sheet.jpg
+
+      - name: Download HQ editorial sources and accepted audio
+        run: |
+          set -euxo pipefail
+          curl -L --retry 5 --retry-delay 2 -sS -o media/opening.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789580564/GRANT_EPISODE1_V22_OPENING_35S_PROOF.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p01.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788976953/grant_pro_final_p01.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p02.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983639/grant_pro_final_p02.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p03.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983651/grant_pro_final_p03.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p04.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983661/grant_pro_final_p04.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p05a.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983673/grant_pro_final_p05a.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p05b.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983684/grant_pro_final_p05b.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p06a.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983694/grant_pro_final_p06a.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p06b.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983706/grant_pro_final_p06b.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/audio.mp3 'https://res.cloudinary.com/saojrfpq/video/upload/v1789496493/GRANT_V19_AUDIO_MASTER.mp3'
+
+      - name: Build single HQ editorial picture master
+        run: |
+          set -euxo pipefail
+          cat > base_filter.txt <<'EOF'
+          [0:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=35,setpts=PTS-STARTPTS[v0];
+          [1:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=start=35:duration=145,setpts=PTS-STARTPTS[v1];
+          [2:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=180,setpts=PTS-STARTPTS[v2];
+          [3:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=180,setpts=PTS-STARTPTS[v3];
+          [4:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=180,setpts=PTS-STARTPTS[v4];
+          [5:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=90,setpts=PTS-STARTPTS[v5];
+          [6:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=90,setpts=PTS-STARTPTS[v6];
+          [7:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=70,setpts=PTS-STARTPTS[v7];
+          [8:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=63.7,setpts=PTS-STARTPTS[v8];
+          [v0][v1][v2][v3][v4][v5][v6][v7][v8]concat=n=9:v=1:a=0[vout]
+          EOF
+          BOUNDARIES='77.7,80.9,189.6,192.8,256.8,260.0,434.8,438.0,548.4,551.6,589.7,592.9,638.4,641.6,698.5,701.7,780.9,784.1,855.8,859.0,957.2,960.4,992.4,995.6'
+          ffmpeg -hide_banner -y -i media/opening.mp4 -i media/p01.mp4 -i media/p02.mp4 -i media/p03.mp4 -i media/p04.mp4 -i media/p05a.mp4 -i media/p05b.mp4 -i media/p06a.mp4 -i media/p06b.mp4 -filter_complex_script base_filter.txt -map '[vout]' -an -frames:v 31011 -r 30 -c:v libx264 -preset slow -crf 12 -profile:v high -level 4.1 -pix_fmt yuv420p -g 60 -keyint_min 60 -sc_threshold 0 -force_key_frames "$BOUNDARIES" -movflags +faststart out/base_hq.mp4
+          test "$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 out/base_hq.mp4)" = '31011'
+
+      - name: Replace selected concept windows with Remotion scenes
+        run: |
+          set -euxo pipefail
+          BOUNDARIES='77.7,80.9,189.6,192.8,256.8,260.0,434.8,438.0,548.4,551.6,589.7,592.9,638.4,641.6,698.5,701.7,780.9,784.1,855.8,859.0,957.2,960.4,992.4,995.6'
+          rm -rf segments && mkdir segments
+          ffmpeg -hide_banner -loglevel error -y -i out/base_hq.mp4 -map 0:v:0 -an -c copy -f segment -segment_times "$BOUNDARIES" -reset_timestamps 1 segments/base_%02d.mp4
+          test "$(find segments -name 'base_*.mp4' | wc -l)" -eq 25
+          IDS=(Systems Compound Emergency Quiet SaveFirst Skills Debt Income Home Compare Perfect Time)
+          : > segments/final_list.txt
+          for i in $(seq 0 24); do
+            if (( i % 2 == 0 )); then
+              printf "file 'base_%02d.mp4'\n" "$i" >> segments/final_list.txt
+            else
+              idx=$(( (i-1)/2 ))
+              echo "file '../motion_norm/${IDS[$idx]}.mp4'" >> segments/final_list.txt
+            fi
+          done
+          ffmpeg -hide_banner -y -f concat -safe 0 -i segments/final_list.txt -an -c copy -movflags +faststart out/visual_master.mp4
+          if [ "$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 out/visual_master.mp4)" != '31011' ]; then
+            ffmpeg -hide_banner -y -i out/visual_master.mp4 -an -frames:v 31011 -r 30 -c:v libx264 -preset slow -crf 12 -profile:v high -level 4.1 -pix_fmt yuv420p -movflags +faststart out/visual_master_norm.mp4
+            mv out/visual_master_norm.mp4 out/visual_master.mp4
+          fi
+          test "$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 out/visual_master.mp4)" = '31011'
+
+      - name: Make narration-forward audio and mux final master
+        run: |
+          set -euxo pipefail
+          ffmpeg -hide_banner -y -i media/audio.mp3 -af "pan=stereo|c0=0.86*c0+0.14*c1|c1=0.14*c0+0.86*c1,aresample=48000" -t 1033.7 -c:a aac -b:a 256k -ar 48000 -ac 2 out/audio_narration_forward.m4a
+          ffmpeg -hide_banner -y -i out/visual_master.mp4 -i out/audio_narration_forward.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 1033.7 -movflags +faststart out/GRANT_EPISODE1_V28_COMPETITOR_INFORMED_MASTER_1080P.mp4
+
+      - name: Full technical and editorial QC
+        run: |
+          set -euxo pipefail
+          FILE='out/GRANT_EPISODE1_V28_COMPETITOR_INFORMED_MASTER_1080P.mp4'
+          ffprobe -v error -show_streams -show_format -of json "$FILE" > qc/ffprobe.json
+          ffmpeg -v error -i "$FILE" -f null - 2> qc/decode_errors.txt
+          test ! -s qc/decode_errors.txt
+          ffmpeg -hide_banner -i "$FILE" -vf 'blackdetect=d=0.5:pix_th=0.02' -an -f null - 2> qc/blackdetect.log || true
+          ffmpeg -hide_banner -i "$FILE" -vf 'freezedetect=n=-50dB:d=2.5' -an -f null - 2> qc/freezedetect.log || true
+          ffmpeg -hide_banner -i "$FILE" -af 'ebur128=peak=true' -f null - 2> qc/loudness.log || true
+          BLACK_COUNT=$(grep -c 'black_start:' qc/blackdetect.log || true)
+          FREEZE_COUNT=$(grep -c 'freeze_start:' qc/freezedetect.log || true)
+          FRAMES=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 "$FILE")
+          VBITRATE=$(ffprobe -v error -select_streams v:0 -show_entries stream=bit_rate -of csv=p=0 "$FILE")
+          test "$BLACK_COUNT" -eq 0
+          test "$FREEZE_COUNT" -eq 0
+          test "$FRAMES" = '31011'
+          test "${VBITRATE:-0}" -gt 2000000
+          ffmpeg -hide_banner -loglevel error -y -ss 0 -t 40 -i "$FILE" -vf 'fps=1/4,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/opening.jpg
+          ffmpeg -hide_banner -loglevel error -y -i "$FILE" -vf 'fps=1/30,scale=384:-1,tile=6x6' -frames:v 1 -update 1 qc/full_timeline.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 74 -t 9 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/systems_reset.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 186 -t 10 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/compound_reset.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 635 -t 10 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/debt_reset.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 989 -t 12 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=6x2' -frames:v 1 -update 1 qc/time_reset.jpg
+          {
+            echo 'GRANT V28 COMPETITOR-INFORMED FINAL QC'
+            echo 'Editorial direction: original simple animated finance storytelling; object/character metaphors, bold readable typography, hand-drawn line language, no copied competitor art/assets.'
+            echo 'Picture: HQ pro editorial source + clean 35s opening + 12 Remotion concept replacements.'
+            echo 'Audio: narration-forward center-preserving stereo remix.'
+            echo 'Full decode: PASS'
+            echo "Black >=0.5s: $BLACK_COUNT"
+            echo "Freeze >=2.5s: $FREEZE_COUNT"
+            echo "Frames: $FRAMES"
+            echo "Video bitrate: $VBITRATE"
+            ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height,r_frame_rate,avg_frame_rate,nb_frames,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels,bit_rate -of default=nw=1 "$FILE"
+            grep -E 'I:|Peak:' qc/loudness.log | tail -8 || true
+          } | tee qc/QC_REPORT.txt
+
+      - name: Publish V28 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euxo pipefail
+          gh release delete grant-v28-competitor-informed -y --cleanup-tag || true
+          gh release create grant-v28-competitor-informed out/GRANT_EPISODE1_V28_COMPETITOR_INFORMED_MASTER_1080P.mp4 qc/QC_REPORT.txt qc/ffprobe.json qc/motion_sheet.jpg qc/opening.jpg qc/full_timeline.jpg qc/systems_reset.jpg qc/compound_reset.jpg qc/debt_reset.jpg qc/time_reset.jpg --title 'Grant Episode 1 — V28 Competitor-Informed Master' --notes 'Built after a high-level audit of Alicia Invests and Nick Invests. Their public positioning emphasizes simple finance animations, clear metaphors, and easy-to-absorb visual explanations. V28 applies those principles with original Grant artwork and storytelling rather than copying proprietary characters, graphics, or shot sequences. Release is gated by full decode, black/freeze, exact frame count, >2 Mbps video bitrate, loudness, and contact-sheet QC.'
