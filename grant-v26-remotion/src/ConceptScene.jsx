@@ -2,320 +2,238 @@ import React from 'react';
 import {AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 
 const C = {
-  bg: '#0B1118',
-  panel: '#111A24',
-  panel2: '#162230',
-  text: '#F4F1EA',
-  muted: '#8D99A8',
-  gold: '#C7A152',
-  gold2: '#E1C272',
-  line: '#2A394A',
-  soft: '#26384B',
+  paper: '#F6F1E8',
+  ink: '#17212B',
+  muted: '#66707A',
+  gold: '#D0A64A',
+  green: '#6E8C6A',
+  red: '#C86D61',
+  blue: '#6E8AA4',
+  white: '#FFFDFC',
+  line: '#D8D0C4',
+  shadow: 'rgba(23,33,43,.14)',
 };
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'};
+const ease = Easing.bezier(0.16, 1, 0.3, 1);
+const prog = (frame, a, b) => interpolate(frame, [a, b], [0, 1], {...clamp, easing: ease});
 
-const lineProgress = (frame, from, to) => interpolate(frame, [from, to], [0, 1], {...clamp, easing: Easing.bezier(0.16, 1, 0.3, 1)});
-
-const Grid = ({frame}) => {
-  const drift = interpolate(frame, [0, 96], [0, 34], clamp);
+const Paper = ({frame}) => {
+  const drift = interpolate(frame, [0, 96], [0, 18], clamp);
   return (
-    <AbsoluteFill
-      style={{
-        opacity: 0.22,
-        backgroundImage:
-          'linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px)',
-        backgroundSize: '72px 72px',
+    <AbsoluteFill style={{backgroundColor: C.paper}}>
+      <AbsoluteFill style={{
+        opacity: 0.33,
+        backgroundImage: `radial-gradient(${C.line} 1.4px, transparent 1.4px)`,
+        backgroundSize: '30px 30px',
         backgroundPosition: `${drift}px ${drift * 0.45}px`,
-      }}
-    />
+      }} />
+      <div style={{position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 28%, rgba(23,33,43,.025))'}} />
+    </AbsoluteFill>
   );
 };
 
-const DiagramFrame = ({children}) => (
-  <div
-    style={{
-      position: 'absolute',
-      right: 120,
-      top: 175,
-      width: 780,
-      height: 730,
-      borderRadius: 34,
-      border: `1px solid ${C.line}`,
-      background: 'linear-gradient(180deg, rgba(21,31,43,.95), rgba(10,16,24,.98))',
-      boxShadow: '0 30px 80px rgba(0,0,0,.35)',
-      overflow: 'hidden',
-    }}
-  >
-    {children}
-  </div>
+const DrawPath = ({d, frame, from=8, to=58, stroke=C.ink, strokeWidth=9, fill='none', ...rest}) => {
+  const p = prog(frame, from, to);
+  return <path d={d} fill={fill} stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} {...rest} />;
+};
+
+const Coin = ({x,y,r=42,frame,delay=0,label='$',color=C.gold}) => {
+  const s = spring({frame: frame-delay, fps:30, config:{damping:14, stiffness:180, mass:.7}});
+  return (
+    <g transform={`translate(${x} ${y}) scale(${Math.max(0,s)})`}>
+      <circle r={r} fill={color} stroke={C.ink} strokeWidth="6" />
+      <text y="14" textAnchor="middle" fill={C.ink} fontSize={r*.9} fontWeight="800" fontFamily="Arial">{label}</text>
+    </g>
+  );
+};
+
+const Person = ({x,y,frame,delay=0,accent=C.green,scale=1}) => {
+  const s = spring({frame:frame-delay, fps:30, config:{damping:16, stiffness:160, mass:.8}});
+  return (
+    <g transform={`translate(${x} ${y}) scale(${Math.max(0,s)*scale})`}>
+      <circle cx="0" cy="-120" r="48" fill={C.white} stroke={C.ink} strokeWidth="7" />
+      <path d="M-20 -122 Q0 -102 20 -122" fill="none" stroke={C.ink} strokeWidth="6" strokeLinecap="round" />
+      <circle cx="-15" cy="-135" r="4" fill={C.ink}/><circle cx="15" cy="-135" r="4" fill={C.ink}/>
+      <path d="M-60 -55 Q0 -95 60 -55 L46 80 L-46 80 Z" fill={accent} stroke={C.ink} strokeWidth="7" strokeLinejoin="round" />
+      <line x1="-62" y1="-35" x2="-110" y2="25" stroke={C.ink} strokeWidth="8" strokeLinecap="round" />
+      <line x1="62" y1="-35" x2="110" y2="25" stroke={C.ink} strokeWidth="8" strokeLinecap="round" />
+      <line x1="-25" y1="80" x2="-35" y2="170" stroke={C.ink} strokeWidth="9" strokeLinecap="round" />
+      <line x1="25" y1="80" x2="35" y2="170" stroke={C.ink} strokeWidth="9" strokeLinecap="round" />
+    </g>
+  );
+};
+
+const Arrow = ({x1,y1,x2,y2,frame,delay=8,color=C.ink}) => {
+  const p = prog(frame, delay, delay+36);
+  const hx = x1 + (x2-x1)*p;
+  const hy = y1 + (y2-y1)*p;
+  const ang = Math.atan2(y2-y1,x2-x1)*180/Math.PI;
+  return <g><line x1={x1} y1={y1} x2={hx} y2={hy} stroke={color} strokeWidth="8" strokeLinecap="round"/><path d="M0 0 L-22 -14 L-22 14 Z" fill={color} transform={`translate(${hx} ${hy}) rotate(${ang})`} opacity={p}/></g>;
+};
+
+const Bubble = ({x,y,w,h,children,frame,delay=0,bg=C.white}) => {
+  const s = spring({frame:frame-delay, fps:30, config:{damping:16, stiffness:170, mass:.8}});
+  return <g transform={`translate(${x} ${y}) scale(${Math.max(0,s)})`}><rect x={-w/2} y={-h/2} width={w} height={h} rx="28" fill={bg} stroke={C.ink} strokeWidth="6"/><foreignObject x={-w/2+24} y={-h/2+18} width={w-48} height={h-36}><div xmlns="http://www.w3.org/1999/xhtml" style={{fontFamily:'Arial',fontWeight:800,fontSize:30,color:C.ink,textAlign:'center',lineHeight:1.05}}>{children}</div></foreignObject></g>;
+};
+
+const Systems = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={180} y={420} frame={frame} delay={2} accent={C.blue} scale={.9}/>
+    <circle cx="180" cy="170" r="95" fill={C.white} stroke={C.ink} strokeWidth="7"/>
+    <line x1="180" y1="170" x2="180" y2="112" stroke={C.ink} strokeWidth="8" strokeLinecap="round" transform={`rotate(${interpolate(frame,[0,96],[-20,210],clamp)} 180 170)`}/>
+    <text x="180" y="292" textAnchor="middle" fill={C.muted} fontSize="25" fontWeight="700">SELL HOURS</text>
+    <Arrow x1={315} y1={360} x2={495} y2={360} frame={frame} delay={14} color={C.gold}/>
+    <g transform="translate(625 355)">
+      <rect x="-118" y="-95" width="236" height="190" rx="28" fill={C.white} stroke={C.ink} strokeWidth="7"/>
+      {[[-55,-22],[0,-42],[55,-5],[-12,42],[58,48]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r="20" fill={i===0?C.gold:C.green} stroke={C.ink} strokeWidth="5"/>)}
+      <DrawPath d="M-55 -22 L0 -42 L55 -5 L58 48 L-12 42 L-55 -22" frame={frame} from={18} to={72} stroke={C.ink} strokeWidth={6}/>
+    </g>
+    <text x="625" y="505" textAnchor="middle" fill={C.ink} fontSize="28" fontWeight="800">BUILD A SYSTEM</text>
+  </svg>
 );
 
-const SystemsDiagram = ({frame}) => {
-  const p = lineProgress(frame, 12, 62);
-  const hand = interpolate(frame, [0, 96], [-50, 125], clamp);
-  const nodes = [
-    [520, 250], [620, 340], [500, 450], [650, 520], [400, 555], [330, 390],
-  ];
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <circle cx="205" cy="340" r="125" fill="none" stroke={C.line} strokeWidth="16" />
-        <circle cx="205" cy="340" r="8" fill={C.gold2} />
-        <line x1="205" y1="340" x2="205" y2="250" stroke={C.text} strokeWidth="10" strokeLinecap="round" transform={`rotate(${hand} 205 340)`} />
-        <text x="205" y="520" textAnchor="middle" fill={C.muted} fontSize="28" fontFamily="Arial">HOURS</text>
-        {nodes.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r={18 + (i % 2) * 5} fill={i === 0 ? C.gold2 : C.soft} stroke={i === 0 ? C.gold2 : C.line} strokeWidth="4" />
-        ))}
-        {[[0,1],[1,2],[1,3],[2,4],[2,5],[4,5]].map(([a,b], i) => (
-          <line key={i} x1={nodes[a][0]} y1={nodes[a][1]} x2={nodes[b][0]} y2={nodes[b][1]} stroke={C.gold} strokeWidth="5" strokeLinecap="round" opacity={0.25 + p * 0.75} />
-        ))}
-        <text x="535" y="650" textAnchor="middle" fill={C.gold2} fontSize="28" fontFamily="Arial">SYSTEMS</text>
-      </svg>
-    </DiagramFrame>
-  );
+const Compound = ({frame}) => {
+  const p = prog(frame,12,72);
+  return <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={135} y={440} frame={frame} delay={2} accent={C.green} scale={.78}/>
+    {[0,1,2,3,4].map((i)=><Coin key={i} x={280+i*95} y={535-Math.pow(i+1,1.55)*46*p} r={30+i*4} frame={frame} delay={8+i*7}/>) }
+    <DrawPath d="M260 535 C360 530 430 500 490 450 C565 390 640 280 720 150" frame={frame} from={12} to={74} stroke={C.green} strokeWidth={12}/>
+    <text x="500" y="635" textAnchor="middle" fill={C.muted} fontSize="26" fontWeight="700">BORING AT FIRST. POWERFUL LATER.</text>
+  </svg>;
 };
 
-const CompoundDiagram = ({frame}) => {
-  const p = lineProgress(frame, 14, 72);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <line x1="110" y1="595" x2="690" y2="595" stroke={C.line} strokeWidth="4" />
-        <line x1="110" y1="595" x2="110" y2="120" stroke={C.line} strokeWidth="4" />
-        <path d="M120 565 C260 555 310 520 390 465 C500 390 560 290 670 135" fill="none" stroke={C.gold2} strokeWidth="12" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - p} />
-        {[0.18,0.38,0.58,0.78].map((v, i) => {
-          const x = 145 + i * 145;
-          const h = 55 + Math.pow(i + 1, 2) * 32;
-          const grow = lineProgress(frame, 18 + i * 5, 45 + i * 4);
-          return <rect key={i} x={x} y={595 - h * grow} width="58" height={h * grow} rx="10" fill={i === 3 ? C.gold : C.soft} />;
-        })}
-        <text x="390" y="665" textAnchor="middle" fill={C.muted} fontSize="26" fontFamily="Arial">TIME →</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Emergency = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={190} y={440} frame={frame} delay={2} accent={C.red} scale={.82}/>
+    <DrawPath d="M460 125 L650 195 L625 405 C608 525 520 590 460 618 C400 590 312 525 295 405 L270 195 Z" frame={frame} from={8} to={46} stroke={C.ink} strokeWidth={10} fill={C.white}/>
+    {[0,1,2,3,4,5].map(i=>{const on=Math.max(0,Math.min(1,prog(frame,18+i*5,40+i*5)));return <rect key={i} x={335+i*43} y={470-145*on} width="30" height={145*on} rx="8" fill={i<3?C.gold:C.green} stroke={C.ink} strokeWidth="4"/>})}
+    <text x="460" y="286" textAnchor="middle" fill={C.ink} fontSize="70" fontWeight="900">3–6</text>
+    <text x="460" y="335" textAnchor="middle" fill={C.muted} fontSize="28" fontWeight="700">MONTHS</text>
+    <Bubble x={650} y={145} w={220} h={90} frame={frame} delay={38} bg="#FFF4D7">BUY TIME</Bubble>
+  </svg>
+);
 
-const EmergencyDiagram = ({frame}) => {
-  const p = lineProgress(frame, 14, 64);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <path d="M390 115 L570 180 L548 390 C532 520 454 585 390 615 C326 585 248 520 232 390 L210 180 Z" fill={C.panel2} stroke={C.gold} strokeWidth="10" />
-        {[0,1,2,3,4,5].map((i) => {
-          const on = Math.min(1, Math.max(0, p * 6 - i));
-          return <rect key={i} x={286 + i * 35} y={320} width="25" height={125 * on} rx="8" fill={i < 3 ? C.gold2 : C.gold} transform={`translate(0 ${125 - 125 * on})`} />;
-        })}
-        <text x="390" y="285" textAnchor="middle" fill={C.text} fontSize="56" fontWeight="700" fontFamily="Arial">3–6</text>
-        <text x="390" y="490" textAnchor="middle" fill={C.muted} fontSize="28" fontFamily="Arial">MONTHS OF RUNWAY</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Quiet = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={175} y={455} frame={frame} delay={2} accent={C.blue} scale={.78}/>
+    <rect x="330" y="235" width="360" height="300" rx="36" fill={C.white} stroke={C.ink} strokeWidth="7"/>
+    {[0,1,2,3,4,5].map(i=>{const g=prog(frame,12+i*5,42+i*5); const h=(45+i*34)*g;return <rect key={i} x={370+i*50} y={480-h} width="31" height={h} rx="8" fill={i===5?C.gold:C.green} stroke={C.ink} strokeWidth="4"/>})}
+    <DrawPath d="M366 457 C430 445 470 422 520 390 C590 344 624 292 661 250" frame={frame} from={18} to={66} stroke={C.ink} strokeWidth={8}/>
+    <text x="510" y="605" textAnchor="middle" fill={C.ink} fontSize="30" fontWeight="800">QUIET MONEY STILL GROWS</text>
+  </svg>
+);
 
-const QuietDiagram = ({frame}) => {
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        {[0,1,2,3,4,5].map((i) => {
-          const h = 70 + i * 58;
-          const g = lineProgress(frame, 12 + i * 5, 40 + i * 6);
-          return <rect key={i} x={120 + i * 92} y={590 - h * g} width="62" height={h * g} rx="12" fill={i === 5 ? C.gold2 : C.soft} />;
-        })}
-        <line x1="95" y1="590" x2="685" y2="590" stroke={C.line} strokeWidth="4" />
-        <text x="390" y="655" textAnchor="middle" fill={C.muted} fontSize="26" fontFamily="Arial">QUIET • REPEATABLE • LONG TERM</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const SaveFirst = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={170} y={450} frame={frame} delay={2} accent={C.green} scale={.8}/>
+    <rect x="340" y="210" width="350" height="250" rx="34" fill={C.white} stroke={C.ink} strokeWidth="7"/>
+    <text x="515" y="280" textAnchor="middle" fill={C.muted} fontSize="25" fontWeight="700">PAYCHECK</text>
+    <Coin x={445} y={355} r={44} frame={frame} delay={12}/><Coin x={530} y={355} r={44} frame={frame} delay={18}/><Coin x={615} y={355} r={44} frame={frame} delay={24}/>
+    <Arrow x1={515} y1={470} x2={515} y2={595} frame={frame} delay={30} color={C.gold}/>
+    <Bubble x={515} y={625} w={310} h={90} frame={frame} delay={46} bg="#FFF4D7">SAVE FIRST</Bubble>
+  </svg>
+);
 
-const SaveFirstDiagram = ({frame}) => {
-  const p = lineProgress(frame, 12, 55);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <rect x="120" y="255" width="540" height="125" rx="28" fill={C.panel2} stroke={C.line} strokeWidth="4" />
-        <rect x="120" y="255" width={540 * p} height="125" rx="28" fill={C.gold} opacity="0.95" />
-        <text x="390" y="335" textAnchor="middle" fill={C.text} fontSize="54" fontWeight="700" fontFamily="Arial">5% FIRST</text>
-        <path d="M390 410 L390 520" stroke={C.gold2} strokeWidth="10" strokeLinecap="round" />
-        <path d="M350 485 L390 530 L430 485" fill="none" stroke={C.gold2} strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-        <rect x="270" y="555" width="240" height="80" rx="20" fill={C.soft} />
-        <text x="390" y="607" textAnchor="middle" fill={C.text} fontSize="30" fontFamily="Arial">SET ASIDE</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Skills = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={175} y={470} frame={frame} delay={2} accent={C.gold} scale={.8}/>
+    {[['LEARN',370,500,C.blue],['PRACTICE',495,390,C.green],['GET PAID',625,275,C.gold]].map(([t,x,y,c],i)=><g key={t}><rect x={x-95} y={y-45} width="190" height="90" rx="24" fill={C.white} stroke={C.ink} strokeWidth="6" opacity={spring({frame:frame-(8+i*10),fps:30,config:{damping:16,stiffness:160}})}/><text x={x} y={y+10} textAnchor="middle" fill={C.ink} fontSize="27" fontWeight="900">{t}</text>{i<2&&<Arrow x1={x+88} y1={y-28} x2={x+112} y2={y-72} frame={frame} delay={22+i*9} color={c}/>}</g>)}
+    <Coin x={690} y={170} r={48} frame={frame} delay={48}/>
+  </svg>
+);
 
-const SkillsDiagram = ({frame}) => {
-  const p = lineProgress(frame, 12, 65);
-  const items = [
-    ['LEARN', 390, 180], ['PRACTICE', 205, 470], ['GET PAID', 575, 470]
-  ];
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <circle cx="390" cy="365" r="230" fill="none" stroke={C.line} strokeWidth="8" strokeDasharray="18 16" />
-        {items.map(([label,x,y],i) => {
-          const s = lineProgress(frame, 10 + i * 8, 30 + i * 8);
-          return <g key={label} opacity={s} transform={`translate(${(1-s)*(390-x)} ${(1-s)*(365-y)})`}>
-            <circle cx={x} cy={y} r="82" fill={i === 2 ? C.gold : C.panel2} stroke={i === 2 ? C.gold2 : C.line} strokeWidth="5" />
-            <text x={x} y={y+9} textAnchor="middle" fill={C.text} fontSize="24" fontWeight="700" fontFamily="Arial">{label}</text>
-          </g>;
-        })}
-        <path d="M465 205 C580 245 640 330 626 415" fill="none" stroke={C.gold2} strokeWidth="8" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} />
-        <path d="M535 535 C420 620 300 605 230 525" fill="none" stroke={C.gold2} strokeWidth="8" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} />
-        <path d="M160 415 C140 305 205 220 315 190" fill="none" stroke={C.gold2} strokeWidth="8" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} />
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Debt = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={410} y={445} frame={frame} delay={2} accent={C.blue} scale={.85}/>
+    <Bubble x={175} y={220} w={245} h={120} frame={frame} delay={10} bg="#F8E0DC">DEBT<br/>PULLS</Bubble>
+    <Bubble x={645} y={220} w={245} h={120} frame={frame} delay={18} bg="#E2ECDD">INVESTING<br/>SENDS</Bubble>
+    <Arrow x1={310} y1={270} x2={365} y2={335} frame={frame} delay={24} color={C.red}/>
+    <Arrow x1={455} y1={335} x2={510} y2={270} frame={frame} delay={32} color={C.green}/>
+    <text x="410" y="650" textAnchor="middle" fill={C.ink} fontSize="28" fontWeight="800">BOTH MOVE MONEY THROUGH TIME</text>
+  </svg>
+);
 
-const DebtDiagram = ({frame}) => {
-  const p = lineProgress(frame, 14, 62);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <rect x="250" y="285" width="280" height="150" rx="30" fill={C.panel2} stroke={C.line} strokeWidth="5" />
-        <text x="390" y="350" textAnchor="middle" fill={C.text} fontSize="38" fontWeight="700" fontFamily="Arial">FUTURE</text>
-        <text x="390" y="395" textAnchor="middle" fill={C.gold2} fontSize="38" fontWeight="700" fontFamily="Arial">YOU</text>
-        <path d="M225 360 L95 360" stroke={C.muted} strokeWidth="14" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} />
-        <path d="M555 360 L685 360" stroke={C.gold2} strokeWidth="14" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} />
-        <text x="120" y="305" fill={C.muted} fontSize="28" fontFamily="Arial">DEBT</text>
-        <text x="570" y="305" fill={C.gold2} fontSize="28" fontFamily="Arial">INVESTING</text>
-        <text x="120" y="430" fill={C.muted} fontSize="20" fontFamily="Arial">PULLS FORWARD</text>
-        <text x="553" y="430" fill={C.gold2} fontSize="20" fontFamily="Arial">SENDS FORWARD</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Income = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={410} y={400} frame={frame} delay={2} accent={C.green} scale={.78}/>
+    {[[145,180],[410,135],[680,180],[155,575],[410,620],[675,575]].map(([x,y],i)=><g key={i}><Arrow x1={x} y1={y} x2={410} y2={360} frame={frame} delay={8+i*5} color={i%2?C.gold:C.blue}/><Coin x={x} y={y} r={34} frame={frame} delay={12+i*6} label={i===0?'$':i===1?'S':i===2?'R':i===3?'P':i===4?'$':'+'} color={i%2?C.gold:C.green}/></g>)}
+    <Bubble x={410} y={650} w={360} h={82} frame={frame} delay={48}>MORE THAN ONE SOURCE</Bubble>
+  </svg>
+);
 
-const IncomeDiagram = ({frame}) => {
-  const p = lineProgress(frame, 14, 64);
-  const ends = [[210,160],[570,150],[660,370],[550,570],[220,560],[115,355]];
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <circle cx="390" cy="360" r="78" fill={C.gold} />
-        <text x="390" y="370" textAnchor="middle" fill={C.bg} fontSize="26" fontWeight="700" fontFamily="Arial">CORE</text>
-        {ends.map(([x,y],i) => (
-          <g key={i}>
-            <line x1="390" y1="360" x2={x} y2={y} stroke={C.gold2} strokeWidth="7" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} />
-            <circle cx={x} cy={y} r="48" fill={i<2 ? C.panel2 : C.soft} stroke={C.line} strokeWidth="4" opacity={p} />
-          </g>
-        ))}
-        <text x="390" y="685" textAnchor="middle" fill={C.muted} fontSize="26" fontFamily="Arial">DIVERSIFY THE FLOW</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Home = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={155} y={470} frame={frame} delay={2} accent={C.blue} scale={.78}/>
+    {[0,1,2,3,4].map(i=><Coin key={i} x={320+i*72} y={560-i*18} r={30} frame={frame} delay={8+i*6}/>) }
+    <DrawPath d="M500 470 L500 320 L620 225 L740 320 L740 470 Z" frame={frame} from={24} to={68} stroke={C.ink} strokeWidth={10} fill={C.white}/>
+    <rect x="585" y="385" width="62" height="85" fill={C.gold} stroke={C.ink} strokeWidth="6" opacity={prog(frame,42,74)}/>
+    <Bubble x={535} y={625} w={355} h={84} frame={frame} delay={50} bg="#FFF4D7">REPETITION BUILDS ASSETS</Bubble>
+  </svg>
+);
 
-const HomeDiagram = ({frame}) => {
-  const p = lineProgress(frame, 14, 66);
-  const roof = lineProgress(frame, 24, 76);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <rect x="110" y="555" width="560" height="24" rx="12" fill={C.line} />
-        <rect x="110" y="555" width={560*p} height="24" rx="12" fill={C.gold2} />
-        <rect x="260" y="310" width="260" height="220" rx="16" fill="none" stroke={C.text} strokeWidth="10" opacity={roof} />
-        <path d="M225 330 L390 190 L555 330" fill="none" stroke={C.gold2} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-roof} />
-        <rect x="355" y="420" width="70" height="110" fill={C.gold} opacity={roof} />
-        <text x="390" y="645" textAnchor="middle" fill={C.muted} fontSize="26" fontFamily="Arial">SMALL HABIT → REAL ASSET</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Compare = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={165} y={470} frame={frame} delay={2} accent={C.red} scale={.8}/>
+    <g transform="translate(370 180)"><rect width="160" height="330" rx="18" fill={C.white} stroke={C.ink} strokeWidth="7"/><text x="80" y="60" textAnchor="middle" fill={C.red} fontSize="28" fontWeight="900">PAGE 1</text>{[0,1,2].map(i=><rect key={i} x="35" y={105+i*62} width={70+i*12} height="18" rx="9" fill={C.line}/>)}</g>
+    <g transform="translate(590 115)"><rect width="170" height="395" rx="18" fill={C.white} stroke={C.ink} strokeWidth="7"/><text x="85" y="60" textAnchor="middle" fill={C.green} fontSize="28" fontWeight="900">PAGE 50</text>{[0,1,2,3,4].map(i=><rect key={i} x="35" y={105+i*55} width={85+(i%2)*22} height="18" rx="9" fill={i===4?C.gold:C.line}/>)}</g>
+    <DrawPath d="M475 555 Q565 610 690 555" frame={frame} from={20} to={66} stroke={C.gold} strokeWidth={8}/>
+    <text x="535" y="650" textAnchor="middle" fill={C.ink} fontSize="27" fontWeight="800">DON'T COMPARE DIFFERENT CHAPTERS</text>
+  </svg>
+);
 
-const CompareDiagram = ({frame}) => {
-  const p = lineProgress(frame, 14, 62);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <rect x="95" y="170" width="250" height="390" rx="28" fill={C.panel2} stroke={C.line} strokeWidth="5" />
-        <rect x="435" y="170" width="250" height="390" rx="28" fill={C.panel2} stroke={C.gold} strokeWidth="5" />
-        <text x="220" y="250" textAnchor="middle" fill={C.muted} fontSize="26" fontFamily="Arial">THEIR PAGE</text>
-        <text x="560" y="250" textAnchor="middle" fill={C.gold2} fontSize="26" fontFamily="Arial">YOUR PAGE</text>
-        {[0,1,2,3].map(i => <rect key={i} x="135" y={300+i*58} width={150-i*12} height="14" rx="7" fill={C.soft} />)}
-        {[0,1,2,3].map(i => <rect key={i} x="475" y={300+i*58} width={(95+i*20)*p} height="14" rx="7" fill={C.gold} />)}
-        <line x1="390" y1="215" x2="390" y2="520" stroke={C.line} strokeWidth="4" strokeDasharray="12 12" />
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Perfect = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={180} y={470} frame={frame} delay={2} accent={C.gold} scale={.8}/>
+    <circle cx="535" cy="330" r="165" fill={C.white} stroke={C.ink} strokeWidth="8"/>
+    <line x1="535" y1="330" x2="535" y2="220" stroke={C.ink} strokeWidth="10" strokeLinecap="round" transform={`rotate(${interpolate(frame,[0,96],[-30,250],clamp)} 535 330)`}/>
+    <line x1="535" y1="330" x2="620" y2="330" stroke={C.gold} strokeWidth="10" strokeLinecap="round"/>
+    <DrawPath d="M390 515 L680 145" frame={frame} from={28} to={68} stroke={C.red} strokeWidth={14}/>
+    <Bubble x={540} y={625} w={340} h={82} frame={frame} delay={45}>START BEFORE READY</Bubble>
+  </svg>
+);
 
-const PerfectDiagram = ({frame}) => {
-  const p = lineProgress(frame, 12, 66);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <circle cx="390" cy="350" r="180" fill="none" stroke={C.line} strokeWidth="18" />
-        <circle cx="390" cy="350" r="180" fill="none" stroke={C.gold2} strokeWidth="18" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1-p} transform="rotate(-90 390 350)" />
-        <text x="390" y="335" textAnchor="middle" fill={C.text} fontSize="44" fontWeight="700" fontFamily="Arial">PERFECT</text>
-        <text x="390" y="390" textAnchor="middle" fill={C.muted} fontSize="30" fontFamily="Arial">MOMENT?</text>
-        <line x1="250" y1="490" x2="530" y2="210" stroke={C.gold} strokeWidth="14" strokeLinecap="round" opacity={p} />
-      </svg>
-    </DiagramFrame>
-  );
-};
+const Time = ({frame}) => (
+  <svg width="820" height="720" viewBox="0 0 820 720">
+    <Person x={160} y={470} frame={frame} delay={2} accent={C.blue} scale={.78}/>
+    <g transform="translate(500 120)">
+      <DrawPath d="M0 0 H230 M0 440 H230 M35 0 C35 115 90 150 115 220 C140 150 195 115 195 0 M35 440 C35 325 90 290 115 220 C140 290 195 325 195 440" frame={frame} from={8} to={58} stroke={C.ink} strokeWidth={9}/>
+      <path d="M83 162 Q115 208 147 162 L138 145 Q115 176 92 145 Z" fill={C.gold} opacity={prog(frame,28,60)}/>
+      <path d="M88 360 Q115 315 142 360 L150 382 H80 Z" fill={C.gold} opacity={prog(frame,42,74)}/>
+    </g>
+    <Bubble x={535} y={640} w={420} h={86} frame={frame} delay={48} bg="#FFF4D7">MONEY RETURNS. TIME DOESN'T.</Bubble>
+  </svg>
+);
 
-const TimeDiagram = ({frame}) => {
-  const p = lineProgress(frame, 10, 66);
-  return (
-    <DiagramFrame>
-      <svg width="780" height="730" viewBox="0 0 780 730">
-        <circle cx="390" cy="340" r="210" fill="none" stroke={C.line} strokeWidth="12" />
-        <line x1="390" y1="340" x2="390" y2="205" stroke={C.gold2} strokeWidth="14" strokeLinecap="round" transform={`rotate(${p*245} 390 340)`} />
-        <line x1="390" y1="340" x2="505" y2="340" stroke={C.text} strokeWidth="10" strokeLinecap="round" transform={`rotate(${p*65} 390 340)`} />
-        <circle cx="390" cy="340" r="12" fill={C.gold2} />
-        <text x="390" y="625" textAnchor="middle" fill={C.gold2} fontSize="28" fontFamily="Arial">THE ONLY CAPITAL YOU CAN'T REPLACE</text>
-      </svg>
-    </DiagramFrame>
-  );
-};
-
-const Diagram = ({kind, frame}) => {
-  switch (kind) {
-    case 'systems': return <SystemsDiagram frame={frame} />;
-    case 'compound': return <CompoundDiagram frame={frame} />;
-    case 'emergency': return <EmergencyDiagram frame={frame} />;
-    case 'quiet': return <QuietDiagram frame={frame} />;
-    case 'savefirst': return <SaveFirstDiagram frame={frame} />;
-    case 'skills': return <SkillsDiagram frame={frame} />;
-    case 'debt': return <DebtDiagram frame={frame} />;
-    case 'income': return <IncomeDiagram frame={frame} />;
-    case 'home': return <HomeDiagram frame={frame} />;
-    case 'compare': return <CompareDiagram frame={frame} />;
-    case 'perfect': return <PerfectDiagram frame={frame} />;
-    case 'time': return <TimeDiagram frame={frame} />;
-    default: return null;
-  }
+const Diagram = ({kind,frame}) => {
+  const map = {systems:Systems,compound:Compound,emergency:Emergency,quiet:Quiet,savefirst:SaveFirst,skills:Skills,debt:Debt,income:Income,home:Home,compare:Compare,perfect:Perfect,time:Time};
+  const Comp = map[kind] || Systems;
+  return <Comp frame={frame}/>;
 };
 
 export const ConceptScene = ({kind, eyebrow, title, subtitle}) => {
   const frame = useCurrentFrame();
   const {fps, durationInFrames} = useVideoConfig();
-  const enter = spring({frame, fps, config: {damping: 20, stiffness: 115, mass: 0.8}});
-  const exit = interpolate(frame, [durationInFrames - 10, durationInFrames - 1], [1, 0], clamp);
-  const titleY = interpolate(enter, [0, 1], [45, 0], clamp);
-  const diagramX = interpolate(enter, [0, 1], [100, 0], clamp);
-  const goldBar = lineProgress(frame, 8, 36);
+  const enter = spring({frame, fps, config:{damping:18, stiffness:145, mass:.8}});
+  const exit = interpolate(frame,[durationInFrames-9,durationInFrames-1],[1,0],clamp);
+  const y = interpolate(enter,[0,1],[42,0],clamp);
+  const scribble = prog(frame,6,30);
   return (
-    <AbsoluteFill style={{backgroundColor: C.bg, color: C.text, fontFamily: 'Arial, Helvetica, sans-serif', overflow: 'hidden', opacity: exit}}>
-      <Grid frame={frame} />
-      <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 80% 20%, rgba(199,161,82,.11), transparent 35%)'}} />
-      <div style={{position: 'absolute', left: 112, top: 92, display: 'flex', alignItems: 'center', gap: 18, opacity: enter}}>
-        <div style={{width: 52, height: 4, borderRadius: 2, backgroundColor: C.gold, scale: `${goldBar} 1`, transformOrigin: 'left center'}} />
-        <div style={{fontSize: 24, letterSpacing: 4, color: C.muted, fontWeight: 700}}>GRANT • PRINCIPLE</div>
+    <AbsoluteFill style={{overflow:'hidden',opacity:exit,color:C.ink,fontFamily:'Arial, Helvetica, sans-serif'}}>
+      <Paper frame={frame}/>
+      <div style={{position:'absolute',left:92,top:78,width:760,transform:`translateY(${y}px)`,opacity:enter}}>
+        <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}>
+          <div style={{width:54,height:7,borderRadius:10,background:C.gold,transform:`scaleX(${scribble})`,transformOrigin:'left center'}}/>
+          <div style={{fontSize:22,fontWeight:900,letterSpacing:2.6,color:C.muted}}>GRANT'S MONEY RULE</div>
+        </div>
+        <div style={{fontSize:23,fontWeight:900,letterSpacing:2.4,color:C.green,marginBottom:18}}>{eyebrow}</div>
+        <div style={{fontSize:80,fontWeight:900,letterSpacing:-3.2,lineHeight:.96,maxWidth:760,whiteSpace:'pre-line'}}>{title}</div>
+        <div style={{fontSize:29,lineHeight:1.28,color:C.muted,maxWidth:700,marginTop:24,fontWeight:600}}>{subtitle}</div>
       </div>
-      <div style={{position: 'absolute', left: 112, top: 245, width: 700, translate: `0 ${titleY}px`, opacity: enter}}>
-        <div style={{fontSize: 24, letterSpacing: 3.5, color: C.gold2, fontWeight: 700, marginBottom: 28}}>{eyebrow}</div>
-        <div style={{fontSize: 84, lineHeight: 0.98, fontWeight: 800, letterSpacing: -3.5, maxWidth: 690}}>{title}</div>
-        <div style={{fontSize: 31, lineHeight: 1.35, color: C.muted, maxWidth: 610, marginTop: 34}}>{subtitle}</div>
+      <div style={{position:'absolute',right:55,top:205,width:820,height:720,transform:`translateX(${interpolate(enter,[0,1],[80,0],clamp)}px)`,opacity:enter}}>
+        <Diagram kind={kind} frame={frame}/>
       </div>
-      <div style={{translate: `${diagramX}px 0`, opacity: enter}}>
-        <Diagram kind={kind} frame={frame} />
-      </div>
-      <div style={{position: 'absolute', left: 112, bottom: 92, fontSize: 18, letterSpacing: 3, color: '#5E6B78'}}>GRANT BUILDS WEALTH</div>
+      <div style={{position:'absolute',left:92,bottom:62,fontSize:18,fontWeight:900,letterSpacing:2.4,color:'#9A9286'}}>GRANT BUILDS WEALTH</div>
     </AbsoluteFill>
   );
 };
