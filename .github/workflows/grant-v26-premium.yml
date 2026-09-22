@@ -1,4 +1,4 @@
-name: Grant V26 Premium Remotion Master
+name: Grant V27 Premium Remotion Master
 
 on:
   push:
@@ -14,79 +14,143 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+
       - name: Install FFmpeg and Node
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: grant-v26-remotion/package.json
+
       - name: Install Remotion
         working-directory: grant-v26-remotion
         run: npm install --no-audit --no-fund
-      - name: Render premium motion scenes
+
+      - name: Render premium finance motion scenes
         working-directory: grant-v26-remotion
         run: |
           set -euxo pipefail
-          mkdir -p ../renders ../qc
+          mkdir -p ../renders ../motion_norm ../media ../out ../qc ../segments
           for ID in Systems Compound Emergency Quiet SaveFirst Skills Debt Income Home Compare Perfect Time; do
             npx remotion render src/index.jsx "$ID" "../renders/${ID}.mp4" --codec=h264 --crf=10 --pixel-format=yuv420p --overwrite
+            ffmpeg -hide_banner -loglevel error -y -i "../renders/${ID}.mp4" -an -frames:v 96 -r 30 -c:v libx264 -preset fast -crf 12 -profile:v high -level 4.1 -pix_fmt yuv420p -g 60 -keyint_min 60 -sc_threshold 0 "../motion_norm/${ID}.mp4"
           done
           printf "" > ../renders/list.txt
           for ID in Systems Compound Emergency Quiet SaveFirst Skills Debt Income Home Compare Perfect Time; do echo "file '${ID}.mp4'" >> ../renders/list.txt; done
-          ffmpeg -hide_banner -y -f concat -safe 0 -i ../renders/list.txt -an -c copy ../renders/all_motion.mp4
-          ffmpeg -hide_banner -y -ss 1.6 -i ../renders/all_motion.mp4 -vf "fps=1/3.2,scale=480:-1,tile=4x3" -frames:v 1 -update 1 ../qc/motion_sheet.jpg
-      - name: Download clean V22 picture and master audio
+          ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i ../renders/list.txt -an -c copy ../renders/all_motion.mp4
+          ffmpeg -hide_banner -loglevel error -y -ss 1.6 -i ../renders/all_motion.mp4 -vf "fps=1/3.2,scale=480:-1,tile=4x3" -frames:v 1 -update 1 ../qc/motion_sheet.jpg
+
+      - name: Download HQ editorial sources and accepted audio
         run: |
           set -euxo pipefail
-          mkdir -p media out qc
-          curl -L --retry 5 --retry-delay 2 -sS -o media/00.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789650490/GRANT_V22_PAIR_A2_000_180.mp4'
-          curl -L --retry 5 --retry-delay 2 -sS -o media/01.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581078/GRANT_V22_BODY_180_360.mp4'
-          curl -L --retry 5 --retry-delay 2 -sS -o media/02.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581138/GRANT_V22_BODY_360_540.mp4'
-          curl -L --retry 5 --retry-delay 2 -sS -o media/03.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581197/GRANT_V22_BODY_540_720.mp4'
-          curl -L --retry 5 --retry-delay 2 -sS -o media/04.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789581275/GRANT_V22_BODY_720_900.mp4'
-          curl -L --retry 5 --retry-delay 2 -sS -o media/05.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789583337/GRANT_V22_BODY_900_END.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/opening.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1789580564/GRANT_EPISODE1_V22_OPENING_35S_PROOF.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p01.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788976953/grant_pro_final_p01.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p02.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983639/grant_pro_final_p02.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p03.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983651/grant_pro_final_p03.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p04.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983661/grant_pro_final_p04.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p05a.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983673/grant_pro_final_p05a.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p05b.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983684/grant_pro_final_p05b.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p06a.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983694/grant_pro_final_p06a.mp4'
+          curl -L --retry 5 --retry-delay 2 -sS -o media/p06b.mp4 'https://res.cloudinary.com/saojrfpq/video/upload/v1788983706/grant_pro_final_p06b.mp4'
           curl -L --retry 5 --retry-delay 2 -sS -o media/audio.mp3 'https://res.cloudinary.com/saojrfpq/video/upload/v1789496493/GRANT_V19_AUDIO_MASTER.mp3'
-      - name: Build V26 clean-source premium master and lower music bed
+
+      - name: Build single HQ editorial picture master
         run: |
           set -euxo pipefail
-          cat > filter.txt <<'EOF'
-          [0:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v0];
-          [1:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v1];
-          [2:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v2];
-          [3:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v3];
-          [4:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=180,setpts=PTS-STARTPTS[v4];
-          [5:v]fps=30,scale=1920:1080:flags=lanczos,trim=duration=133.7,setpts=PTS-STARTPTS[v5];
-          [v0][v1][v2][v3][v4][v5]concat=n=6:v=1:a=0,scale=w='1920+10*sin(2*PI*t/9)':h='1080+6*sin(2*PI*t/9)':eval=frame,crop=1920:1080:(iw-1920)/2:(ih-1080)/2[base];
-          [7:v]setpts=PTS-STARTPTS+76.361/TB[mg01]; [8:v]setpts=PTS-STARTPTS+190.074/TB[mg02]; [9:v]setpts=PTS-STARTPTS+257.316/TB[mg03]; [10:v]setpts=PTS-STARTPTS+435.309/TB[mg04]; [11:v]setpts=PTS-STARTPTS+548.818/TB[mg05]; [12:v]setpts=PTS-STARTPTS+590.148/TB[mg06]; [13:v]setpts=PTS-STARTPTS+638.943/TB[mg07]; [14:v]setpts=PTS-STARTPTS+698.990/TB[mg08]; [15:v]setpts=PTS-STARTPTS+781.467/TB[mg09]; [16:v]setpts=PTS-STARTPTS+856.306/TB[mg10]; [17:v]setpts=PTS-STARTPTS+957.664/TB[mg11]; [18:v]setpts=PTS-STARTPTS+992.906/TB[mg12];
-          [base][mg01]overlay=eof_action=pass:shortest=0[o01]; [o01][mg02]overlay=eof_action=pass:shortest=0[o02]; [o02][mg03]overlay=eof_action=pass:shortest=0[o03]; [o03][mg04]overlay=eof_action=pass:shortest=0[o04]; [o04][mg05]overlay=eof_action=pass:shortest=0[o05]; [o05][mg06]overlay=eof_action=pass:shortest=0[o06]; [o06][mg07]overlay=eof_action=pass:shortest=0[o07]; [o07][mg08]overlay=eof_action=pass:shortest=0[o08]; [o08][mg09]overlay=eof_action=pass:shortest=0[o09]; [o09][mg10]overlay=eof_action=pass:shortest=0[o10]; [o10][mg11]overlay=eof_action=pass:shortest=0[o11]; [o11][mg12]overlay=eof_action=pass:shortest=0[vout];
-          [6:a]pan=stereo|c0=0.86*c0+0.14*c1|c1=0.14*c0+0.86*c1,aresample=48000[aout]
+          cat > base_filter.txt <<'EOF'
+          [0:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=35,setpts=PTS-STARTPTS[v0];
+          [1:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=start=35:duration=145,setpts=PTS-STARTPTS[v1];
+          [2:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=180,setpts=PTS-STARTPTS[v2];
+          [3:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=180,setpts=PTS-STARTPTS[v3];
+          [4:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=180,setpts=PTS-STARTPTS[v4];
+          [5:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=90,setpts=PTS-STARTPTS[v5];
+          [6:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=90,setpts=PTS-STARTPTS[v6];
+          [7:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=70,setpts=PTS-STARTPTS[v7];
+          [8:v]fps=30,scale=1920:1080:flags=lanczos,setsar=1,trim=duration=63.7,setpts=PTS-STARTPTS[v8];
+          [v0][v1][v2][v3][v4][v5][v6][v7][v8]concat=n=9:v=1:a=0[vout]
           EOF
-          ffmpeg -hide_banner -y -i media/00.mp4 -i media/01.mp4 -i media/02.mp4 -i media/03.mp4 -i media/04.mp4 -i media/05.mp4 -i media/audio.mp3 -i renders/Systems.mp4 -i renders/Compound.mp4 -i renders/Emergency.mp4 -i renders/Quiet.mp4 -i renders/SaveFirst.mp4 -i renders/Skills.mp4 -i renders/Debt.mp4 -i renders/Income.mp4 -i renders/Home.mp4 -i renders/Compare.mp4 -i renders/Perfect.mp4 -i renders/Time.mp4 -filter_complex_script filter.txt -map '[vout]' -map '[aout]' -t 1033.7 -r 30 -c:v libx264 -preset medium -crf 14 -profile:v high -level 4.1 -pix_fmt yuv420p -c:a aac -b:a 256k -ar 48000 -ac 2 -movflags +faststart out/GRANT_EPISODE1_V26_PREMIUM_MASTER_1080P.mp4
+          BOUNDARIES='77.7,80.9,189.6,192.8,256.8,260.0,434.8,438.0,548.4,551.6,589.7,592.9,638.4,641.6,698.5,701.7,780.9,784.1,855.8,859.0,957.2,960.4,992.4,995.6'
+          ffmpeg -hide_banner -y -i media/opening.mp4 -i media/p01.mp4 -i media/p02.mp4 -i media/p03.mp4 -i media/p04.mp4 -i media/p05a.mp4 -i media/p05b.mp4 -i media/p06a.mp4 -i media/p06b.mp4 -filter_complex_script base_filter.txt -map '[vout]' -an -frames:v 31011 -r 30 -c:v libx264 -preset fast -crf 12 -profile:v high -level 4.1 -pix_fmt yuv420p -g 60 -keyint_min 60 -sc_threshold 0 -force_key_frames "$BOUNDARIES" -movflags +faststart out/base_hq.mp4
+          FRAMES=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 out/base_hq.mp4)
+          test "$FRAMES" = '31011'
+
+      - name: Replace selected concept windows with Remotion scenes
+        run: |
+          set -euxo pipefail
+          BOUNDARIES='77.7,80.9,189.6,192.8,256.8,260.0,434.8,438.0,548.4,551.6,589.7,592.9,638.4,641.6,698.5,701.7,780.9,784.1,855.8,859.0,957.2,960.4,992.4,995.6'
+          rm -rf segments && mkdir segments
+          ffmpeg -hide_banner -loglevel error -y -i out/base_hq.mp4 -map 0:v:0 -an -c copy -f segment -segment_times "$BOUNDARIES" -reset_timestamps 1 segments/base_%02d.mp4
+          test "$(find segments -name 'base_*.mp4' | wc -l)" -eq 25
+          IDS=(Systems Compound Emergency Quiet SaveFirst Skills Debt Income Home Compare Perfect Time)
+          : > segments/final_list.txt
+          for i in $(seq 0 24); do
+            if (( i % 2 == 0 )); then
+              printf "file 'base_%02d.mp4'\n" "$i" >> segments/final_list.txt
+            else
+              idx=$(( (i-1)/2 ))
+              echo "file '../motion_norm/${IDS[$idx]}.mp4'" >> segments/final_list.txt
+            fi
+          done
+          ffmpeg -hide_banner -y -f concat -safe 0 -i segments/final_list.txt -an -c copy -movflags +faststart out/visual_master.mp4
+          FRAMES=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 out/visual_master.mp4)
+          if [ "$FRAMES" != '31011' ]; then
+            echo "Unexpected stream-copy frame count: $FRAMES; normalizing once."
+            ffmpeg -hide_banner -y -i out/visual_master.mp4 -an -frames:v 31011 -r 30 -c:v libx264 -preset fast -crf 12 -profile:v high -level 4.1 -pix_fmt yuv420p -movflags +faststart out/visual_master_norm.mp4
+            mv out/visual_master_norm.mp4 out/visual_master.mp4
+          fi
+          test "$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 out/visual_master.mp4)" = '31011'
+
+      - name: Make narration-forward audio and mux final master
+        run: |
+          set -euxo pipefail
+          # Preserve center (where narration is concentrated) at unity; reduce stereo-side bed by ~2.85 dB.
+          ffmpeg -hide_banner -y -i media/audio.mp3 -af "pan=stereo|c0=0.86*c0+0.14*c1|c1=0.14*c0+0.86*c1,aresample=48000" -t 1033.7 -c:a aac -b:a 256k -ar 48000 -ac 2 out/audio_narration_forward.m4a
+          ffmpeg -hide_banner -y -i out/visual_master.mp4 -i out/audio_narration_forward.m4a -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy -t 1033.7 -movflags +faststart out/GRANT_EPISODE1_V27_PREMIUM_MASTER_1080P.mp4
+
       - name: Full technical and editorial QC
         run: |
           set -euxo pipefail
-          FILE='out/GRANT_EPISODE1_V26_PREMIUM_MASTER_1080P.mp4'
+          FILE='out/GRANT_EPISODE1_V27_PREMIUM_MASTER_1080P.mp4'
           ffprobe -v error -show_streams -show_format -of json "$FILE" > qc/ffprobe.json
           ffmpeg -v error -i "$FILE" -f null - 2> qc/decode_errors.txt
           test ! -s qc/decode_errors.txt
           ffmpeg -hide_banner -i "$FILE" -vf 'blackdetect=d=0.5:pix_th=0.02' -an -f null - 2> qc/blackdetect.log || true
           ffmpeg -hide_banner -i "$FILE" -vf 'freezedetect=n=-50dB:d=2.5' -an -f null - 2> qc/freezedetect.log || true
           ffmpeg -hide_banner -i "$FILE" -af 'ebur128=peak=true' -f null - 2> qc/loudness.log || true
-          BLACK_COUNT=$(grep -c 'black_start:' qc/blackdetect.log || true); FREEZE_COUNT=$(grep -c 'freeze_start:' qc/freezedetect.log || true)
-          test "$BLACK_COUNT" -eq 0; test "$FREEZE_COUNT" -eq 0
-          ffmpeg -hide_banner -y -ss 0 -t 40 -i "$FILE" -vf 'fps=1/4,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/opening.jpg
-          ffmpeg -hide_banner -y -ss 74 -t 8 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=4x2' -frames:v 1 -update 1 qc/systems_reset.jpg
-          ffmpeg -hide_banner -y -ss 187 -t 8 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=4x2' -frames:v 1 -update 1 qc/compound_reset.jpg
-          ffmpeg -hide_banner -y -ss 635 -t 9 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/debt_reset.jpg
-          ffmpeg -hide_banner -y -ss 989 -t 12 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=6x2' -frames:v 1 -update 1 qc/time_reset.jpg
-          { echo 'GRANT V26 PREMIUM FINAL QC'; echo 'Source: clean V22 picture + V19 master audio'; echo 'Editorial: 12 custom Remotion full-screen finance concept resets; subtle global Ken Burns motion prevents static holds'; echo 'Audio: center-preserving stereo-side reduction (~2.85 dB side energy) to push music/ambience behind narration'; echo 'Full decode: PASS'; echo "Black >=0.5s: $BLACK_COUNT"; echo "Freeze >=2.5s: $FREEZE_COUNT"; ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$FILE"; ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height,r_frame_rate,avg_frame_rate,nb_frames,bit_rate -of default=nw=1 "$FILE"; ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels,bit_rate -of default=nw=1 "$FILE"; grep -E 'I:|Peak:' qc/loudness.log | tail -8 || true; } | tee qc/QC_REPORT.txt
-      - name: Publish V26 release
+          BLACK_COUNT=$(grep -c 'black_start:' qc/blackdetect.log || true)
+          FREEZE_COUNT=$(grep -c 'freeze_start:' qc/freezedetect.log || true)
+          FRAMES=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 "$FILE")
+          test "$BLACK_COUNT" -eq 0
+          test "$FREEZE_COUNT" -eq 0
+          test "$FRAMES" = '31011'
+          ffmpeg -hide_banner -loglevel error -y -ss 0 -t 40 -i "$FILE" -vf 'fps=1/4,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/opening.jpg
+          ffmpeg -hide_banner -loglevel error -y -i "$FILE" -vf 'fps=1/30,scale=384:-1,tile=6x6' -frames:v 1 -update 1 qc/full_timeline.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 74 -t 9 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/systems_reset.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 186 -t 10 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/compound_reset.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 635 -t 10 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=5x2' -frames:v 1 -update 1 qc/debt_reset.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 989 -t 12 -i "$FILE" -vf 'fps=1,scale=480:-1,tile=6x2' -frames:v 1 -update 1 qc/time_reset.jpg
+          {
+            echo 'GRANT V27 PREMIUM FINAL QC'
+            echo 'Picture: HQ pro editorial source + clean 35s opening + 12 frame-accurate Remotion full-screen concept replacements.'
+            echo 'Audio: accepted master with center held at unity and stereo-side music/ambience reduced ~2.85 dB.'
+            echo 'Full decode: PASS'
+            echo "Black >=0.5s: $BLACK_COUNT"
+            echo "Freeze >=2.5s: $FREEZE_COUNT"
+            echo "Frames: $FRAMES"
+            ffprobe -v error -show_entries format=duration,size,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height,r_frame_rate,avg_frame_rate,nb_frames,bit_rate -of default=nw=1 "$FILE"
+            ffprobe -v error -select_streams a:0 -show_entries stream=codec_name,sample_rate,channels,bit_rate -of default=nw=1 "$FILE"
+            grep -E 'I:|Peak:' qc/loudness.log | tail -8 || true
+          } | tee qc/QC_REPORT.txt
+
+      - name: Publish V27 release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euxo pipefail
-          gh release delete grant-v26-premium -y --cleanup-tag || true
-          gh release create grant-v26-premium out/GRANT_EPISODE1_V26_PREMIUM_MASTER_1080P.mp4 qc/QC_REPORT.txt qc/ffprobe.json qc/motion_sheet.jpg qc/opening.jpg qc/systems_reset.jpg qc/compound_reset.jpg qc/debt_reset.jpg qc/time_reset.jpg --title 'Grant Episode 1 — V26 Premium Master' --notes 'Clean-source rebuild with 12 custom Remotion finance motion-graphic resets, subtle cinematic motion, and a center-preserving audio remix. Full decode / black / freeze / loudness QC passed before release.'
+          gh release delete grant-v27-premium -y --cleanup-tag || true
+          gh release create grant-v27-premium out/GRANT_EPISODE1_V27_PREMIUM_MASTER_1080P.mp4 qc/QC_REPORT.txt qc/ffprobe.json qc/motion_sheet.jpg qc/opening.jpg qc/full_timeline.jpg qc/systems_reset.jpg qc/compound_reset.jpg qc/debt_reset.jpg qc/time_reset.jpg --title 'Grant Episode 1 — V27 Premium Master' --notes 'HQ pro-source rebuild. Twelve custom Remotion finance concept scenes replace timeline windows frame-for-frame instead of stacking lower-thirds. Narration remains centered while stereo music/ambience is reduced ~2.85 dB. Release occurs only after full decode, black, freeze, frame-count, loudness and contact-sheet QC.'
